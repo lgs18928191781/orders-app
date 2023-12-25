@@ -10,11 +10,13 @@ import {
   DUMMY_UTXO_VALUE,
   DUST_UTXO_VALUE,
   EXTRA_INPUT_MIN_VALUE,
+  IS_DEV,
   ONE_SERVICE_FEE,
   SELL_SERVICE_FEE,
   SERVICE_LIVENET_ADDRESS,
   SERVICE_LIVENET_RDEX_ADDRESS,
   SERVICE_TESTNET_ADDRESS,
+  SIGHASH_ALL,
   SIGHASH_ALL_ANYONECANPAY,
   SIGHASH_SINGLE_ANYONECANPAY,
   USE_UTXO_COUNT_LIMIT,
@@ -22,13 +24,16 @@ import {
 import {
   constructBidPsbt,
   getListingUtxos,
+  getOneBidOrder,
   getOneBrc20,
   getOneOrder,
   getSellFees,
 } from '@/queries/orders-api'
-import { getUtxos, type SimpleUtxoFromMempool, getTxHex } from '@/queries/proxy'
+import { getUtxos, type SimpleUtxo, getTxHex } from '@/queries/proxy'
 import { type TradingPair } from '@/data/trading-pairs'
 import { SIGHASH_NONE_ANYONECANPAY } from '../data/constants'
+import { assert } from '@vueuse/core'
+import { raise, raiseIf, raiseUnless } from '@/lib/helpers'
 
 export async function buildAskLimit({
   total,
@@ -46,7 +51,7 @@ export async function buildAskLimit({
   // Get address
   // Step 1: Get the ordinal utxo as input
   // if testnet, we use a cardinal utxo as a fake one
-  let ordinalUtxo: SimpleUtxoFromMempool
+  let ordinalUtxo: SimpleUtxo
   if (networkStore.network === 'testnet') {
     const cardinalUtxo = await getUtxos(address).then((result) => {
       // choose the smallest utxo, but bigger than 600
@@ -421,7 +426,7 @@ export async function buildSellTake({
 
   // Step 1: Get the ordinal utxo as input
   // if testnet, we use a cardinal utxo as a fake one
-  let ordinalUtxo: SimpleUtxoFromMempool
+  let ordinalUtxo: SimpleUtxo
 
   let transferable = await getOneBrc20({
     tick: selectedPair.fromSymbol,
@@ -513,6 +518,115 @@ export async function buildSellTake({
       txId: ordinalUtxo.txId,
       outputIndex: ordinalUtxo.outputIndex,
     },
+  }
+}
+
+export async function buildSellTakeV2({
+  orderId,
+  total,
+  amount,
+  selectedPair,
+}: {
+  orderId: string
+  total: number
+  amount: number
+  selectedPair: TradingPair
+}) {
+  const networkStore = useNetworkStore()
+  const address = useAddressStore().get!
+  const btcjs = useBtcJsStore().get!
+
+  // Step 1: Get the ordinal utxo as input
+  // the amount must match
+  let ordinalUtxo: SimpleUtxo
+  let transferable = await getOneBrc20({
+    tick: selectedPair.fromSymbol,
+    address,
+  }).then((brc20Info) => {
+    if (DEBUG) {
+      return brc20Info.transferBalanceList[0]
+    }
+    // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
+    return brc20Info.transferBalanceList.find(
+      (brc20) => Number(brc20.amount) === amount
+    )
+  })
+  if (!transferable) {
+    throw new Error(
+      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.'
+    )
+  }
+
+  // 1.5 fetch and decode rawTx of the utxo
+  const [ordinalTxId, ordinalOutputIndex] =
+    transferable.inscriptionId.split('i')
+  ordinalUtxo = {
+    txId: ordinalTxId,
+    satoshis: 546,
+    outputIndex: Number(ordinalOutputIndex),
+    addressType: 2,
+  }
+  const rawTx = await getTxHex(ordinalUtxo.txId)
+  // decode rawTx
+  const ordinalPreTx = btcjs.Transaction.fromHex(rawTx)
+  const ordinalDetail = ordinalPreTx.outs[ordinalUtxo.outputIndex]
+  const ordinalValue = ordinalDetail.value
+
+  // Step 2: Get limit order
+  const order = await getOneBidOrder({
+    orderId,
+    inscriptionId: transferable!.inscriptionId,
+  })
+
+  // Step 3: Reconstruct the psbt and check if the amount is correct
+  const sell = btcjs.Psbt.fromHex(order.psbtRaw, {
+    network: btcjs.networks[networkStore.btcNetwork],
+  })
+  // check if the amount is correct
+  const sellerOutputIndex = 2
+  const sellerOutputAmont = sell.txOutputs[sellerOutputIndex].value
+  raiseUnless(sellerOutputAmont === total, 'Amount mismatch')
+
+  // check if the fee amount is met
+  const { platformFee, releaseInscriptionFee } = order
+  const platformFeeIndex = 7
+  const releaseInscriptionFeeIndex = 6
+  raiseUnless(
+    sell.txOutputs[platformFeeIndex].value === platformFee,
+    'Platform fee mismatch'
+  )
+  raiseUnless(
+    sell.txOutputs[releaseInscriptionFeeIndex].value === releaseInscriptionFee,
+    'Release inscription fee mismatch'
+  )
+
+  console.log({ sell, order })
+
+  // Step 4: Change
+  const predefinedInputsLength = 5
+  const { fee, feeb } = await exclusiveChange({
+    psbt: sell,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+    sighashType: SIGHASH_ALL,
+    partialPay: true,
+    cutFrom: predefinedInputsLength,
+    extraInputValue: -(platformFee + releaseInscriptionFee),
+  })
+
+  return {
+    order: sell,
+    type: 'sell',
+    value: ordinalValue,
+    totalPrice: 0,
+    networkFee: fee + order.furtherFee,
+    selfFee: fee,
+    networkFeeRate: feeb,
+    serviceFee: order.platformFee,
+    totalSpent: fee + order.platformFee,
+    fromSymbol: selectedPair.fromSymbol,
+    toSymbol: selectedPair.toSymbol,
+    fromValue: amount,
+    toValue: total,
   }
 }
 

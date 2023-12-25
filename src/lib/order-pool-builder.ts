@@ -8,7 +8,7 @@ import {
   useNetworkStore,
 } from '@/store'
 import { getOneBrc20 } from '@/queries/orders-api'
-import { type SimpleUtxoFromMempool, getTxHex, getUtxos } from '@/queries/proxy'
+import { type SimpleUtxo, getTxHex, getUtxos } from '@/queries/proxy'
 import {
   getEventClaimFees,
   getPoolCredential,
@@ -73,7 +73,7 @@ export async function buildAddBrcLiquidity({
 
   // Step 1: Get the ordinal utxo as input
   // if testnet, we use a cardinal utxo as a fake one
-  let ordinalUtxo: SimpleUtxoFromMempool
+  let ordinalUtxo: SimpleUtxo
 
   let transferable = await getOneBrc20({
     tick: selectedPair.fromSymbol,

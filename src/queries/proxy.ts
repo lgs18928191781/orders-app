@@ -1,7 +1,7 @@
 import { useNetworkStore } from '../store'
 import fetch, { originalFetch } from '@/lib/fetch'
 
-export type SimpleUtxoFromMempool = {
+export type SimpleUtxo = {
   txId: string
   satoshis: number
   outputIndex: number
@@ -14,7 +14,7 @@ export const getUtxos = async (address: string) => {
   }
 
   const url = `https://api2.orders.exchange/api/utxos2?address=${address}&network=${network}`
-  const paymentUtxos: SimpleUtxoFromMempool[] = await fetch(url, {
+  const paymentUtxos: SimpleUtxo[] = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -36,7 +36,7 @@ export const getUtxosFromYouKnowWhere = async (address: string) => {
   const network = useNetworkStore().network
 
   const url = `https://api2.orders.exchange/api/utxos?address=${address}&network=${network}`
-  const paymentUtxos: SimpleUtxoFromMempool[] = await fetch(url, {
+  const paymentUtxos: SimpleUtxo[] = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
     },

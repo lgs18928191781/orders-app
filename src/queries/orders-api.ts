@@ -362,6 +362,55 @@ export const getOneOrder = async ({
   return order
 }
 
+export type BidV20Order = {
+  orderId: string
+  psbtRaw: string
+  platformFee: number
+  releaseInscriptionFee: number
+  rewardInscriptionFee: number
+  rewardSendFee: number
+  furtherFee: number
+}
+export const getOneBidOrder = async ({
+  orderId,
+  inscriptionId,
+}: {
+  orderId: string
+  inscriptionId: string
+}): Promise<BidV20Order> => {
+  const { publicKey, signature } = await sign()
+  const address = useAddressStore().get!
+  const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
+
+  const params = new URLSearchParams({
+    net: 'livenet',
+    orderId,
+    inscriptionId,
+    sellerAddress: address,
+    version: '2',
+    networkFeeRate: String(feeb),
+  })
+
+  const order: BidV20Order = await ordersApiFetch(
+    `order/bid-v2/do/pre?${params}`,
+    {
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+    }
+  ).then((order) => {
+    order.furtherFee =
+      order.releaseInscriptionFee +
+      order.rewardInscriptionFee +
+      order.rewardSendFee
+
+    return order
+  })
+
+  return order
+}
+
 export type Ticker = {
   amount: string
   avgPrice: string

@@ -17,7 +17,7 @@ import {
   pushSellTake,
 } from '@/queries/orders-api'
 import { useAddressStore, useBtcJsStore, useNetworkStore } from '@/store'
-import { DEBUG, SIGHASH_ALL_ANYONECANPAY } from '@/data/constants'
+import { DEBUG, SIGHASH_ALL, SIGHASH_ALL_ANYONECANPAY } from '@/data/constants'
 import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
@@ -156,14 +156,14 @@ async function submitOrder() {
   }
 
   try {
-    // 1. sign
-    const signed = await unisat.signPsbt(builtInfo.order.toHex())
-
     let pushRes: any
+    let signed: string
     // 2. push
     switch (builtInfo!.type) {
       case 'buy':
       case 'free claim':
+        signed = await unisat.signPsbt(builtInfo.order.toHex())
+
         pushRes = await pushBuyTake({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,
@@ -171,6 +171,29 @@ async function submitOrder() {
         })
         break
       case 'sell':
+        console.log({ address: addressStore.get! })
+        // re-sign
+        const before = builtInfo.order.toHex()
+        signed = await unisat.signPsbt(builtInfo.order.toHex(), {
+          autoFinalized: false,
+          toSignInputs: [
+            {
+              index: 2,
+              address: 'bc1qtwgcscvuzq4jkr7dnhl3t4rpqa2hyjc5hyty37',
+              sighashTypes: [SIGHASH_ALL],
+            },
+            {
+              index: 5,
+              address: 'bc1qtwgcscvuzq4jkr7dnhl3t4rpqa2hyjc5hyty37',
+              sighashTypes: [SIGHASH_ALL],
+            },
+          ],
+        })
+        const after = signed
+        console.log('before', before)
+        console.log('after', after)
+        console.log('equal', before === after)
+
         pushRes = await pushSellTake({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,
@@ -182,20 +205,8 @@ async function submitOrder() {
           networkFeeRate: builtInfo.networkFeeRate,
         })
         break
-      // case 'bid':
-      //   pushRes = await pushBidOrder({
-      //     psbtRaw: signed,
-      //     network: networkStore.ordersNetwork,
-      //     address: addressStore.get!,
-      //     tick: selectedPair.fromSymbol,
-      //     feeb: builtInfo.feeb,
-      //     fee: builtInfo.networkFee,
-      //     total: builtInfo.total,
-      //     using: builtInfo.using,
-      //     orderId: builtInfo.orderId,
-      //   })
-      //   break
       case 'ask':
+        signed = await unisat.signPsbt(builtInfo.order.toHex())
         pushRes = await pushAskOrder({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,

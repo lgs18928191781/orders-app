@@ -9,6 +9,14 @@ export const raise = (err: string): never => {
   throw new Error(err)
 }
 
+export const raiseIf = (cond: boolean, err: string): void => {
+  if (cond) raise(err)
+}
+
+export const raiseUnless = (cond: boolean, err: string): void => {
+  if (!cond) raise(err)
+}
+
 export const useBtcUnit = computedEager(() => {
   return useStorage('use-btc-unit', true)
 })
