@@ -3,10 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
 import { inject, ref } from 'vue'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-import {
-  HelpCircleIcon,
-  ChevronRightIcon,
-} from 'lucide-vue-next'
+import { HelpCircleIcon, ChevronRightIcon } from 'lucide-vue-next'
 
 import { prettyBalance, prettyTimestamp, prettyTxid } from '@/lib/formatters'
 import {
@@ -101,6 +98,7 @@ async function submitReleaseRecord() {
       autoFinalized: true,
       toSignInputs,
     })
+    // 123
 
     mutateFinishRecord({
       orderId: props.record.orderId,
