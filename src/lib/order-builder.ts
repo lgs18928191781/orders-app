@@ -543,9 +543,9 @@ export async function buildSellTakeV2({
     tick: selectedPair.fromSymbol,
     address,
   }).then((brc20Info) => {
-    if (DEBUG) {
-      return brc20Info.transferBalanceList[0]
-    }
+    // if (DEBUG) {
+    //   return brc20Info.transferBalanceList[0]
+    // }
     // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
     return brc20Info.transferBalanceList.find(
       (brc20) => Number(brc20.amount) === amount
@@ -575,7 +575,7 @@ export async function buildSellTakeV2({
   // Step 2: Get limit order
   const order = await getOneBidOrder({
     orderId,
-    inscriptionId: transferable!.inscriptionId,
+    inscriptionId: transferable.inscriptionId,
   })
 
   // Step 3: Reconstruct the psbt and check if the amount is correct
@@ -622,7 +622,7 @@ export async function buildSellTakeV2({
     selfFee: fee,
     networkFeeRate: feeb,
     serviceFee: order.platformFee,
-    totalSpent: fee + order.platformFee,
+    totalSpent: fee + order.platformFee + order.furtherFee,
     fromSymbol: selectedPair.fromSymbol,
     toSymbol: selectedPair.toSymbol,
     fromValue: amount,

@@ -2,7 +2,7 @@ import changelog from './changelog'
 
 export const VERSION = changelog[0].version
 export const CHARGE_SERVICE_FEES = false
-export const DEBUG = true
+export const DEBUG = false
 export const IS_DEV = import.meta.env.VITE_ENVIRONMENT === 'development'
 
 // all kinds of satoshis value
@@ -24,7 +24,8 @@ export const RELEASE_PAYLOAD_SIZE = 391
 export const RELEASE_TX_SIZE = RELEASE_PAYLOAD_SIZE + 68 + 31
 export const RECOVER_TX_SIZE = 363
 export const BUY_TX_SIZE = 500
-export const SELL_TX_SIZE = 2320
+// export const SELL_TX_SIZE = 2320
+export const SELL_TX_SIZE = 1166
 export const BID_TX_SIZE = 750
 export const SEND_TX_SIZE = 140
 

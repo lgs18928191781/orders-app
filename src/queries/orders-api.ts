@@ -554,6 +554,49 @@ export const pushSellTake = async ({
   return sellRes
 }
 
+export const pushSellTakeV2 = async ({
+  network,
+  psbtRaw,
+  orderId,
+  address,
+  value,
+  amount,
+  networkFee,
+  networkFeeRate,
+}: {
+  network: 'livenet' | 'testnet'
+  psbtRaw: string
+  orderId: string
+  address: string
+  value: number
+  amount: string
+  networkFee: number
+  networkFeeRate: number
+}) => {
+  const { publicKey, signature } = await sign()
+
+  const sellRes = await ordersApiFetch(`order/bid-v2/do`, {
+    method: 'POST',
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+    body: JSON.stringify({
+      net: network,
+      psbtRaw,
+      orderId,
+      address,
+      value,
+      amount,
+      networkFee,
+      networkFeeRate,
+      version: 2,
+    }),
+  })
+
+  return sellRes
+}
+
 export const pushAskOrder = async ({
   network,
   address,

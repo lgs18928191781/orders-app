@@ -15,6 +15,7 @@ import {
   pushAskOrder,
   pushBuyTake,
   pushSellTake,
+  pushSellTakeV2,
 } from '@/queries/orders-api'
 import { useAddressStore, useBtcJsStore, useNetworkStore } from '@/store'
 import { DEBUG, SIGHASH_ALL, SIGHASH_ALL_ANYONECANPAY } from '@/data/constants'
@@ -179,12 +180,12 @@ async function submitOrder() {
           toSignInputs: [
             {
               index: 2,
-              address: 'bc1qtwgcscvuzq4jkr7dnhl3t4rpqa2hyjc5hyty37',
+              address: addressStore.get!,
               sighashTypes: [SIGHASH_ALL],
             },
             {
               index: 5,
-              address: 'bc1qtwgcscvuzq4jkr7dnhl3t4rpqa2hyjc5hyty37',
+              address: addressStore.get!,
               sighashTypes: [SIGHASH_ALL],
             },
           ],
@@ -194,7 +195,10 @@ async function submitOrder() {
         console.log('after', after)
         console.log('equal', before === after)
 
-        pushRes = await pushSellTake({
+        const afterPsbt = useBtcJsStore().get!.Psbt.fromHex(after)
+        console.log({ afterPsbt })
+
+        pushRes = await pushSellTakeV2({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,
           orderId: builtInfo.orderId,
