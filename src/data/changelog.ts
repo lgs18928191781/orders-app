@@ -5,7 +5,7 @@ const changelog = [
     date: '2023-12-25',
     changes: [
       'Merry Christmas!',
-      'Refactor the mechanism of sell process. Now use a safer signature type to sign the sell transaction to prevent mempool RBF attacks.',
+      'Refactor the mechanism of sell process. Now use a safer signature type to sign the sell transaction in order to prevent mempool RBF attacks.',
     ],
   },
   {
