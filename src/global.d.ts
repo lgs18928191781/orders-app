@@ -20,6 +20,7 @@ interface Window {
       connect: () => Promise<{
         address: string
         publicKey: string
+        compressedPublicKey: string
       }>
       disconnect: () => Promise<void>
       signMessage: (

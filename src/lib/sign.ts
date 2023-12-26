@@ -6,12 +6,14 @@ export default async function sign() {
   if (!connection.address || connection.status === 'disconnected') {
     throw new Error('Please connect to a wallet first.')
   }
+  console.log({ connection })
 
   const address = useConnectionStore().getAddress
   const credentialsStore = useCredentialsStore()
 
   // read from store first.
   const credential = credentialsStore.getByAddress(address)
+  console.log({ credential })
 
   if (credential) return credential
 
@@ -28,9 +30,10 @@ export default async function sign() {
     const account: {
       address: string
       publicKey: string
+      compressedPublicKey: string
     } = await window.okxwallet.bitcoin.connect()
 
-    publicKey = account.publicKey
+    publicKey = account.compressedPublicKey || account.publicKey
     signature = await window.okxwallet.bitcoin.signMessage(message, {
       from: account.address,
     })

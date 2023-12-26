@@ -386,7 +386,8 @@ const { data: fiatRate } = useQuery({
                                   >
                                     <input
                                       type="text"
-                                      class="bg-transparent text-sm w-8 border-0 outline-none border-b !border-zinc-500 py-0.5 px-0 focus:ring-0 focus:ring-transparent text-center"
+                                      class="bg-transparent text-sm w-8 border-0 outline-none border-b !border-zinc-500 py-0.5 px-0 focus:ring-0 focus:ring-transparent text-center rounded"
+                                      autocomplete="off"
                                       :class="
                                         checked ? 'text-white' : 'text-zinc-300'
                                       "
