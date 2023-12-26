@@ -6,14 +6,12 @@ export default async function sign() {
   if (!connection.address || connection.status === 'disconnected') {
     throw new Error('Please connect to a wallet first.')
   }
-  console.log({ connection })
 
   const address = useConnectionStore().getAddress
   const credentialsStore = useCredentialsStore()
 
   // read from store first.
   const credential = credentialsStore.getByAddress(address)
-  console.log({ credential })
 
   if (credential) return credential
 

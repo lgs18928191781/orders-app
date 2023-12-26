@@ -343,7 +343,7 @@ export const getOrders = async ({
   return orders
 }
 
-type DetailedOrder = Order & { psbtRaw: string }
+type DetailedOrder = Order & { psbtRaw: string; takePsbtRaw: string }
 export const getOneOrder = async ({
   orderId,
 }: {
