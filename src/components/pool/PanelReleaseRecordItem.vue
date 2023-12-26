@@ -101,6 +101,7 @@ async function submitReleaseRecord() {
       autoFinalized: true,
       toSignInputs,
     })
+    // 123
 
     mutateFinishRecord({
       orderId: props.record.orderId,

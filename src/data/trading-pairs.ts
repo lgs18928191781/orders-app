@@ -16,6 +16,7 @@ import ratsLogo from '@/assets/rats.jpg?url'
 
 import { useRoute } from 'vue-router'
 import { InjectionKey } from 'vue'
+import { IS_DEV } from '@/data/constants'
 
 const tradingPairs = [
   {
@@ -137,14 +138,6 @@ const tradingPairs = [
     fromIcon: saycLogo,
     toIcon: btcLogo,
   },
-  {
-    id: 15,
-    fromSymbol: 'orxc',
-    toSymbol: 'btc',
-    fromIcon: rdexLogo,
-    toIcon: btcLogo,
-    hasPool: true,
-  },
 ] as {
   id: number
   fromSymbol: string
@@ -158,6 +151,18 @@ const tradingPairs = [
   isNew?: boolean
   hasEvent?: boolean
 }[]
+
+if (IS_DEV) {
+  tradingPairs.push({
+    id: 15,
+    fromSymbol: 'orxc',
+    exactName: 'ORXC',
+    toSymbol: 'btc',
+    fromIcon: rdexLogo,
+    toIcon: btcLogo,
+    hasPool: true,
+  })
+}
 
 export default tradingPairs
 

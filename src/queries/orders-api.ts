@@ -258,12 +258,13 @@ export const constructBidPsbt = async ({
   return constructInfo
 }
 
-export const getSellFees = async () => {
+export const getSellFees = async ({ orderId }: { orderId: string }) => {
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
 
   const params = new URLSearchParams({
     version: '2',
     networkFeeRate: String(feeb),
+    orderId,
   })
 
   const fees: {
@@ -361,6 +362,55 @@ export const getOneOrder = async ({
       },
     }
   )
+
+  return order
+}
+
+export type BidV20Order = {
+  orderId: string
+  psbtRaw: string
+  platformFee: number
+  releaseInscriptionFee: number
+  rewardInscriptionFee: number
+  rewardSendFee: number
+  furtherFee: number
+}
+export const getOneBidOrder = async ({
+  orderId,
+  inscriptionId,
+}: {
+  orderId: string
+  inscriptionId: string
+}): Promise<BidV20Order> => {
+  const { publicKey, signature } = await sign()
+  const address = useAddressStore().get!
+  const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
+
+  const params = new URLSearchParams({
+    net: 'livenet',
+    orderId,
+    inscriptionId,
+    sellerAddress: address,
+    version: '2',
+    networkFeeRate: String(feeb),
+  })
+
+  const order: BidV20Order = await ordersApiFetch(
+    `order/bid-v2/do/pre?${params}`,
+    {
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+    }
+  ).then((order) => {
+    order.furtherFee =
+      order.releaseInscriptionFee +
+      order.rewardInscriptionFee +
+      order.rewardSendFee
+
+    return order
+  })
 
   return order
 }
@@ -508,6 +558,49 @@ export const pushSellTake = async ({
   return sellRes
 }
 
+export const pushSellTakeV2 = async ({
+  network,
+  psbtRaw,
+  orderId,
+  address,
+  value,
+  amount,
+  networkFee,
+  networkFeeRate,
+}: {
+  network: 'livenet' | 'testnet'
+  psbtRaw: string
+  orderId: string
+  address: string
+  value: number
+  amount: string
+  networkFee: number
+  networkFeeRate: number
+}) => {
+  const { publicKey, signature } = await sign()
+
+  const sellRes = await ordersApiFetch(`order/bid-v2/do`, {
+    method: 'POST',
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+    body: JSON.stringify({
+      net: network,
+      psbtRaw,
+      orderId,
+      address,
+      value,
+      amount,
+      networkFee,
+      networkFeeRate,
+      version: 2,
+    }),
+  })
+
+  return sellRes
+}
+
 export const pushAskOrder = async ({
   network,
   address,
@@ -602,6 +695,7 @@ export const pushBidOrder = async ({
   address,
   tick,
   psbtRaw,
+  preTxRaw,
   feeb,
   fee,
   total,
@@ -612,6 +706,7 @@ export const pushBidOrder = async ({
   address: string
   tick: string
   psbtRaw: string
+  preTxRaw: string
   feeb: number
   fee: number
   total: number
@@ -631,6 +726,7 @@ export const pushBidOrder = async ({
         address,
         tick,
         psbtRaw,
+        preTxRaw,
         rate: feeb,
         fee,
         amount: total,

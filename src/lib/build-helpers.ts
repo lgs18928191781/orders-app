@@ -172,6 +172,7 @@ export async function exclusiveChange({
   otherSighashType,
   estimate = false,
   partialPay = false,
+  cutFrom = 1,
 }: {
   psbt: Psbt
   pubKey?: Buffer
@@ -183,6 +184,7 @@ export async function exclusiveChange({
   otherSighashType?: number
   estimate?: boolean
   partialPay?: boolean
+  cutFrom?: number
 }) {
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
   // check if address is set
@@ -249,13 +251,26 @@ export async function exclusiveChange({
       sighashType,
       tapInternalKey: pubKey,
     }
-    const psbtClone = psbt.clone()
+    const vin = psbt.inputCount
+    let psbtClone: Psbt
+    // .clone has bug when there is no input; so we have to manually add the output
+    if (vin === 0) {
+      psbtClone = new btcjs.Psbt()
+      // add outputs manually
+      const vout = psbt.txOutputs.length
+      for (let i = 0; i < vout; i++) {
+        psbtClone.addOutput(psbt.txOutputs[i])
+      }
+    } else {
+      psbtClone = psbt.clone()
+    }
     psbtClone.addInput(paymentInput)
+    console.log({ psbtClone })
 
     // Add change output
     let fee = useSize
       ? Math.round(useSize * feeb)
-      : calcFee(psbt, feeb, extraSize)
+      : calcFee(psbtClone, feeb, extraSize)
     const totalOutput = sumOrNaN(psbtClone.txOutputs)
     const totalInput = sumOrNaN(
       psbtClone.data.inputs.map(
@@ -325,7 +340,7 @@ export async function exclusiveChange({
       // totalInput = the inputs we add in now
       totalInput = sumOrNaN(
         psbt.data.inputs
-          .slice(1) // exclude the first input, which is the oridinal input
+          .slice(cutFrom) // exclude the first input, which is the oridinal input
           .map(
             (input) =>
               input.witnessUtxo ||
@@ -338,6 +353,7 @@ export async function exclusiveChange({
     } else {
       // we pay for the whole transaction
       totalOutput = sumOrNaN(psbt.txOutputs)
+      console.log({ inputs: psbt.data.inputs })
       totalInput = sumOrNaN(
         psbt.data.inputs.map(
           (input) =>

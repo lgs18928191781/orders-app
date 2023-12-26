@@ -60,8 +60,6 @@ function discardOrder() {
 }
 
 async function submitOrder() {
-  console.log({ props })
-
   const builtInfo = toRaw(props.builtInfo)
   try {
     const toSigns = []
@@ -78,11 +76,11 @@ async function submitOrder() {
       toSigns.map(() => {})
     )
 
+    let preTxRaw: string | undefined
     if (props.builtBtcInfo?.separatePsbt) {
-      // push separate psbt
-      const pushSeparateRes = await connectionStore.adapter.pushPsbt(
-        signedPsbts[1]
-      )
+      // instead of push psbt, we extract the signed tx
+      const btcjs = useBtcJsStore().get!
+      preTxRaw = btcjs.Psbt.fromHex(signedPsbts[1]).extractTransaction().toHex()
     }
 
     // extract btc tx and get its txid
@@ -93,9 +91,12 @@ async function submitOrder() {
       )
     }
     let btcTxOutputLocation: string = ''
-    if (bidirectional && BTC_POOL_MODE === 2) {
+    if (bidirectional && BTC_POOL_MODE !== 1) {
+      // needed when in custody and cascade mode
       const btcjs = useBtcJsStore().get!
-      const btcTx = btcjs.Psbt.fromHex(signedPsbts[1]).extractTransaction()
+      const btcTx = btcjs.Psbt.fromHex(
+        signedPsbts[signedPsbts.length - 1]
+      ).extractTransaction()
       const btcTxid = btcTx.getId()
       btcTxOutputLocation = btcTxid + '_0'
     }
@@ -109,12 +110,13 @@ async function submitOrder() {
           address: connectionStore.getAddress,
           amount: builtInfo.toValue.toNumber(),
           btcUtxoId:
-            bidirectional && BTC_POOL_MODE === 2
+            bidirectional && BTC_POOL_MODE !== 1
               ? btcTxOutputLocation
               : undefined,
           psbtRaw: bidirectional
             ? signedPsbts[signedPsbts.length - 1]
             : undefined,
+          preTxRaw: preTxRaw || undefined,
           coinAmount: builtInfo.fromValue.toNumber(),
           coinPsbtRaw: signedPsbts[0],
           net: networkStore.network,
@@ -215,13 +217,13 @@ async function submitOrder() {
                     v-if="builtBtcInfo"
                   >
                     <h3 class="text-center text-orange-300">
-                      {{ builtInfo.fromSymbol.toUpperCase() + ' Liquidity' }}
+                      ${{ builtInfo.fromSymbol.toUpperCase() + ' Liquidity' }}
                     </h3>
                     <el-popover
                       placement="bottom"
                       :width="400"
                       trigger="hover"
-                      content="You provide BRC20 liquidity to the pool by signing a PSBT to the multi-sig address. The multi-sig address is controlled by the service provider and the pool participants."
+                      content="You provide BRC20 liquidity to the pool by signing a PSBT."
                       popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10"
                     >
                       <template #reference>
@@ -245,7 +247,7 @@ async function submitOrder() {
                         {{
                           prettyCoinDisplay(
                             builtInfo.fromValue,
-                            builtInfo.fromSymbol
+                            '$' + builtInfo.fromSymbol
                           )
                         }}
                       </span>
@@ -275,10 +277,7 @@ async function submitOrder() {
                         }}
                       </span>
                       <span class="text-zinc-500 text-left">
-                        {{
-                          prettyAddress(builtInfo.toAddress) +
-                          ' (MultiSig Address)'
-                        }}
+                        {{ prettyAddress(builtInfo.toAddress) + ' (You)' }}
                       </span>
                     </div>
                   </div>
@@ -294,7 +293,7 @@ async function submitOrder() {
                       placement="bottom"
                       :width="400"
                       trigger="hover"
-                      content="You provide BTC liquidity to the pool by offering a PSBT which spends the BTC UTXO to the multi-sig address. The multi-sig address is controlled by the service provider and the pool participants."
+                      content="You provide BTC liquidity to the pool by offering a PSBT which spends the BTC UTXO. Once the liquidity is used, the BTC will send back to your address automatically."
                       popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10"
                     >
                       <template #reference>
@@ -314,11 +313,36 @@ async function submitOrder() {
                     />
                     <div class="flex flex-col items-start gap-1">
                       <span>
-                        {{ prettyCoinDisplay(builtBtcInfo.amount, 'btc') }}
+                        {{ prettyCoinDisplay(builtBtcInfo.totalAmount, 'btc') }}
+                      </span>
+                      <span class="text-zinc-500 text-left">
+                        {{ prettyAddress(builtBtcInfo.fromAddress) + ' (You)' }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="ml-1">
+                    <ArrowDownIcon class="h-6 w-6 text-zinc-300" />
+                  </div>
+
+                  <div class="flex items-center gap-4">
+                    <img
+                      :src="getIconFromSymbol(builtBtcInfo.toSymbol)"
+                      alt=""
+                      class="h-8 w-8 rounded-full"
+                    />
+                    <div class="flex flex-col items-start gap-1">
+                      <span>
+                        {{
+                          prettyCoinDisplay(
+                            builtBtcInfo.amount,
+                            builtBtcInfo.toSymbol
+                          )
+                        }}
                       </span>
                       <span class="text-zinc-500 text-left">
                         {{
-                          prettyAddress(builtInfo.toAddress) +
+                          prettyAddress(builtBtcInfo.toAddress) +
                           ' (Service Address)'
                         }}
                       </span>

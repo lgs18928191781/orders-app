@@ -1,5 +1,3 @@
-import { MIN_FEEB } from '@/data/constants'
-import { getFeebPlans } from '@/queries/proxy'
 import { computedEager, useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
 
@@ -9,6 +7,14 @@ export const sleep = (ms: number) => {
 
 export const raise = (err: string): never => {
   throw new Error(err)
+}
+
+export const raiseIf = (cond: boolean, err: string): void => {
+  if (cond) raise(err)
+}
+
+export const raiseUnless = (cond: boolean, err: string): void => {
+  if (!cond) raise(err)
 }
 
 export const generateRandomString = (length: number = 32) => {
@@ -35,19 +41,6 @@ export const unit = computedEager(() => {
 export const showFiat = computedEager(() => {
   return useStorage('show-fiat-price', true)
 })
-
-export const getLowestFeeb = async () => {
-  const feeb = (await getFeebPlans({ network: 'livenet' }).then(
-    (plans) => plans[0]?.feeRate || MIN_FEEB
-  )) as number
-
-  // no less than 3
-  return Math.max(feeb, 3)
-}
-
-export const getDecimalLength = (value: number | string | Decimal): number => {
-  return new Decimal(value).dp()
-}
 
 export type BidTxSpec = {
   inputs: {

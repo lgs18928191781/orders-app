@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Ref, computed, ref, watch } from 'vue'
+import { Ref, computed, onMounted, ref, watch } from 'vue'
 import { get, useStorage } from '@vueuse/core'
 import {
   Popover,
@@ -17,7 +17,7 @@ import { CarIcon, CheckIcon, Loader2Icon } from 'lucide-vue-next'
 import { useNetworkStore } from '@/stores/network'
 import { useFeebStore } from '@/stores/feeb'
 import { FeebPlan, getFeebPlans } from '@/queries/proxy'
-import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
+import { calcFiatPrice, sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance } from '@/lib/formatters'
 import { getFiatRate } from '@/queries/orders-api'
 import {
@@ -27,6 +27,8 @@ import {
   SELL_TX_SIZE,
   SEND_TX_SIZE,
 } from '@/data/constants'
+import { getRewardClaimFees } from '@/queries/pool'
+import Decimal from 'decimal.js'
 
 // custom feeb plan
 const customFeeb = useStorage('customFeeb', 2)
@@ -49,12 +51,10 @@ const transactionActions = [
   {
     title: 'Buy',
     size: BUY_TX_SIZE,
-    equalitySymbol: '>=',
   },
   {
     title: 'Sell',
     size: SELL_TX_SIZE,
-    equalitySymbol: '>=',
   },
   {
     title: 'Ask',
@@ -63,7 +63,6 @@ const transactionActions = [
   {
     title: 'Bid',
     size: BID_TX_SIZE,
-    equalitySymbol: '>=',
   },
 ]
 
@@ -75,7 +74,6 @@ const poolActions = [
   {
     title: 'Add 2-Way Liquidity',
     size: SEND_TX_SIZE,
-    equalitySymbol: '>=',
   },
   {
     title: 'Remove Liquidity',
@@ -91,15 +89,45 @@ const poolActions = [
   },
 ]
 
+// fetch claim fees dynamically
+const claimFee = ref(0)
+async function getClaimFee() {
+  const fees = await getRewardClaimFees()
+  claimFee.value = new Decimal(fees.rewardInscriptionFee)
+    .plus(fees.rewardSendFee)
+    .toNumber()
+}
+// onMounted(async () => {
+//   await sleep(1000)
+//   await getClaimFee()
+// })
+// watch if network changes; if so, refetch claim fees
+
 function getPoolActionsPriceDisplay(
   actionSize: number,
-  equalitySymbol: string = '>='
+  equalitySymbol: string = '>=',
+  isClaim?: boolean
 ) {
   if (!selectedFeebPlan.value)
     return {
       inCrypto: '-',
       inFiat: '-',
     }
+
+  if (isClaim) {
+    const prefix = actionSize > 0 ? `${equalitySymbol} ` : ''
+    const btcPriceDisplay =
+      prettyBalance(claimFee.value, get(useBtcUnit)) + ' ' + unit.value
+
+    const fiatPriceDisplay = fiatRate.value
+      ? calcFiatPrice(claimFee.value, get(fiatRate))
+      : ''
+
+    return {
+      inCrypto: prefix + btcPriceDisplay,
+      inFiat: fiatPriceDisplay ? '$' + fiatPriceDisplay : '$0',
+    }
+  }
 
   const prefix = actionSize > 0 ? `${equalitySymbol} ` : ''
   const btcPriceDisplay =
@@ -151,11 +179,16 @@ const selectedFeebPlan = computed(() => {
 const feebStore = useFeebStore()
 watch(
   selectedFeebPlan,
-  (plan) => {
+  (plan, oldValue) => {
     if (!plan) return
     if (!plan.feeRate) return
 
     feebStore.set(plan.feeRate)
+
+    // if ()
+    sleep(1000).then(async () => {
+      await getClaimFee()
+    })
   },
   { immediate: true, deep: true }
 )
@@ -165,9 +198,9 @@ const traffic = computed(() => {
 
   const avgFeeRate = feebPlans.value[1].feeRate
 
-  if (avgFeeRate < 10) return 'Low'
-  if (avgFeeRate < 20) return 'Normal'
-  if (avgFeeRate < 50) return 'Busy'
+  if (avgFeeRate < 20) return 'Low'
+  if (avgFeeRate < 50) return 'Normal'
+  if (avgFeeRate < 150) return 'Busy'
 
   return 'Extremely Busy'
 })
@@ -442,12 +475,7 @@ const { data: fiatRate } = useQuery({
 
                     <div class="text-right flex gap-4">
                       <div class="font-bold">
-                        {{
-                          getPoolActionsPriceDisplay(
-                            action.size,
-                            action?.equalitySymbol
-                          ).inCrypto
-                        }}
+                        {{ getPoolActionsPriceDisplay(action.size).inCrypto }}
                         <div class="pl-2 text-zinc-500 text-xs">
                           {{ getPoolActionsPriceDisplay(action.size).inFiat }}
                         </div>
@@ -472,11 +500,18 @@ const { data: fiatRate } = useQuery({
                         {{
                           getPoolActionsPriceDisplay(
                             action.size,
-                            action?.equalitySymbol
+                            '>=',
+                            action.title === 'Claim Reward'
                           ).inCrypto
                         }}
                         <div class="pl-2 text-zinc-500 text-xs">
-                          {{ getPoolActionsPriceDisplay(action.size).inFiat }}
+                          {{
+                            getPoolActionsPriceDisplay(
+                              action.size,
+                              '>=',
+                              action.title === 'Claim Reward'
+                            ).inFiat
+                          }}
                         </div>
                       </div>
                     </div>

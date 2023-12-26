@@ -52,12 +52,15 @@ const { data: eventRewardsEssential, isLoading: isLoadingRewardsEssential } =
         tick: selectedPair.fromSymbol,
       }),
     select: (data) => {
+      let total =
+        data.totalRewardAmount +
+        data.totalRewardExtraAmount -
+        data.hadClaimRewardAmount
+      if (total < 0) total = 0
+
       return {
         ...data,
-        total:
-          data.totalRewardAmount +
-          data.totalRewardExtraAmount -
-          data.hadClaimRewardAmount,
+        total,
       }
     },
     enabled: computed(() => connectionStore.connected),

@@ -7,7 +7,11 @@ import { useCredentialsStore } from '@/stores/credentials'
 import { useNetworkStore } from '@/stores/network'
 import { getOneBrc20 } from '@/queries/orders-api'
 import { type SimpleUtxo, getTxHex, getUtxos } from '@/queries/proxy'
-import { getEventClaimFees, getPoolCredential } from '@/queries/pool'
+import {
+  getEventClaimFees,
+  getPoolCredential,
+  getRewardClaimFees,
+} from '@/queries/pool'
 import { type TradingPair } from '@/data/trading-pairs'
 import { raise } from './helpers'
 import { exclusiveChange, safeOutputValue } from './build-helpers'
@@ -15,6 +19,8 @@ import {
   BTC_POOL_MODE,
   MS_BRC20_UTXO_VALUE,
   RELEASE_TX_SIZE,
+  SIGHASH_ALL,
+  SIGHASH_ALL_ANYONECANPAY,
   SIGHASH_SINGLE_ANYONECANPAY,
   USE_UTXO_COUNT_LIMIT,
 } from '@/data/constants'
@@ -127,8 +133,8 @@ export async function buildAddBrcLiquidity({
       'No multisig address. Please try again or contact customer service for assistance.'
     )
   addLiquidity.addOutput({
-    address: multisigAddress,
-    value: safeOutputValue(total, true),
+    address,
+    value: safeOutputValue(total),
   })
 
   return {
@@ -139,9 +145,9 @@ export async function buildAddBrcLiquidity({
     fromSymbol: selectedPair.fromSymbol,
     toSymbol: selectedPair.toSymbol,
     fromValue: amount,
-    toValue: new Decimal(safeOutputValue(total, true)),
+    toValue: new Decimal(safeOutputValue(total)),
     fromAddress: address,
-    toAddress: multisigAddress,
+    toAddress: address,
   }
 }
 
@@ -154,34 +160,23 @@ export async function buildAddBtcLiquidity({ total }: { total: Decimal }) {
   const networkStore = useNetworkStore()
   const btcjs = useBtcJsStore().get!
 
-  // Custody mode
-  if (BTC_POOL_MODE === 2) {
-    const serviceAddress = await getPoolCredential().then((credential) => {
-      return credential.btcReceiveAddress
-    })
-
-    // build psbt
-    const addBtcLiquidity = new btcjs.Psbt({
-      network: btcjs.networks[networkStore.btcNetwork],
-    }).addOutput({
-      address: serviceAddress,
-      value: safeOutputValue(total),
-    })
-
-    await exclusiveChange({
-      psbt: addBtcLiquidity,
-    })
-
-    return {
-      order: addBtcLiquidity,
-      type: 'add-liquidity (BTC -> BRC20)',
-      amount: new Decimal(safeOutputValue(total)),
-      toAddress: serviceAddress,
-    }
+  switch (BTC_POOL_MODE) {
+    case 1:
+      return await buildInPsbtMode(total)
+    case 2:
+      return await buildInCustodyMode(total)
+    case 3:
+      return await buildInCascadeMode(total)
+    default:
+      throw new Error('Invalid BTC_POOL_MODE')
   }
+}
 
-  // PSBT mode
+// PSBT mode
+async function buildInPsbtMode(total: Decimal) {
+  const btcjs = useBtcJsStore().get!
   const address = useConnectionStore().getAddress
+  const btcNetwork = useNetworkStore().btcNetwork
 
   let input
   let separatePsbt
@@ -205,7 +200,7 @@ export async function buildAddBtcLiquidity({ total }: { total: Decimal }) {
   } else {
     // 1. build the transaction to separate the needed amount BTC Utxo from the wallet
     separatePsbt = new btcjs.Psbt({
-      network: btcjs.networks[networkStore.btcNetwork],
+      network: btcjs.networks[btcNetwork],
     }).addOutput({
       address,
       value: safeOutputValue(total),
@@ -236,7 +231,7 @@ export async function buildAddBtcLiquidity({ total }: { total: Decimal }) {
       'No multisig address. Please try again or contact customer service for assistance.'
     )
   const addBtcLiquidity = new btcjs.Psbt({
-    network: btcjs.networks[networkStore.btcNetwork],
+    network: btcjs.networks[btcNetwork],
   })
     .addInput(input)
     .addOutput({
@@ -250,6 +245,104 @@ export async function buildAddBtcLiquidity({ total }: { total: Decimal }) {
     amount: new Decimal(safeOutputValue(total)),
     toAddress: multisigAddress,
     separatePsbt,
+  }
+}
+
+async function buildInCustodyMode(total: Decimal) {
+  const btcNetwork = useNetworkStore().btcNetwork
+  const btcjs = useBtcJsStore().get!
+
+  const serviceAddress = await getPoolCredential().then((credential) => {
+    return credential.btcReceiveAddress
+  })
+
+  // build psbt
+  const addBtcLiquidity = new btcjs.Psbt({
+    network: btcjs.networks[btcNetwork],
+  }).addOutput({
+    address: serviceAddress,
+    value: safeOutputValue(total),
+  })
+
+  await exclusiveChange({
+    psbt: addBtcLiquidity,
+  })
+
+  return {
+    order: addBtcLiquidity,
+    type: 'add-liquidity (BTC -> BRC20)',
+    amount: new Decimal(safeOutputValue(total)),
+    toAddress: serviceAddress,
+  }
+}
+
+async function buildInCascadeMode(total: Decimal) {
+  const btcjs = useBtcJsStore().get!
+  const btcNetwork = useNetworkStore().btcNetwork
+  const address = useConnectionStore().getAddress
+
+  // Cascade mode is a combination of custody mode and psbt mode
+  // We create the second tx first
+  const serviceAddress = await getPoolCredential().then((credential) => {
+    return credential.btcReceiveAddress
+  })
+  const child = new btcjs.Psbt({
+    network: btcjs.networks[btcNetwork],
+  })
+
+  child.addOutput({
+    address: serviceAddress,
+    value: safeOutputValue(total),
+  })
+
+  // estimate miner fee
+  const { fee } = await exclusiveChange({
+    psbt: child,
+    estimate: true,
+    extraSize: 0,
+  })
+  console.log({ fee })
+
+  const childNeededAmount = new Decimal(safeOutputValue(total)).plus(fee)
+  // construct the parent tx to generate the needed amount utxo
+  const parent = new btcjs.Psbt({
+    network: btcjs.networks[btcNetwork],
+  })
+  parent.addOutput({
+    address,
+    value: safeOutputValue(childNeededAmount),
+  })
+  // change it
+  await exclusiveChange({
+    psbt: parent,
+    sighashType: SIGHASH_ALL,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+  })
+  console.log({ parent })
+
+  // get the needed utxo and add it to the child
+  const neededUtxo = parent.txOutputs[0]
+  // get parents' tx hash
+  const parentTx = (parent.data.globalMap.unsignedTx as any).tx
+  const parentTxHash: string = (parentTx as any).getId()
+  console.log('est tx id', parentTxHash)
+
+  child.addInput({
+    hash: parentTxHash,
+    index: 0,
+    witnessUtxo: neededUtxo,
+    sighashType: SIGHASH_ALL_ANYONECANPAY,
+  })
+
+  return {
+    order: child,
+    type: 'add-liquidity (BTC)',
+    amount: new Decimal(safeOutputValue(total)),
+    totalAmount: childNeededAmount,
+    toAddress: serviceAddress,
+    toSymbol: 'BTC',
+    fromAddress: address,
+    separatePsbt: parent,
   }
 }
 
@@ -306,6 +399,44 @@ export async function buildReleasePsbt({
   return claim
 }
 
+export async function buildRewardClaim() {
+  const networkStore = useNetworkStore()
+  const btcjs = useBtcJsStore().get!
+
+  const { feeAddress, rewardInscriptionFee, rewardSendFee } =
+    await getRewardClaimFees()
+  const totalFees = new Decimal(rewardInscriptionFee).plus(rewardSendFee)
+
+  // build psbt
+  const rewardClaimPsbt = new btcjs.Psbt({
+    network: btcjs.networks[networkStore.btcNetwork],
+  })
+    .addOutput({
+      address: feeAddress,
+      value: safeOutputValue(rewardInscriptionFee),
+    })
+    .addOutput({
+      address: feeAddress,
+      value: safeOutputValue(rewardSendFee),
+    })
+
+  const { fee, feeb } = await exclusiveChange({
+    psbt: rewardClaimPsbt,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+    sighashType: SIGHASH_ALL,
+  })
+
+  return {
+    order: rewardClaimPsbt,
+    type: 'pool reward claiming',
+    amount: new Decimal(safeOutputValue(totalFees)),
+    toAddress: feeAddress,
+    feeb,
+    feeSend: rewardSendFee,
+    feeInscription: rewardInscriptionFee,
+  }
+}
+
 export async function buildEventClaim() {
   const networkStore = useNetworkStore()
   const btcjs = useBtcJsStore().get!
@@ -329,6 +460,8 @@ export async function buildEventClaim() {
 
   const { fee, feeb } = await exclusiveChange({
     psbt: eventClaimPsbt,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+    sighashType: SIGHASH_ALL,
   })
 
   return {
@@ -365,6 +498,8 @@ export async function buildStandbyClaim() {
 
   const { fee, feeb } = await exclusiveChange({
     psbt: standbyClaimPsbt,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+    sighashType: SIGHASH_ALL,
   })
 
   return {

@@ -32,8 +32,8 @@ import { calculateFee } from '@/lib/build-helpers'
 import {
   buildAskLimit,
   buildBidLimit,
-  buildSellTake,
   buildBuyTake,
+  buildSellTakeV2,
 } from '@/lib/order-builder'
 import {
   getOrdiBalance,
@@ -49,7 +49,7 @@ import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 import { selectPair, selectedPairKey } from '@/data/trading-pairs'
-import { DEBUG, SELL_TX_SIZE } from '@/data/constants'
+import { DEBUG, IS_DEV, SELL_TX_SIZE } from '@/data/constants'
 
 import btcIcon from '@/assets/btc.svg?url'
 import OrderPanelHeader from './PanelHeader.vue'
@@ -299,10 +299,11 @@ async function buildOrder() {
           return acc + Number(cur.amount)
         }, 0)
 
-        const sellTake = await buildSellTake({
+        const sellTake = await buildSellTakeV2({
           total,
           amount: selectedSellCoinAmount.value,
           selectedPair,
+          orderId: selectedSellOrders.value[0].orderId,
         }).catch(async (err) => {
           await sleep(500)
 
@@ -311,6 +312,9 @@ async function buildOrder() {
           setIsOpen(false)
           builtInfo.value = undefined
           isLimitExchangeMode.value = false
+          if (IS_DEV) {
+            throw err
+          }
         })
 
         buildRes = {
