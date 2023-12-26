@@ -19,11 +19,11 @@ import {
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { DEBUG, SIGHASH_ALL_ANYONECANPAY } from '@/data/constants'
+import { DEBUG, IS_DEV, SIGHASH_ALL_ANYONECANPAY } from '@/data/constants'
 import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
-import BtcHelpers, { toXOnly } from '@/lib/btc-helpers'
+import BtcHelpers, { toXOnly, validatePsbt } from '@/lib/btc-helpers'
 import { Buffer } from 'buffer'
 
 const networkStore = useNetworkStore()
@@ -160,6 +160,7 @@ async function submitBidOrder() {
 }
 
 async function submitOrder() {
+  const btcjs = useBtcJsStore().get!
   const builtInfo = toRaw(props.builtInfo)
 
   // if type if bid, we handle it differently
@@ -213,6 +214,13 @@ async function submitOrder() {
         break
       case 'ask':
         const finished = adapter.finishPsbt(signed)
+        const isValid = validatePsbt({
+          psbt: btcjs.Psbt.fromHex(finished),
+          type: 'ask',
+        })
+        if (!isValid) {
+          throw new Error('Sign failed. Please contact support.')
+        }
 
         pushRes = await pushAskOrder({
           psbtRaw: finished,
@@ -232,6 +240,9 @@ async function submitOrder() {
       ElMessage.error('The order was taken. Please try another one.')
     } else {
       ElMessage.error(err.message)
+    }
+    if (IS_DEV) {
+      throw err
     }
     emit('update:isOpen', false)
     clearBuiltInfo()
@@ -254,7 +265,7 @@ async function submitOrder() {
     type: 'success',
     onClose: () => {
       // reload
-      if (!DEBUG) {
+      if (!IS_DEV) {
         window.location.reload()
       }
     },

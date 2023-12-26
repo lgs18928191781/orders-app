@@ -27,14 +27,27 @@ export function finishPsbt(psbt: string): string {
     const rebuilt = new btcjs.Psbt()
     rebuilt.setVersion(original.version)
     rebuilt.setLocktime(original.locktime)
+    console.log(original.data.inputs[2])
 
     const useIndex = 2
-    rebuilt.addInput({
+    const input: any = {
       hash: original.txInputs[useIndex].hash,
       index: original.txInputs[useIndex].index,
-      witnessUtxo: original.data.inputs[useIndex].witnessUtxo,
-      finalScriptWitness: original.data.inputs[useIndex].finalScriptWitness,
-    })
+    }
+    if (original.data.inputs[useIndex].witnessUtxo) {
+      input.witnessUtxo = original.data.inputs[useIndex].witnessUtxo
+    }
+    if (original.data.inputs[useIndex].nonWitnessUtxo) {
+      input.nonWitnessUtxo = original.data.inputs[useIndex].nonWitnessUtxo
+    }
+    if (original.data.inputs[useIndex].partialSig) {
+      input.partialSig = original.data.inputs[useIndex].partialSig
+    }
+    if (original.data.inputs[useIndex].finalScriptWitness) {
+      input.finalScriptWitness =
+        original.data.inputs[useIndex].finalScriptWitness
+    }
+    rebuilt.addInput(input)
     rebuilt.addOutput(original.txOutputs[useIndex])
 
     return rebuilt

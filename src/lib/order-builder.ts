@@ -19,7 +19,7 @@ import {
   getOneOrder,
   getSellFees,
 } from '@/queries/orders-api'
-import { getUtxos, type SimpleUtxoFromMempool, getTxHex } from '@/queries/proxy'
+import { getUtxos, type SimpleUtxo, getTxHex } from '@/queries/proxy'
 import { type TradingPair } from '@/data/trading-pairs'
 import { SIGHASH_NONE_ANYONECANPAY } from '../data/constants'
 import { toXOnly } from '@/lib/btc-helpers'
@@ -41,7 +41,7 @@ export async function buildAskLimit({
   // Get address
   // Step 1: Get the ordinal utxo as input
   // if testnet, we use a cardinal utxo as a fake one
-  let ordinalUtxo: SimpleUtxoFromMempool
+  let ordinalUtxo: SimpleUtxo
   if (networkStore.network === 'testnet') {
     const cardinalUtxo = await getUtxos(address).then((result) => {
       // choose the smallest utxo, but bigger than 600
@@ -415,7 +415,7 @@ export async function buildSellTake({
 
   // Step 1: Get the ordinal utxo as input
   // if testnet, we use a cardinal utxo as a fake one
-  let ordinalUtxo: SimpleUtxoFromMempool
+  let ordinalUtxo: SimpleUtxo
 
   let transferable = await getOneBrc20({
     tick: selectedPair.fromSymbol,

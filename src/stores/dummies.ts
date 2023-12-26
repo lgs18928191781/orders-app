@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { type SimpleUtxoFromMempool } from '../queries/proxy'
+import { type SimpleUtxo } from '../queries/proxy'
 
-export type DummyUtxo = SimpleUtxoFromMempool & {
+export type DummyUtxo = SimpleUtxo & {
   txHex: string
 }
 export const useDummiesStore = defineStore('dummies', {

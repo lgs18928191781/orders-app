@@ -4,6 +4,28 @@ import { type Psbt } from 'bitcoinjs-lib'
 
 import { useBtcJsStore } from '@/stores/btcjs'
 
+export function createValidator() {
+  const ECPair = useBtcJsStore().ECPair
+
+  if (!ECPair) throw new Error('ECPair is not set!')
+
+  const validator = (
+    pubkey: Buffer,
+    msghash: Buffer,
+    signature: Buffer
+  ): boolean => ECPair.fromPublicKey(pubkey).verify(msghash, signature)
+
+  return validator
+}
+
+export function validatePsbt({ psbt, type }: { psbt: Psbt; type: 'ask' }) {
+  const validator = createValidator()
+
+  if (type === 'ask') {
+    return psbt.validateSignaturesOfAllInputs(validator)
+  }
+}
+
 export function toXOnly(pubKey: Buffer) {
   return pubKey.length === 32 ? pubKey : pubKey.slice(1, 33)
 }
@@ -16,6 +38,16 @@ class BtcHelpers {
     const btcJsStore = useBtcJsStore()
     this.btcjs = btcJsStore.get!
     this.ECPair = btcJsStore.ECPair!
+  }
+
+  public createValidator() {
+    const validator = (
+      pubkey: Buffer,
+      msghash: Buffer,
+      signature: Buffer
+    ): boolean => this.ECPair.fromPublicKey(pubkey).verify(msghash, signature)
+
+    return validator
   }
 
   public fromPubKey(pubKey: string): any {

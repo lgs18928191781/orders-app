@@ -10,8 +10,11 @@ import OrderItem from './Item.vue'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
 import Decimal from 'decimal.js'
+import { useConnectionStore } from '@/stores/connection'
+import { ElMessage } from 'element-plus'
 
 const networkStore = useNetworkStore()
+const address = useConnectionStore().getAddress
 
 const props = withDefaults(
   defineProps<{
@@ -31,7 +34,7 @@ const rearrangedAskOrders = computed(() => {
   return [...nonFreeOrders, ...freeOrders]
 })
 
-defineEmits(['useBuyPrice', 'useSellPrice'])
+const emit = defineEmits(['useBuyPrice', 'useSellPrice'])
 
 const selectedPair = inject(selectedPairKey, defaultPair)
 
@@ -48,6 +51,40 @@ const { data: fiatRate } = useQuery({
   queryKey: ['fiatRate'],
   queryFn: getFiatRate,
 })
+
+const useBuyPrice = (order: Order) => {
+  // first check if the order is mine; if so, throw error
+  const isMine = order.sellerAddress === address
+  if (isMine) {
+    ElMessage.error({
+      message: 'You cannot take your own order',
+      grouping: true,
+    })
+    return
+  }
+
+  const buyPrice = Number(order.coinRatePrice)
+  const buyOrderId = order.orderId
+
+  emit('useBuyPrice', buyPrice, buyOrderId)
+}
+
+const useSellPrice = (order: Order) => {
+  // first check if the order is mine; if so, throw error
+  const isMine = order.buyerAddress === address
+  if (isMine) {
+    ElMessage.error({
+      message: 'You cannot take your own order',
+      grouping: true,
+    })
+    return
+  }
+
+  const sellPrice = Number(order.coinRatePrice)
+  const sellOrderId = order.orderId
+
+  emit('useSellPrice', sellPrice, sellOrderId)
+}
 </script>
 
 <template>
@@ -90,9 +127,7 @@ const { data: fiatRate } = useQuery({
             :key="order.orderId"
             :order="order"
             :order-type="'ask'"
-            @click="
-              $emit('useBuyPrice', Number(order.coinRatePrice), order.orderId)
-            "
+            @click="useBuyPrice(order)"
           />
         </tbody>
       </table>
@@ -167,9 +202,7 @@ const { data: fiatRate } = useQuery({
             :key="order.orderId"
             :order="order"
             :order-type="'bid'"
-            @click="
-              $emit('useSellPrice', Number(order.coinRatePrice), order.orderId)
-            "
+            @click="useSellPrice(order)"
           />
         </tbody>
       </table>
