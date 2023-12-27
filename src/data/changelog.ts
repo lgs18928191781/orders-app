@@ -1,5 +1,13 @@
 const changelog = [
   {
+    version: '1.5.1',
+    emoji: '🎃',
+    date: '2023-12-27',
+    changes: [
+      'Fix a bug that causes the sell process to fail when the user has multiple UTXOs',
+    ],
+  },
+  {
     version: '1.5.0',
     emoji: '🎅🏻🎄🎅🏻',
     date: '2023-12-25',
