@@ -175,28 +175,33 @@ async function submitOrder() {
         console.log({ address: addressStore.get! })
         // re-sign
         const before = builtInfo.order.toHex()
+
+        // toSignInputs gathering:
+        // index-2 input is brc
+        // then add every other inputs after index-5
+        const inputsCount = builtInfo.order.data.inputs.length
+        const toSignInputs = [
+          {
+            index: 2,
+            address: addressStore.get!,
+            sighashTypes: [SIGHASH_ALL],
+          },
+        ]
+        for (let i = 5; i < inputsCount; i++) {
+          toSignInputs.push({
+            index: i,
+            address: addressStore.get!,
+            sighashTypes: [SIGHASH_ALL],
+          })
+        }
+
         signed = await unisat.signPsbt(builtInfo.order.toHex(), {
           autoFinalized: false,
-          toSignInputs: [
-            {
-              index: 2,
-              address: addressStore.get!,
-              sighashTypes: [SIGHASH_ALL],
-            },
-            {
-              index: 5,
-              address: addressStore.get!,
-              sighashTypes: [SIGHASH_ALL],
-            },
-          ],
+          toSignInputs,
         })
         const after = signed
-        console.log('before', before)
-        console.log('after', after)
-        console.log('equal', before === after)
 
         const afterPsbt = useBtcJsStore().get!.Psbt.fromHex(after)
-        console.log({ afterPsbt })
 
         pushRes = await pushSellTakeV2({
           psbtRaw: signed,
