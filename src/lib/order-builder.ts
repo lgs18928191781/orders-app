@@ -236,6 +236,7 @@ export async function buildBidLimit({
   } = await exclusiveChange({
     maxUtxosCount: USE_UTXO_COUNT_LIMIT,
     psbt: payPsbt,
+    sighashType: SIGHASH_ALL,
   })
 
   const uploadFee = bidFee - (EXTRA_INPUT_MIN_VALUE - extraInputValue)

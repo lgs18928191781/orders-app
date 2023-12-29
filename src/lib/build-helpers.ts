@@ -315,6 +315,7 @@ export async function exclusiveChange({
     const toUseSighashType =
       i > 0 && otherSighashType ? otherSighashType : sighashType
     const pubKey = toXOnly(Buffer.from(useConnectionStore().getPubKey))
+    console.log({ pubKey, length: pubKey.length })
     const paymentInput = {
       hash: paymentUtxo.txId,
       index: paymentUtxo.outputIndex,

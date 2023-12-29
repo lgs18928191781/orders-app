@@ -330,7 +330,7 @@ async function buildOrder() {
     builtInfo.value = undefined
     isLimitExchangeMode.value = false
 
-    if (DEBUG) throw error
+    if (IS_DEV) throw error
   }
 
   isBuilding.value = false

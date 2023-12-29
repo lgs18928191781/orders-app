@@ -18,7 +18,7 @@ const links: {
   {
     name: 'Pool',
     path: '/pool',
-    new: true,
+    // new: true,
   },
   // {
   //   name: 'Whitelist',
