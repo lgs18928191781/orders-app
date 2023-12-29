@@ -98,7 +98,11 @@ export const signPsbt = async (
 ): Promise<string> => {
   checkUnisat()
 
-  return await window.unisat.signPsbt(psbt, options)
+  const signed = await window.unisat.signPsbt(psbt, options)
+
+  console.log({ equals: signed === psbt })
+
+  return signed
 }
 
 export const signPsbts = async (

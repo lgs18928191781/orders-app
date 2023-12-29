@@ -46,6 +46,10 @@ function sumOrNaN(txOutputs: TxOutput[] | Output[]) {
 }
 
 type PsbtInput = (typeof Psbt.prototype.data.inputs)[0]
+type PsbtInputExtended = PsbtInput & {
+  hash: string
+  index: number
+}
 function inputBytes(input: PsbtInput) {
   // todo: script length
   if (isTaprootInput(input)) {
@@ -158,6 +162,26 @@ export function calculatePsbtFee(psbt: Psbt, feeRate: number, isMs?: boolean) {
   return Math.round(fee * multiplier)
 }
 
+export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
+  // check if the input is mine, and address is Taproot
+  // if so, fill in the internal key
+  const address =
+    useConnectionStore().getAddress ??
+    raise('Please connect to a wallet first.')
+
+  const isP2TR = address.startsWith('bc1p')
+  const lostInternalPubkey = !input.tapInternalKey
+
+  if (isP2TR && lostInternalPubkey) {
+    const pubKey = toXOnly(Buffer.from(useConnectionStore().getPubKey, 'hex'))
+    if (input.witnessUtxo?.script.toString('hex') == address) {
+      input.tapInternalKey = pubKey
+    }
+  }
+
+  return input
+}
+
 // the difference between exclusiveChange and change
 // is that we filter out all the utxos that are currently listing
 // that way we dont generate contradictory psbts
@@ -233,7 +257,7 @@ export async function exclusiveChange({
   const paymentPrevOutputScript = btcjs.address.toOutputScript(address)
 
   if (estimate) {
-    // if estimating, we assume a payment utxo that is absurbly large
+    // if estimating, we assume a payment utxo that is absurdly large
     const paymentUtxo = {
       txId: '8729586f5352810db997e2ae0f1530ccc6f63740ba09d656da78e6a7751e7a86',
       outputIndex: 0,
@@ -243,14 +267,13 @@ export async function exclusiveChange({
       value: paymentUtxo.satoshis,
       script: paymentPrevOutputScript,
     }
-    const pubKey = toXOnly(Buffer.from(useConnectionStore().getPubKey))
     const paymentInput = {
       hash: paymentUtxo.txId,
       index: paymentUtxo.outputIndex,
       witnessUtxo: paymentWitnessUtxo,
       sighashType,
-      tapInternalKey: pubKey,
     }
+    fillInternalKey(paymentInput)
     const vin = psbt.inputCount
     let psbtClone: Psbt
     // .clone has bug when there is no input; so we have to manually add the output
@@ -296,7 +319,7 @@ export async function exclusiveChange({
       )
     }
 
-    // return the difference，which feans how much we actually paying
+    // return the difference，which means how much we actually paying
     return {
       difference: paymentUtxo.satoshis - changeValue,
       feeb,
@@ -314,19 +337,13 @@ export async function exclusiveChange({
     }
     const toUseSighashType =
       i > 0 && otherSighashType ? otherSighashType : sighashType
-    const pubKey = toXOnly(Buffer.from(useConnectionStore().getPubKey))
-    console.log({ pubKey, length: pubKey.length })
     const paymentInput = {
       hash: paymentUtxo.txId,
       index: paymentUtxo.outputIndex,
       witnessUtxo: paymentWitnessUtxo,
       sighashType: toUseSighashType,
-      tapInternalKey: pubKey,
     }
-
-    // if (pubKey) {
-    //   paymentInput.tapInternalPubkey = pubKey
-    // }
+    fillInternalKey(paymentInput)
 
     psbt.addInput(paymentInput)
 
@@ -341,7 +358,7 @@ export async function exclusiveChange({
       // totalInput = the inputs we add in now
       totalInput = sumOrNaN(
         psbt.data.inputs
-          .slice(cutFrom) // exclude the first input, which is the oridinal input
+          .slice(cutFrom) // exclude the first input, which is the ordinal input
           .map(
             (input) =>
               input.witnessUtxo ||

@@ -30,6 +30,7 @@ import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 import { toXOnly, validatePsbt } from '@/lib/btc-helpers'
 import { Buffer } from 'buffer'
+import { fillInternalKey } from '@/lib/build-helpers'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -94,7 +95,7 @@ async function submitBidOrder() {
 
     // 2. now we can add that utxo to the bid order
     const bidPsbt = builtInfo.order
-    bidPsbt.addInput({
+    const addingInput = {
       hash: payPsbt.extractTransaction().getId(),
       index: 0,
       witnessUtxo: {
@@ -102,8 +103,9 @@ async function submitBidOrder() {
         value: payPsbt.extractTransaction().outs[0].value,
       },
       sighashType: SIGHASH_ALL_ANYONECANPAY,
-      tapInternalKey: toXOnly(Buffer.from(connectionStore.getPubKey)),
-    })
+    }
+    fillInternalKey(addingInput)
+    bidPsbt.addInput(addingInput)
     console.log(
       '🚀 ~ file: ConfirmationModal.vue:83 ~ submitBidOrder ~ bidPsbt:',
       bidPsbt
