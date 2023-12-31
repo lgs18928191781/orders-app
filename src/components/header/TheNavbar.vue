@@ -20,6 +20,10 @@ const links: {
     path: '/pool',
     // new: true,
   },
+  {
+    name: 'Swap',
+    path: '/swap',
+  },
   // {
   //   name: 'Whitelist',
   //   path: '/whitelist',
@@ -35,6 +39,8 @@ function isLinkActive(path: string) {
       return route.path.startsWith('/whitelist')
     case '/pool':
       return route.path.startsWith('/pool')
+    case '/swap':
+      return route.path.startsWith('/swap')
 
     default:
       return false
