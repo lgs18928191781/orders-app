@@ -47,6 +47,7 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     StandbyClaimRecords: typeof import('./src/components/pool/StandbyClaimRecords.vue')['default']
     StandbyExplainModal: typeof import('./src/components/pool/StandbyExplainModal.vue')['default']
+    SwapBlur: typeof import('./src/components/swap/SwapBlur.vue')['default']
     TheHeader: typeof import('./src/components/header/TheHeader.vue')['default']
     TheNavbar: typeof import('./src/components/header/TheNavbar.vue')['default']
     Toast: typeof import('./src/components/ui/toast/Toast.vue')['default']

@@ -27,3 +27,11 @@
   transition-duration: 100ms;
   @apply outline-orange-300;
 }
+
+.quiet-input {
+  @apply !border-transparent !border-0;
+}
+
+.quiet-input:focus {
+  @apply !ring-0 !outline-0 !outline-transparent !ring-transparent !border-transparent;
+}
