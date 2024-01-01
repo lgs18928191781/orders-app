@@ -5,7 +5,7 @@ import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 
 import sign from '@/lib/sign'
-import { ordersApiFetch } from '@/lib/fetch'
+import fetchWrapper, { ordersApiFetch } from '@/lib/fetch'
 import { raise } from '@/lib/helpers'
 
 export const login = async () => {
@@ -31,6 +31,15 @@ export const getFiatRate = async (): Promise<number> => {
 
   // use per satoshi price
   return res?.usd?.btc ? new Decimal(res.usd.btc).dividedBy(1e8).toNumber() : 0
+}
+
+export const getBrcFiatRate = async (): Promise<Record<string, number>> => {
+  const res = await fetchWrapper(
+    `https://www.metalet.space/wallet-api/v3/coin/brc20/price`
+  )
+
+  // use per satoshi price
+  return res?.data?.priceInfo || {}
 }
 
 export type Notification = {

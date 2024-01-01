@@ -263,7 +263,7 @@ function onSwitchShow(open: boolean) {
 
 // fiat price
 const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate'],
+  queryKey: ['fiatRate', { coin: 'btc' }],
   queryFn: getFiatRate,
 })
 </script>

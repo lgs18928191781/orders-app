@@ -1,13 +1,61 @@
 <script lang="ts" setup>
-import SwapBlur from '@/components/swap/SwapBlur.vue'
+import { ref, watch, type Ref } from 'vue'
+import { ArrowDownIcon } from 'lucide-vue-next'
 
-import RdexLogo from '@/assets/rdex.png?url'
-import BtcLogo from '@/assets/btc.svg?url'
-import { ChevronDownIcon } from 'lucide-vue-next'
+import { Wallet, useConnectionStore } from '@/stores/connection'
+
+import SwapBlur from '@/components/swap/SwapBlur.vue'
+import ConnectionsModal from '@/components/header/ConnectionsModal.vue'
+import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
+
+const fromSymbol = ref('RDEX')
+const toSymbol = ref('btc')
+// watch for changes to both symbols
+// the rule is when one changes from brc to btc, the other changes from btc to brc
+watch(fromSymbol, (newSymbol) => {
+  if (newSymbol === 'btc' && toSymbol.value === 'btc') {
+    toSymbol.value = ''
+  } else if (newSymbol !== 'btc' && toSymbol.value !== 'btc') {
+    toSymbol.value = 'btc'
+  }
+})
+watch(toSymbol, (newSymbol) => {
+  if (newSymbol === 'btc' && fromSymbol.value === 'btc') {
+    fromSymbol.value = ''
+  } else if (newSymbol !== 'btc' && fromSymbol.value !== 'btc') {
+    fromSymbol.value = 'btc'
+  }
+})
+
+const flipAsset = () => {
+  const from = fromSymbol.value
+  const to = toSymbol.value
+  fromSymbol.value = to
+  toSymbol.value = from
+}
+
+// connection
+const connectionStore = useConnectionStore()
+const connectionsModalOpen = ref(false)
+const walletMissingModalOpen = ref(false)
+const missingWallet: Ref<Wallet> = ref('unisat')
+function onWalletMissing(wallet: Wallet) {
+  missingWallet.value = wallet
+  walletMissingModalOpen.value = true
+}
 </script>
 
 <template>
-  <div class="relative max-w-lg mt-16 mx-auto rounded-3xl">
+  <ConnectionsModal
+    v-model:open="connectionsModalOpen"
+    @wallet-missing="onWalletMissing"
+  />
+  <WalletMissingModal
+    v-model:open="walletMissingModalOpen"
+    :missing-wallet="missingWallet"
+  />
+
+  <div class="relative max-w-md mt-16 mx-auto rounded-3xl">
     <div
       class="border border-orange-300/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
     >
@@ -15,59 +63,30 @@ import { ChevronDownIcon } from 'lucide-vue-next'
       <h3 class="px-3">Swap</h3>
 
       <!-- body -->
-      <div class="text-sm space-y-1">
-        <div
-          class="p-4 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
-        >
-          <div class="text-zinc-500">You pay</div>
+      <div class="text-sm space-y-0.5">
+        <SwapSide side="pay" v-model:symbol="fromSymbol" />
 
-          <!-- main control -->
-          <div class="flex items-center space-x-2 justify-between">
-            <input
-              class="bg-transparent text-4xl quiet-input caret-orange-300 flex-1 w-12"
-              type="text"
-              placeholder="0"
-            />
-
-            <div
-              class="rounded-full bg-zinc-900 p-1 px-2 text-xl flex items-center gap-1"
+        <!-- flip -->
+        <div class="h-0 relative flex justify-center">
+          <div class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl">
+            <button
+              class="bg-zinc-800 rounded-lg p-2 hover:text-orange-300"
+              @click="flipAsset"
             >
-              <img :src="RdexLogo" class="w-6 h-6" />
-              <div>$RDEX</div>
-              <ChevronDownIcon class="h-5 w-5" />
-            </div>
+              <ArrowDownIcon class="h-4 w-4" />
+            </button>
           </div>
         </div>
 
-        <div
-          class="p-4 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
-        >
-          <div class="text-zinc-500">You receive</div>
-
-          <!-- main control -->
-          <div class="flex items-center space-x-2 justify-between">
-            <input
-              class="bg-transparent text-4xl quiet-input caret-orange-300 flex-1 w-12"
-              type="text"
-              placeholder="0"
-            />
-
-            <div
-              class="rounded-full bg-zinc-900 p-1 px-2 text-xl flex items-center gap-1"
-            >
-              <img :src="BtcLogo" class="w-6 h-6" />
-              <div>BTC</div>
-              <ChevronDownIcon class="h-5 w-5" />
-            </div>
-          </div>
-        </div>
+        <SwapSide side="receive" v-model:symbol="toSymbol" />
       </div>
 
       <!-- confirm button -->
-      <button
-        class="bg-orange-300/20 text-orange-300 font-medium block w-full py-4 rounded-2xl text-xl"
-      >
-        Swap
+      <button class="main-btn" v-if="connectionStore.connected">Swap</button>
+
+      <!-- connect button -->
+      <button class="main-btn" v-else @click="connectionsModalOpen = true">
+        Connect Wallet
       </button>
     </div>
 
@@ -75,3 +94,9 @@ import { ChevronDownIcon } from 'lucide-vue-next'
     <SwapBlur />
   </div>
 </template>
+
+<style scoped>
+.main-btn {
+  @apply bg-orange-300/20 text-orange-300 font-medium block w-full py-4 rounded-2xl text-xl hover:bg-orange-300/30;
+}
+</style>

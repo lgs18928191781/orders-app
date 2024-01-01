@@ -10,6 +10,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
+    AssetSelect: typeof import('./src/components/swap/AssetSelect.vue')['default']
     ConfirmationModal: typeof import('./src/components/ConfirmationModal.vue')['default']
     ConnectionsModal: typeof import('./src/components/header/ConnectionsModal.vue')['default']
     copy: typeof import('./src/components/pool/PanelRelease copy.vue')['default']
@@ -48,6 +49,7 @@ declare module '@vue/runtime-core' {
     StandbyClaimRecords: typeof import('./src/components/pool/StandbyClaimRecords.vue')['default']
     StandbyExplainModal: typeof import('./src/components/pool/StandbyExplainModal.vue')['default']
     SwapBlur: typeof import('./src/components/swap/SwapBlur.vue')['default']
+    SwapSide: typeof import('./src/components/swap/SwapSide.vue')['default']
     TheHeader: typeof import('./src/components/header/TheHeader.vue')['default']
     TheNavbar: typeof import('./src/components/header/TheNavbar.vue')['default']
     Toast: typeof import('./src/components/ui/toast/Toast.vue')['default']
