@@ -124,7 +124,7 @@ const useTotalBalance = () => {
 
 <template>
   <div
-    class="px-4 py-6 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
+    class="p-4 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
   >
     <div class="text-zinc-400">You {{ side }}</div>
 
