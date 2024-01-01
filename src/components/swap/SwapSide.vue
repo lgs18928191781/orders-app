@@ -28,6 +28,7 @@ const emit = defineEmits([
   'notEnough',
   'amountEntered',
   'amountCleared',
+  'update:symbol',
 ])
 
 // fiat price

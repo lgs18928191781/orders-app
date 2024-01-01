@@ -98,5 +98,3 @@ const displaySymbol = (symbol: string) => {
     </transition>
   </Listbox>
 </template>
-
-<style scoped></style>
