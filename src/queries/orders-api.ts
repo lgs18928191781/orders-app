@@ -392,7 +392,7 @@ export const getOneBidOrder = async ({
   inscriptionId: string
 }): Promise<BidV20Order> => {
   const { publicKey, signature } = await sign()
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
 
   const params = new URLSearchParams({
