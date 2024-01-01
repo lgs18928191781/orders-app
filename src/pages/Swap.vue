@@ -250,7 +250,7 @@ watch(
 
       <!-- disabled button -->
       <button
-        :class="[!!unmet && 'disabled', 'main-btn']"
+        :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
         v-if="unmet"
         :disabled="!unmet.handler"
         @click="!!unmet.handler && unmet.handler()"
