@@ -175,7 +175,7 @@ watch(
 
 <template>
   <div
-    class="p-4 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
+    class="px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
   >
     <div class="text-zinc-400">You {{ side }}</div>
 
@@ -201,7 +201,7 @@ watch(
     <!-- data footer -->
     <div
       class="flex items-center justify-between"
-      v-if="connectionStore.connected && !!symbol"
+      v-if="connectionStore.connected"
     >
       <!-- fiat price -->
       <div class="text-sm text-zinc-400" v-if="fiatPrice">
@@ -212,6 +212,7 @@ watch(
       <!-- balance -->
       <div
         class="text-sm text-zinc-400 cursor-pointer"
+        v-show="!!symbol"
         @click="useTotalBalance"
       >
         Balance: {{ balanceDisplay }}
