@@ -144,7 +144,10 @@ const useTotalBalance = () => {
     </div>
 
     <!-- data footer -->
-    <div class="flex items-center justify-between">
+    <div
+      class="flex items-center justify-between"
+      v-if="connectionStore.connected"
+    >
       <!-- fiat price -->
       <div class="text-sm text-zinc-400" v-if="fiatPrice">
         {{ fiatPrice ? '$' + fiatPrice : '-' }}
