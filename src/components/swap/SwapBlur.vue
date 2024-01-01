@@ -11,6 +11,6 @@
 
 <style scoped>
 .base {
-  @apply absolute inset-0 -z-10 bg-orange-300/5 rounded-3xl;
+  @apply absolute inset-0 -z-10 bg-orange-300/[0.03] rounded-3xl;
 }
 </style>

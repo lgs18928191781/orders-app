@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, type Ref } from 'vue'
+import { ref, watch, type Ref, computed } from 'vue'
 import { ArrowDownIcon } from 'lucide-vue-next'
 
 import { Wallet, useConnectionStore } from '@/stores/connection'
@@ -27,11 +27,21 @@ watch(toSymbol, (newSymbol) => {
   }
 })
 
+// amount
+const fromAmount = ref()
+const toAmount = ref()
+
+// flip
 const flipAsset = () => {
   const from = fromSymbol.value
   const to = toSymbol.value
   fromSymbol.value = to
   toSymbol.value = from
+
+  const fromAmt = fromAmount.value
+  const toAmt = toAmount.value
+  fromAmount.value = toAmt
+  toAmount.value = fromAmt
 }
 
 // connection
@@ -43,6 +53,151 @@ function onWalletMissing(wallet: Wallet) {
   missingWallet.value = wallet
   walletMissingModalOpen.value = true
 }
+
+// unmet conditions for swap
+// if any of these conditions are not met, the swap button is disabled
+const conditions: Ref<
+  {
+    condition: string
+    message: string
+    priority: number
+    met: boolean
+    handler?: Function
+  }[]
+> = ref([
+  {
+    condition: 'not-connected',
+    message: 'Connect wallet',
+    priority: 1,
+    met: false,
+    handler: () => (connectionsModalOpen.value = true),
+  },
+  {
+    condition: 'not-select-token',
+    message: 'Select a token',
+    priority: 2,
+    met: false,
+  },
+  {
+    condition: 'enter-amount',
+    message: 'Enter an amount',
+    priority: 3,
+    met: false,
+  },
+  {
+    condition: 'insufficient-balance',
+    message: 'Insufficient balance',
+    priority: 4,
+    met: false,
+  },
+])
+const hasUnmet = computed(() => {
+  return conditions.value.some((c) => !c.met)
+})
+const unmet = computed(() => {
+  // use highest priority unmet condition
+  if (!hasUnmet.value) {
+    return null
+  }
+
+  const unmets = conditions.value.filter((c) => !c.met)
+
+  return unmets.reduce((prev, curr) => {
+    return prev.priority < curr.priority ? prev : curr
+  }, unmets[0])
+})
+
+// try to met conditions
+watch(
+  () => connectionStore.connected,
+  (connected) => {
+    if (connected) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'not-connected') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'not-connected') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => [fromSymbol.value, toSymbol.value],
+  ([from, to]) => {
+    if (from && to) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'not-select-token') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'not-select-token') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
+// third watcher: hasEnough
+const hasEnough = ref(true)
+watch(
+  () => hasEnough.value,
+  (hasEnough) => {
+    if (hasEnough) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'insufficient-balance') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'insufficient-balance') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
+
+// fourth watcher: hasAmount
+const hasAmount = ref(false)
+watch(
+  () => hasAmount.value,
+  (hasAmount) => {
+    if (hasAmount) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'enter-amount') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'enter-amount') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -64,7 +219,15 @@ function onWalletMissing(wallet: Wallet) {
 
       <!-- body -->
       <div class="text-sm space-y-0.5">
-        <SwapSide side="pay" v-model:symbol="fromSymbol" />
+        <SwapSide
+          side="pay"
+          v-model:symbol="fromSymbol"
+          v-model:amount="fromAmount"
+          @has-enough="hasEnough = true"
+          @not-enough="hasEnough = false"
+          @amount-entered="hasAmount = true"
+          @amount-cleared="hasAmount = false"
+        />
 
         <!-- flip -->
         <div class="h-0 relative flex justify-center">
@@ -78,16 +241,25 @@ function onWalletMissing(wallet: Wallet) {
           </div>
         </div>
 
-        <SwapSide side="receive" v-model:symbol="toSymbol" />
+        <SwapSide
+          side="receive"
+          v-model:symbol="toSymbol"
+          v-model:amount="toAmount"
+        />
       </div>
 
-      <!-- confirm button -->
-      <button class="main-btn" v-if="connectionStore.connected">Swap</button>
-
-      <!-- connect button -->
-      <button class="main-btn" v-else @click="connectionsModalOpen = true">
-        Connect Wallet
+      <!-- disabled button -->
+      <button
+        :class="[!!unmet && 'disabled', 'main-btn']"
+        v-if="unmet"
+        :disabled="!unmet.handler"
+        @click="!!unmet.handler && unmet.handler()"
+      >
+        {{ unmet.message || '' }}
       </button>
+
+      <!-- confirm button -->
+      <button class="main-btn" v-else>Swap</button>
     </div>
 
     <!-- background blur -->
@@ -97,6 +269,10 @@ function onWalletMissing(wallet: Wallet) {
 
 <style scoped>
 .main-btn {
-  @apply bg-orange-300/20 text-orange-300 font-medium block w-full py-4 rounded-2xl text-xl hover:bg-orange-300/30;
+  @apply bg-orange-300/20 text-orange-300 font-medium block w-full py-3 rounded-2xl text-xl hover:bg-orange-300/30;
+}
+
+.main-btn.disabled {
+  @apply bg-zinc-800 text-zinc-300/50 cursor-not-allowed;
 }
 </style>

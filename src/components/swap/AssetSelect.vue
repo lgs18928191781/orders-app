@@ -53,7 +53,7 @@ const displaySymbol = (symbol: string) => {
         <div class="mr-1" v-if="selectedAsset">
           {{ displaySymbol(selectedAsset.symbol) }}
         </div>
-        <div v-else>-</div>
+        <div v-else class="text-base pl-2 text-orange-300">Select token</div>
         <ChevronDownIcon class="h-5 w-5" />
       </button>
     </ListboxButton>
