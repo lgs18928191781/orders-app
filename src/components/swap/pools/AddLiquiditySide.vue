@@ -14,13 +14,6 @@ import AssetSelect from '@/components/swap/AssetSelect.vue'
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
 
-defineProps({
-  side: {
-    type: String,
-    required: true,
-    validator: (side: string) => ['pay', 'receive'].includes(side),
-  },
-})
 const symbol = defineModel('symbol', { required: true, type: String })
 const amount = defineModel('amount', { type: Number })
 const emit = defineEmits([
@@ -177,8 +170,6 @@ watch(
   <div
     class="px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
   >
-    <div class="text-zinc-400">You {{ side }}</div>
-
     <!-- main control -->
     <div class="flex items-center space-x-2 justify-between">
       <input

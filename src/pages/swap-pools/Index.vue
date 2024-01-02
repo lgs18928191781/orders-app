@@ -7,9 +7,20 @@ import { Wallet, useConnectionStore } from '@/stores/connection'
 import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionsModal from '@/components/header/ConnectionsModal.vue'
 import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
+import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
+import { PlusIcon } from 'lucide-vue-next'
+import SwapPoolPairSelect from '@/components/swap/pools/SwapPoolPairSelect.vue'
+import { useRoute } from 'vue-router'
 
-const fromSymbol = ref('RDEX')
-const toSymbol = ref('btc')
+const props = defineProps({
+  pair: {
+    type: String,
+    required: true,
+  },
+})
+
+const fromSymbol = ref('btc')
+const toSymbol = ref('RDEX')
 // watch for changes to both symbols
 // the rule is when one changes from brc to btc, the other changes from btc to brc
 watch(fromSymbol, (newSymbol) => {
@@ -198,6 +209,11 @@ watch(
   },
   { immediate: true }
 )
+
+const route = useRoute()
+function isLinkActive(keyword: string) {
+  return route.path.includes(keyword)
+}
 </script>
 
 <template>
@@ -215,26 +231,57 @@ watch(
       class="border border-orange-300/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
     >
       <!-- header -->
-      <div class="px-3 flex gap-4">
+      <div class="px-3 flex gap-4 border-b border-zinc-800 pb-2">
         <router-link
           to="/swap"
-          class="flex items-center space-x-1 text-zinc-200"
+          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
         >
           Swap
         </router-link>
 
         <router-link
           to="/swap-pools/btc-rdex/add"
-          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
+          class="flex items-center space-x-1 text-zinc-200"
         >
           Pools
         </router-link>
       </div>
 
+      <!-- pair control -->
+      <div class="flex justify-between items-center">
+        <SwapPoolPairSelect />
+
+        <!-- sub nav -->
+        <div class="flex items-center gap-1 text-sm">
+          <router-link
+            class="px-2 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
+            :class="
+              isLinkActive('add')
+                ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
+                : 'text-zinc-300'
+            "
+            :to="`/swap-pools/${pair}/add`"
+          >
+            Add
+          </router-link>
+
+          <router-link
+            class="px-2 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
+            :class="
+              isLinkActive('remove')
+                ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
+                : 'text-zinc-300'
+            "
+            :to="`/swap-pools/${pair}/remove`"
+          >
+            Remove
+          </router-link>
+        </div>
+      </div>
+
       <!-- body -->
       <div class="text-sm space-y-0.5">
-        <SwapSide
-          side="pay"
+        <AddLiquiditySide
           v-model:symbol="fromSymbol"
           v-model:amount="fromAmount"
           @has-enough="hasEnough = true"
@@ -244,22 +291,16 @@ watch(
         />
 
         <!-- flip -->
-        <div class="h-0 relative flex justify-center">
-          <div class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl">
-            <button
-              class="bg-zinc-800 rounded-lg p-2 hover:text-orange-300"
-              @click="flipAsset"
-            >
-              <ArrowDownIcon class="h-4 w-4" />
-            </button>
-          </div>
+        <div class="py-4">
+          <PlusIcon class="h-5 w-5 mx-auto text-zinc-500" />
         </div>
+        <!-- <div class="h-0 relative flex justify-center">
+          <div
+            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl"
+          ></div>
+        </div> -->
 
-        <SwapSide
-          side="receive"
-          v-model:symbol="toSymbol"
-          v-model:amount="toAmount"
-        />
+        <AddLiquiditySide v-model:symbol="toSymbol" v-model:amount="toAmount" />
       </div>
 
       <!-- disabled button -->

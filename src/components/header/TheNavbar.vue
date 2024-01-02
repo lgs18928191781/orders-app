@@ -15,12 +15,13 @@ const links: {
   {
     name: 'Orderbook',
     path: '/',
+    version: 2,
   },
-  {
-    name: 'Pool',
-    path: '/pool',
-    // new: true,
-  },
+  // {
+  //   name: 'Pool',
+  //   path: '/pool',
+  //   // new: true,
+  // },
   {
     name: 'Swap',
     path: '/swap',
@@ -42,7 +43,7 @@ function isLinkActive(path: string) {
     case '/pool':
       return route.path.startsWith('/pool')
     case '/swap':
-      return route.path.startsWith('/swap')
+      return route.path.startsWith('/swap') || route.path.startsWith('/add')
 
     default:
       return false
