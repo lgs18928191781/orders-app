@@ -10,28 +10,21 @@ import {
 import { FrownIcon } from 'lucide-vue-next'
 import { ref } from 'vue'
 
-import type { Wallet } from '@/stores/connection'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
 
-const props = defineProps<{
-  open: boolean
-  missingWallet: Wallet
-}>()
-const emit = defineEmits(['update:open'])
+const { isWalletMissingModalOpen, closeWalletMissingModal, missingWallet } =
+  useConnectionModal()
 
 const goButtonRef = ref<HTMLElement | null>(null)
 
-function close() {
-  emit('update:open', false)
-}
-
 function goToMissingWallet() {
   close()
-  if (props.missingWallet === 'unisat') {
+  if (missingWallet.value === 'unisat') {
     window.open(
       'https://chrome.google.com/webstore/detail/unisat-wallet/ppbibelpcjmhbdihakflkdcoccbgbkpo',
       '_blank'
     )
-  } else if (props.missingWallet === 'okx') {
+  } else if (missingWallet.value === 'okx') {
     window.open(
       'https://chromewebstore.google.com/detail/mcohilncbfahbmgdjkbpemcciiolgcge',
       '_blank'
@@ -41,11 +34,11 @@ function goToMissingWallet() {
 </script>
 
 <template>
-  <TransitionRoot as="template" :show="open">
+  <TransitionRoot as="template" :show="isWalletMissingModalOpen">
     <Dialog
       as="div"
       class="relative z-10"
-      @close="close"
+      @close="closeWalletMissingModal"
       :initial-focus="goButtonRef"
     >
       <TransitionChild
@@ -58,8 +51,8 @@ function goToMissingWallet() {
         leave-to="opacity-0"
       >
         <div
-          class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur transition-all"
-        />
+          class="fixed inset-0 bg-black/20 backdrop-blur-sm transition-all"
+        ></div>
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">

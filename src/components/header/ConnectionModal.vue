@@ -13,22 +13,17 @@ import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
 import { useConnectionStore } from '@/stores/connection'
 import { IS_DEV } from '@/data/constants'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
 
-defineProps<{
-  open?: boolean
-}>()
-const emit = defineEmits(['update:open', 'walletMissing'])
+const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
+  useConnectionModal()
 
-const goButtonRef = ref<HTMLElement | null>(null)
-
-function close() {
-  emit('update:open', false)
-}
+const firstButtonRef = ref<HTMLElement | null>(null)
 
 const connectionStore = useConnectionStore()
 async function connectToUnisat() {
   if (!window.unisat) {
-    emit('walletMissing', 'unisat')
+    setMissingWallet('unisat')
     return
   }
 
@@ -40,7 +35,7 @@ async function connectToUnisat() {
 
 async function connectToOkx() {
   if (!window.okxwallet) {
-    emit('walletMissing', 'okx')
+    setMissingWallet('okx')
     return
   }
 
@@ -52,12 +47,12 @@ async function connectToOkx() {
 </script>
 
 <template>
-  <TransitionRoot as="template" :show="open">
+  <TransitionRoot as="template" :show="isConnectionModalOpen">
     <Dialog
       as="div"
       class="relative z-10"
-      @close="close"
-      :initial-focus="goButtonRef"
+      @close="closeConnectionModal"
+      :initial-focus="firstButtonRef"
     >
       <TransitionChild
         as="template"
@@ -69,8 +64,8 @@ async function connectToOkx() {
         leave-to="opacity-0"
       >
         <div
-          class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur transition-all"
-        />
+          class="fixed inset-0 bg-black/20 backdrop-blur-sm transition-all"
+        ></div>
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -87,7 +82,7 @@ async function connectToOkx() {
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
-              class="relative transform overflow-hidden rounded-lg bg-zinc-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:px-8 sm:py-6"
+              class="relative transform overflow-hidden rounded-lg bg-zinc-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:px-8 sm:py-6 z-50"
             >
               <div class="text-left my-4">
                 <DialogTitle
@@ -100,6 +95,7 @@ async function connectToOkx() {
                 <div class="grid grid-cols-3 gap-4 mt-8 text-base">
                   <button
                     class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-orange-300/30 hover:border-orange-300/30 hover:bg-orange-300 hover:text-orange-950"
+                    ref="firstButtonRef"
                     @click="connectToOkx"
                   >
                     <img class="h-12 rounded" :src="OkxIcon" alt="Metamask" />
@@ -120,7 +116,7 @@ async function connectToOkx() {
 
                   <button
                     class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-orange-300/30 hover:border-orange-300/30 hover:bg-orange-300 hover:text-orange-950 disabled:opacity-30"
-                    @click="close"
+                    @click="closeConnectionModal"
                     :disabled="!IS_DEV"
                   >
                     <img

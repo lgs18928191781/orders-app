@@ -16,7 +16,23 @@ const NoService = () => import('./pages/NoService.vue')
 
 const routes = [
   { path: '/orders/:pair?', component: Home, alias: '/' },
-  { path: '/swap-pools/:pair/add', component: SwapPools },
+  {
+    path: '/swap-pools/:pair',
+    component: SwapPools,
+    children: [
+      {
+        path: 'add',
+        alias: '',
+        name: 'swap-pools-add',
+        component: () => import('./pages/swap-pools/Add.vue'),
+      },
+      {
+        path: 'remove',
+        name: 'swap-pools-remove',
+        component: () => import('./pages/swap-pools/Remove.vue'),
+      },
+    ],
+  },
   { path: '/swap', component: Swap },
   { path: '/whitelist', component: Whitelist },
   { path: '/changelog', component: Changelog },

@@ -1,52 +1,21 @@
 <script lang="ts" setup>
 import { ref, watch, type Ref, computed } from 'vue'
-import { ArrowDownIcon } from 'lucide-vue-next'
+import { PlusIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+
+import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
-import SwapBlur from '@/components/swap/SwapBlur.vue'
-import ConnectionModal from '@/components/header/ConnectionModal.vue'
-import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
-
+const { fromSymbol, toSymbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
-
-const fromSymbol = ref('RDEX')
-const toSymbol = ref('btc')
-// watch for changes to both symbols
-// the rule is when one changes from brc to btc, the other changes from btc to brc
-watch(fromSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && toSymbol.value === 'btc') {
-    toSymbol.value = ''
-  } else if (newSymbol !== 'btc' && toSymbol.value !== 'btc') {
-    toSymbol.value = 'btc'
-  }
-})
-watch(toSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && fromSymbol.value === 'btc') {
-    fromSymbol.value = ''
-  } else if (newSymbol !== 'btc' && fromSymbol.value !== 'btc') {
-    fromSymbol.value = 'btc'
-  }
-})
 
 // amount
 const fromAmount = ref()
 const toAmount = ref()
 
-// flip
-const flipAsset = () => {
-  const from = fromSymbol.value
-  const to = toSymbol.value
-  fromSymbol.value = to
-  toSymbol.value = from
-
-  const fromAmt = fromAmount.value
-  const toAmt = toAmount.value
-  fromAmount.value = toAmt
-  toAmount.value = fromAmt
-}
-
+// connection
 const connectionStore = useConnectionStore()
 
 // unmet conditions for swap
@@ -196,78 +165,36 @@ watch(
 </script>
 
 <template>
-  <ConnectionModal />
-  <WalletMissingModal />
+  <div class="text-sm space-y-0.5 my-8">
+    <AddLiquiditySide
+      v-model:symbol="fromSymbol"
+      v-model:amount="fromAmount"
+      @has-enough="hasEnough = true"
+      @not-enough="hasEnough = false"
+      @amount-entered="hasAmount = true"
+      @amount-cleared="hasAmount = false"
+    />
 
-  <div class="relative max-w-md mt-16 mx-auto rounded-3xl">
-    <div
-      class="border border-orange-300/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
-    >
-      <!-- header -->
-      <div class="px-3 flex gap-4">
-        <router-link
-          to="/swap"
-          class="flex items-center space-x-1 text-zinc-200"
-        >
-          Swap
-        </router-link>
-
-        <router-link
-          to="/swap-pools/btc-rdex/add"
-          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
-        >
-          Pools
-        </router-link>
-      </div>
-
-      <!-- body -->
-      <div class="text-sm space-y-0.5">
-        <SwapSide
-          side="pay"
-          v-model:symbol="fromSymbol"
-          v-model:amount="fromAmount"
-          @has-enough="hasEnough = true"
-          @not-enough="hasEnough = false"
-          @amount-entered="hasAmount = true"
-          @amount-cleared="hasAmount = false"
-        />
-
-        <!-- flip -->
-        <div class="h-0 relative flex justify-center">
-          <div class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl">
-            <button
-              class="bg-zinc-800 rounded-lg p-2 hover:text-orange-300"
-              @click="flipAsset"
-            >
-              <ArrowDownIcon class="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        <SwapSide
-          side="receive"
-          v-model:symbol="toSymbol"
-          v-model:amount="toAmount"
-        />
-      </div>
-
-      <!-- disabled button -->
-      <button
-        :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-        v-if="unmet"
-        :disabled="!unmet.handler"
-        @click="!!unmet.handler && unmet.handler()"
-      >
-        {{ unmet.message || '' }}
-      </button>
-
-      <!-- confirm button -->
-      <button class="main-btn" v-else>Swap</button>
+    <!-- flip -->
+    <div class="py-2">
+      <PlusIcon class="h-5 w-5 mx-auto text-zinc-500" />
     </div>
 
-    <!-- background blur -->
-    <SwapBlur />
+    <AddLiquiditySide v-model:symbol="toSymbol" v-model:amount="toAmount" />
   </div>
+
+  <!-- disabled button -->
+  <button
+    :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+    v-if="unmet"
+    :disabled="!unmet.handler"
+    @click="!!unmet.handler && unmet.handler()"
+  >
+    {{ unmet.message || '' }}
+  </button>
+
+  <!-- confirm button -->
+  <button class="main-btn" v-else>Swap</button>
 </template>
 
 <style scoped>

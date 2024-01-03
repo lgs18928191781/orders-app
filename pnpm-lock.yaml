@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   '@headlessui/vue':
-    specifier: ^1.7.13
+    specifier: ^1.7.16
     version: 1.7.16(vue@3.4.3)
   '@tanstack/vue-query':
     specifier: ^4.29.11

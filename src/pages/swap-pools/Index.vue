@@ -1,194 +1,24 @@
 <script lang="ts" setup>
-import { ref, watch, type Ref, computed } from 'vue'
-import { ArrowDownIcon } from 'lucide-vue-next'
-
-import { Wallet, useConnectionStore } from '@/stores/connection'
-
-import SwapBlur from '@/components/swap/SwapBlur.vue'
-import ConnectionsModal from '@/components/header/ConnectionsModal.vue'
-import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
-import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
-import { PlusIcon } from 'lucide-vue-next'
-import SwapPoolPairSelect from '@/components/swap/pools/SwapPoolPairSelect.vue'
 import { useRoute } from 'vue-router'
+
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
-const { pairStr, fromSymbol, toSymbol } = useSwapPoolPair()
+import SwapBlur from '@/components/swap/SwapBlur.vue'
+import ConnectionModal from '@/components/header/ConnectionModal.vue'
+import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
+import SwapPoolPairSelect from '@/components/swap/pools/SwapPoolPairSelect.vue'
 
-// amount
-const fromAmount = ref()
-const toAmount = ref()
-
-// connection
-const connectionStore = useConnectionStore()
-const connectionsModalOpen = ref(false)
-const walletMissingModalOpen = ref(false)
-const missingWallet: Ref<Wallet> = ref('unisat')
-function onWalletMissing(wallet: Wallet) {
-  missingWallet.value = wallet
-  walletMissingModalOpen.value = true
-}
-
-// unmet conditions for swap
-// if any of these conditions are not met, the swap button is disabled
-const conditions: Ref<
-  {
-    condition: string
-    message: string
-    priority: number
-    met: boolean
-    handler?: Function
-  }[]
-> = ref([
-  {
-    condition: 'not-connected',
-    message: 'Connect wallet',
-    priority: 1,
-    met: false,
-    handler: () => (connectionsModalOpen.value = true),
-  },
-  {
-    condition: 'not-select-token',
-    message: 'Select a token',
-    priority: 2,
-    met: false,
-  },
-  {
-    condition: 'enter-amount',
-    message: 'Enter an amount',
-    priority: 3,
-    met: false,
-  },
-  {
-    condition: 'insufficient-balance',
-    message: 'Insufficient balance',
-    priority: 4,
-    met: false,
-  },
-])
-const hasUnmet = computed(() => {
-  return conditions.value.some((c) => !c.met)
-})
-const unmet = computed(() => {
-  // use highest priority unmet condition
-  if (!hasUnmet.value) {
-    return null
-  }
-
-  const unmets = conditions.value.filter((c) => !c.met)
-
-  return unmets.reduce((prev, curr) => {
-    return prev.priority < curr.priority ? prev : curr
-  }, unmets[0])
-})
-
-// try to met conditions
-watch(
-  () => connectionStore.connected,
-  (connected) => {
-    if (connected) {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'not-connected') {
-          c.met = true
-        }
-        return c
-      })
-    } else {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'not-connected') {
-          c.met = false
-        }
-        return c
-      })
-    }
-  },
-  { immediate: true }
-)
-
-watch(
-  () => [fromSymbol.value, toSymbol.value],
-  ([from, to]) => {
-    if (from && to) {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'not-select-token') {
-          c.met = true
-        }
-        return c
-      })
-    } else {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'not-select-token') {
-          c.met = false
-        }
-        return c
-      })
-    }
-  },
-  { immediate: true }
-)
-// third watcher: hasEnough
-const hasEnough = ref(true)
-watch(
-  () => hasEnough.value,
-  (hasEnough) => {
-    if (hasEnough) {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'insufficient-balance') {
-          c.met = true
-        }
-        return c
-      })
-    } else {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'insufficient-balance') {
-          c.met = false
-        }
-        return c
-      })
-    }
-  },
-  { immediate: true }
-)
-
-// fourth watcher: hasAmount
-const hasAmount = ref(false)
-watch(
-  () => hasAmount.value,
-  (hasAmount) => {
-    if (hasAmount) {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'enter-amount') {
-          c.met = true
-        }
-        return c
-      })
-    } else {
-      conditions.value = conditions.value.map((c) => {
-        if (c.condition === 'enter-amount') {
-          c.met = false
-        }
-        return c
-      })
-    }
-  },
-  { immediate: true }
-)
+const { pairStr } = useSwapPoolPair()
 
 const route = useRoute()
 function isLinkActive(keyword: string) {
-  return route.path.includes(keyword)
+  return route.name && route.name.toString().includes(keyword)
 }
 </script>
 
 <template>
-  <ConnectionsModal
-    v-model:open="connectionsModalOpen"
-    @wallet-missing="onWalletMissing"
-  />
-  <WalletMissingModal
-    v-model:open="walletMissingModalOpen"
-    :missing-wallet="missingWallet"
-  />
+  <ConnectionModal />
+  <WalletMissingModal />
 
   <div class="relative max-w-md mt-16 mx-auto rounded-3xl">
     <div
@@ -218,9 +48,9 @@ function isLinkActive(keyword: string) {
         <!-- sub nav -->
         <div class="flex items-center gap-1 text-sm">
           <router-link
-            class="px-2 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
+            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
             :class="
-              isLinkActive('add')
+              isLinkActive('swap-pools-add')
                 ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
                 : 'text-zinc-300'
             "
@@ -230,9 +60,9 @@ function isLinkActive(keyword: string) {
           </router-link>
 
           <router-link
-            class="px-2 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
+            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
             :class="
-              isLinkActive('remove')
+              isLinkActive('swap-pools-remove')
                 ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
                 : 'text-zinc-300'
             "
@@ -243,42 +73,8 @@ function isLinkActive(keyword: string) {
         </div>
       </div>
 
-      <!-- body -->
-      <div class="text-sm space-y-0.5 my-8">
-        <AddLiquiditySide
-          v-model:symbol="fromSymbol"
-          v-model:amount="fromAmount"
-          @has-enough="hasEnough = true"
-          @not-enough="hasEnough = false"
-          @amount-entered="hasAmount = true"
-          @amount-cleared="hasAmount = false"
-        />
-
-        <!-- flip -->
-        <div class="py-2">
-          <PlusIcon class="h-5 w-5 mx-auto text-zinc-500" />
-        </div>
-        <!-- <div class="h-0 relative flex justify-center">
-          <div
-            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl"
-          ></div>
-        </div> -->
-
-        <AddLiquiditySide v-model:symbol="toSymbol" v-model:amount="toAmount" />
-      </div>
-
-      <!-- disabled button -->
-      <button
-        :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-        v-if="unmet"
-        :disabled="!unmet.handler"
-        @click="!!unmet.handler && unmet.handler()"
-      >
-        {{ unmet.message || '' }}
-      </button>
-
-      <!-- confirm button -->
-      <button class="main-btn" v-else>Swap</button>
+      <!-- sub pages -->
+      <router-view></router-view>
     </div>
 
     <!-- background blur -->
@@ -286,12 +82,4 @@ function isLinkActive(keyword: string) {
   </div>
 </template>
 
-<style scoped>
-.main-btn {
-  @apply bg-orange-300/20 text-orange-300 font-medium block w-full py-3 rounded-2xl text-xl hover:bg-orange-300/30;
-}
-
-.main-btn.disabled {
-  @apply bg-zinc-800 text-zinc-300/50 cursor-not-allowed;
-}
-</style>
+<style scoped></style>
