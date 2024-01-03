@@ -16,7 +16,7 @@ const NoService = () => import('./pages/NoService.vue')
 
 const routes = [
   { path: '/orders/:pair?', component: Home, alias: '/' },
-  { path: '/swap-pools/:pair/add', component: SwapPools, props: true },
+  { path: '/swap-pools/:pair/add', component: SwapPools },
   { path: '/swap', component: Swap },
   { path: '/whitelist', component: Whitelist },
   { path: '/changelog', component: Changelog },

@@ -11,49 +11,13 @@ import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
 import { PlusIcon } from 'lucide-vue-next'
 import SwapPoolPairSelect from '@/components/swap/pools/SwapPoolPairSelect.vue'
 import { useRoute } from 'vue-router'
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
-const props = defineProps({
-  pair: {
-    type: String,
-    required: true,
-  },
-})
-
-const fromSymbol = ref('btc')
-const toSymbol = ref('RDEX')
-// watch for changes to both symbols
-// the rule is when one changes from brc to btc, the other changes from btc to brc
-watch(fromSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && toSymbol.value === 'btc') {
-    toSymbol.value = ''
-  } else if (newSymbol !== 'btc' && toSymbol.value !== 'btc') {
-    toSymbol.value = 'btc'
-  }
-})
-watch(toSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && fromSymbol.value === 'btc') {
-    fromSymbol.value = ''
-  } else if (newSymbol !== 'btc' && fromSymbol.value !== 'btc') {
-    fromSymbol.value = 'btc'
-  }
-})
+const { pairStr, fromSymbol, toSymbol } = useSwapPoolPair()
 
 // amount
 const fromAmount = ref()
 const toAmount = ref()
-
-// flip
-const flipAsset = () => {
-  const from = fromSymbol.value
-  const to = toSymbol.value
-  fromSymbol.value = to
-  toSymbol.value = from
-
-  const fromAmt = fromAmount.value
-  const toAmt = toAmount.value
-  fromAmount.value = toAmt
-  toAmount.value = fromAmt
-}
 
 // connection
 const connectionStore = useConnectionStore()
@@ -228,7 +192,7 @@ function isLinkActive(keyword: string) {
 
   <div class="relative max-w-md mt-16 mx-auto rounded-3xl">
     <div
-      class="border border-orange-300/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
+      class="border border-orange-300/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900"
     >
       <!-- header -->
       <div class="px-3 flex gap-4 border-b border-zinc-800 pb-2">
@@ -248,7 +212,7 @@ function isLinkActive(keyword: string) {
       </div>
 
       <!-- pair control -->
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center mt-4">
         <SwapPoolPairSelect />
 
         <!-- sub nav -->
@@ -260,7 +224,7 @@ function isLinkActive(keyword: string) {
                 ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
                 : 'text-zinc-300'
             "
-            :to="`/swap-pools/${pair}/add`"
+            :to="`/swap-pools/${pairStr}/add`"
           >
             Add
           </router-link>
@@ -272,7 +236,7 @@ function isLinkActive(keyword: string) {
                 ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
                 : 'text-zinc-300'
             "
-            :to="`/swap-pools/${pair}/remove`"
+            :to="`/swap-pools/${pairStr}/remove`"
           >
             Remove
           </router-link>
@@ -280,7 +244,7 @@ function isLinkActive(keyword: string) {
       </div>
 
       <!-- body -->
-      <div class="text-sm space-y-0.5">
+      <div class="text-sm space-y-0.5 my-8">
         <AddLiquiditySide
           v-model:symbol="fromSymbol"
           v-model:amount="fromAmount"
@@ -291,7 +255,7 @@ function isLinkActive(keyword: string) {
         />
 
         <!-- flip -->
-        <div class="py-4">
+        <div class="py-2">
           <PlusIcon class="h-5 w-5 mx-auto text-zinc-500" />
         </div>
         <!-- <div class="h-0 relative flex justify-center">

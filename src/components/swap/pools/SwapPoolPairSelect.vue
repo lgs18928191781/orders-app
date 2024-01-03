@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ChevronDownIcon, CheckIcon } from 'lucide-vue-next'
-import { Ref, computed, defineModel, ref } from 'vue'
 import {
   Listbox,
   ListboxButton,
@@ -9,47 +8,10 @@ import {
 } from '@headlessui/vue'
 
 import swapPairs from '@/data/swap-pairs'
-import { useRouteParams } from '@vueuse/router'
-import { useRouter } from 'vue-router'
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { prettySymbol } from '@/lib/formatters'
 
-const router = useRouter()
-
-const selectedPairId = ref(swapPairs[0].id)
-const selectedPair = computed(() => {
-  return swapPairs.find((a) => a.id === selectedPairId.value)
-})
-
-const pairStr = useRouteParams('pair') as Ref<string>
-const [from, to] = pairStr.value.split('-')
-const selected = swapPairs.find(
-  (a) =>
-    a.fromSymbol.toUpperCase() === from.toUpperCase() &&
-    a.toSymbol.toUpperCase() === to.toUpperCase()
-)
-if (selected) {
-  selectedPairId.value = selected.id
-}
-
-const selectPair = (pairId: number) => {
-  selectedPairId.value = pairId
-
-  // redirect
-  const pair = swapPairs.find((pair) => pair.id === pairId)
-  if (pair) {
-    const pairSymbol = `${pair.fromSymbol}-${pair.toSymbol}`
-    router.push({
-      path: `/swap-pools/${pairSymbol}/add`,
-    })
-  }
-}
-
-const displaySymbol = (symbol: string) => {
-  if (symbol.toUpperCase() === 'BTC') {
-    return 'BTC'
-  }
-
-  return '$' + symbol.toUpperCase()
-}
+const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
 </script>
 
 <template>
@@ -67,14 +29,14 @@ const displaySymbol = (symbol: string) => {
         ]"
       >
         <div class="flex" v-if="selectedPair">
-          <img :src="selectedPair.fromIcon" class="h-6 rounded-full" />
-          <img :src="selectedPair.toIcon" class="-ml-2 h-6 rounded-full" />
+          <img :src="selectedPair.token1Icon" class="h-6 rounded-full" />
+          <img :src="selectedPair.token2Icon" class="-ml-2 h-6 rounded-full" />
         </div>
         <div class="mr-1" v-if="selectedPair">
           {{
-            displaySymbol(selectedPair.fromSymbol) +
+            prettySymbol(selectedPair.token1Symbol) +
             '-' +
-            displaySymbol(selectedPair.toSymbol)
+            prettySymbol(selectedPair.token2Symbol)
           }}
         </div>
         <div v-else class="text-base pl-2 text-orange-300">Select token</div>
@@ -106,15 +68,15 @@ const displaySymbol = (symbol: string) => {
             ]"
           >
             <div class="flex">
-              <img :src="pair.fromIcon" class="h-6 rounded-full" />
-              <img :src="pair.toIcon" class="-ml-2 h-6 rounded-full" />
+              <img :src="pair.token1Icon" class="h-6 rounded-full" />
+              <img :src="pair.token2Icon" class="-ml-2 h-6 rounded-full" />
             </div>
 
             <div class="text-base font-bold">
               {{
-                displaySymbol(pair.fromSymbol) +
+                prettySymbol(pair.token1Symbol) +
                 '-' +
-                displaySymbol(pair.toSymbol)
+                prettySymbol(pair.token2Symbol)
               }}
             </div>
 

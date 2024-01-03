@@ -9,6 +9,7 @@ import {
 } from '@headlessui/vue'
 
 import assets from '@/data/assets'
+import { prettySymbol } from '@/lib/formatters'
 
 const assetSymbol = defineModel('assetSymbol', { required: true, type: String })
 const selectedAsset = computed(() => {
@@ -21,14 +22,6 @@ const selectedAsset = computed(() => {
 
   return selected
 })
-
-const displaySymbol = (symbol: string) => {
-  if (symbol.toUpperCase() === 'BTC') {
-    return 'BTC'
-  }
-
-  return '$' + symbol
-}
 </script>
 
 <template>
@@ -51,7 +44,7 @@ const displaySymbol = (symbol: string) => {
           v-if="selectedAsset"
         />
         <div class="mr-1" v-if="selectedAsset">
-          {{ displaySymbol(selectedAsset.symbol) }}
+          {{ prettySymbol(selectedAsset.symbol) }}
         </div>
         <div v-else class="text-base pl-2 text-orange-300">Select token</div>
         <ChevronDownIcon class="h-5 w-5" />
@@ -84,7 +77,7 @@ const displaySymbol = (symbol: string) => {
             <img :src="asset.icon" class="h-6 rounded-full" />
 
             <div class="text-base font-bold">
-              {{ displaySymbol(asset.symbol) }}
+              {{ prettySymbol(asset.symbol) }}
             </div>
 
             <CheckIcon

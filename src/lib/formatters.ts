@@ -45,3 +45,11 @@ export const prettyCoinDisplay = (balance: number | string, symbol: string) => {
 
   return `${balance} ${symbol.toUpperCase()}`
 }
+
+export const prettySymbol = (symbol: string) => {
+  if (symbol.toUpperCase() === 'BTC') {
+    return 'BTC'
+  }
+
+  return '$' + symbol.toUpperCase()
+}
