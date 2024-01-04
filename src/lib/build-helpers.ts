@@ -229,7 +229,7 @@ export async function exclusiveChange({
   const paymentPrevOutputScript = btcjs.address.toOutputScript(address)
 
   if (estimate) {
-    // if estimating, we assume a payment utxo that is absurbly large
+    // if estimating, we assume a payment utxo that is absurdly large
     const paymentUtxo = {
       txId: '8729586f5352810db997e2ae0f1530ccc6f63740ba09d656da78e6a7751e7a86',
       outputIndex: 0,

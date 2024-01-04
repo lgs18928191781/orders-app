@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js'
 import sign from '../lib/sign'
 import { useAddressStore, useFeebStore, useNetworkStore } from '../store'
-import { ordersApiFetch } from '@/lib/fetch'
+import { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
 import { raise, showFiat } from '@/lib/helpers'
 
 export const login = async () => {
@@ -27,6 +27,31 @@ export const getFiatRate = async (): Promise<number> => {
 
   // use per satoshi price
   return res?.usd?.btc ? new Decimal(res.usd.btc).dividedBy(1e8).toNumber() : 0
+}
+
+export type FeebPlan = {
+  feeRate: number
+  title: 'Slow' | 'Average' | 'Fast' | 'Custom'
+}
+export const getFeebPlans = async (): Promise<FeebPlan[]> => {
+  const res = await ordersCommonApiFetch(`fee/recommended`)
+
+  if (!res) return []
+
+  return [
+    {
+      title: 'Slow',
+      feeRate: res.hourFee,
+    },
+    {
+      title: 'Average',
+      feeRate: res.halfHourFee,
+    },
+    {
+      title: 'Fast',
+      feeRate: res.fastestFee,
+    },
+  ]
 }
 
 export type Notification = {
