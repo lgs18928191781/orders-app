@@ -12,8 +12,6 @@ declare module '@vue/runtime-core' {
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
     ConfirmationModal: typeof import('./src/components/ConfirmationModal.vue')['default']
     ConnectionsModal: typeof import('./src/components/header/ConnectionsModal.vue')['default']
-    copy: typeof import('./src/components/pool/PanelRelease copy.vue')['default']
-    ElPopover: typeof import('element-plus/es')['ElPopover']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     EventClaimRecords: typeof import('./src/components/pool/EventClaimRecords.vue')['default']
     IssueItem: typeof import('./src/components/recover/IssueItem.vue')['default']
