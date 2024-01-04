@@ -3,9 +3,8 @@ import Decimal from 'decimal.js'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
-
 import sign from '@/lib/sign'
-import fetchWrapper, { ordersApiFetch } from '@/lib/fetch'
+import fetchWrapper, { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
 import { raise } from '@/lib/helpers'
 
 export const login = async () => {
@@ -40,6 +39,31 @@ export const getBrcFiatRate = async (): Promise<Record<string, number>> => {
 
   // use per satoshi price
   return res?.data?.priceInfo || {}
+}
+
+export type FeebPlan = {
+  feeRate: number
+  title: 'Slow' | 'Average' | 'Fast' | 'Custom'
+}
+export const getFeebPlans = async (): Promise<FeebPlan[]> => {
+  const res = await ordersCommonApiFetch(`fee/recommended`)
+
+  if (!res) return []
+
+  return [
+    {
+      title: 'Slow',
+      feeRate: res.hourFee,
+    },
+    {
+      title: 'Average',
+      feeRate: res.halfHourFee,
+    },
+    {
+      title: 'Fast',
+      feeRate: res.fastestFee,
+    },
+  ]
 }
 
 export type Notification = {

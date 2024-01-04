@@ -10,6 +10,36 @@ async function fetchWrapper(url: string, options?: RequestInit): Promise<any> {
 
 export default fetchWrapper
 
+export async function ordersCommonApiFetch(
+  url: string,
+  options?: { headers?: HeadersInit } & RequestInit
+) {
+  const ordersApiUrl = `https://api.ordbook.io/book/common/${url}`
+  if (!options)
+    options = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+
+  if (options.headers && 'Content-Type' in options.headers) {
+  } else {
+    options.headers = { ...options.headers, 'Content-Type': 'application/json' }
+  }
+
+  const jsoned: {
+    code: number
+    message: string
+    data: any
+  } = await fetchWrapper(ordersApiUrl, options)
+
+  if (jsoned.code === 1) {
+    throw new Error(jsoned.message)
+  }
+
+  return jsoned.data
+}
+
 export async function ordersApiFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit
