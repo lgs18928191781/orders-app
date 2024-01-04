@@ -40,6 +40,36 @@ export async function ordersCommonApiFetch(
   return jsoned.data
 }
 
+export async function ordersV2Fetch(
+  url: string,
+  options?: { headers?: HeadersInit } & RequestInit
+) {
+  const ordersApiUrl = `https://api.ordbook.io/book/brc20/order-v2/${url}`
+  if (!options)
+    options = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+
+  if (options.headers && 'Content-Type' in options.headers) {
+  } else {
+    options.headers = { ...options.headers, 'Content-Type': 'application/json' }
+  }
+
+  const jsoned: {
+    code: number
+    message: string
+    data: any
+  } = await fetchWrapper(ordersApiUrl, options)
+
+  if (jsoned.code === 1) {
+    throw new Error(jsoned.message)
+  }
+
+  return jsoned.data
+}
+
 export async function ordersApiFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit

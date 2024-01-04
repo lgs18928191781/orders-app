@@ -50,11 +50,11 @@ function updateCustomFeeb(e: any) {
 }
 
 // feeb plan icons
-function getFeePlanIcon(planTitle: 'Slow' | 'Average' | 'Fast' | 'Custom') {
+function getFeePlanIcon(planTitle: 'Slow' | 'Avg' | 'Fast' | 'Custom') {
   switch (planTitle) {
     case 'Slow':
       return BikeIcon
-    case 'Average':
+    case 'Avg':
       return BusIcon
     case 'Fast':
       return RocketIcon
