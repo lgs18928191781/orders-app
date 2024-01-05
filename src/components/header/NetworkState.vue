@@ -33,6 +33,7 @@ import { BikeIcon } from 'lucide-vue-next'
 import { RocketIcon } from 'lucide-vue-next'
 import { BusIcon } from 'lucide-vue-next'
 import { SailboatIcon } from 'lucide-vue-next'
+import { PlaneIcon } from 'lucide-vue-next'
 
 // custom feeb plan
 const customFeeb = useStorage('customFeeb', 2)
@@ -50,12 +51,14 @@ function updateCustomFeeb(e: any) {
 }
 
 // feeb plan icons
-function getFeePlanIcon(planTitle: 'Slow' | 'Avg' | 'Fast' | 'Custom') {
+function getFeePlanIcon(planTitle: FeebPlan['title']) {
   switch (planTitle) {
-    case 'Slow':
+    case 'Eco':
       return BikeIcon
-    case 'Avg':
+    case 'Slow':
       return BusIcon
+    case 'Avg':
+      return PlaneIcon
     case 'Fast':
       return RocketIcon
     case 'Custom':
@@ -407,7 +410,7 @@ const { data: fiatRate } = useQuery({
                             ? 'bg-orange-300/75 text-white '
                             : 'bg-black ',
                         ]"
-                        class="relative flex cursor-pointer rounded-lg px-5 py-6 shadow-md focus:outline-none"
+                        class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
                       >
                         <div class="flex w-full items-center justify-between">
                           <div class="flex items-center">
@@ -425,7 +428,7 @@ const { data: fiatRate } = useQuery({
                                   "
                                   class="font-medium text-lg"
                                 >
-                                  {{ plan.title }}
+                                  {{ plan.fullTitle || plan.title }}
                                 </RadioGroupLabel>
                               </div>
 

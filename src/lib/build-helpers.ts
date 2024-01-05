@@ -371,7 +371,6 @@ export async function exclusiveChange({
     } else {
       // we pay for the whole transaction
       totalOutput = sumOrNaN(psbt.txOutputs)
-      console.log({ inputs: psbt.data.inputs })
       totalInput = sumOrNaN(
         psbt.data.inputs.map(
           (input) =>

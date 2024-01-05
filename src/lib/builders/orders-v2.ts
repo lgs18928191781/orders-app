@@ -13,6 +13,7 @@ import {
 import { getPlatformPublicKey } from '@/queries/orders-v2'
 import { generateP2wshPayment, getBothPubKeys } from './helpers'
 import { raise } from '../helpers'
+import { useFeebStore } from '@/stores/feeb'
 
 export async function buildBidOffer({
   total,
@@ -24,7 +25,6 @@ export async function buildBidOffer({
   selectedPair: TradingPair
 }) {
   const networkStore = useNetworkStore()
-  const orderNetwork = networkStore.network
   const btcNetwork = networkStore.btcNetwork
   const btcjs = window.bitcoin
   const address = useConnectionStore().getAddress
@@ -37,37 +37,97 @@ export async function buildBidOffer({
   const multiSigAddress =
     multiSigPayment.address ?? raise('Error when generating multisig address')
 
-  // 3. build pre-transfer transaction
-  const pay = new btcjs.Psbt({ network: btcjs.networks[btcNetwork] })
-  pay.addOutput({
+  // 3. build bid grant transaction; estimate one single UTXO as input
+  const bidGrant = new btcjs.Psbt({
+    network: btcjs.networks[btcNetwork],
+  }).addOutput({
     address: multiSigAddress,
     value: safeOutputValue(total),
   })
 
-  await exclusiveChange({
+  const { fee: bidGrantFee, feeb } = await exclusiveChange({
+    psbt: bidGrant,
+    sighashType: SIGHASH_ALL,
+    estimate: true,
+    extraSize: 0,
+  })
+
+  // the value of the input should be the total value plus the fee
+  const bidGrantInputValue = total + bidGrantFee
+
+  // 3.5 Optimization: if we find a utxo with the exact value of bidGrantInputValue, we can skip the next step and use it directly
+
+  // 4. build pay transaction in order to generate such a UTXO
+  const pay = new btcjs.Psbt({
+    network: btcjs.networks[btcNetwork],
+  }).addOutput({
+    address,
+    value: safeOutputValue(bidGrantInputValue),
+  })
+
+  const { fee: payFee } = await exclusiveChange({
     psbt: pay,
     maxUtxosCount: USE_UTXO_COUNT_LIMIT,
     sighashType: SIGHASH_ALL,
   })
 
-  // 4. build bid grant transaction; use the utxo generated from step 3 as input
-  const bidGrant = new btcjs.Psbt({ network: btcjs.networks[btcNetwork] })
-  const grantInput = {
-    hash: pay.extractTransaction().getId(),
-    index: 0,
-    witnessUtxo: {
-      script: pay.extractTransaction().outs[0].script,
-      value: pay.extractTransaction().outs[0].value,
-    },
-    sighashType: SIGHASH_ALL_ANYONECANPAY,
-  }
-  bidGrant.addInput({
-    hash: pay.txOutputs[0].hash,
-    index: pay.txOutputs[0].index,
-    witnessUtxo: pay.txOutputs[0],
-  })
+  // 5. add the input to bid grant
+  // const grantInput = {
+  //   hash: pay.extractTransaction().getId(),
+  //   index: 0,
+  //   witnessUtxo: {
+  //     script: pay.extractTransaction().outs[0].script,
+  //     value: pay.extractTransaction().outs[0].value,
+  //   },
+  //   sighashType: SIGHASH_ALL,
+  // }
+  // bidGrant.addInput(grantInput)
 
-  console.log({ pay })
+  return {
+    order: bidGrant,
+    secondaryOrder: pay,
+    type: 'bid',
+    feeb,
+    networkFee: payFee + bidGrantFee,
+    mainFee: bidGrantFee,
+    secondaryFee: payFee,
+    total,
+    fromSymbol: selectedPair.toSymbol, // reversed
+    toSymbol: selectedPair.fromSymbol,
+    fromValue: total,
+    toValue: coinAmount,
+    serviceFee: 0,
+    totalPrice: total,
+    totalSpent: payFee + bidGrantFee + total,
+  }
+
+  // const grantInput = {
+  //   hash: pay.extractTransaction().getId(),
+  //   index: 0,
+  //   witnessUtxo: {
+  //     script: pay.extractTransaction().outs[0].script,
+  //     value: pay.extractTransaction().outs[0].value,
+  //   },
+  //   sighashType: SIGHASH_ALL_ANYONECANPAY,
+  // }
+  // bidGrant.addInput({
+  //   hash: pay.txOutputs[0].hash,
+  //   index: pay.txOutputs[0].index,
+  //   witnessUtxo: pay.txOutputs[0],
+  // })
+
+  // 4. build pre-transfer transaction
+  // const pay = new btcjs.Psbt({ network: btcjs.networks[btcNetwork] })
+  // pay.addOutput({
+  //   address: multiSigAddress,
+  //   value: safeOutputValue(total),
+  // })
+
+  // await exclusiveChange({
+  //   psbt: pay,
+  //   maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+  //   sighashType: SIGHASH_ALL,
+  // })
 
   return
 

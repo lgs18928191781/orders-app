@@ -23,7 +23,47 @@ export const getPlatformPublicKey = async (): Promise<{
   return res
 }
 
-export const postBidOffer = async () => {}
+export const postBidOrder = async ({
+  network,
+  address,
+  tick,
+  preTxRaw,
+  mergeTxRaw,
+  total,
+  coinAmount,
+}: {
+  network: 'livenet' | 'testnet'
+  address: string
+  tick: string
+  preTxRaw: string
+  mergeTxRaw: string
+  total: number
+  coinAmount: number
+}) => {
+  try {
+    const { publicKey, signature } = await sign()
+    const createRes = await ordersV2Fetch(`bid/push`, {
+      method: 'POST',
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+      body: JSON.stringify({
+        net: network,
+        address,
+        tick,
+        preTxRaw,
+        mergeTxRaw,
+        amount: total,
+        coinAmount,
+      }),
+    })
+
+    return createRes
+  } catch (e) {
+    throw e
+  }
+}
 
 export const getSellFees = async () => {}
 

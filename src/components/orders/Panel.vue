@@ -253,7 +253,6 @@ async function buildOrder() {
         })
         buildRes = preBuildRes
 
-        console.log({ preBuildRes })
       } else {
         buildRes = await buildAskLimit({
           total: Math.round(askExchangePrice.value * askLimitBrcAmount.value),

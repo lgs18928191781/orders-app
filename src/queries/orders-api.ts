@@ -43,7 +43,8 @@ export const getBrcFiatRate = async (): Promise<Record<string, number>> => {
 
 export type FeebPlan = {
   feeRate: number
-  title: 'Slow' | 'Avg' | 'Fast' | 'Custom'
+  title: 'Eco' | 'Slow' | 'Avg' | 'Fast' | 'Custom'
+  fullTitle?: string
 }
 export const getFeebPlans = async (): Promise<FeebPlan[]> => {
   const res = await ordersCommonApiFetch(`fee/recommended`)
@@ -51,6 +52,11 @@ export const getFeebPlans = async (): Promise<FeebPlan[]> => {
   if (!res) return []
 
   return [
+    {
+      title: 'Eco',
+      fullTitle: 'Economy',
+      feeRate: res.economyFee,
+    },
     {
       title: 'Slow',
       feeRate: res.hourFee,

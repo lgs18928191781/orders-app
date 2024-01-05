@@ -29,7 +29,7 @@ async function connectToUnisat() {
 
   const connection = await connectionStore.connect('unisat')
   if (connection.status === 'connected') {
-    close()
+    closeConnectionModal()
   }
 }
 
@@ -41,7 +41,7 @@ async function connectToOkx() {
 
   const connection = await connectionStore.connect('okx')
   if (connection.status === 'connected') {
-    close()
+    closeConnectionModal()
   }
 }
 </script>
