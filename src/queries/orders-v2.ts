@@ -65,7 +65,14 @@ export const postBidOrder = async ({
   }
 }
 
-export const getSellFees = async ({ orderId }: { orderId: string }) => {
+export const getSellFees = async ({
+  orderId,
+}: {
+  orderId: string
+}): Promise<{
+  feeAddress: string
+  platformFee: number
+}> => {
   const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     net: useNetworkStore().network,
@@ -79,7 +86,7 @@ export const getSellFees = async ({ orderId }: { orderId: string }) => {
     },
   })
 
-  return res
+  return !res ? { feeAddress: '', platformFee: 0 } : res
 }
 
 export const getSellEssentials = async () => {}

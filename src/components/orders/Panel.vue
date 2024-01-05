@@ -25,28 +25,21 @@ import { get } from '@vueuse/core'
 import { prettyBalance } from '@/lib/formatters'
 import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { calculateFee } from '@/lib/build-helpers'
-import {
-  buildAskLimit,
-  buildBidLimit,
-  buildBuyTake,
-  buildSellTakeV2,
-} from '@/lib/builders/orders'
-import { buildBidOffer } from '@/lib/builders/orders-v2'
+import { buildAskLimit, buildBuyTake } from '@/lib/builders/orders'
+import { buildBidOffer, buildSellTake } from '@/lib/builders/orders-v2'
 import {
   getOrdiBalance,
-  getBidCandidates,
   getOrders,
   getOneBrc20,
   getMarketPrice,
   type Order,
   type Brc20Transferable,
-  type BidCandidate,
 } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 import { selectPair, selectedPairKey } from '@/data/trading-pairs'
-import { DEBUG, IS_DEV, SELL_TX_SIZE } from '@/data/constants'
+import { IS_DEV, SELL_TX_SIZE } from '@/data/constants'
 
 import btcIcon from '@/assets/btc.svg?url'
 import OrderPanelHeader from './PanelHeader.vue'
@@ -276,7 +269,7 @@ async function buildOrder() {
           return acc + Number(cur.amount)
         }, 0)
 
-        const sellTake = await buildSellTakeV2({
+        const sellTake = await buildSellTake({
           total,
           amount: selectedSellCoinAmount.value,
           selectedPair,
@@ -333,7 +326,7 @@ const isBuilding = ref(false)
 const builtInfo = ref()
 
 // limit exchange mode
-const isLimitExchangeMode = ref(true)
+const isLimitExchangeMode = ref(false)
 const limitExchangeType: Ref<'bid' | 'ask'> = ref('bid')
 const { data: marketPrice } = useQuery({
   queryKey: [
