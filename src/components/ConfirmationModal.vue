@@ -77,27 +77,30 @@ async function submitBidOrder() {
   const builtInfo = toRaw(props.builtInfo)
 
   try {
-    // 1. sign secondary order which is used to create the actual utxo to pay for the bid grant order
-    const payPsbtSigned = await adapter.signPsbt(
-      builtInfo.secondaryOrder.toHex()
-    )
-    const payPsbt = btcjs.Psbt.fromHex(payPsbtSigned)
-    // extract tx from signed payPsbt
-    const payTxRaw = payPsbt.extractTransaction().toHex()
-
-    // 2. now we can add that utxo to the bid order
     const bidGrant = builtInfo.order
-    const addingInput = {
-      hash: payPsbt.extractTransaction().getId(),
-      index: 0,
-      witnessUtxo: {
-        script: payPsbt.extractTransaction().outs[0].script,
-        value: payPsbt.extractTransaction().outs[0].value,
-      },
-      sighashType: SIGHASH_ALL,
+    let payTxRaw
+    if (builtInfo.secondaryOrder) {
+      // 1. sign secondary order which is used to create the actual utxo to pay for the bid grant order
+      const payPsbtSigned = await adapter.signPsbt(
+        builtInfo.secondaryOrder.toHex()
+      )
+      const payPsbt = btcjs.Psbt.fromHex(payPsbtSigned)
+      // extract tx from signed payPsbt
+      payTxRaw = payPsbt.extractTransaction().toHex()
+
+      // 2. now we can add that utxo to the bid order
+      const addingInput = {
+        hash: payPsbt.extractTransaction().getId(),
+        index: 0,
+        witnessUtxo: {
+          script: payPsbt.extractTransaction().outs[0].script,
+          value: payPsbt.extractTransaction().outs[0].value,
+        },
+        sighashType: SIGHASH_ALL,
+      }
+      fillInternalKey(addingInput)
+      bidGrant.addInput(addingInput)
     }
-    fillInternalKey(addingInput)
-    bidGrant.addInput(addingInput)
 
     // 3. we sign the bid order
     const signed = await adapter.signPsbt(bidGrant.toHex(), {
@@ -117,12 +120,6 @@ async function submitBidOrder() {
       coinAmount: builtInfo.toValue,
     })
     console.log('bid order push result', pushRes)
-
-    // // 5. if pushRes is not null, we can now push the secondary order to the blockchain
-    // if (pushRes) {
-    //   const res = await window.adapter.pushPsbt(payPsbtSigned)
-    //   console.log('unisat push result', res)
-    // }
   } catch (err: any) {
     if (DEBUG) {
       console.error(err)
@@ -152,9 +149,9 @@ async function submitBidOrder() {
     type: 'success',
     onClose: () => {
       // reload
-      // if (!DEBUG) {
-      window.location.reload()
-      // }
+      if (!IS_DEV) {
+        window.location.reload()
+      }
     },
   })
 }

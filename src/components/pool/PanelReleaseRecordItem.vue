@@ -21,7 +21,7 @@ import {
   POOL_REWARDS_TICK,
   SIGHASH_SINGLE_ANYONECANPAY,
 } from '@/data/constants'
-import { buildReleasePsbt } from '@/lib/order-pool-builder'
+import { buildReleasePsbt } from '@/lib/builders/pool'
 import { defaultPoolPair, selectedPoolPairKey } from '@/data/trading-pairs'
 import { toTx, unit, useBtcUnit } from '@/lib/helpers'
 

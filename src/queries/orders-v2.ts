@@ -36,7 +36,7 @@ export const postBidOrder = async ({
   address: string
   tick: string
   preTxRaw: string
-  mergeTxRaw: string
+  mergeTxRaw?: string
   total: number
   coinAmount: number
 }) => {
@@ -65,7 +65,22 @@ export const postBidOrder = async ({
   }
 }
 
-export const getSellFees = async () => {}
+export const getSellFees = async ({ orderId }: { orderId: string }) => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    net: useNetworkStore().network,
+    orderId,
+  })
+
+  const res = await ordersV2Fetch(`bid/cal/fee?${params}`, {
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+  })
+
+  return res
+}
 
 export const getSellEssentials = async () => {}
 

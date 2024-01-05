@@ -34,6 +34,7 @@ const { mutate } = useMutation({
     ElMessage.success('Order canceled')
     const queryKey = props.orderType === 'ask' ? 'askOrders' : 'bidOrders'
     queryClient.invalidateQueries([queryKey])
+    queryClient.invalidateQueries(['excludedBalance'])
   },
   onError: (err: any) => {
     ElMessage.error(err.message)

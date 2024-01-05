@@ -13,12 +13,12 @@ import {
   getRewardClaimFees,
 } from '@/queries/pool'
 import { type TradingPair } from '@/data/trading-pairs'
-import { raise } from './helpers'
+import { raise } from '../helpers'
 import {
   exclusiveChange,
   fillInternalKey,
   safeOutputValue,
-} from './build-helpers'
+} from '../build-helpers'
 import {
   BTC_POOL_MODE,
   MS_BRC20_UTXO_VALUE,

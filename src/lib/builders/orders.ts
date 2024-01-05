@@ -6,7 +6,7 @@ import {
   exclusiveChange,
   fillInternalKey,
   safeOutputValue,
-} from './build-helpers'
+} from '../build-helpers'
 import {
   DUMMY_UTXO_VALUE,
   EXTRA_INPUT_MIN_VALUE,
@@ -30,7 +30,7 @@ import {
 } from '@/queries/orders-api'
 import { getUtxos, type SimpleUtxo, getTxHex } from '@/queries/proxy'
 import { type TradingPair } from '@/data/trading-pairs'
-import { SIGHASH_NONE_ANYONECANPAY } from '../data/constants'
+import { SIGHASH_NONE_ANYONECANPAY } from '../../data/constants'
 import { toXOnly } from '@/lib/btc-helpers'
 import { Buffer } from 'buffer'
 import { raise, raiseIf, raiseUnless } from '@/lib/helpers'

@@ -11,7 +11,7 @@ import {
   type Issue,
 } from '@/queries/orders/issues'
 import { prettyTimestamp } from '@/lib/formatters'
-import { buildRecoverPsbt } from '@/lib/order-pool-builder'
+import { buildRecoverPsbt } from '@/lib/builders/pool'
 import { DEBUG, SIGHASH_SINGLE_ANYONECANPAY } from '@/data/constants'
 
 import BuildingOverlay from '@/components/overlays/Loading.vue'
