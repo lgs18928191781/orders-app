@@ -1,3 +1,5 @@
+import theme from 'tailwindcss/defaultTheme'
+
 const defaultTheme = require('tailwindcss/defaultTheme')
 const animate = require('tailwindcss-animate')
 const forms = require('@tailwindcss/forms')

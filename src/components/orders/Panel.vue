@@ -252,7 +252,6 @@ async function buildOrder() {
           selectedPair,
         })
         buildRes = preBuildRes
-
       } else {
         buildRes = await buildAskLimit({
           total: Math.round(askExchangePrice.value * askLimitBrcAmount.value),
@@ -345,7 +344,7 @@ const { data: marketPrice } = useQuery({
 })
 
 const bidExchangePrice = ref(0)
-const bidAmount = ref(0)
+const bidAmount = ref()
 const bidTotalExchangePrice = computed(() => {
   return Math.round(bidExchangePrice.value * bidAmount.value)
 })
