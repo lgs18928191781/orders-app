@@ -187,7 +187,6 @@ export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
 // that way we dont generate contradictory psbts
 export async function exclusiveChange({
   psbt,
-  pubKey,
   extraSize,
   useSize,
   extraInputValue,
@@ -197,9 +196,9 @@ export async function exclusiveChange({
   estimate = false,
   partialPay = false,
   cutFrom = 1,
+  feeb,
 }: {
   psbt: Psbt
-  pubKey?: Buffer
   extraSize?: number
   useSize?: number
   extraInputValue?: number
@@ -209,8 +208,10 @@ export async function exclusiveChange({
   estimate?: boolean
   partialPay?: boolean
   cutFrom?: number
+  feeb?: number
 }) {
-  const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
+  // check if feeb is set
+  feeb = feeb ?? useFeebStore().get ?? raise('Choose a fee rate first.')
   // check if address is set
   const address =
     useConnectionStore().getAddress ??

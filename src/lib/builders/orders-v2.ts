@@ -18,9 +18,13 @@ import {
   SIGHASH_ALL_ANYONECANPAY,
   USE_UTXO_COUNT_LIMIT,
 } from '@/data/constants'
-import { getPlatformPublicKey, getSellFees } from '@/queries/orders-v2'
+import {
+  getPlatformPublicKey,
+  getSellEssentials,
+  getSellFees,
+} from '@/queries/orders-v2'
 import { generateP2wshPayment, getBothPubKeys } from './helpers'
-import { raise } from '../helpers'
+import { raise, raiseUnless } from '../helpers'
 import { useFeebStore } from '@/stores/feeb'
 import { getExcludedUtxos } from '@/queries/excluded-utxos'
 import { useBtcJsStore } from '@/stores/btcjs'
@@ -136,100 +140,79 @@ export async function buildSellTake({
 }) {
   const networkStore = useNetworkStore()
   const address = useConnectionStore().getAddress
+  const feeb = useFeebStore().feeb ?? raise('Choose a gas plan first')
   const btcjs = useBtcJsStore().get ?? raise('Btcjs not initialized')
 
-  // // 1: Get the ordinal utxo as input
-  // // the amount must match
-  // let ordinalUtxo: SimpleUtxo
-  // let transferable = await getOneBrc20({
-  //   tick: selectedPair.fromSymbol,
-  //   address,
-  // }).then((brc20Info) => {
-  //   // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
-  //   return brc20Info.transferBalanceList.find(
-  //     (brc20) => Number(brc20.amount) === amount
-  //   )
-  // })
-  // if (!transferable) {
-  //   throw new Error(
-  //     'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.'
-  //   )
-  // }
+  // 1: Get the ordinal utxo as input
+  // the amount must match
+  let ordinalUtxo: SimpleUtxo
+  let transferable = await getOneBrc20({
+    tick: selectedPair.fromSymbol,
+    address,
+  }).then((brc20Info) => {
+    // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
+    return brc20Info.transferBalanceList.find(
+      (brc20) => Number(brc20.amount) === amount
+    )
+  })
+  if (!transferable) {
+    throw new Error(
+      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.'
+    )
+  }
 
-  // // 2. fetch and decode rawTx of the utxo
-  // const [ordinalTxId, ordinalOutputIndex] =
-  //   transferable.inscriptionId.split('i')
-  // ordinalUtxo = {
-  //   txId: ordinalTxId,
-  //   satoshis: 546,
-  //   outputIndex: Number(ordinalOutputIndex),
-  //   addressType: 2,
-  // }
-  // const rawTx = await getTxHex(ordinalUtxo.txId)
-  // // decode rawTx
-  // const ordinalPreTx = btcjs.Transaction.fromHex(rawTx)
-  // const ordinalDetail = ordinalPreTx.outs[ordinalUtxo.outputIndex]
-  // const ordinalValue = ordinalDetail.value
+  // 2. fetch and decode rawTx of the utxo
+  const [ordinalTxId, ordinalOutputIndex] =
+    transferable.inscriptionId.split('i')
+  ordinalUtxo = {
+    txId: ordinalTxId,
+    satoshis: 546,
+    outputIndex: Number(ordinalOutputIndex),
+    addressType: 2,
+  }
+  const rawTx = await getTxHex(ordinalUtxo.txId)
+  // decode rawTx
+  const ordinalPreTx = btcjs.Transaction.fromHex(rawTx)
+  const ordinalDetail = ordinalPreTx.outs[ordinalUtxo.outputIndex]
+  const ordinalValue = ordinalDetail.value
 
   // 3. get fees
-  const fees = await getSellFees({ orderId })
-  console.log({ fees })
-  return
+  const { platformFee } = await getSellFees({ orderId }) // TODO: Add platform fee
 
-  // 4. get bid order
-  // const bidEssential
-
-  // Step 2: Get limit order
-  const order = await getOneBidOrder({
+  // 4. get bid essentials
+  const sellEssentials = await getSellEssentials({
     orderId,
     inscriptionId: transferable.inscriptionId,
+    feeb,
   })
 
-  // Step 3: Reconstruct the psbt and check if the amount is correct
-  const sell = btcjs.Psbt.fromHex(order.psbtRaw, {
-    network: btcjs.networks[networkStore.btcNetwork],
-  })
-  // check if the amount is correct
+  // 5. construct sell psbt
+  const sell = btcjs.Psbt.fromHex(sellEssentials.psbtRaw)
+  console.log('🚀 ~ file: orders-v2.ts:192 ~ sell:', sell)
+
+  // check if total amount is correct
   const sellerOutputIndex = 2
   const sellerOutputAmount = sell.txOutputs[sellerOutputIndex].value
   raiseUnless(sellerOutputAmount === total, 'Amount mismatch')
 
-  // check if the fee amount is met
-  const { platformFee, releaseInscriptionFee } = order
-  const platformFeeIndex = 7
-  const releaseInscriptionFeeIndex = 6
-  raiseUnless(
-    sell.txOutputs[platformFeeIndex].value === platformFee,
-    'Platform fee mismatch'
-  )
-  raiseUnless(
-    sell.txOutputs[releaseInscriptionFeeIndex].value === releaseInscriptionFee,
-    'Release inscription fee mismatch'
-  )
-
-  console.log({ sell, order })
-
-  // Step 4: Change
-  const predefinedInputsLength = 5
-  const { fee, feeb } = await exclusiveChange({
+  // 6. change
+  const { fee } = await exclusiveChange({
     psbt: sell,
     maxUtxosCount: USE_UTXO_COUNT_LIMIT,
     sighashType: SIGHASH_ALL,
-    partialPay: true,
-    cutFrom: predefinedInputsLength,
-    extraInputValue: -(platformFee + releaseInscriptionFee),
+    feeb,
   })
+  console.log({ fee })
 
   return {
     order: sell,
     type: 'sell',
     value: ordinalValue,
     totalPrice: 0,
-    networkFee: fee + order.furtherFee,
-    selfFee: fee,
+    networkFee: fee,
     networkFeeRate: feeb,
-    serviceFee: order.platformFee,
-    totalSpent: fee + order.platformFee + order.furtherFee,
+    serviceFee: platformFee,
+    totalSpent: fee + platformFee,
     fromSymbol: selectedPair.fromSymbol,
     toSymbol: selectedPair.toSymbol,
     fromValue: amount,

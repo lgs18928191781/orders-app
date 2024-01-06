@@ -26,7 +26,7 @@ import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 import { toXOnly, validatePsbt } from '@/lib/btc-helpers'
 import { Buffer } from 'buffer'
 import { fillInternalKey } from '@/lib/build-helpers'
-import { postBidOrder } from '@/queries/orders-v2'
+import { postBidOrder, postSellTake } from '@/queries/orders-v2'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -181,8 +181,7 @@ async function submitOrder() {
         })
         break
       case 'sell':
-        console.log({ address: connectionStore.getAddress })
-        // re-sign
+        // sign
         const before = builtInfo.order.toHex()
 
         // toSignInputs gathering:
@@ -203,6 +202,7 @@ async function submitOrder() {
             sighashTypes: [SIGHASH_ALL],
           })
         }
+        console.log({ toSignInputs })
 
         signed = await adapter.signPsbt(builtInfo.order.toHex(), {
           autoFinalized: false,
@@ -212,14 +212,10 @@ async function submitOrder() {
 
         const afterPsbt = useBtcJsStore().get!.Psbt.fromHex(after)
 
-        pushRes = await pushSellTakeV2({
-          psbtRaw: signed,
-          network: networkStore.ordersNetwork,
+        pushRes = await postSellTake({
           orderId: builtInfo.orderId,
-          address: connectionStore.getAddress,
-          value: builtInfo.value,
-          amount: builtInfo.amount,
-          networkFee: builtInfo.selfFee,
+          psbtRaw: signed,
+          networkFee: builtInfo.networkFee,
           networkFeeRate: builtInfo.networkFeeRate,
         })
         break

@@ -89,6 +89,67 @@ export const getSellFees = async ({
   return !res ? { feeAddress: '', platformFee: 0 } : res
 }
 
-export const getSellEssentials = async () => {}
+export const getSellEssentials = async ({
+  orderId,
+  inscriptionId,
+  feeb,
+}: {
+  orderId: string
+  inscriptionId: string
+  feeb: number
+}): Promise<{
+  orderId: string
+  psbtRaw: string
+}> => {
+  const { publicKey, signature } = await sign()
+  const address = useConnectionStore().getAddress
+  const params = new URLSearchParams({
+    net: useNetworkStore().network,
+    orderId,
+    sellerAddress: address,
+    inscriptionId,
+    networkFeeRate: String(feeb),
+  })
 
-export const postSellTake = async () => {}
+  const res = await ordersV2Fetch(`bid/do/pre?${params}`, {
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+  })
+
+  return res
+}
+
+export const postSellTake = async ({
+  orderId,
+  psbtRaw,
+  networkFee,
+  networkFeeRate,
+}: {
+  orderId: string
+  psbtRaw: string
+  networkFee: number
+  networkFeeRate: number
+}): Promise<{
+  txId: string
+}> => {
+  const { publicKey, signature } = await sign()
+
+  const res = await ordersV2Fetch(`bid/do`, {
+    method: 'POST',
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+    body: JSON.stringify({
+      net: useNetworkStore().network,
+      networkFee,
+      networkFeeRate,
+      orderId,
+      psbtRaw,
+    }),
+  })
+
+  return res
+}
