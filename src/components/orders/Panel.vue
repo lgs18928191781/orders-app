@@ -10,9 +10,6 @@ import {
   ListboxButton,
   ListboxOptions,
   ListboxOption,
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
 } from '@headlessui/vue'
 import {
   CheckIcon,
@@ -23,38 +20,34 @@ import {
 import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
+import { get } from '@vueuse/core'
 
-import btcIcon from '@/assets/btc.svg?url'
 import { prettyBalance } from '@/lib/formatters'
 import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { calculateFee } from '@/lib/build-helpers'
-import {
-  buildAskLimit,
-  buildBidLimit,
-  buildSellTakeV2,
-} from '@/lib/order-builder'
+import { buildAskLimit, buildBuyTake } from '@/lib/builders/orders'
+import { buildBidOffer, buildSellTake } from '@/lib/builders/orders-v2'
 import {
   getOrdiBalance,
-  getBidCandidates,
   getOrders,
   getOneBrc20,
   getMarketPrice,
   type Order,
   type Brc20Transferable,
-  type BidCandidate,
 } from '@/queries/orders-api'
-import { useAddressStore, useFeebStore, useNetworkStore } from '@/store'
-import { buildBuyTake } from '@/lib/order-builder'
+import { useConnectionStore } from '@/stores/connection'
+import { useFeebStore } from '@/stores/feeb'
+import { useNetworkStore } from '@/stores/network'
 import { selectPair, selectedPairKey } from '@/data/trading-pairs'
-import { DEBUG, IS_DEV, SELL_TX_SIZE } from '@/data/constants'
+import { IS_DEV, SELL_TX_SIZE } from '@/data/constants'
 
+import btcIcon from '@/assets/btc.svg?url'
 import OrderPanelHeader from './PanelHeader.vue'
 import OrderList from './List.vue'
 import OrderConfirmationModal from '../ConfirmationModal.vue'
-import { ChevronRightIcon } from 'lucide-vue-next'
-import { get } from '@vueuse/core'
 
-const addressStore = useAddressStore()
+const connectionStore = useConnectionStore()
+const address = connectionStore.getAddress
 const networkStore = useNetworkStore()
 const feebStore = useFeebStore()
 
@@ -246,32 +239,12 @@ async function buildOrder() {
   try {
     if (isLimitExchangeMode.value) {
       if (limitExchangeType.value === 'bid') {
-        if (!selectedBidCandidate.value) return
-        console.log({
-          bidExchangePrice: bidExchangePrice.value,
-          selectedBidCandidate: selectedBidCandidate.value,
-          total: Math.round(
-            bidExchangePrice.value *
-              Number(selectedBidCandidate.value.coinAmount)
-          ),
-        })
-
-        // v2 update: 2-step build
-        // 1. build the schema of the transaction and report the schema to the server
-        const preBuildRes = await buildBidLimit({
-          total: Math.round(
-            bidExchangePrice.value *
-              Number(selectedBidCandidate.value.coinAmount)
-          ),
-          coinAmount: Number(selectedBidCandidate.value.coinAmount),
-          inscriptionId: selectedBidCandidate.value.inscriptionId,
-          inscriptionNumber: selectedBidCandidate.value.inscriptionNumber,
+        const preBuildRes = await buildBidOffer({
+          total: bidTotalExchangePrice.value,
+          coinAmount: bidAmount.value,
           selectedPair,
-          poolOrderId: selectedBidCandidate.value.poolOrderId,
         })
         buildRes = preBuildRes
-
-        console.log({ preBuildRes })
       } else {
         buildRes = await buildAskLimit({
           total: Math.round(askExchangePrice.value * askLimitBrcAmount.value),
@@ -296,7 +269,7 @@ async function buildOrder() {
           return acc + Number(cur.amount)
         }, 0)
 
-        const sellTake = await buildSellTakeV2({
+        const sellTake = await buildSellTake({
           total,
           amount: selectedSellCoinAmount.value,
           selectedPair,
@@ -327,7 +300,7 @@ async function buildOrder() {
     builtInfo.value = undefined
     isLimitExchangeMode.value = false
 
-    if (DEBUG) throw error
+    if (IS_DEV) throw error
   }
 
   isBuilding.value = false
@@ -339,7 +312,9 @@ async function buildOrder() {
 }
 
 async function goInscribe() {
-  await window.unisat.inscribeTransfer(selectedPair.fromSymbol)
+  const adapter = connectionStore.adapter
+
+  await adapter?.inscribe(selectedPair.exactName)
 }
 
 // confirm modal
@@ -351,7 +326,7 @@ const isBuilding = ref(false)
 const builtInfo = ref()
 
 // limit exchange mode
-const isLimitExchangeMode = ref(false)
+const isLimitExchangeMode = ref(true)
 const limitExchangeType: Ref<'bid' | 'ask'> = ref('ask')
 const { data: marketPrice } = useQuery({
   queryKey: [
@@ -362,16 +337,13 @@ const { data: marketPrice } = useQuery({
 })
 
 const bidExchangePrice = ref(0)
+const bidAmount = ref()
 const bidTotalExchangePrice = computed(() => {
-  if (!!!selectedBidCandidate.value) return '0'
-
-  return Math.round(
-    bidExchangePrice.value * Number(selectedBidCandidate.value.coinAmount)
-  )
+  return Math.round(bidExchangePrice.value * bidAmount.value)
 })
 
 const canPlaceBidOrder = computed(() => {
-  return bidExchangePrice.value > 0 && !!selectedBidCandidate.value
+  return bidExchangePrice.value > 0 && bidAmount.value > 0
 })
 
 const askExchangePrice = ref(0)
@@ -412,70 +384,30 @@ const { data: ordiBalance } = useQuery({
   queryKey: [
     'ordiBalance',
     {
-      address: addressStore.get,
+      address,
       network: networkStore.network,
     },
   ],
-  queryFn: () => getOrdiBalance(addressStore.get!, networkStore.network),
+  queryFn: () => getOrdiBalance(address, networkStore.network),
 })
 const { data: myBrc20Info } = useQuery({
   queryKey: [
     'myBrc20Info',
     {
-      address: addressStore.get,
+      address,
       network: networkStore.network,
       tick: selectedPair.fromSymbol,
     },
   ],
   queryFn: () =>
     getOneBrc20({
-      address: addressStore.get!,
+      address,
       tick: selectedPair.fromSymbol,
     }),
 
-  enabled: computed(
-    () => networkStore.network !== 'testnet' && !!addressStore.get
-  ),
+  enabled: computed(() => networkStore.network !== 'testnet' && !!address),
 })
 const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
-
-const usePool = selectedPair.hasPool || selectedPair.usePool || false
-const { data: bidCandidates } = useQuery({
-  queryKey: [
-    'bidCandidates',
-    {
-      address: addressStore.get,
-      network: networkStore.network,
-      symbol: selectedPair.fromSymbol,
-    },
-  ],
-  queryFn: () =>
-    getBidCandidates(networkStore.network, selectedPair.fromSymbol, usePool),
-})
-// filter out the bid candidates that is less than the price user input
-const usableBidCandidates = computed(() => {
-  if (!bidCandidates.value) return []
-
-  return bidCandidates.value.filter((item) => {
-    return item.coinRatePrice > bidExchangePrice.value
-  })
-})
-const unusableBidCandidates = computed(() => {
-  if (!bidCandidates.value) return []
-
-  return bidCandidates.value.filter((item) => {
-    return item.coinRatePrice < bidExchangePrice.value
-  })
-})
-const selectedBidCandidate: Ref<BidCandidate | undefined> = ref()
-// watch for bid exchange price change, remove selected bid candidate if the price is higher than the bid exchange price
-watch(bidExchangePrice, (price) => {
-  if (!selectedBidCandidate.value) return
-
-  if (selectedBidCandidate.value.coinRatePrice < price) {
-    selectedBidCandidate.value = undefined
-  }
-})
 </script>
 
 <template>
@@ -596,8 +528,6 @@ watch(bidExchangePrice, (price) => {
                     </div>
                   </div>
 
-                  <!-- estimate -->
-
                   <!-- amount -->
                   <div class="mt-4 rounded-md border border-zinc-500 p-2">
                     <div class="flex items-center justify-between">
@@ -610,187 +540,19 @@ watch(bidExchangePrice, (price) => {
                         <span class="ml-2 text-zinc-500">Amount</span>
                       </div>
 
-                      <Listbox
-                        v-model="selectedBidCandidate"
-                        as="div"
-                        class="max-w-[67%] grow"
-                      >
-                        <ListboxButton
-                          class="relative w-full rounded bg-zinc-700 py-2 pl-3 pr-20 text-right text-sm focus:outline-none"
+                      <div class="relative max-w-[67%] grow">
+                        <input
+                          type="number"
+                          class="w-full rounded bg-zinc-700 py-2 pl-2 pr-16 text-right placeholder-zinc-500 outline-none"
+                          placeholder="0"
+                          v-model.number="bidAmount"
+                        />
+                        <span
+                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
                         >
-                          <span class="block truncate">
-                            {{ selectedBidCandidate?.coinAmount || '-' }}
-                          </span>
-
-                          <span
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
-                          >
-                            <span class="uppercase"
-                              >${{ selectedPair.fromSymbol }}</span
-                            >
-                            <ChevronsUpDownIcon
-                              class="h-5 w-5"
-                              aria-hidden="true"
-                            />
-                          </span>
-                        </ListboxButton>
-
-                        <ListboxOptions
-                          class="absolute z-10 mt-4 max-h-60 w-full left-0 overflow-auto rounded-md border border-zinc-500 bg-zinc-800 p-2 pr-4 text-sm focus:outline-none grid grid-cols-2 gap-2"
-                        >
-                          <ListboxOption
-                            v-if="!bidCandidates?.length"
-                            :disabled="true"
-                            class="text-right text-zinc-500 text-sm py-2 col-span-2"
-                          >
-                            No liquidity provided.
-                          </ListboxOption>
-
-                          <div
-                            class="col-span-2 text-zinc-300 px-2 py-1"
-                            v-else
-                          >
-                            Select Liquidity
-                          </div>
-                          <div
-                            class="col-span-2 text-zinc-500 px-2 text-sm"
-                            v-if="usableBidCandidates.length <= 0"
-                          >
-                            🥹 No liquidity is available since the liquidity used
-                            must have a price higher than current market price.
-                          </div>
-                          <ListboxOption
-                            v-for="bidCandidate in usableBidCandidates"
-                            v-slot="{ active, selected }"
-                            as="template"
-                            :key="bidCandidate.inscriptionId"
-                            :value="bidCandidate"
-                          >
-                            <li
-                              class="relative flex cursor-pointer items-center justify-between rounded py-2 pl-2 pr-10 transition bg-black"
-                              :class="[
-                                active && 'bg-orange-500/20',
-                                selected && 'shadow-md shadow-orange-300/30',
-                              ]"
-                              :title="bidCandidate?.poolOrderId"
-                            >
-                              <div class="flex items-center">
-                                <!-- liquidity race status  -->
-                                <span class="relative flex h-2 w-2 mr-4">
-                                  <span
-                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 blur-xs"
-                                    v-if="bidCandidate.bidCount === 0"
-                                  ></span>
-                                  <span
-                                    class="relative inline-flex rounded-full h-2 w-2"
-                                    :class="{
-                                      'bg-green-500':
-                                        bidCandidate.bidCount === 0,
-                                      'bg-yellow-500':
-                                        bidCandidate.bidCount > 0 &&
-                                        bidCandidate.bidCount < 5,
-                                      'bg-red-500': bidCandidate.bidCount >= 5,
-                                    }"
-                                  ></span>
-                                </span>
-
-                                <div class="space-y-0.5">
-                                  <div :class="selected && 'text-orange-300'">
-                                    {{ bidCandidate.coinAmount }}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <span
-                                v-if="selected"
-                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-orange-300"
-                              >
-                                <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                              </span>
-                            </li>
-                          </ListboxOption>
-
-                          <Disclosure
-                            as="div"
-                            class="mt-4 col-span-2"
-                            v-if="unusableBidCandidates.length > 0"
-                          >
-                            <DisclosureButton
-                              class="text-left mb-2 text-zinc-300 pl-2 flex items-center gap-1"
-                              v-slot="{ open }"
-                            >
-                              <span>
-                                Unusable Liquidity ({{
-                                  unusableBidCandidates.length
-                                }})
-                              </span>
-                              <ChevronRightIcon
-                                :class="[
-                                  'h-4 w-4 text-zinc-400 transform duration-200',
-                                  open && 'rotate-90',
-                                ]"
-                                aria-hidden="true"
-                              />
-                            </DisclosureButton>
-
-                            <DisclosurePanel class="grid grid-cols-2 gap-2">
-                              <ListboxOption
-                                v-for="bidCandidate in unusableBidCandidates"
-                                v-slot="{ active, selected }"
-                                as="template"
-                                :key="bidCandidate.inscriptionId"
-                                :value="bidCandidate"
-                                :disabled="true"
-                              >
-                                <li
-                                  class="relative flex cursor-not-allowed items-center justify-between rounded py-2 pl-2 pr-10 transition bg-black opacity-30"
-                                  :title="bidCandidate?.poolOrderId"
-                                >
-                                  <div class="flex items-center">
-                                    <!-- liquidity race status  -->
-                                    <span class="relative flex h-2 w-2 mr-4">
-                                      <span
-                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 blur-xs"
-                                        v-if="bidCandidate.bidCount === 0"
-                                      ></span>
-                                      <span
-                                        class="relative inline-flex rounded-full h-2 w-2"
-                                        :class="{
-                                          'bg-green-500':
-                                            bidCandidate.bidCount === 0,
-                                          'bg-yellow-500':
-                                            bidCandidate.bidCount > 0 &&
-                                            bidCandidate.bidCount < 5,
-                                          'bg-red-500':
-                                            bidCandidate.bidCount >= 5,
-                                        }"
-                                      ></span>
-                                    </span>
-
-                                    <div class="space-y-0.5">
-                                      <div
-                                        :class="selected && 'text-orange-300'"
-                                      >
-                                        {{ bidCandidate.coinAmount }}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <span
-                                    v-if="selected"
-                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-orange-300"
-                                  >
-                                    <CheckIcon
-                                      class="h-5 w-5"
-                                      aria-hidden="true"
-                                    />
-                                  </span>
-                                </li>
-                              </ListboxOption>
-                            </DisclosurePanel>
-                          </Disclosure>
-                        </ListboxOptions>
-                      </Listbox>
+                          ${{ selectedPair.fromSymbol }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

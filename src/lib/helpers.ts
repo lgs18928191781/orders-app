@@ -17,6 +17,20 @@ export const raiseUnless = (cond: boolean, err: string): void => {
   if (!cond) raise(err)
 }
 
+export const generateRandomString = (length: number = 32) => {
+  let randomString = ''
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+  for (let i = 0; i < length; i++) {
+    randomString += characters.charAt(
+      Math.floor(Math.random() * characters.length)
+    )
+  }
+
+  return randomString
+}
+
 export const useBtcUnit = computedEager(() => {
   return useStorage('use-btc-unit', true)
 })

@@ -1,12 +1,15 @@
 import Decimal from 'decimal.js'
-import sign from '../lib/sign'
-import { useAddressStore, useFeebStore, useNetworkStore } from '../store'
-import { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
-import { raise, showFiat } from '@/lib/helpers'
+
+import { useConnectionStore } from '@/stores/connection'
+import { useFeebStore } from '@/stores/feeb'
+import { useNetworkStore } from '@/stores/network'
+import sign from '@/lib/sign'
+import fetchWrapper, { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
+import { raise } from '@/lib/helpers'
 
 export const login = async () => {
   const { publicKey, signature } = await sign()
-  const address = useAddressStore().get as string
+  const address = useConnectionStore().getAddress
   const loginRes = await ordersApiFetch(`login/in`, {
     method: 'POST',
     headers: {
@@ -29,9 +32,19 @@ export const getFiatRate = async (): Promise<number> => {
   return res?.usd?.btc ? new Decimal(res.usd.btc).dividedBy(1e8).toNumber() : 0
 }
 
+export const getBrcFiatRate = async (): Promise<Record<string, number>> => {
+  const res = await fetchWrapper(
+    `https://www.metalet.space/wallet-api/v3/coin/brc20/price`
+  )
+
+  // use per satoshi price
+  return res?.data?.priceInfo || {}
+}
+
 export type FeebPlan = {
   feeRate: number
-  title: 'Slow' | 'Average' | 'Fast' | 'Custom'
+  title: 'Eco' | 'Slow' | 'Avg' | 'Fast' | 'Custom'
+  fullTitle?: string
 }
 export const getFeebPlans = async (): Promise<FeebPlan[]> => {
   const res = await ordersCommonApiFetch(`fee/recommended`)
@@ -40,11 +53,16 @@ export const getFeebPlans = async (): Promise<FeebPlan[]> => {
 
   return [
     {
+      title: 'Eco',
+      fullTitle: 'Economy',
+      feeRate: res.economyFee,
+    },
+    {
       title: 'Slow',
       feeRate: res.hourFee,
     },
     {
-      title: 'Average',
+      title: 'Avg',
       feeRate: res.halfHourFee,
     },
     {
@@ -117,7 +135,7 @@ export const getBidCandidates = async (
   tick: string,
   isPool: boolean = true
 ): Promise<BidCandidate[]> => {
-  const address = useAddressStore().get as string
+  const address = useConnectionStore().getAddress
   const params = new URLSearchParams({
     net: network,
     address,
@@ -178,7 +196,7 @@ export const getBidCandidateInfo = async ({
   psbtRaw: string
   orderId: string
 }> => {
-  const address = useAddressStore().get as string
+  const address = useConnectionStore().getAddress
   const params = new URLSearchParams({
     net: network,
     tick,
@@ -247,7 +265,7 @@ export const constructBidPsbt = async ({
 }> => {
   const { publicKey, signature } = await sign()
 
-  const address = useAddressStore().get as string
+  const address = useConnectionStore().getAddress
   const body = {
     net: network,
     tick,
@@ -335,7 +353,7 @@ export const getOrders = async ({
 }) => {
   const orderType = type === 'ask' ? 1 : 2
   const sortType = sort === 'asc' ? 1 : -1
-  const address = useAddressStore().get as string
+  const address = useConnectionStore().getAddress
 
   const params = new URLSearchParams({
     net: network,
@@ -365,14 +383,14 @@ export const getOrders = async ({
   return orders
 }
 
-type DetailedOrder = Order & { psbtRaw: string }
+type DetailedOrder = Order & { psbtRaw: string; takePsbtRaw: string }
 export const getOneOrder = async ({
   orderId,
 }: {
   orderId: string
 }): Promise<DetailedOrder> => {
   const { publicKey, signature } = await sign()
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
 
   const order: DetailedOrder = await ordersApiFetch(
     `order/${orderId}?buyerAddress=${address}`,
@@ -404,7 +422,7 @@ export const getOneBidOrder = async ({
   inscriptionId: string
 }): Promise<BidV20Order> => {
   const { publicKey, signature } = await sign()
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
 
   const params = new URLSearchParams({
@@ -417,13 +435,7 @@ export const getOneBidOrder = async ({
   })
 
   const order: BidV20Order = await ordersApiFetch(
-    `order/bid-v2/do/pre?${params}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    `order/bid-v2/do/pre?${params}`
   ).then((order) => {
     order.furtherFee =
       order.releaseInscriptionFee +
@@ -432,6 +444,35 @@ export const getOneBidOrder = async ({
 
     return order
   })
+  return order
+}
+
+export const getAskOrderDetail = async ({
+  orderId,
+  address,
+  tick,
+  buyerChangeAmount,
+}: {
+  orderId: string
+  address: string
+  tick: string
+  buyerChangeAmount: number
+}): Promise<DetailedOrder> => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    buyerAddress: address,
+    tick,
+  })
+
+  const order: DetailedOrder = await ordersApiFetch(
+    `order/${orderId}?${params}`,
+    {
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+    }
+  )
 
   return order
 }
@@ -666,8 +707,7 @@ export const pushBuyTake = async ({
   psbtRaw: string
   orderId: string
 }) => {
-  // const pushTxId = await window.unisat.pushPsbt(psbtRaw)
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
 
   const { publicKey, signature } = await sign()
 
@@ -693,7 +733,7 @@ export const pushBuyTake = async ({
 }
 
 export const cancelOrder = async ({ orderId }: { orderId: string }) => {
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const network = useNetworkStore().network
   const { publicKey, signature } = await sign()
 
@@ -820,7 +860,7 @@ export const getListingUtxos: () => Promise<
   }[]
 > = async () => {
   const network = 'livenet'
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
 
   const utxos = await ordersApiFetch(
     `order/bid/dummy/${address}?net=${network}`

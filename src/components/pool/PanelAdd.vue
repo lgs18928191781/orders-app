@@ -17,17 +17,15 @@ import Decimal from 'decimal.js'
 import { useStorage } from '@vueuse/core'
 
 import { defaultPoolPair, selectedPoolPairKey } from '@/data/trading-pairs'
-import { useAddressStore, useNetworkStore } from '@/store'
+import { useConnectionStore } from '@/stores/connection'
+import { useNetworkStore } from '@/stores/network'
 import {
   Brc20Transferable,
   getMarketPrice,
   getOneBrc20,
 } from '@/queries/orders-api'
 import { getMyPooledInscriptions } from '@/queries/pool'
-import {
-  buildAddBrcLiquidity,
-  buildAddBtcLiquidity,
-} from '@/lib/order-pool-builder'
+import { buildAddBrcLiquidity, buildAddBtcLiquidity } from '@/lib/builders/pool'
 import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance } from '@/lib/formatters'
 
@@ -35,7 +33,7 @@ import OrderConfirmationModal from './PoolConfirmationModal.vue'
 import funArrowSvg from '@/assets/fun-arrow.svg?url'
 
 const queryClient = useQueryClient()
-const addressStore = useAddressStore()
+const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const selectedPair = inject(selectedPoolPairKey, defaultPoolPair)
 
@@ -43,7 +41,7 @@ const { data: poolableBrc20s } = useQuery({
   queryKey: [
     'poolableBrc20s',
     {
-      address: addressStore.get,
+      address: connectionStore.getAddress,
       network: networkStore.network,
       tick: selectedPair.fromSymbol,
     },
@@ -51,11 +49,11 @@ const { data: poolableBrc20s } = useQuery({
   queryFn: () =>
     Promise.all([
       getOneBrc20({
-        address: addressStore.get!,
+        address: connectionStore.getAddress,
         tick: selectedPair.fromSymbol,
       }),
       getMyPooledInscriptions({
-        address: addressStore.get!,
+        address: connectionStore.getAddress,
         tick: selectedPair.fromSymbol,
       }),
     ]).then(([allBrc20s, pooledBrc20s]) => {
@@ -69,7 +67,7 @@ const { data: poolableBrc20s } = useQuery({
       return poolableBrc20s
     }),
   enabled: computed(
-    () => networkStore.network !== 'testnet' && !!addressStore.get
+    () => networkStore.network !== 'testnet' && connectionStore.connected
   ),
 })
 const selected: Ref<undefined | Brc20Transferable> = ref()

@@ -1,12 +1,10 @@
 import { Buffer } from 'buffer'
 import Decimal from 'decimal.js'
 
-import {
-  useAddressStore,
-  useBtcJsStore,
-  useCredentialsStore,
-  useNetworkStore,
-} from '@/store'
+import { useBtcJsStore } from '@/stores/btcjs'
+import { useConnectionStore } from '@/stores/connection'
+import { useCredentialsStore } from '@/stores/credentials'
+import { useNetworkStore } from '@/stores/network'
 import { getOneBrc20 } from '@/queries/orders-api'
 import { type SimpleUtxo, getTxHex, getUtxos } from '@/queries/proxy'
 import {
@@ -15,8 +13,12 @@ import {
   getRewardClaimFees,
 } from '@/queries/pool'
 import { type TradingPair } from '@/data/trading-pairs'
-import { raise } from './helpers'
-import { exclusiveChange, safeOutputValue } from './build-helpers'
+import { raise } from '../helpers'
+import {
+  exclusiveChange,
+  fillInternalKey,
+  safeOutputValue,
+} from '../build-helpers'
 import {
   BTC_POOL_MODE,
   MS_BRC20_UTXO_VALUE,
@@ -26,9 +28,10 @@ import {
   SIGHASH_SINGLE_ANYONECANPAY,
   USE_UTXO_COUNT_LIMIT,
 } from '@/data/constants'
+import { toXOnly } from '@/lib/btc-helpers'
 
 async function getBothPubKeys(type: 'btc' | 'brc20' = 'brc20') {
-  const selfAddress = useAddressStore().get!
+  const selfAddress = useConnectionStore().getAddress
   const credential = useCredentialsStore().getByAddress(selfAddress)
   const selfPubKey =
     credential?.publicKey ??
@@ -69,7 +72,7 @@ export async function buildAddBrcLiquidity({
 }) {
   const networkStore = useNetworkStore()
   const btcjs = useBtcJsStore().get!
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
 
   // Step 1: Get the ordinal utxo as input
   // if testnet, we use a cardinal utxo as a fake one
@@ -117,21 +120,16 @@ export async function buildAddBrcLiquidity({
     } catch (e: any) {}
   }
 
-  addLiquidity.addInput({
-    hash: ordinalUtxo.txId,
-    index: ordinalUtxo.outputIndex,
-    witnessUtxo: ordinalPreTx.outs[ordinalUtxo.outputIndex],
-    sighashType:
-      btcjs.Transaction.SIGHASH_SINGLE | btcjs.Transaction.SIGHASH_ANYONECANPAY,
-  })
+  addLiquidity.addInput(
+    fillInternalKey({
+      hash: ordinalUtxo.txId,
+      index: ordinalUtxo.outputIndex,
+      witnessUtxo: ordinalPreTx.outs[ordinalUtxo.outputIndex],
+      sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+    })
+  )
 
   // Step 2: Build BTC output for the pool
-  const msPayment = await generateP2wshPayment()
-  const multisigAddress =
-    msPayment.address ??
-    raise(
-      'No multisig address. Please try again or contact customer service for assistance.'
-    )
   addLiquidity.addOutput({
     address,
     value: safeOutputValue(total),
@@ -157,9 +155,6 @@ export async function buildAddBtcLiquidity({ total }: { total: Decimal }) {
   // then create the PSBT with the Utxo (first output of the previous separate tx) as input and MS address as BRC20 output
   // 2. Custody mode: Send the BTC to the exchange's service address
 
-  const networkStore = useNetworkStore()
-  const btcjs = useBtcJsStore().get!
-
   switch (BTC_POOL_MODE) {
     case 1:
       return await buildInPsbtMode(total)
@@ -172,9 +167,10 @@ export async function buildAddBtcLiquidity({ total }: { total: Decimal }) {
   }
 }
 
+// PSBT mode
 async function buildInPsbtMode(total: Decimal) {
   const btcjs = useBtcJsStore().get!
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const btcNetwork = useNetworkStore().btcNetwork
 
   let input
@@ -214,12 +210,12 @@ async function buildInPsbtMode(total: Decimal) {
     // get separate psbt's tx hash
     const separateTx = (separatePsbt.data.globalMap.unsignedTx as any).tx
     const txHash: string = (separateTx as any).getId()
-    input = {
+    input = fillInternalKey({
       hash: txHash,
       index: 0,
       witnessUtxo: separatePsbt.txOutputs[0],
       sighashType: SIGHASH_SINGLE_ANYONECANPAY,
-    }
+    })
   }
 
   const msPayment = await generateP2wshPayment('btc')
@@ -277,7 +273,7 @@ async function buildInCustodyMode(total: Decimal) {
 async function buildInCascadeMode(total: Decimal) {
   const btcjs = useBtcJsStore().get!
   const btcNetwork = useNetworkStore().btcNetwork
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
 
   // Cascade mode is a combination of custody mode and psbt mode
   // We create the second tx first
@@ -325,12 +321,14 @@ async function buildInCascadeMode(total: Decimal) {
   const parentTxHash: string = (parentTx as any).getId()
   console.log('est tx id', parentTxHash)
 
-  child.addInput({
-    hash: parentTxHash,
-    index: 0,
-    witnessUtxo: neededUtxo,
-    sighashType: SIGHASH_ALL_ANYONECANPAY,
-  })
+  child.addInput(
+    fillInternalKey({
+      hash: parentTxHash,
+      index: 0,
+      witnessUtxo: neededUtxo,
+      sighashType: SIGHASH_ALL_ANYONECANPAY,
+    })
+  )
 
   return {
     order: child,
@@ -360,27 +358,31 @@ export async function buildReleasePsbt({
   const releasePsbt = btcjs.Psbt.fromHex(ordinalReleasePsbtRaw)
 
   // Add BTC input
-  claim.addInput({
-    hash: btcPsbt.txInputs[0].hash,
-    index: btcPsbt.txInputs[0].index,
-    witnessUtxo: btcPsbt.data.inputs[0].witnessUtxo,
-    witnessScript: btcPsbt.data.inputs[0].witnessScript,
-    partialSig: btcPsbt.data.inputs[0].partialSig,
-    sighashType: SIGHASH_SINGLE_ANYONECANPAY,
-  })
+  claim.addInput(
+    fillInternalKey({
+      hash: btcPsbt.txInputs[0].hash,
+      index: btcPsbt.txInputs[0].index,
+      witnessUtxo: btcPsbt.data.inputs[0].witnessUtxo,
+      witnessScript: btcPsbt.data.inputs[0].witnessScript,
+      partialSig: btcPsbt.data.inputs[0].partialSig,
+      sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+    })
+  )
 
   // Add BTC output
   claim.addOutput(btcPsbt.txOutputs[0])
 
   // Add release input
-  claim.addInput({
-    hash: releasePsbt.txInputs[0].hash,
-    index: releasePsbt.txInputs[0].index,
-    witnessUtxo: releasePsbt.data.inputs[0].witnessUtxo,
-    partialSig: releasePsbt.data.inputs[0].partialSig,
-    witnessScript: releasePsbt.data.inputs[0].witnessScript,
-    sighashType: SIGHASH_SINGLE_ANYONECANPAY,
-  })
+  claim.addInput(
+    fillInternalKey({
+      hash: releasePsbt.txInputs[0].hash,
+      index: releasePsbt.txInputs[0].index,
+      witnessUtxo: releasePsbt.data.inputs[0].witnessUtxo,
+      partialSig: releasePsbt.data.inputs[0].partialSig,
+      witnessScript: releasePsbt.data.inputs[0].witnessScript,
+      sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+    })
+  )
 
   // Add release output
   claim.addOutput(releasePsbt.txOutputs[0])
@@ -522,14 +524,16 @@ export async function buildRecoverPsbt({
   const releasePsbt = btcjs.Psbt.fromHex(ordinalRecoverPsbtRaw)
 
   // Add recover input
-  recover.addInput({
-    hash: releasePsbt.txInputs[0].hash,
-    index: releasePsbt.txInputs[0].index,
-    witnessUtxo: releasePsbt.data.inputs[0].witnessUtxo,
-    partialSig: releasePsbt.data.inputs[0].partialSig,
-    witnessScript: releasePsbt.data.inputs[0].witnessScript,
-    sighashType: SIGHASH_SINGLE_ANYONECANPAY,
-  })
+  recover.addInput(
+    fillInternalKey({
+      hash: releasePsbt.txInputs[0].hash,
+      index: releasePsbt.txInputs[0].index,
+      witnessUtxo: releasePsbt.data.inputs[0].witnessUtxo,
+      partialSig: releasePsbt.data.inputs[0].partialSig,
+      witnessScript: releasePsbt.data.inputs[0].witnessScript,
+      sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+    })
+  )
 
   // Add recover output
   recover.addOutput(releasePsbt.txOutputs[0])

@@ -4,13 +4,12 @@ import { XCircleIcon, BadgeCheckIcon } from 'lucide-vue-next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
 
-import { useAddressStore } from '@/store'
+import { useConnectionStore } from '@/stores/connection'
 import { cancelOrder, type Order, getFiatRate } from '@/queries/orders-api'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, useBtcUnit } from '@/lib/helpers'
-import Decimal from 'decimal.js'
 
-const address = useAddressStore().get!
+const address = useConnectionStore().getAddress
 
 const props = defineProps<{
   order: Order
@@ -35,6 +34,7 @@ const { mutate } = useMutation({
     ElMessage.success('Order canceled')
     const queryKey = props.orderType === 'ask' ? 'askOrders' : 'bidOrders'
     queryClient.invalidateQueries([queryKey])
+    queryClient.invalidateQueries(['excludedBalance'])
   },
   onError: (err: any) => {
     ElMessage.error(err.message)
@@ -46,7 +46,7 @@ async function onCancel() {
 
 // fiat price
 const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate'],
+  queryKey: ['fiatRate', { coin: 'btc' }],
   queryFn: getFiatRate,
 })
 </script>

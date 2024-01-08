@@ -28,4 +28,26 @@
   @apply outline-orange-300;
 }
 
-/* ok */
+.quiet-input {
+  @apply !border-transparent !border-0;
+}
+
+.quiet-input:focus {
+  @apply !ring-0 !outline-0 !outline-transparent !ring-transparent !border-transparent;
+}
+
+/* hide numeric input's ugly control */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type='number'] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+input:focus {
+  @apply !border-orange-300 !ring-orange-300;
+}

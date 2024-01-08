@@ -14,7 +14,8 @@ import {
 import { useQuery } from '@tanstack/vue-query'
 import { CarIcon, CheckIcon, Loader2Icon } from 'lucide-vue-next'
 
-import { useNetworkStore, useFeebStore } from '@/store'
+import { useNetworkStore } from '@/stores/network'
+import { useFeebStore } from '@/stores/feeb'
 import { FeebPlan, getFeebPlans } from '@/queries/orders-api'
 import { calcFiatPrice, sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance } from '@/lib/formatters'
@@ -32,6 +33,7 @@ import { BikeIcon } from 'lucide-vue-next'
 import { RocketIcon } from 'lucide-vue-next'
 import { BusIcon } from 'lucide-vue-next'
 import { SailboatIcon } from 'lucide-vue-next'
+import { PlaneIcon } from 'lucide-vue-next'
 
 // custom feeb plan
 const customFeeb = useStorage('customFeeb', 2)
@@ -49,12 +51,14 @@ function updateCustomFeeb(e: any) {
 }
 
 // feeb plan icons
-function getFeePlanIcon(planTitle: 'Slow' | 'Average' | 'Fast' | 'Custom') {
+function getFeePlanIcon(planTitle: FeebPlan['title']) {
   switch (planTitle) {
-    case 'Slow':
+    case 'Eco':
       return BikeIcon
-    case 'Average':
+    case 'Slow':
       return BusIcon
+    case 'Avg':
+      return PlaneIcon
     case 'Fast':
       return RocketIcon
     case 'Custom':
@@ -279,7 +283,7 @@ function onSwitchShow(open: boolean) {
 
 // fiat price
 const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate'],
+  queryKey: ['fiatRate', { coin: 'btc' }],
   queryFn: getFiatRate,
 })
 </script>
@@ -406,7 +410,7 @@ const { data: fiatRate } = useQuery({
                             ? 'bg-orange-300/75 text-white '
                             : 'bg-black ',
                         ]"
-                        class="relative flex cursor-pointer rounded-lg px-5 py-6 shadow-md focus:outline-none"
+                        class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
                       >
                         <div class="flex w-full items-center justify-between">
                           <div class="flex items-center">
@@ -424,7 +428,7 @@ const { data: fiatRate } = useQuery({
                                   "
                                   class="font-medium text-lg"
                                 >
-                                  {{ plan.title }}
+                                  {{ plan.fullTitle || plan.title }}
                                 </RadioGroupLabel>
                               </div>
 
@@ -442,7 +446,8 @@ const { data: fiatRate } = useQuery({
                                   >
                                     <input
                                       type="text"
-                                      class="bg-transparent text-sm w-8 border-0 outline-none border-b !border-zinc-500 py-0.5 px-0 focus:ring-0 focus:ring-transparent text-center"
+                                      class="bg-transparent text-sm w-8 border-0 outline-none border-b !border-zinc-500 py-0.5 px-0 focus:ring-0 focus:ring-transparent text-center rounded"
+                                      autocomplete="off"
                                       :class="
                                         checked ? 'text-white' : 'text-zinc-300'
                                       "

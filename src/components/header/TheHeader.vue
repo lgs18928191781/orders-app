@@ -1,50 +1,65 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import { ShieldAlertIcon, CheckCircle2 } from 'lucide-vue-next'
 
-import unisatIcon from '@/assets/unisat-icon.png?url'
 import { prettyAddress } from '@/lib/formatters'
-import {
-  useAddressStore,
-  useDummiesStore,
-  useNetworkStore,
-  type Network,
-} from '@/store'
-import { getAddress, connect } from '@/queries/unisat'
+import { useDummiesStore } from '@/stores/dummies'
+import { useNetworkStore, type Network } from '@/stores/network'
+import { useConnectionStore } from '@/stores/connection'
 import utils from '@/utils'
 import whitelist from '@/lib/whitelist'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
 
-import UnisatModal from './UnisatModal.vue'
+import WalletMissingModal from './WalletMissingModal.vue'
 import AssetsDisplay from './AssetsDisplay.vue'
 import NetworkState from './NetworkState.vue'
 import Notifications from './Notifications.vue'
 import TheNavbar from './TheNavbar.vue'
+import unisatIcon from '@/assets/unisat-icon.png?url'
+import okxIcon from '@/assets/okx-icon.png?url'
 
-const addressStore = useAddressStore()
 const networkStore = useNetworkStore()
 const dummiesStore = useDummiesStore()
+
+const { openConnectionModal } = useConnectionModal()
+
+const unisatAccountsChangedHandler = (accounts: string[]) => {
+  if (useConnectionStore().last.wallet !== 'unisat') return
+
+  ElMessage.warning({
+    message: 'Unisat account changed. Refreshing page...',
+    type: 'warning',
+    onClose: () => {
+      window.location.reload()
+    },
+  })
+}
+const okxAccountsChangedHandler = (accounts: string[]) => {
+  if (useConnectionStore().last.wallet !== 'okx') return
+
+  ElMessage.warning({
+    message: 'Okx account changed. Refreshing page...',
+    type: 'warning',
+    onClose: () => {
+      window.location.reload()
+    },
+  })
+}
 
 onMounted(async () => {
   if (window.unisat) {
     const unisat = window.unisat
-    unisat.on('accountsChanged', (accounts: string[]) => {
-      ElMessage.warning({
-        message: 'Unisat account changed. Refreshing page...',
-        type: 'warning',
-        onClose: () => {
-          window.location.reload()
-        },
-      })
-    })
+    unisat.on('accountsChanged', unisatAccountsChangedHandler)
 
     // getNetwork
-    const network: Network = await unisat.getNetwork()
-    const address = addressStore.get
+    // const network: Network = await unisat.getNetwork()
+    const network: Network = 'livenet'
+    const address = connectionStore.getAddress
 
     // if not in whitelist, switch to mainnet
-    if (network === 'testnet' && address && !whitelist.includes(address)) {
+    if (network !== 'livenet' && address && !whitelist.includes(address)) {
       const switchRes = await unisat.switchNetwork('livenet').catch(() => false)
       if (!switchRes) {
         ElMessage({
@@ -62,27 +77,27 @@ onMounted(async () => {
     }
     networkStore.set(network)
   }
+
+  if (window.okxwallet) {
+    window.okxwallet.on('accountsChanged', okxAccountsChangedHandler)
+  }
 })
 onBeforeUnmount(() => {
   // remove event listener
-  window.unisat?.removeListener('accountsChanged', () => {})
+  window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
+  window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
 })
 
 // connect / address related
-async function connectWallet() {
-  if (!window.unisat) {
-    unisatModalOpen.value = true
-    return
-  }
-
-  await connect()
-}
-
+const connectionStore = useConnectionStore()
 const { data: address } = useQuery({
   queryKey: ['address', { network: networkStore.network }],
-  queryFn: async () => getAddress(),
+  queryFn: async () =>
+    connectionStore.sync().then((connection) => connection?.address),
   retry: 0,
+  enabled: computed(() => connectionStore.connected),
 })
+
 const enabled = computed(() => !!address.value)
 useQuery({
   queryKey: [
@@ -92,7 +107,6 @@ useQuery({
   queryFn: async () =>
     utils.checkAndSelectDummies({
       checkOnly: true,
-      addressParam: address.value,
     }),
   retry: 0,
   enabled,
@@ -114,18 +128,26 @@ async function switchNetwork() {
   window.location.reload()
 }
 
+const walletIcon = computed(() => {
+  const connection = connectionStore.last
+
+  if (!connection) return null
+
+  return connection.wallet === 'unisat' ? unisatIcon : okxIcon
+})
+
 function copyAddress() {
   // copy address value to clipboard
-  if (!addressStore.get) return
-  navigator.clipboard.writeText(addressStore.get)
+  const address = connectionStore.getAddress
+  if (!address) return
+  navigator.clipboard.writeText(address)
   ElMessage.success('Address copied to clipboard')
 }
-
-const unisatModalOpen = ref(false)
 </script>
 
 <template>
-  <UnisatModal v-model:open="unisatModalOpen" />
+  <ConnectionModal />
+  <WalletMissingModal />
 
   <header class="flex items-center justify-between px-6 py-4 select-none">
     <TheNavbar />
@@ -138,7 +160,6 @@ const unisatModalOpen = ref(false)
           :content="`Click to switch to ${
             networkStore.network === 'testnet' ? 'livenet' : 'testnet'
           } `"
-          v-if="addressStore.get && whitelist.includes(addressStore.get)"
         >
           <button
             class="h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition hover:text-orange-300"
@@ -151,8 +172,8 @@ const unisatModalOpen = ref(false)
 
       <button
         class="h-10 rounded-lg border-2 border-orange-300 px-4 transition hover:text-orange-950 hover:bg-orange-300"
-        @click="connectWallet"
-        v-if="!addressStore.get"
+        @click="openConnectionModal"
+        v-if="!connectionStore.connected"
       >
         Connect Wallet
       </button>
@@ -166,9 +187,9 @@ const unisatModalOpen = ref(false)
             @click="copyAddress"
             title="copy address"
           >
-            <img class="h-5" :src="unisatIcon" alt="Unisat" />
+            <img class="h-5" :src="walletIcon" alt="Unisat" v-if="walletIcon" />
             <span class="text-sm text-orange-300">
-              {{ prettyAddress(addressStore.get, 4) }}
+              {{ address ? prettyAddress(address, 4) : '-' }}
             </span>
           </div>
 

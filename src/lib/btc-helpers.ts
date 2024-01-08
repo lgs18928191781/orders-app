@@ -2,7 +2,50 @@ import { Buffer } from 'buffer'
 import * as ecc from 'tiny-secp256k1'
 import { type Psbt } from 'bitcoinjs-lib'
 
-import { useBtcJsStore } from '@/store'
+import { useBtcJsStore } from '@/stores/btcjs'
+import { useConnectionStore } from '@/stores/connection'
+
+export function createValidator() {
+  const ECPair = useBtcJsStore().ECPair
+
+  if (!ECPair) throw new Error('ECPair is not set!')
+
+  const legacyValidator = (
+    pubkey: Buffer,
+    msghash: Buffer,
+    signature: Buffer
+  ): boolean => ECPair.fromPublicKey(pubkey).verify(msghash, signature)
+
+  const schnorrValidator = (
+    pubkey: Buffer,
+    msghash: Buffer,
+    signature: Buffer
+  ): boolean => ecc.verifySchnorr(msghash, pubkey, signature)
+
+  // determine which validator to use
+  const isTaproot = useConnectionStore().isTaproot
+  console.log(
+    '🚀 ~ file: btc-helpers.ts:27 ~ createValidator ~ isTaproot:',
+    isTaproot
+  )
+
+  return isTaproot ? schnorrValidator : legacyValidator
+}
+
+export function validatePsbt({ psbt, type }: { psbt: Psbt; type: 'ask' }) {
+  const validator = createValidator()
+
+  if (type === 'ask') {
+    // validate the first input;
+    // if taproot, tweak pubkey and validate
+    let pubkey
+    if (useConnectionStore().isTaproot) {
+      // pubkey = toXOnly(Buffer.from(useConnectionStore().getPubKey, 'hex'))
+      pubkey = Buffer.from(useConnectionStore().getPubKey, 'hex')
+    }
+    return psbt.validateSignaturesOfInput(0, validator)
+  }
+}
 
 export function toXOnly(pubKey: Buffer) {
   return pubKey.length === 32 ? pubKey : pubKey.slice(1, 33)
@@ -18,8 +61,18 @@ class BtcHelpers {
     this.ECPair = btcJsStore.ECPair!
   }
 
+  public createValidator() {
+    const validator = (
+      pubkey: Buffer,
+      msghash: Buffer,
+      signature: Buffer
+    ): boolean => this.ECPair.fromPublicKey(pubkey).verify(msghash, signature)
+
+    return validator
+  }
+
   public fromPubKey(pubKey: string): any {
-    return this.ECPair.fromPublicKey(pubKey)
+    return this.ECPair.fromPublicKey(Buffer.from(pubKey, 'hex'))
   }
 
   public tapTweakHash(pubKey: Buffer, h: Buffer | undefined): Buffer {

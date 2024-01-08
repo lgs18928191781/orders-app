@@ -3,38 +3,42 @@ import {
   Dialog,
   DialogPanel,
   DialogTitle,
+  DialogDescription,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
 import { FrownIcon } from 'lucide-vue-next'
 import { ref } from 'vue'
 
-defineProps<{
-  open?: boolean
-}>()
-const emit = defineEmits(['update:open'])
+import { useConnectionModal } from '@/hooks/use-connection-modal'
+
+const { isWalletMissingModalOpen, closeWalletMissingModal, missingWallet } =
+  useConnectionModal()
 
 const goButtonRef = ref<HTMLElement | null>(null)
 
-function close() {
-  emit('update:open', false)
-}
-
-function goToUnisat() {
+function goToMissingWallet() {
   close()
-  window.open(
-    'https://chrome.google.com/webstore/detail/unisat-wallet/ppbibelpcjmhbdihakflkdcoccbgbkpo',
-    '_blank'
-  )
+  if (missingWallet.value === 'unisat') {
+    window.open(
+      'https://chrome.google.com/webstore/detail/unisat-wallet/ppbibelpcjmhbdihakflkdcoccbgbkpo',
+      '_blank'
+    )
+  } else if (missingWallet.value === 'okx') {
+    window.open(
+      'https://chromewebstore.google.com/detail/mcohilncbfahbmgdjkbpemcciiolgcge',
+      '_blank'
+    )
+  }
 }
 </script>
 
 <template>
-  <TransitionRoot as="template" :show="open">
+  <TransitionRoot as="template" :show="isWalletMissingModalOpen">
     <Dialog
       as="div"
       class="relative z-10"
-      @close="close"
+      @close="closeWalletMissingModal"
       :initial-focus="goButtonRef"
     >
       <TransitionChild
@@ -47,8 +51,8 @@ function goToUnisat() {
         leave-to="opacity-0"
       >
         <div
-          class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur transition-all"
-        />
+          class="fixed inset-0 bg-black/20 backdrop-blur-sm transition-all"
+        ></div>
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -80,13 +84,20 @@ function goToUnisat() {
                   <DialogTitle
                     as="h3"
                     class="text-base font-semibold leading-6 text-zinc-100"
-                    >Unisat not installed</DialogTitle
                   >
+                    <span class="capitalize">
+                      {{ missingWallet }}
+                    </span>
+                    wallet not installed
+                  </DialogTitle>
                   <div class="mt-2">
-                    <p class="text-sm text-zinc-500">
-                      Orders.Exchange requires Unisat to be installed. Please
-                      install Unisat to continue.
-                    </p>
+                    <DialogDescription
+                      class="text-sm text-zinc-500 text-center"
+                    >
+                      Please install
+                      <span class="capitalize">{{ missingWallet }}</span> wallet
+                      to continue.
+                    </DialogDescription>
                   </div>
                 </div>
               </div>
@@ -94,10 +105,15 @@ function goToUnisat() {
                 <button
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-orange-300 px-3 py-2 text-sm font-semibold text-orange-950 shadow-sm transition-colors hover:bg-orange-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-300"
-                  @click="goToUnisat"
+                  @click="goToMissingWallet"
                   ref="goButtonRef"
                 >
-                  Go to Unisat
+                  Go to
+
+                  <span class="capitalize mx-2">
+                    {{ missingWallet }}
+                  </span>
+                  wallet
                 </button>
               </div>
             </DialogPanel>
