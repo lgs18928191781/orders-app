@@ -18,10 +18,12 @@ export function initPsbt() {
   const bitcoinJs = useBtcJsStore().get!
 
   // use templatePsbt otherwise for okx
-  return bitcoinJs.Psbt.fromHex(OKX_TEMPLATE_PSBT)
+  // return bitcoinJs.Psbt.fromHex(OKX_TEMPLATE_PSBT)
+  return new bitcoinJs.Psbt()
 }
 
 export function finishPsbt(psbt: string): string {
+  return psbt
   const btcjs = useBtcJsStore().get!
   const rebuild = (original: Psbt) => {
     const rebuilt = new btcjs.Psbt()
@@ -150,9 +152,11 @@ export const signPsbt = async (psbt: string, options?: any) => {
 
   const address = useConnectionStore().getAddress
 
-  const signed = await window.okxwallet.bitcoin.signPsbt(psbt, {
-    from: address,
-  })
+  // const signed = await window.okxwallet.bitcoin.signPsbt(psbt, {
+  //   from: address,
+  // })
+
+  const signed = await window.okxwallet.bitcoin.signPsbt(psbt, options)
 
   console.log({ equal: psbt === signed })
 

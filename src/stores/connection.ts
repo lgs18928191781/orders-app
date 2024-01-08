@@ -31,6 +31,7 @@ export const useConnectionStore = defineStore('connection', {
     connected: (state) =>
       state.last.status === 'connected' && !!state.last.address,
     getAddress: (state) => state.last.address,
+    isTaproot: (state) => state.last.address.startsWith('bc1p'),
     getPubKey: (state) => state.last.pubKey,
     provider: (state) => {
       if (!state.last) return null

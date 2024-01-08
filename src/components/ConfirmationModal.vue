@@ -10,21 +10,20 @@ import { Loader, ArrowDownIcon } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
 
 import { prettyBtcDisplay, prettyCoinDisplay } from '@/lib/formatters'
-import { pushAskOrder, pushBuyTake, pushSellTakeV2 } from '@/queries/orders-api'
+import { pushAskOrder, pushBuyTake } from '@/queries/orders-api'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import {
   DEBUG,
   SIGHASH_ALL,
-  SIGHASH_ALL_ANYONECANPAY,
   IS_DEV,
+  SIGHASH_SINGLE_ANYONECANPAY,
 } from '@/data/constants'
 import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
-import { toXOnly, validatePsbt } from '@/lib/btc-helpers'
-import { Buffer } from 'buffer'
+import { validatePsbt } from '@/lib/btc-helpers'
 import { fillInternalKey } from '@/lib/build-helpers'
 import { postBidOrder, postSellTake } from '@/queries/orders-v2'
 
@@ -101,6 +100,7 @@ async function submitBidOrder() {
       fillInternalKey(addingInput)
       bidGrant.addInput(addingInput)
     }
+    return
 
     // 3. we sign the bid order
     const signed = await adapter.signPsbt(bidGrant.toHex(), {
@@ -221,7 +221,19 @@ async function submitOrder() {
         break
       case 'ask':
         signed = await adapter.signPsbt(builtInfo.order.toHex())
+
+        // signed = await adapter.signPsbt(builtInfo.order.toHex(), {
+        //   autoFinalized: false,
+        //   toSignInputs: [
+        //     {
+        //       index: 0,
+        //       address: connectionStore.getAddress,
+        //       sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
+        //     },
+        //   ],
+        // })
         const finished = adapter.finishPsbt(signed)
+        console.log({ signed: btcjs.Psbt.fromHex(finished) })
         const isValid = validatePsbt({
           psbt: btcjs.Psbt.fromHex(finished),
           type: 'ask',
