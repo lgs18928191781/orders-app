@@ -8,6 +8,7 @@ import {
 } from '@headlessui/vue'
 import { ref } from 'vue'
 
+import { ElMessage } from 'element-plus'
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
@@ -41,6 +42,22 @@ async function connectToOkx() {
 
   const connection = await connectionStore.connect('okx')
   if (connection.status === 'connected') {
+    closeConnectionModal()
+  }
+}
+
+async function connectToMetalet() {
+  if (!window.metaidwallet) {
+    setMissingWallet('metalet')
+    return
+  }
+  const connection = await connectionStore.connect('metalet').catch(err => {
+    ElMessage.warning({
+      message: err.message,
+      type: 'warning',
+    })
+  })
+  if (connection?.status === 'connected') {
     closeConnectionModal()
   }
 }
@@ -115,9 +132,8 @@ async function connectToOkx() {
                   </button>
 
                   <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-orange-300/30 hover:border-orange-300/30 hover:bg-orange-300 hover:text-orange-950 disabled:opacity-30"
-                    @click="closeConnectionModal"
-                    :disabled="!IS_DEV"
+                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-orange-300/30 hover:border-orange-300/30 hover:bg-orange-300 hover:text-orange-950"
+                    @click="connectToMetalet"
                   >
                     <img
                       class="h-12 rounded"
