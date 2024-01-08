@@ -46,9 +46,9 @@ const token2 = computed(() => {
 const lp1 = ref(0)
 const lp2 = computed(() => {
   const pairData = {
-    swapToken1Amount: 11870875253,
-    swapToken2Amount: 2637889074,
-    swapLpAmount: 25001133081,
+    swapToken1Amount: 11888924484,
+    swapToken2Amount: 2653981922,
+    swapLpAmount: 25050191205,
   }
   const { swapToken1Amount, swapToken2Amount, swapLpAmount } = pairData
   const origin_amount = formatSat(lp1.value, 8)
@@ -61,6 +61,10 @@ const lp2 = computed(() => {
   )
 
   console.log('lpMinted', lpMinted, token2AddAmount)
+  // return {
+  //   token1RemoveAmount: formatTok(token1RemoveAmount, 8, 2),
+  //   token2RemoveAmount: formatTok(token2RemoveAmount, 6, 2),
+  // }
   return formatTok(token2AddAmount, 6)
 })
 
@@ -154,6 +158,12 @@ queryClient.setDefaultOptions({
 
     <div>
       <div>pool</div>
+
+      <!-- <div>
+        <span> lpRemove::</span>
+        <input type="text" v-model="lpRemove" class="text-black" />
+      </div> -->
+
       <div>
         <div>
           <span>space:</span>

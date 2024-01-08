@@ -186,13 +186,7 @@ export default class SwapAlgo {
     let amount2 = dirForward ? swapToken2Amount : swapToken1Amount
     let decimal1 = dirForward ? token1.decimal : token2.decimal
     let decimal2 = dirForward ? token2.decimal : token1.decimal
-    console.log(
-      'originAddAmount',
-      originAddAmount,
-      aimAddAmount,
-      decimal1,
-      decimal2
-    )
+
     const p = new Decimal(amount1).div(amount2)
     const p1 = new Decimal(
       new Decimal(amount1).sub(new Decimal(aimAddAmount).mul(10 ** decimal1))

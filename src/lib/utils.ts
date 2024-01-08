@@ -11,6 +11,17 @@ export function formatSat(tokenValue: number, tokenDecimal: number) {
   return new Decimal(tokenValue).mul(10 ** tokenDecimal).toNumber()
 }
 
-export function formatTok(tokenValue: number, tokenDecimal: number) {
-  return new Decimal(tokenValue).div(10 ** tokenDecimal).toNumber()
+export function formatTok(
+  tokenValue: number,
+  tokenDecimal: number,
+  fomat?: number
+) {
+  if (fomat) {
+    return new Decimal(tokenValue)
+      .div(10 ** tokenDecimal)
+      .toNumber()
+      .toFixed(fomat)
+  } else {
+    return new Decimal(tokenValue).div(10 ** tokenDecimal).toNumber()
+  }
 }
