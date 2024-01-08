@@ -40,7 +40,16 @@ interface Window {
       }) => Promise<string>
       signPsbt: (
         psbt: string,
-        { from, type }: { from: string; type?: any }
+        {
+          from,
+          type,
+          autoFinalized,
+        }?: {
+          from?: string
+          type?: any
+          autoFinalized?: boolean
+          toSignInputs?: any[]
+        }
       ) => Promise<string>
       inscribe: ({
         type,

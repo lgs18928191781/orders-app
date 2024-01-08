@@ -4,8 +4,11 @@ import { type Psbt } from 'bitcoinjs-lib'
 import { fetchBalance } from '@/queries/proxy'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
-import { generateRandomString } from '@/lib/helpers'
-import { OKX_TEMPLATE_PSBT } from '@/data/constants'
+import { generateRandomString, raise } from '@/lib/helpers'
+import {
+  OKX_TEMPLATE_PSBT,
+  SIGHASH_SINGLE_ANYONECANPAY,
+} from '@/data/constants'
 
 function checkOkx() {
   if (!window.okxwallet) {
@@ -22,41 +25,54 @@ export function initPsbt() {
   return new bitcoinJs.Psbt()
 }
 
-export function finishPsbt(psbt: string): string {
-  return psbt
-  const btcjs = useBtcJsStore().get!
-  const rebuild = (original: Psbt) => {
-    const rebuilt = new btcjs.Psbt()
-    rebuilt.setVersion(original.version)
-    rebuilt.setLocktime(original.locktime)
+export function finishPsbt(psbtStr: string): string {
+  return psbtStr
+  const btcjs = useBtcJsStore().get ?? raise('btcjs not initialized')
 
-    const useIndex = 2
-    const input: any = {
-      hash: original.txInputs[useIndex].hash,
-      index: original.txInputs[useIndex].index,
-    }
-    if (original.data.inputs[useIndex].witnessUtxo) {
-      input.witnessUtxo = original.data.inputs[useIndex].witnessUtxo
-    }
-    if (original.data.inputs[useIndex].nonWitnessUtxo) {
-      input.nonWitnessUtxo = original.data.inputs[useIndex].nonWitnessUtxo
-    }
-    if (original.data.inputs[useIndex].partialSig) {
-      input.partialSig = original.data.inputs[useIndex].partialSig
-    }
-    if (original.data.inputs[useIndex].finalScriptWitness) {
-      input.finalScriptWitness =
-        original.data.inputs[useIndex].finalScriptWitness
-    }
-    rebuilt.addInput(input)
-    rebuilt.addOutput(original.txOutputs[useIndex])
+  const psbtObj = btcjs.Psbt.fromHex(psbtStr)
 
-    return rebuilt
+  console.log({ before: psbtObj })
+  // finalize psbt
+  try {
+    psbtObj.finalizeAllInputs()
+  } catch (err) {
+    console.error(err)
   }
+  console.log({ after: psbtObj })
 
-  const psbtObj = btcjs.Psbt.fromHex(psbt)
+  // return psbt
+  // const rebuild = (original: Psbt) => {
+  //   const rebuilt = new btcjs.Psbt()
+  //   rebuilt.setVersion(original.version)
+  //   rebuilt.setLocktime(original.locktime)
 
-  return rebuild(psbtObj).toHex()
+  //   const useIndex = 2
+  //   const input: any = {
+  //     hash: original.txInputs[useIndex].hash,
+  //     index: original.txInputs[useIndex].index,
+  //   }
+  //   if (original.data.inputs[useIndex].witnessUtxo) {
+  //     input.witnessUtxo = original.data.inputs[useIndex].witnessUtxo
+  //   }
+  //   if (original.data.inputs[useIndex].nonWitnessUtxo) {
+  //     input.nonWitnessUtxo = original.data.inputs[useIndex].nonWitnessUtxo
+  //   }
+  //   if (original.data.inputs[useIndex].partialSig) {
+  //     input.partialSig = original.data.inputs[useIndex].partialSig
+  //   }
+  //   if (original.data.inputs[useIndex].finalScriptWitness) {
+  //     input.finalScriptWitness =
+  //       original.data.inputs[useIndex].finalScriptWitness
+  //   }
+  //   rebuilt.addInput(input)
+  //   rebuilt.addOutput(original.txOutputs[useIndex])
+
+  //   return rebuilt
+  // }
+
+  // const psbtObj = btcjs.Psbt.fromHex(psbt)
+
+  // return rebuild(psbtObj).toHex()
 }
 
 export const getAddress = async () => {
@@ -151,14 +167,23 @@ export const signPsbt = async (psbt: string, options?: any) => {
   checkOkx()
 
   const address = useConnectionStore().getAddress
+  console.log({ address })
 
   // const signed = await window.okxwallet.bitcoin.signPsbt(psbt, {
-  //   from: address,
+  //   autoFinalized: true,
+  //   type: 3,
+  //   toSignInputs: [
+  //     {
+  //       index: 0,
+  //       address,
+  //       sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
+  //     },
+  //   ],
   // })
-
-  const signed = await window.okxwallet.bitcoin.signPsbt(psbt, options)
+  const signed = await window.okxwallet.bitcoin.signPsbt(psbt)
 
   console.log({ equal: psbt === signed })
+  console.log({ signed: useBtcJsStore().get!.Psbt.fromHex(signed) })
 
   return signed
 }

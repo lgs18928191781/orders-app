@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
-    "init-btc": "npx browserify --standalone bitcoin - -o src/lib/bitcoin.js <<<\"module.exports = require('bitcoinjs-lib');\"",
+    "init-btc": "npx browserify --standalone bitcoin - -o public/bitcoin.js <<<\"module.exports = require('bitcoinjs-lib');\"",
     "init-ecpair": "npx browserify --standalone ecpair - -o public/ecpair.js <<<\"module.exports = require('ecpair');\"",
     "init-bip32": "npx browserify --standalone bip32 - -o public/bip32.js <<<\"module.exports = require('bip32');\"",
     "init-bip39": "npx browserify --standalone bip39 - -o public/bip39.js <<<\"module.exports = require('bip39');\""
@@ -19,7 +19,7 @@
     "@vueuse/router": "^10.7.1",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
-    "bitcoinjs-lib": "^6.1.0",
+    "bitcoinjs-lib": "^6.1.5",
     "browserify": "^17.0.0",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.0",

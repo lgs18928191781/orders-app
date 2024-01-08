@@ -19,6 +19,8 @@ import { raise } from './helpers'
 import { Output } from 'bitcoinjs-lib/src/transaction'
 import { getListingUtxos } from '@/queries/orders-api'
 import { toXOnly } from '@/lib/btc-helpers'
+import { useNetwork } from '@vueuse/core'
+import { useNetworkStore } from '@/stores/network'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -173,9 +175,14 @@ export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
   const lostInternalPubkey = !input.tapInternalKey
 
   if (isP2TR && lostInternalPubkey) {
-    const pubKey = toXOnly(Buffer.from(useConnectionStore().getPubKey, 'hex'))
-    if (input.witnessUtxo?.script.toString('hex') == address) {
-      input.tapInternalKey = pubKey
+    const tapInternalKey = toXOnly(
+      Buffer.from(useConnectionStore().getPubKey, 'hex')
+    )
+    const { output } = useBtcJsStore().get!.payments.p2tr({
+      internalPubkey: tapInternalKey,
+    })
+    if (input.witnessUtxo?.script.toString('hex') == output.toString('hex')) {
+      input.tapInternalKey = tapInternalKey
     }
   }
 

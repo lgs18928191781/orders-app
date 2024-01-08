@@ -222,28 +222,8 @@ async function submitOrder() {
       case 'ask':
         signed = await adapter.signPsbt(builtInfo.order.toHex())
 
-        // signed = await adapter.signPsbt(builtInfo.order.toHex(), {
-        //   autoFinalized: false,
-        //   toSignInputs: [
-        //     {
-        //       index: 0,
-        //       address: connectionStore.getAddress,
-        //       sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
-        //     },
-        //   ],
-        // })
-        const finished = adapter.finishPsbt(signed)
-        console.log({ signed: btcjs.Psbt.fromHex(finished) })
-        const isValid = validatePsbt({
-          psbt: btcjs.Psbt.fromHex(finished),
-          type: 'ask',
-        })
-        if (!isValid) {
-          throw new Error('Sign failed. Please contact support.')
-        }
-
         pushRes = await pushAskOrder({
-          psbtRaw: finished,
+          psbtRaw: signed,
           network: networkStore.ordersNetwork,
           address: connectionStore.getAddress,
           tick: selectedPair.fromSymbol,

@@ -117,20 +117,18 @@ export async function buildAskLimit({
     } catch (e: any) {}
   }
 
-  const input = {
+  const input = fillInternalKey({
     hash: ordinalUtxo.txId,
     index: ordinalUtxo.outputIndex,
     witnessUtxo: ordinalPreTx.outs[ordinalUtxo.outputIndex],
-    sighashType: SIGHASH_ALL_ANYONECANPAY,
-  }
-  fillInternalKey(input)
+    sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+  })
   ask.addInput(input)
 
   // Step 2: Build output as what the seller want (BTC)
   ask.addOutput({
     address,
     value: safeOutputValue(total),
-    // tapInternalKey: toXOnly(Buffer.from(useConnectionStore().getPubKey, 'hex')),
   })
 
   return {
