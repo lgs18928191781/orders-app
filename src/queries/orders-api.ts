@@ -435,13 +435,7 @@ export const getOneBidOrder = async ({
   })
 
   const order: BidV20Order = await ordersApiFetch(
-    `order/bid-v2/do/pre?${params}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    `order/bid-v2/do/pre?${params}`
   ).then((order) => {
     order.furtherFee =
       order.releaseInscriptionFee +
@@ -450,6 +444,35 @@ export const getOneBidOrder = async ({
 
     return order
   })
+  return order
+}
+
+export const getAskOrderDetail = async ({
+  orderId,
+  address,
+  tick,
+  buyerChangeAmount,
+}: {
+  orderId: string
+  address: string
+  tick: string
+  buyerChangeAmount: number
+}): Promise<DetailedOrder> => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    buyerAddress: address,
+    tick,
+  })
+
+  const order: DetailedOrder = await ordersApiFetch(
+    `order/${orderId}?${params}`,
+    {
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+    }
+  )
 
   return order
 }
