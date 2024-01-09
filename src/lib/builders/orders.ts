@@ -27,7 +27,7 @@ import {
   getOneBrc20,
   getOneOrder,
   getSellFees,
-  getAskOrderDetail,
+  getBuyEssentials,
 } from '@/queries/orders-api'
 import { getUtxos, type SimpleUtxo, getTxHex } from '@/queries/proxy'
 import { type TradingPair } from '@/data/trading-pairs'
@@ -288,7 +288,7 @@ export async function buildBuyTake({
 
   const isFree = order.freeState === 1
 
-  const askPsbtRaw = await getAskOrderDetail({
+  const askPsbtRaw = await getBuyEssentials({
     orderId: order.orderId,
     address,
     tick: selectedPair.fromSymbol,

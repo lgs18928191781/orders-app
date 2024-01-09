@@ -1,9 +1,8 @@
 import { useConnectionStore } from '@/stores/connection'
-import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 import sign from '@/lib/sign'
 import { ordersV2Fetch } from '@/lib/fetch'
-import { raise } from '@/lib/helpers'
+import { Order } from './orders-api'
 
 export const getPlatformPublicKey = async (): Promise<{
   platformPublicKey: string
@@ -21,6 +20,39 @@ export const getPlatformPublicKey = async (): Promise<{
   })
 
   return res
+}
+
+type DetailedOrder = Order & {
+  psbtRaw: string
+  takePsbtRaw: string
+  platformFee: number
+}
+export const getBuyEssentials = async ({
+  orderId,
+  address,
+  tick,
+  buyerChangeAmount,
+}: {
+  orderId: string
+  address: string
+  tick: string
+  buyerChangeAmount: number
+}): Promise<DetailedOrder> => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    buyerAddress: address,
+    tick,
+    platformDummy: '1',
+  })
+
+  const order: DetailedOrder = await ordersV2Fetch(`${orderId}?${params}`, {
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+  })
+
+  return order
 }
 
 export const postBidOrder = async ({

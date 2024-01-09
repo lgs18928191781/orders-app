@@ -1,9 +1,5 @@
 import { TradingPair } from '@/data/trading-pairs'
-import {
-  constructBidPsbt,
-  getOneBidOrder,
-  getOneBrc20,
-} from '@/queries/orders-api'
+import { getOneBrc20 } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import {
@@ -12,19 +8,21 @@ import {
   safeOutputValue,
 } from '../build-helpers'
 import {
-  EXTRA_INPUT_MIN_VALUE,
-  ONE_SERVICE_FEE,
+  BUY_PRICE_OUTPUT_INDEX,
+  SERVICE_LIVENET_ADDRESS,
+  SERVICE_LIVENET_RDEX_ADDRESS,
+  SERVICE_TESTNET_ADDRESS,
   SIGHASH_ALL,
-  SIGHASH_ALL_ANYONECANPAY,
   USE_UTXO_COUNT_LIMIT,
 } from '@/data/constants'
 import {
   getPlatformPublicKey,
   getSellEssentials,
   getSellFees,
+  getBuyEssentials,
 } from '@/queries/orders-v2'
-import { generateP2wshPayment, getBothPubKeys } from './helpers'
-import { raise, raiseUnless } from '../helpers'
+import { generateP2wshPayment } from '@/lib/builders/helpers'
+import { raise, raiseUnless } from '@/lib/helpers'
 import { useFeebStore } from '@/stores/feeb'
 import { getExcludedUtxos } from '@/queries/excluded-utxos'
 import { useBtcJsStore } from '@/stores/btcjs'
@@ -124,6 +122,82 @@ export async function buildBidOffer({
     serviceFee: 0,
     totalPrice: total,
     totalSpent: payFee + bidGrantFee + total,
+  }
+}
+
+export async function buildBuyTake({
+  order,
+  selectedPair,
+}: {
+  order: {
+    coinRatePrice: number
+    amount: number
+    coinAmount: number
+    orderId: string
+    freeState?: number
+  }
+  selectedPair: TradingPair
+}) {
+  const address = useConnectionStore().getAddress
+  const btcjs = useBtcJsStore().get!
+  const btcNetwork = useNetworkStore().btcNetwork
+
+  const isFree = order.freeState === 1
+
+  // 1. get buy essentials and construct buy psbt
+  const buyEssentials = await getBuyEssentials({
+    orderId: order.orderId,
+    address,
+    tick: selectedPair.fromSymbol,
+    buyerChangeAmount: 0,
+  })
+
+  const buy = btcjs.Psbt.fromHex(buyEssentials.takePsbtRaw, {
+    network: btcjs.networks[btcNetwork],
+  })
+  console.log('🚀 ~ file: order-builder.ts:293 ~ askPsbt:', buy)
+
+  // 2. add service fee
+  // 🚓🚓 UPDATE: Since now the transaction structure is controlled by backend, we dont' have to add service fees outputs on our own
+  // let serviceFee = 0
+  // if (isFree) {
+  //   serviceFee = 0
+  // } else {
+  //   const serviceAddress =
+  //     btcNetwork === 'bitcoin'
+  //       ? selectedPair.fromSymbol === 'rdex'
+  //         ? SERVICE_LIVENET_RDEX_ADDRESS
+  //         : SERVICE_LIVENET_ADDRESS
+  //       : SERVICE_TESTNET_ADDRESS
+  //   serviceFee = safeOutputValue(
+  //     Math.max(2000, Math.ceil(priceOutput.value * 0.01))
+  //   )
+  //   buy.addOutput({
+  //     address: serviceAddress,
+  //     value: serviceFee,
+  //   })
+  // }
+
+  // 3. pay for the order / service fees and gas and change
+  const { fee } = await exclusiveChange({
+    psbt: buy,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+  })
+  const totalSpent = buyEssentials.amount + buyEssentials.platformFee + fee
+
+  return {
+    order: buy,
+    type: isFree ? 'free claim' : 'buy',
+    orderId: order.orderId,
+    totalPrice: buyEssentials.amount,
+    networkFee: fee,
+    serviceFee: buyEssentials.platformFee,
+    totalSpent,
+    fromSymbol: selectedPair.toSymbol,
+    toSymbol: selectedPair.fromSymbol,
+    fromValue: buyEssentials.amount,
+    toValue: order.coinAmount,
+    isFree,
   }
 }
 

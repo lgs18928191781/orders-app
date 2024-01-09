@@ -447,7 +447,7 @@ export const getOneBidOrder = async ({
   return order
 }
 
-export const getAskOrderDetail = async ({
+export const getBuyEssentials = async ({
   orderId,
   address,
   tick,
@@ -462,6 +462,7 @@ export const getAskOrderDetail = async ({
   const params = new URLSearchParams({
     buyerAddress: address,
     tick,
+    platformDummy: '1',
   })
 
   const order: DetailedOrder = await ordersApiFetch(

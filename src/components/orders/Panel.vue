@@ -25,8 +25,8 @@ import { get } from '@vueuse/core'
 import { prettyBalance } from '@/lib/formatters'
 import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { calculateFee } from '@/lib/build-helpers'
-import { buildAskLimit, buildBuyTake } from '@/lib/builders/orders'
-import { buildBidOffer, buildSellTake } from '@/lib/builders/orders-v2'
+import { buildAskLimit } from '@/lib/builders/orders'
+import { buildBidOffer, buildBuyTake, buildSellTake } from '@/lib/builders/orders-v2'
 import {
   getOrdiBalance,
   getOrders,
@@ -326,8 +326,8 @@ const isBuilding = ref(false)
 const builtInfo = ref()
 
 // limit exchange mode
-const isLimitExchangeMode = ref(true)
-const limitExchangeType: Ref<'bid' | 'ask'> = ref('ask')
+const isLimitExchangeMode = ref(false)
+const limitExchangeType: Ref<'bid' | 'ask'> = ref('bid')
 const { data: marketPrice } = useQuery({
   queryKey: [
     'marketPrice',
