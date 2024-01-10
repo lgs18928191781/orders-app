@@ -241,7 +241,7 @@ async function submitReleaseRecord() {
             </DisclosureButton>
 
             <DisclosurePanel
-              class="text-gray-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5 text-xs"
+              class="text-zinc-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5 text-xs"
             >
               <div class="">
                 <div>Confirm Block Height</div>

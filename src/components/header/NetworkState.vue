@@ -351,7 +351,7 @@ const { data: fiatRate } = useQuery({
                       aria-hidden="true"
                       v-for="i in Array.from({ length: colorCarsCount })"
                     />
-                    <!-- gray cars -->
+                    <!-- zinc cars -->
                     <CarIcon
                       class="h-6 w-6 text-zinc-700"
                       aria-hidden="true"

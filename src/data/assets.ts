@@ -13,6 +13,7 @@ import btcsLogo from '@/assets/btcs.jpg?url'
 import ibtcLogo from '@/assets/ibtc.jpg?url'
 import biliLogo from '@/assets/bili.jpg?url'
 import ratsLogo from '@/assets/rats.jpg?url'
+import { IS_DEV } from '@/data/constants'
 
 const assets = [
   {
@@ -96,5 +97,13 @@ const assets = [
     icon: ratsLogo,
   },
 ]
+
+if (IS_DEV) {
+  assets.push({
+    id: 18,
+    symbol: 'orxc',
+    icon: rdexLogo,
+  })
+}
 
 export default assets

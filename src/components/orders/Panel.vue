@@ -508,7 +508,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                           @input="(event: any) => updateExchangePrice(event.target.value, 'bid')"
                         />
                         <span
-                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                         >
                           {{ unit }}
                         </span>
@@ -552,7 +552,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                           v-model.number="bidAmount"
                         />
                         <span
-                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                         >
                           ${{ selectedPair.fromSymbol }}
                         </span>
@@ -615,7 +615,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                           @input="(event: any) => updateExchangePrice(event.target.value, 'ask')"
                         />
                         <span
-                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                         >
                           {{ unit }}
                         </span>
@@ -665,7 +665,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                           v-model.number="askExchangeOrdiAmount"
                         />
                         <span
-                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400 uppercase"
+                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400 uppercase"
                         >
                           ${{ selectedPair.fromSymbol }}
                         </span>
@@ -685,7 +685,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                           </span>
 
                           <span
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                           >
                             <span class="uppercase">
                               ${{ selectedPair.fromSymbol }}
@@ -850,7 +850,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                       {{ prettyBalance(useBuyPrice, useBtcUnit) }}
                     </div>
                     <span
-                      class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                      class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                     >
                       {{ unit }}
                     </span>
@@ -884,7 +884,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                       </span>
 
                       <span
-                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                       >
                         <span class="uppercase"
                           >${{ selectedPair.fromSymbol }}</span
@@ -978,7 +978,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                       {{ prettyBalance(useSellPrice, useBtcUnit) }}
                     </div>
                     <span
-                      class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                      class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                     >
                       {{ unit }}
                     </span>
@@ -1015,7 +1015,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                       </span>
 
                       <span
-                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"
+                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
                       >
                         <span class="uppercase"
                           >${{ selectedPair.fromSymbol }}</span

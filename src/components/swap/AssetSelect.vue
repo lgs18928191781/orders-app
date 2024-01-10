@@ -11,6 +11,7 @@ import {
 import assets from '@/data/assets'
 import { prettySymbol } from '@/lib/formatters'
 
+const brcAssets = assets.filter((a) => a.symbol !== 'btc')
 const assetSymbol = defineModel('assetSymbol', { required: true, type: String })
 const selectedAsset = computed(() => {
   const selected = assets.find(
@@ -60,11 +61,11 @@ const selectedAsset = computed(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute right-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800"
+        class="absolute right-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800 border border-orange-300/10 shadow shadow-orange-300/30"
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="asset in assets"
+          v-for="asset in brcAssets"
           :key="asset.id"
           :value="asset.symbol"
         >
