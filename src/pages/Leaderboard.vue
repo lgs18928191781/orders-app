@@ -98,9 +98,9 @@ const trophyColor = (index: number) => {
           class="caption-bottom text-sm w-full text-zinc-100"
           v-if="leaderboard && leaderboard.total > 0"
         >
-          <thead class="[&amp;_tr]:border-b">
+          <thead class="[&amp;_tr]:border-b border-zinc-500">
             <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              class="border-b border-zinc-500 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
             >
               <th
                 class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-center"
@@ -122,7 +122,7 @@ const trophyColor = (index: number) => {
 
           <tbody class="border-0">
             <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              class="border-b border-zinc-500 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               v-for="(row, index) in leaderboard.results"
             >
               <td class="text-center">
