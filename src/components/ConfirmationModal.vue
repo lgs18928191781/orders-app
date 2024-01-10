@@ -14,12 +14,7 @@ import { pushAskOrder, pushBuyTake } from '@/queries/orders-api'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import {
-  DEBUG,
-  SIGHASH_ALL,
-  IS_DEV,
-  SIGHASH_SINGLE_ANYONECANPAY,
-} from '@/data/constants'
+import { DEBUG, SIGHASH_ALL, IS_DEV } from '@/data/constants'
 import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
@@ -172,6 +167,7 @@ async function submitOrder() {
       case 'buy':
       case 'free claim':
         signed = await adapter.signPsbt(builtInfo.order.toHex())
+        return
 
         pushRes = await pushBuyTake({
           psbtRaw: signed,
