@@ -78,6 +78,7 @@ export async function buildBidOffer({
       utxo.satoshis >= bidGrantInputValue &&
       utxo.satoshis <= bidGrantInputValue + 1000
   )
+  console.log({ foundUtxo })
 
   let pay: any
   let payFee = 0

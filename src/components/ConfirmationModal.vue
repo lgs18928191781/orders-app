@@ -88,7 +88,7 @@ async function submitBidOrder() {
       payTxRaw = payPsbt.extractTransaction().toHex()
 
       // 2. now we can add that utxo to the bid order
-      const addingInput = {
+      const addingInput = fillInternalKey({
         hash: payPsbt.extractTransaction().getId(),
         index: 0,
         witnessUtxo: {
@@ -96,11 +96,9 @@ async function submitBidOrder() {
           value: payPsbt.extractTransaction().outs[0].value,
         },
         sighashType: SIGHASH_ALL,
-      }
-      fillInternalKey(addingInput)
+      })
       bidGrant.addInput(addingInput)
     }
-    return
 
     // 3. we sign the bid order
     const signed = await adapter.signPsbt(bidGrant.toHex(), {
@@ -108,6 +106,7 @@ async function submitBidOrder() {
     })
     // extract
     const grantTxRaw = btcjs.Psbt.fromHex(signed).extractTransaction().toHex()
+    console.log({ grant: btcjs.Psbt.fromHex(signed) })
 
     // 4. push the bid order to the api
     const pushRes = await postBidOrder({

@@ -327,7 +327,7 @@ const builtInfo = ref()
 
 // limit exchange mode
 const isLimitExchangeMode = ref(true)
-const limitExchangeType: Ref<'bid' | 'ask'> = ref('ask')
+const limitExchangeType: Ref<'bid' | 'ask'> = ref('bid')
 const { data: marketPrice } = useQuery({
   queryKey: [
     'marketPrice',
