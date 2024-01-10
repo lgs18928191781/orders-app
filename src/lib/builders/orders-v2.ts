@@ -89,6 +89,7 @@ export async function buildBidOffer({
           script: btcjs.address.toOutputScript(address),
           value: foundUtxo.satoshis,
         },
+        sighashType: SIGHASH_ALL,
       })
     )
   } else {
@@ -183,6 +184,7 @@ export async function buildBuyTake({
   const { fee } = await exclusiveChange({
     psbt: buy,
     maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+    sighashType: SIGHASH_ALL,
   })
   const totalSpent = buyEssentials.amount + buyEssentials.platformFee + fee
 
@@ -213,7 +215,6 @@ export async function buildSellTake({
   amount: number
   selectedPair: TradingPair
 }) {
-  const networkStore = useNetworkStore()
   const address = useConnectionStore().getAddress
   const feeb = useFeebStore().feeb ?? raise('Choose a gas plan first')
   const btcjs = useBtcJsStore().get ?? raise('Btcjs not initialized')
@@ -266,9 +267,12 @@ export async function buildSellTake({
   console.log('🚀 ~ file: orders-v2.ts:192 ~ sell:', sell)
 
   // check if total amount is correct
-  const sellerOutputIndex = 2
-  const sellerOutputAmount = sell.txOutputs[sellerOutputIndex].value
+  const sellerIndex = 2
+  const sellerOutputAmount = sell.txOutputs[sellerIndex].value
   raiseUnless(sellerOutputAmount === total, 'Amount mismatch')
+
+  // fill tap internal key for the ordinal input if it's a taproot address
+  fillInternalKey(sell.data.inputs[sellerIndex])
 
   // 6. change
   const { fee } = await exclusiveChange({

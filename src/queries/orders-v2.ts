@@ -55,6 +55,38 @@ export const getBuyEssentials = async ({
   return order
 }
 
+export const postBuyTake = async ({
+  network,
+  psbtRaw,
+  orderId,
+}: {
+  network: 'livenet' | 'testnet'
+  psbtRaw: string
+  orderId: string
+}) => {
+  const address = useConnectionStore().getAddress
+
+  const { publicKey, signature } = await sign()
+
+  const updateRes = await ordersV2Fetch(`update`, {
+    method: 'POST',
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+    body: JSON.stringify({
+      net: network,
+      address,
+      orderId,
+      orderState: 2,
+      psbtRaw,
+      broadcastIndex: 1,
+    }),
+  })
+
+  return updateRes
+}
+
 export const postBidOrder = async ({
   network,
   address,

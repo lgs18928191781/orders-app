@@ -41,6 +41,14 @@ export const getAddress = async () => {
   return ''
 }
 
+export const getPubKey = async () => {
+  if (!window.unisat) {
+    return ''
+  }
+
+  return await window.unisat.getPublicKey()
+}
+
 export const connect: () => Promise<{
   address: string
   pubKey: string

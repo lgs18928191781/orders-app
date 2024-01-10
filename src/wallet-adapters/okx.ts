@@ -101,6 +101,14 @@ export const getAddress = async () => {
   return address
 }
 
+export const getPubKey = async () => {
+  if (!window.unisat) {
+    return ''
+  }
+
+  return await window.okxwallet.bitcoin.getPublicKey()
+}
+
 export const connect: () => Promise<{
   address: string
   pubKey: string
@@ -166,21 +174,7 @@ export const inscribe = async (tick: string) => {
 export const signPsbt = async (psbt: string, options?: any) => {
   checkOkx()
 
-  const address = useConnectionStore().getAddress
-  console.log({ address })
-
-  // const signed = await window.okxwallet.bitcoin.signPsbt(psbt, {
-  //   autoFinalized: true,
-  //   type: 3,
-  //   toSignInputs: [
-  //     {
-  //       index: 0,
-  //       address,
-  //       sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
-  //     },
-  //   ],
-  // })
-  const signed = await window.okxwallet.bitcoin.signPsbt(psbt)
+  const signed = await window.okxwallet.bitcoin.signPsbt(psbt, options)
 
   console.log({ equal: psbt === signed })
   console.log({ signed: useBtcJsStore().get!.Psbt.fromHex(signed) })

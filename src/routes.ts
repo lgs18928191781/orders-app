@@ -36,7 +36,7 @@ const routes = [
   { path: '/swap', component: Swap },
   { path: '/whitelist', component: Whitelist },
   { path: '/changelog', component: Changelog },
-  { path: '/pool/:pair?', component: Pool },
+  // { path: '/pool/:pair?', component: Pool },
   { path: '/recover', component: Recover },
   { path: '/dev', component: Dev },
   { path: '/not-available', component: NoService },

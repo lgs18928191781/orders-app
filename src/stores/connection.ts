@@ -45,6 +45,7 @@ export const useConnectionStore = defineStore('connection', {
         initPsbt: () => Psbt
         finishPsbt: (psbt: string) => string
         getAddress: () => Promise<string>
+        getPubKey: () => Promise<string>
         connect: () => Promise<{
           address: string
           pubKey: string
@@ -98,9 +99,11 @@ export const useConnectionStore = defineStore('connection', {
         this.last.wallet === 'unisat'
           ? await unisatAdapter.getAddress()
           : await okxAdapter.getAddress()
+      const pubKey = await this.adapter.getPubKey()
 
       this.last.status = 'connected'
       this.last.address = address
+      this.last.pubKey = pubKey
 
       await login()
 
@@ -116,6 +119,7 @@ export const useConnectionStore = defineStore('connection', {
 
       this.last.status = 'disconnected'
       this.last.address = ''
+      this.last.pubKey = ''
     },
   },
 })

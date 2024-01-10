@@ -164,7 +164,9 @@ export function calculatePsbtFee(psbt: Psbt, feeRate: number, isMs?: boolean) {
   return Math.round(fee * multiplier)
 }
 
-export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
+export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
+  input: T
+): T {
   // check if the input is mine, and address is Taproot
   // if so, fill in the internal key
   const address =
@@ -180,6 +182,10 @@ export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
     )
     const { output } = useBtcJsStore().get!.payments.p2tr({
       internalPubkey: tapInternalKey,
+    })
+    console.log({
+      script1: input.witnessUtxo?.script.toString('hex'),
+      script2: output.toString('hex'),
     })
     if (input.witnessUtxo?.script.toString('hex') == output.toString('hex')) {
       input.tapInternalKey = tapInternalKey
