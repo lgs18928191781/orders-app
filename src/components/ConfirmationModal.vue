@@ -399,9 +399,12 @@ async function submitOrder() {
                 <div class="col-span-1 text-right">
                   <div
                     class="flex items-center justify-end gap-2"
-                    v-if="builtInfo.isFree"
+                    v-if="builtInfo.isFree || builtInfo.serviceFee === 0"
                   >
-                    <span class="text-zinc-500 line-through">
+                    <span
+                      class="text-zinc-500 line-through"
+                      v-if="builtInfo.isFree"
+                    >
                       {{ prettyBtcDisplay(2000) }}
                     </span>
                     <span
