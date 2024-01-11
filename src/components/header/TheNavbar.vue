@@ -27,10 +27,10 @@ const links: {
     path: '/swap',
     version: 0,
   },
-  {
-    name: 'Events',
-    path: '/whitelist',
-  },
+  // {
+  //   name: 'Events',
+  //   path: '/whitelist',
+  // },
   {
     name: 'Leaderboard',
     path: '/leaderboard',

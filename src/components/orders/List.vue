@@ -9,7 +9,6 @@ import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import OrderItem from './Item.vue'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
-import Decimal from 'decimal.js'
 import { useConnectionStore } from '@/stores/connection'
 import { ElMessage } from 'element-plus'
 
@@ -121,7 +120,7 @@ const useSellPrice = (order: Order) => {
           </tr>
         </thead>
 
-        <tbody v-if="askOrders.length">
+        <tbody v-if="askOrders.length" id="askOrdersList">
           <OrderItem
             v-for="order in rearrangedAskOrders"
             :key="order.orderId"
@@ -196,7 +195,7 @@ const useSellPrice = (order: Order) => {
           </tr>
         </thead>
 
-        <tbody>
+        <tbody id="bidOrdersList">
           <OrderItem
             v-for="order in bidOrders"
             :key="order.orderId"

@@ -49,11 +49,13 @@ import btcIcon from '@/assets/btc.svg?url'
 import OrderPanelHeader from './PanelHeader.vue'
 import OrderList from './List.vue'
 import OrderConfirmationModal from '../ConfirmationModal.vue'
+import { useAreaHighlight } from '@/hooks/use-area-highlight'
 
 const connectionStore = useConnectionStore()
 const address = connectionStore.getAddress
 const networkStore = useNetworkStore()
 const feebStore = useFeebStore()
+const { highlight } = useAreaHighlight()
 
 const selectedPair = selectPair()
 provide(selectedPairKey, selectedPair)
@@ -347,7 +349,24 @@ const bidTotalExchangePrice = computed(() => {
 })
 
 const canPlaceBidOrder = computed(() => {
-  return bidExchangePrice.value > 0 && bidAmount.value > 0
+  return (
+    bidExchangePrice.value > 0 &&
+    bidAmount.value > 0 &&
+    bidTotalExchangePrice.value >= 10000
+  )
+})
+const cannotPlaceBidOrderReason = computed(() => {
+  if (bidExchangePrice.value <= 0) {
+    return 'Enter a price'
+  }
+  if (bidAmount.value <= 0) {
+    return 'Enter an amount'
+  }
+  if (bidTotalExchangePrice.value < 10000) {
+    return 'Order should > 0.0001 BTC'
+  }
+
+  return ''
 })
 
 const askExchangePrice = ref(0)
@@ -382,8 +401,26 @@ const askTotalExchangePrice = computed(() => {
   return Math.round(askExchangePrice.value * askLimitBrcAmount.value)
 })
 const canPlaceAskOrder = computed(() => {
-  return askExchangePrice.value > 0 && askLimitBrcAmount.value > 0
+  return (
+    askExchangePrice.value > 0 &&
+    askLimitBrcAmount.value > 0 &&
+    askTotalExchangePrice.value >= 10000
+  )
 })
+const cannotPlaceAskOrderReason = computed(() => {
+  if (askExchangePrice.value <= 0) {
+    return 'Enter a price'
+  }
+  if (askLimitBrcAmount.value <= 0) {
+    return 'Enter an amount'
+  }
+  if (askTotalExchangePrice.value < 10000) {
+    return 'Order should > 0.0001 BTC'
+  }
+
+  return ''
+})
+
 const { data: ordiBalance } = useQuery({
   queryKey: [
     'ordiBalance',
@@ -584,7 +621,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                     @click="buildOrder"
                     :disabled="!canPlaceBidOrder"
                   >
-                    Place Bid Order
+                    {{ cannotPlaceBidOrderReason || 'Place Bid Order' }}
                   </button>
                 </div>
               </TabPanel>
@@ -795,7 +832,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                     @click="buildOrder"
                     :disabled="!canPlaceAskOrder"
                   >
-                    Place Ask Order
+                    {{ cannotPlaceAskOrderReason || 'Place Ask Order' }}
                   </button>
                 </div>
               </TabPanel>
@@ -870,11 +907,26 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                     <span class="ml-2 text-zinc-500">Amount</span>
                   </div>
 
-                  <Listbox
+                  <div
+                    class="max-w-[67%] grow flex items-center"
+                    v-if="useBuyOrderId"
+                  >
+                    <div class="w-full p-2 text-right outline-none">
+                      {{ selectedBuyCoinAmount }}
+                    </div>
+                    <div
+                      class="pointer-events-none flex items-center pr-2 text-zinc-400 uppercase"
+                    >
+                      ${{ selectedPair.fromSymbol }}
+                    </div>
+                  </div>
+
+                  <!-- <Listbox
                     v-model="selectedBuyOrders"
                     multiple
                     as="div"
                     class="relative max-w-[67%] grow"
+                    v-if="useBuyOrderId"
                   >
                     <ListboxButton
                       class="relative w-full cursor-default rounded bg-zinc-700 py-2 pl-3 pr-20 text-right text-sm focus:outline-none"
@@ -931,7 +983,26 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                         </li>
                       </ListboxOption>
                     </ListboxOptions>
-                  </Listbox>
+                  </Listbox> -->
+
+                  <div
+                    class="max-w-[67%] grow text-right text-orange-300 py-1"
+                    v-else
+                  >
+                    <button
+                      class="text-orange-300/80 flex items-center gap-2 justify-end w-full group"
+                      @click="highlight('askOrdersList')"
+                    >
+                      <span class="group-hover:underline">Select an</span>
+
+                      <span
+                        class="text-red-500 font-bold bg-red-500/20 py-0.5 px-2 rounded-md"
+                      >
+                        ASK Order
+                      </span>
+                      <span class="group-hover:underline">to buy</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -989,6 +1060,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                 <!-- <div class="mt-2 text-right text-sm">≈$12.99</div> -->
 
                 <!-- amount -->
+
                 <div
                   class="mt-4 flex items-center justify-between rounded-md border border-zinc-500 p-2"
                 >
@@ -1001,11 +1073,26 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                     <span class="ml-2 text-zinc-500">Amount</span>
                   </div>
 
-                  <Listbox
+                  <div
+                    class="max-w-[67%] grow flex items-center"
+                    v-if="useSellOrderId"
+                  >
+                    <div class="w-full p-2 text-right outline-none">
+                      {{ selectedSellCoinAmount }}
+                    </div>
+                    <div
+                      class="pointer-events-none flex items-center pr-2 text-zinc-400 uppercase"
+                    >
+                      ${{ selectedPair.fromSymbol }}
+                    </div>
+                  </div>
+
+                  <!-- <Listbox
                     v-model="selectedSellOrders"
                     multiple
                     as="div"
                     class="relative max-w-[67%] grow"
+                    v-if="useSellOrderId"
                   >
                     <ListboxButton
                       class="relative w-full cursor-default rounded bg-zinc-700 py-2 pl-3 pr-20 text-right text-sm focus:outline-none"
@@ -1062,7 +1149,26 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                         </li>
                       </ListboxOption>
                     </ListboxOptions>
-                  </Listbox>
+                  </Listbox> -->
+
+                  <div
+                    class="max-w-[67%] grow text-right text-orange-300 py-1"
+                    v-else
+                  >
+                    <button
+                      class="text-orange-300/80 flex items-center gap-2 justify-end w-full group"
+                      @click="highlight('bidOrdersList')"
+                    >
+                      <span class="group-hover:underline">Select a</span>
+
+                      <span
+                        class="text-green-500 font-bold bg-green-500/20 py-0.5 px-2 rounded-md"
+                      >
+                        BID Order
+                      </span>
+                      <span class="group-hover:underline">to buy</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 

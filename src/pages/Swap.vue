@@ -9,6 +9,7 @@ import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
 import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
 import { ArrowUpDownIcon } from 'lucide-vue-next'
+import { SWAP_READY } from '@/data/constants'
 
 const { openConnectionModal } = useConnectionModal()
 
@@ -260,18 +261,24 @@ watch(
         />
       </div>
 
-      <!-- disabled button -->
-      <button
-        :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-        v-if="unmet"
-        :disabled="!unmet.handler"
-        @click="!!unmet.handler && unmet.handler()"
-      >
-        {{ unmet.message || '' }}
-      </button>
+      <template v-if="SWAP_READY">
+        <!-- disabled button -->
+        <button
+          :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+          v-if="unmet"
+          :disabled="!unmet.handler"
+          @click="!!unmet.handler && unmet.handler()"
+        >
+          {{ unmet.message || '' }}
+        </button>
 
-      <!-- confirm button -->
-      <button class="main-btn" v-else>Swap</button>
+        <!-- confirm button -->
+        <button class="main-btn" v-else>Swap</button>
+      </template>
+
+      <button class="disabled main-btn" v-else :disabled="true" @click="">
+        Coming Soon!
+      </button>
     </div>
 
     <!-- background blur -->
