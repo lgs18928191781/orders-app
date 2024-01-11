@@ -9,7 +9,7 @@ import { useNetworkStore } from '@/stores/network'
 import { prettyBalance } from '@/lib/formatters'
 import { getBrc20s } from '@/queries/orders-api'
 
-import AssetSelect from '@/components/swap/AssetSelect.vue'
+import AssetSelect from '@/components/AssetSelect.vue'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()

@@ -57,11 +57,6 @@ const assets = [
     icon: tracLogo,
   },
   {
-    id: 10,
-    symbol: 'ORXC',
-    icon: rdexLogo,
-  },
-  {
     id: 11,
     symbol: 'btcs',
     icon: btcsLogo,

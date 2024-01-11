@@ -11,7 +11,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AddLiquiditySide: typeof import('./src/components/swap/pools/AddLiquiditySide.vue')['default']
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
-    AssetSelect: typeof import('./src/components/swap/AssetSelect.vue')['default']
+    AssetSelect: typeof import('./src/components/AssetSelect.vue')['default']
     ConfirmationModal: typeof import('./src/components/ConfirmationModal.vue')['default']
     ConnectionModal: typeof import('./src/components/header/ConnectionModal.vue')['default']
     ElPopover: typeof import('element-plus/es')['ElPopover']

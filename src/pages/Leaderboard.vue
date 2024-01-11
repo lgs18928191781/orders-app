@@ -1,26 +1,30 @@
 <script lang="ts" setup>
 import { useQuery } from '@tanstack/vue-query'
-import { TrophyIcon } from 'lucide-vue-next'
+import { TrophyIcon, Loader2Icon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
+import { useStorage } from '@vueuse/core'
 
 import {
   getOneLeaderboard,
   getOneLeaderboardStats,
 } from '@/queries/leaderboard'
-import AssetSelect from '@/components/swap/AssetSelect.vue'
 
-const tick = ref('orxc')
+import AssetSelect from '@/components/AssetSelect.vue'
 
-const { data: stats } = useQuery({
+const tick = useStorage('tick', 'orxc')
+
+const { data: stats, isFetching: isFetchingStats } = useQuery({
   queryKey: ['leaderboardStats', { tick }],
-  queryFn: () => getOneLeaderboardStats({ tick: tick.value }),
+  queryFn: () => getOneLeaderboardStats({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
+  staleTime: 1000 * 10,
 })
 
-const { data: leaderboard } = useQuery({
+const { data: leaderboard, isFetching: isFetchingLeaderboard } = useQuery({
   queryKey: ['leaderboard', { tick }],
-  queryFn: () => getOneLeaderboard({ tick: tick.value }),
+  queryFn: () => getOneLeaderboard({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
+  staleTime: 1000 * 10,
 })
 
 const trophyColor = (index: number) => {
@@ -47,13 +51,18 @@ const trophyColor = (index: number) => {
     <section
       class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-orange-300/30 border border-orange-300/20"
     >
-      <div class="grid grid-cols-6 gap-4 items-center">
-        <span class="text-lg text-zinc-300 col-span-1">Tick</span>
+      <div class="flex gap-8 items-center">
+        <span class="text-lg text-zinc-300">Tick</span>
 
-        <div class="col-span-5">
+        <div class="flex gap-4 items-center">
           <AssetSelect
             :asset-symbol="tick"
             @update:asset-symbol="tick = $event"
+          />
+
+          <Loader2Icon
+            class="w-6 h-6 text-zinc-300 animate-spin-slow"
+            v-if="isFetchingStats || isFetchingLeaderboard"
           />
         </div>
       </div>
