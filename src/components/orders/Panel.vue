@@ -349,6 +349,10 @@ const bidTotalExchangePrice = computed(() => {
 })
 
 const canPlaceBidOrder = computed(() => {
+  if (IS_DEV) {
+    return bidExchangePrice.value > 0 && bidAmount.value > 0
+  }
+
   return (
     bidExchangePrice.value > 0 &&
     bidAmount.value > 0 &&
