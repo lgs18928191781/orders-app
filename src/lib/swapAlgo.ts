@@ -1,15 +1,43 @@
+import { TAGGED_HASH_PREFIXES } from 'bitcoinjs-lib/src/crypto'
 import Decimal from 'decimal.js'
 
 export default class SwapAlgo {
   public FEE_FACTOR: number = 10000
   public MIN_TOKEN1_FEE: number = 500
+  public swapFeeRate: number = 30
+  public projFeeRate: number = 12
   static instance: SwapAlgo
+  public token1SwapAmount: number = 0
+  public token2SwapAmount: number = 0
+  public swapLpAmount: number = 0
+  constructor(token1SwapAmount: number, token2SwapAmount: number) {
+    // if (SwapAlgo.instance) {
+    //   this.token1SwapAmount = token1SwapAmount
+    //   this.token2SwapAmount = token2SwapAmount
+    //   return SwapAlgo.instance
+    // }
 
-  constructor() {
-    if (SwapAlgo.instance) {
-      return SwapAlgo.instance
+    //SwapAlgo.instance = this
+    this.token1SwapAmount = token1SwapAmount
+    this.token2SwapAmount = token2SwapAmount
+    debugger
+  }
+
+  get currentSwapLpAmount() {
+    return this.swapLpAmount
+  }
+
+  /**
+   *
+   * @param lpMinted
+   * @param op 0:移除,1：添加
+   */
+  public calcSwapLPTokenAmount(lpMinted: number, op: 0 | 1) {
+    if (op) {
+      this.swapLpAmount += lpMinted
+    } else {
+      this.swapLpAmount -= lpMinted
     }
-    SwapAlgo.instance = this
   }
 
   // count token2 and lp token amount with fixed token1 amount when add liquidity
@@ -87,17 +115,16 @@ export default class SwapAlgo {
   public swapToken1ToToken2(
     token1AddAmount: number,
     swapToken1Amount: number,
-    swapToken2Amount: number,
-    swapFeeRate: number,
-    projFeeRate: number,
-    minProjFee: number = this.MIN_TOKEN1_FEE
+    swapToken2Amount: number
   ) {
     token1AddAmount = token1AddAmount
     swapToken1Amount = swapToken1Amount
     swapToken2Amount = swapToken2Amount
 
     const token2RemoveAmount =
-      (token1AddAmount * (this.FEE_FACTOR - swapFeeRate) * swapToken2Amount) /
+      (token1AddAmount *
+        (this.FEE_FACTOR - this.swapFeeRate) *
+        swapToken2Amount) /
       ((swapToken1Amount + token1AddAmount) * this.FEE_FACTOR)
 
     return {
@@ -109,10 +136,7 @@ export default class SwapAlgo {
   public swapToken1ToToken2ByToken2(
     token2RemoveAmount: number,
     swapToken1Amount: number,
-    swapToken2Amount: number,
-    swapFeeRate: number,
-    projFeeRate: number,
-    minProjFee: number = this.MIN_TOKEN1_FEE
+    swapToken2Amount: number
   ) {
     token2RemoveAmount = token2RemoveAmount
     swapToken1Amount = swapToken1Amount
@@ -120,7 +144,7 @@ export default class SwapAlgo {
 
     const token1AddAmount =
       (token2RemoveAmount * this.FEE_FACTOR * swapToken1Amount) /
-      ((this.FEE_FACTOR - swapFeeRate) * swapToken2Amount -
+      ((this.FEE_FACTOR - this.swapFeeRate) * swapToken2Amount -
         token2RemoveAmount * this.FEE_FACTOR)
 
     return {
@@ -132,16 +156,15 @@ export default class SwapAlgo {
   public swapToken2ToToken1(
     token2AddAmount: number,
     swapToken1Amount: number,
-    swapToken2Amount: number,
-    swapFeeRate: number,
-    projFeeRate: number,
-    minProjFee: number = this.MIN_TOKEN1_FEE
+    swapToken2Amount: number
   ) {
     token2AddAmount = token2AddAmount
     swapToken1Amount = swapToken1Amount
     swapToken2Amount = swapToken2Amount
     const token1RemoveAmount =
-      (token2AddAmount * (this.FEE_FACTOR - swapFeeRate) * swapToken1Amount) /
+      (token2AddAmount *
+        (this.FEE_FACTOR - this.swapFeeRate) *
+        swapToken1Amount) /
       ((swapToken2Amount + token2AddAmount) * this.FEE_FACTOR)
 
     return {
@@ -153,10 +176,7 @@ export default class SwapAlgo {
   public swapToken2ToToken1ByToken1(
     token1RemoveAmount: number,
     swapToken1Amount: number,
-    swapToken2Amount: number,
-    swapFeeRate: number,
-    projFeeRate: number,
-    minProjFee: number = this.MIN_TOKEN1_FEE
+    swapToken2Amount: number
   ) {
     token1RemoveAmount = token1RemoveAmount
     swapToken1Amount = swapToken1Amount
@@ -164,7 +184,7 @@ export default class SwapAlgo {
 
     const token2AddAmount =
       (token1RemoveAmount * this.FEE_FACTOR * swapToken2Amount) /
-      ((this.FEE_FACTOR - swapFeeRate) * swapToken1Amount -
+      ((this.FEE_FACTOR - this.swapFeeRate) * swapToken1Amount -
         token1RemoveAmount * this.FEE_FACTOR)
 
     return {
@@ -173,8 +193,6 @@ export default class SwapAlgo {
   }
 
   public tokenPriceImpact(
-    token1: tokenInfo,
-    token2: tokenInfo,
     originAddAmount: number,
     aimAddAmount: number,
     pairData: pairInfo,
@@ -184,8 +202,8 @@ export default class SwapAlgo {
 
     let amount1 = dirForward ? swapToken1Amount : swapToken2Amount
     let amount2 = dirForward ? swapToken2Amount : swapToken1Amount
-    let decimal1 = dirForward ? token1.decimal : token2.decimal
-    let decimal2 = dirForward ? token2.decimal : token1.decimal
+    let decimal1 = 8
+    let decimal2 = 8
 
     const p = new Decimal(amount1).div(amount2)
     const p1 = new Decimal(

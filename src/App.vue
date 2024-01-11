@@ -10,9 +10,9 @@ import { useGeoStore } from '@/stores/geo'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import TheHeader from '@/components/header/TheHeader.vue'
 import NotAvailableOverlay from '@/components/overlays/NotAvailable.vue'
-import SwapAlgo from '@/lib/swapAlgo'
+
 import Decimal from 'decimal.js'
-import { formatSat, formatTok } from '@/lib/utils'
+
 const btcJsStore = useBtcJsStore()
 const geoStore = useGeoStore()
 
@@ -24,77 +24,77 @@ const swapTokenInfo = reactive({
   token2: 'token2',
 })
 const dimForward = ref(false)
-const swapCalc = new SwapAlgo()
-const token1 = ref(0)
-const token2 = computed(() => {
-  const token1Remove = new Decimal(token1.value).mul(10 ** 8).toNumber()
-  const swapToken1Amount = 12071561791
-  const swapToken2Amount = 2593956114
-  const swapFeeRate = 30
-  const projFeeRate = 12
-  const { token2AddAmount } = swapCalc.swapToken2ToToken1ByToken1(
-    token1Remove,
-    swapToken1Amount,
-    swapToken2Amount,
-    swapFeeRate,
-    projFeeRate
-  )
-  console.log('token2RemoveAmount', token2AddAmount)
-  return new Decimal(token2AddAmount).div(10 ** 6).toNumber()
-})
 
-const lp1 = ref(0)
-const lp2 = computed(() => {
-  const pairData = {
-    swapToken1Amount: 11888924484,
-    swapToken2Amount: 2653981922,
-    swapLpAmount: 25050191205,
-  }
-  const { swapToken1Amount, swapToken2Amount, swapLpAmount } = pairData
-  const origin_amount = formatSat(lp1.value, 8)
+// const token1 = ref(0)
+// const token2 = computed(() => {
+//   const token1Remove = new Decimal(token1.value).mul(10 ** 8).toNumber()
+//   const swapToken1Amount = 12071561791
+//   const swapToken2Amount = 2593956114
+//   const swapFeeRate = 30
+//   const projFeeRate = 12
+//   const { token2AddAmount } = swapCalc.swapToken2ToToken1ByToken1(
+//     token1Remove,
+//     swapToken1Amount,
+//     swapToken2Amount,
+//     swapFeeRate,
+//     projFeeRate
+//   )
+//   console.log('token2RemoveAmount', token2AddAmount)
+//   return new Decimal(token2AddAmount).div(10 ** 6).toNumber()
+// })
 
-  const { lpMinted, token2AddAmount } = swapCalc.countLpAddAmount(
-    origin_amount,
-    swapToken1Amount,
-    swapToken2Amount,
-    swapLpAmount
-  )
+// const lp1 = ref(0)
+// const lp2 = computed(() => {
+//   const pairData = {
+//     swapToken1Amount: 11888924484,
+//     swapToken2Amount: 2653981922,
+//     swapLpAmount: 25050191205,
+//   }
+//   const { swapToken1Amount, swapToken2Amount, swapLpAmount } = pairData
+//   const origin_amount = formatSat(lp1.value, 8)
 
-  console.log('lpMinted', lpMinted, token2AddAmount)
-  // return {
-  //   token1RemoveAmount: formatTok(token1RemoveAmount, 8, 2),
-  //   token2RemoveAmount: formatTok(token2RemoveAmount, 6, 2),
-  // }
-  return formatTok(token2AddAmount, 6)
-})
+//   const { lpMinted, token2AddAmount } = swapCalc.countLpAddAmount(
+//     origin_amount,
+//     swapToken1Amount,
+//     swapToken2Amount,
+//     swapLpAmount
+//   )
 
-const tokenImspact = computed(() => {
-  const token1Info = {
-    decimal: dimForward.value ? 6 : 8,
-  }
-  const token2Info = {
-    decimal: dimForward.value ? 8 : 6,
-  }
-  const pairData = {
-    swapToken1Amount: 12071561791,
-    swapToken2Amount: 2593956114,
-  }
-  const originAddAmount = token1.value
-  const aimAddAmount = token2.value
-  const { slip1, slip2 } = swapCalc.tokenPriceImpact(
-    token1Info,
-    token2Info,
-    originAddAmount,
-    aimAddAmount,
-    pairData,
-    dimForward.value
-  )
-  console.log('token1Impact, token2Impact', slip1, slip2)
-  return {
-    slip1,
-    slip2,
-  }
-})
+//   console.log('lpMinted', lpMinted, token2AddAmount)
+//   // return {
+//   //   token1RemoveAmount: formatTok(token1RemoveAmount, 8, 2),
+//   //   token2RemoveAmount: formatTok(token2RemoveAmount, 6, 2),
+//   // }
+//   return formatTok(token2AddAmount, 6)
+// })
+
+// const tokenImspact = computed(() => {
+//   const token1Info = {
+//     decimal: dimForward.value ? 6 : 8,
+//   }
+//   const token2Info = {
+//     decimal: dimForward.value ? 8 : 6,
+//   }
+//   const pairData = {
+//     swapToken1Amount: 12071561791,
+//     swapToken2Amount: 2593956114,
+//   }
+//   const originAddAmount = token1.value
+//   const aimAddAmount = token2.value
+//   const { slip1, slip2 } = swapCalc.tokenPriceImpact(
+//     token1Info,
+//     token2Info,
+//     originAddAmount,
+//     aimAddAmount,
+//     pairData,
+//     dimForward.value
+//   )
+//   console.log('token1Impact, token2Impact', slip1, slip2)
+//   return {
+//     slip1,
+//     slip2,
+//   }
+// })
 
 function changeToken() {
   if (swapTokenInfo.token1 == 'token1') {
@@ -135,7 +135,7 @@ queryClient.setDefaultOptions({
 
   <template v-else>
     <TheHeader v-if="geoStore.pass" />
-    <div>
+    <!-- <div>
       <div>
         <span>{{ swapTokenInfo.token1 }}:</span>
         <input type="text" v-model="token2" class="text-black" />
@@ -159,10 +159,10 @@ queryClient.setDefaultOptions({
     <div>
       <div>pool</div>
 
-      <!-- <div>
+      <div>
         <span> lpRemove::</span>
         <input type="text" v-model="lpRemove" class="text-black" />
-      </div> -->
+      </div>
 
       <div>
         <div>
@@ -176,7 +176,7 @@ queryClient.setDefaultOptions({
           <input type="text" v-model="lp2" class="text-black" />
         </div>
       </div>
-    </div>
+    </div> -->
 
     <router-view :key="$route.fullPath"></router-view>
   </template>
