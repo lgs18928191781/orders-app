@@ -8,6 +8,7 @@ import { useConnectionModal } from '@/hooks/use-connection-modal'
 import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
 import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
+import { ArrowUpDownIcon } from 'lucide-vue-next'
 
 const { openConnectionModal } = useConnectionModal()
 
@@ -235,12 +236,20 @@ watch(
         <!-- flip -->
         <div class="h-0 relative flex justify-center">
           <div class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl">
-            <button
-              class="bg-zinc-800 rounded-lg p-2 hover:text-orange-300"
-              @click="flipAsset"
-            >
-              <ArrowDownIcon class="h-4 w-4" />
-            </button>
+            <div class="group transition-all">
+              <ArrowDownIcon
+                class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
+              />
+              <button
+                class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-orange-300/80"
+                :class="{
+                  'rotate-180': fromSymbol === 'btc',
+                }"
+                @click="flipAsset"
+              >
+                <ArrowUpDownIcon class="h-6 w-6 text-orange-300" />
+              </button>
+            </div>
           </div>
         </div>
 
