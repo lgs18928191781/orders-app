@@ -4,7 +4,11 @@ import { type Psbt } from 'bitcoinjs-lib'
 import { fetchBalance } from '@/queries/proxy'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
-import { generateRandomString, raise } from '@/lib/helpers'
+import {
+  generateRandomString,
+  isUnsupportedAddress,
+  raise,
+} from '@/lib/helpers'
 import {
   OKX_TEMPLATE_PSBT,
   SIGHASH_SINGLE_ANYONECANPAY,
@@ -88,12 +92,9 @@ export const getAddress = async () => {
   if (!account) return ''
 
   const address = account.address
-  if (
-    address.startsWith('1') ||
-    address.startsWith('3') ||
-    address.startsWith('m') ||
-    address.startsWith('n')
-  ) {
+  if (isUnsupportedAddress(address)) {
+    // await window.okxwallet.bitcoin.disconnect()
+
     ElMessage.error('Please use a SegWit or Taproot address')
     throw new Error('Please use a SegWit or Taproot address')
   }
@@ -121,12 +122,9 @@ export const connect: () => Promise<{
   if (account) {
     const address = account.address
     // if it's a legacy address(1... or m..., n...), throw error
-    if (
-      address.startsWith('1') ||
-      address.startsWith('3') ||
-      address.startsWith('m') ||
-      address.startsWith('n')
-    ) {
+    if (isUnsupportedAddress(address)) {
+      // await window.okxwallet.bitcoin.disconnect()
+
       throw new Error('Please use a SegWit or Taproot address')
     }
 

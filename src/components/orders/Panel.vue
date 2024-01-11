@@ -369,6 +369,34 @@ const cannotPlaceBidOrderReason = computed(() => {
   return ''
 })
 
+const canTakeBuyOrder = computed(() => {
+  return selectedBuyOrders.value.length > 0 && connectionStore.connected
+})
+const cannotTakeBuyOrderReason = computed(() => {
+  if (!connectionStore.connected) {
+    return 'Connect wallet first'
+  }
+  if (selectedBuyOrders.value.length === 0) {
+    return 'Select an order'
+  }
+
+  return ''
+})
+
+const canTakeSellOrder = computed(() => {
+  return selectedSellOrders.value.length > 0 && connectionStore.connected
+})
+const cannotTakeSellOrderReason = computed(() => {
+  if (!connectionStore.connected) {
+    return 'Connect wallet first'
+  }
+  if (selectedBuyOrders.value.length === 0) {
+    return 'Select an order'
+  }
+
+  return ''
+})
+
 const askExchangePrice = ref(0)
 const updateExchangePrice = (price: number, type: 'ask' | 'bid') => {
   if (typeof price === 'string') {
@@ -1021,14 +1049,17 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                 <button
                   class="mt-4 w-full rounded-md py-4 font-bold"
                   :class="
-                    selectedBuyOrders.length
+                    canTakeBuyOrder
                       ? 'bg-green-500 text-white'
                       : 'bg-zinc-700 text-zinc-500'
                   "
                   @click="buildOrder"
-                  :disabled="!selectedBuyOrders.length"
+                  :disabled="!canTakeBuyOrder"
                 >
-                  Buy ${{ selectedPair.fromSymbol.toUpperCase() }}
+                  {{
+                    cannotTakeBuyOrderReason ||
+                    `Buy $${selectedPair.fromSymbol.toUpperCase()}`
+                  }}
                 </button>
               </div>
             </TabPanel>
@@ -1196,14 +1227,17 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                 <button
                   class="mt-4 w-full rounded-md py-4 font-bold"
                   :class="
-                    selectedSellOrders.length
+                    canTakeSellOrder
                       ? 'bg-green-500 text-white'
                       : 'bg-zinc-700 text-zinc-500'
                   "
                   @click="buildOrder"
-                  :disabled="!selectedSellOrders.length"
+                  :disabled="!canTakeSellOrder"
                 >
-                  Sell ${{ selectedPair.fromSymbol.toUpperCase() }}
+                  {{
+                    cannotTakeSellOrderReason ||
+                    `Sell $${selectedPair.fromSymbol.toUpperCase()}`
+                  }}
                 </button>
               </div>
             </TabPanel>

@@ -114,18 +114,25 @@ async function connectToOkx() {
                     <span class="">Unisat</span>
                   </button>
 
-                  <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-orange-300/30 hover:border-orange-300/30 hover:bg-orange-300 hover:text-orange-950 disabled:opacity-30"
-                    @click="closeConnectionModal"
-                    :disabled="!IS_DEV"
-                  >
-                    <img
-                      class="h-12 rounded"
-                      :src="MetaletIcon"
-                      alt="Metamask"
-                    />
-                    <span class="">Metalet</span>
-                  </button>
+                  <div class="relative">
+                    <button
+                      class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 enabled:hover:shadow-md enabled:hover:shadow-orange-300/30 enabled:hover:border-orange-300/30 enabled:hover:bg-orange-300 enabled:hover:text-orange-950 disabled:opacity-30"
+                      @click="closeConnectionModal"
+                      :disabled="!IS_DEV"
+                    >
+                      <img
+                        class="h-12 rounded"
+                        :src="MetaletIcon"
+                        alt="Metamask"
+                      />
+                      <span class="">Metalet</span>
+                    </button>
+                    <span
+                      class="absolute top-0 right-0 text-xs text-red-400 bg-red-400/30 rounded-md font-medium px-1.5 py-0.5 translate-x-4 -translate-y-2 rotate-3"
+                    >
+                      Coming Soon!
+                    </span>
+                  </div>
                 </div>
 
                 <!-- footer -->

@@ -5,8 +5,14 @@ import { onMounted } from 'vue'
 import { useBtcJsStore } from '@/stores/btcjs'
 // import * as bip39 from 'bip39'
 import BIP32Factory from 'bip32'
+import { useSelectOrder } from '@/hooks/use-select-order'
 
 const btcJsStore = useBtcJsStore()
+
+const { selectedOrder, select } = useSelectOrder()
+function addRandom() {
+  select('random')
+}
 
 onMounted(async () => {
   // gotta trigger deploy again
@@ -95,5 +101,16 @@ function decodePsbt() {
     <button class="border p-2 rounded-md" @click="decodePsbt">
       decode psbt
     </button>
+  </div>
+
+  <div class="p-8">
+    <h3>Test Reactivity</h3>
+
+    <button @click="addRandom" class="p-2 rounded border border-zinc-500">
+      Add Random String
+    </button>
+    <p>
+      {{ selectedOrder }}
+    </p>
   </div>
 </template>

@@ -22,6 +22,8 @@ interface Window {
         publicKey: string
         compressedPublicKey: string
       }>
+      on: (event: string, callback: (data: any) => void) => void
+      removeListener: (event: string, callback: (data: any) => void) => void
       disconnect: () => Promise<void>
       getPublicKey: () => Promise<string>
       signMessage: (

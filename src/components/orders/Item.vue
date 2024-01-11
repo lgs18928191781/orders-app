@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { XCircleIcon, BadgeCheckIcon } from 'lucide-vue-next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
@@ -8,8 +8,10 @@ import { useConnectionStore } from '@/stores/connection'
 import { cancelOrder, type Order, getFiatRate } from '@/queries/orders-api'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, useBtcUnit } from '@/lib/helpers'
+import { useSelectOrder } from '@/hooks/use-select-order'
 
 const address = useConnectionStore().getAddress
+const { isSelected } = useSelectOrder()
 
 const props = defineProps<{
   order: Order
@@ -23,6 +25,7 @@ const isMyOrder = computed(() => {
 
   return props.order.buyerAddress === address
 })
+
 const isFreeOrder = computed(() => {
   return props.orderType === 'ask' && props.order.freeState === 1
 })
@@ -52,7 +55,10 @@ const { data: fiatRate } = useQuery({
 </script>
 
 <template>
-  <tr class="cursor-pointer">
+  <tr
+    class="cursor-pointer text-xs hover:bg-orange-300/10"
+    :class="{ '!bg-orange-300/20': isSelected(order.orderId) }"
+  >
     <td class="td">
       <el-tooltip
         content="This order is official and free to take."

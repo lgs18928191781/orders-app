@@ -16,14 +16,23 @@ import Notifications from './Notifications.vue'
 import TheNavbar from './TheNavbar.vue'
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
+import { isUnsupportedAddress } from '@/lib/helpers'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
+const connectionStore = useConnectionStore()
 
 const { openConnectionModal } = useConnectionModal()
 
 const unisatAccountsChangedHandler = (accounts: string[]) => {
-  if (useConnectionStore().last.wallet !== 'unisat') return
+  if (connectionStore.last.wallet !== 'unisat') return
+  if (!accounts[0]) {
+    // disconnect
+    connectionStore.disconnect()
+    return
+  }
+
+  if (isUnsupportedAddress(accounts[0])) return
 
   ElMessage.warning({
     message: 'Unisat account changed. Refreshing page...',
@@ -34,8 +43,17 @@ const unisatAccountsChangedHandler = (accounts: string[]) => {
     },
   })
 }
-const okxAccountsChangedHandler = (accounts: string[]) => {
-  if (useConnectionStore().last.wallet !== 'okx') return
+const okxAccountsChangedHandler = (accounts: string[] | null) => {
+  if (connectionStore.last.wallet !== 'okx') return
+  if (!accounts) {
+    // disconnect
+    connectionStore.disconnect()
+    return
+  }
+
+  console.log({ accounts })
+
+  if (isUnsupportedAddress(accounts[0])) return
 
   ElMessage.warning({
     message: 'Okx account changed. Refreshing page...',
@@ -78,17 +96,19 @@ onMounted(async () => {
   }
 
   if (window.okxwallet) {
-    window.okxwallet.on('accountsChanged', okxAccountsChangedHandler)
+    window.okxwallet.bitcoin.on('accountsChanged', okxAccountsChangedHandler)
   }
 })
 onBeforeUnmount(() => {
   // remove event listener
   window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
-  window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
+  window.okxwallet.bitcoin?.removeListener(
+    'accountsChanged',
+    okxAccountsChangedHandler
+  )
 })
 
 // connect / address related
-const connectionStore = useConnectionStore()
 const { data: address } = useQuery({
   queryKey: ['address', { network: networkStore.network }],
   queryFn: async () =>
