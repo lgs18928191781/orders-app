@@ -23,6 +23,7 @@ interface Window {
         compressedPublicKey: string
       }>
       disconnect: () => Promise<void>
+      getPublicKey: () => Promise<string>
       signMessage: (
         message: string,
         { from }: { from: string }

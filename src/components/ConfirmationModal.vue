@@ -18,14 +18,15 @@ import {
   DEBUG,
   SIGHASH_ALL,
   IS_DEV,
-  SIGHASH_SINGLE_ANYONECANPAY,
+  BUY_PAY_INPUT_INDEX,
+  SIGHASH_ALL_ANYONECANPAY,
 } from '@/data/constants'
 import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 import { validatePsbt } from '@/lib/btc-helpers'
 import { fillInternalKey } from '@/lib/build-helpers'
-import { postBidOrder, postSellTake } from '@/queries/orders-v2'
+import { postBidOrder, postBuyTake, postSellTake } from '@/queries/orders-v2'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -88,7 +89,7 @@ async function submitBidOrder() {
       payTxRaw = payPsbt.extractTransaction().toHex()
 
       // 2. now we can add that utxo to the bid order
-      const addingInput = {
+      const addingInput = fillInternalKey({
         hash: payPsbt.extractTransaction().getId(),
         index: 0,
         witnessUtxo: {
@@ -96,17 +97,23 @@ async function submitBidOrder() {
           value: payPsbt.extractTransaction().outs[0].value,
         },
         sighashType: SIGHASH_ALL,
-      }
-      fillInternalKey(addingInput)
+      })
       bidGrant.addInput(addingInput)
     }
-    return
 
     // 3. we sign the bid order
     const signed = await adapter.signPsbt(bidGrant.toHex(), {
       autoFinalized: true,
+      toSignInputs: [
+        {
+          index: 0,
+          address: connectionStore.getAddress,
+          sighashTypes: [SIGHASH_ALL],
+        },
+      ],
     })
     // extract
+    console.log({ grant: btcjs.Psbt.fromHex(signed) })
     const grantTxRaw = btcjs.Psbt.fromHex(signed).extractTransaction().toHex()
 
     // 4. push the bid order to the api
@@ -168,13 +175,31 @@ async function submitOrder() {
   try {
     let pushRes: any
     let signed: string
+    let inputsCount: number
+    let toSignInputs: any[]
     // 2. push
     switch (builtInfo!.type) {
       case 'buy':
       case 'free claim':
-        signed = await adapter.signPsbt(builtInfo.order.toHex())
+        // toSignInputs gathering:
+        // index-2 input is brc
+        // then add every other inputs after index-5
+        inputsCount = builtInfo.order.data.inputs.length
+        toSignInputs = []
+        for (let i = BUY_PAY_INPUT_INDEX; i < inputsCount; i++) {
+          toSignInputs.push({
+            index: i,
+            address: connectionStore.getAddress,
+            sighashTypes: [SIGHASH_ALL],
+          })
+        }
+        console.log({ toSignInputs })
+        signed = await adapter.signPsbt(builtInfo.order.toHex(), {
+          autoFinalized: false,
+          toSignInputs,
+        })
 
-        pushRes = await pushBuyTake({
+        pushRes = await postBuyTake({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,
           orderId: builtInfo.orderId,
@@ -187,8 +212,8 @@ async function submitOrder() {
         // toSignInputs gathering:
         // index-2 input is brc
         // then add every other inputs after index-5
-        const inputsCount = builtInfo.order.data.inputs.length
-        const toSignInputs = [
+        inputsCount = builtInfo.order.data.inputs.length
+        toSignInputs = [
           {
             index: 2,
             address: connectionStore.getAddress,

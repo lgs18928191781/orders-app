@@ -27,6 +27,10 @@ const links: {
     path: '/swap',
     version: 0,
   },
+  {
+    name: 'Events',
+    path: '/whitelist',
+  },
   // {
   //   name: 'Whitelist',
   //   path: '/whitelist',

@@ -1,14 +1,11 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useQuery } from '@tanstack/vue-query'
-import { ShieldAlertIcon, CheckCircle2 } from 'lucide-vue-next'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import { prettyAddress } from '@/lib/formatters'
-import { useDummiesStore } from '@/stores/dummies'
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
-import utils from '@/utils'
 import whitelist from '@/lib/whitelist'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
@@ -22,7 +19,7 @@ import okxIcon from '@/assets/okx-icon.png?url'
 import metaletIcon from '@/assets/metalet-icon.png?url'
 
 const networkStore = useNetworkStore()
-const dummiesStore = useDummiesStore()
+const queryClient = useQueryClient()
 
 const { openConnectionModal } = useConnectionModal()
 
@@ -33,6 +30,7 @@ const unisatAccountsChangedHandler = (accounts: string[]) => {
     message: 'Unisat account changed. Refreshing page...',
     type: 'warning',
     onClose: () => {
+      queryClient.invalidateQueries()
       window.location.reload()
     },
   })
@@ -45,6 +43,7 @@ const okxAccountsChangedHandler = (accounts: string[]) => {
     message: 'Okx account changed. Refreshing page...',
     type: 'warning',
     onClose: () => {
+      queryClient.invalidateQueries()
       window.location.reload()
     },
   })
@@ -116,20 +115,6 @@ const { data: address } = useQuery({
     connectionStore.sync().then((connection) => connection?.address),
   retry: 0,
   enabled: computed(() => connectionStore.connected),
-})
-
-const enabled = computed(() => !!address.value)
-useQuery({
-  queryKey: [
-    'dummies',
-    { network: networkStore.network, address: address.value },
-  ],
-  queryFn: async () =>
-    utils.checkAndSelectDummies({
-      checkOnly: true,
-    }),
-  retry: 0,
-  enabled,
 })
 
 async function switchNetwork() {
@@ -205,8 +190,14 @@ function copyAddress() {
       </button>
 
       <div v-else class="flex items-center gap-2">
-        <div class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 px-4">
-          <div class="lg:flex gap-2 pr-3 hidden cursor-pointer" @click="copyAddress" title="copy address">
+        <div
+          class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
+        >
+          <div
+            class="lg:flex gap-2 pr-3 hidden cursor-pointer"
+            @click="copyAddress"
+            title="copy address"
+          >
             <img class="h-5" :src="walletIcon" alt="Unisat" v-if="walletIcon" />
             <span class="text-sm text-orange-300">
               {{ address ? prettyAddress(address, 4) : '-' }}
@@ -216,29 +207,6 @@ function copyAddress() {
           <AssetsDisplay />
 
           <NetworkState />
-
-          <!-- ready button -->
-          <div class="pl-3" v-if="!dummiesStore.has">
-            <el-tooltip effect="light" placement="bottom-end">
-              <template #content>
-                <h3 class="my-2 text-sm font-bold text-orange-300">
-                  Create 2 dummies UTXOs to begin
-                </h3>
-                <div class="mb-2 max-w-sm space-y-2 text-sm leading-relaxed text-zinc-300">
-                  <p>
-                    When using Orders.Exchange for the first time, it's
-                    necessary to prepare two UTXOs of 600 satoshis as a
-                    prerequisite for the transaction.
-                  </p>
-                  <p>Click to complete this preparation.</p>
-                </div>
-              </template>
-              <ShieldAlertIcon class="h-5 text-red-500" @click="utils.checkAndSelectDummies({})" />
-            </el-tooltip>
-          </div>
-          <div class="pl-3" v-else>
-            <CheckCircle2 class="h-5 text-orange-300" />
-          </div>
         </div>
 
         <Notifications />
