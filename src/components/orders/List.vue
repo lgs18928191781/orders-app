@@ -1,17 +1,21 @@
 <script lang="ts" setup>
 import { useQuery } from '@tanstack/vue-query'
 import { computed, inject } from 'vue'
+import { ElMessage } from 'element-plus'
 
 import { getFiatRate, getMarketPrice, type Order } from '@/queries/orders-api'
-import { useNetworkStore } from '@/store'
+import { useNetworkStore } from '@/stores/network'
 import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
-
-import OrderItem from './Item.vue'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
-import Decimal from 'decimal.js'
+import { useConnectionStore } from '@/stores/connection'
+import { useSelectOrder } from '@/hooks/use-select-order'
+
+import OrderItem from './Item.vue'
 
 const networkStore = useNetworkStore()
+const address = useConnectionStore().getAddress
+const { select } = useSelectOrder()
 
 const props = withDefaults(
   defineProps<{
@@ -31,7 +35,7 @@ const rearrangedAskOrders = computed(() => {
   return [...nonFreeOrders, ...freeOrders]
 })
 
-defineEmits(['useBuyPrice', 'useSellPrice'])
+const emit = defineEmits(['useBuyPrice', 'useSellPrice'])
 
 const selectedPair = inject(selectedPairKey, defaultPair)
 
@@ -48,6 +52,44 @@ const { data: fiatRate } = useQuery({
   queryKey: ['fiatRate'],
   queryFn: getFiatRate,
 })
+
+const useBuyPrice = (order: Order) => {
+  // first check if the order is mine; if so, throw error
+  const isMine = order.sellerAddress === address
+  if (isMine) {
+    ElMessage.error({
+      message: 'You cannot take your own order',
+      grouping: true,
+    })
+    return
+  }
+
+  const buyPrice = Number(order.coinRatePrice)
+  const buyOrderId = order.orderId
+
+  select(buyOrderId)
+
+  emit('useBuyPrice', buyPrice, buyOrderId)
+}
+
+const useSellPrice = (order: Order) => {
+  // first check if the order is mine; if so, throw error
+  const isMine = order.buyerAddress === address
+  if (isMine) {
+    ElMessage.error({
+      message: 'You cannot take your own order',
+      grouping: true,
+    })
+    return
+  }
+
+  const sellPrice = Number(order.coinRatePrice)
+  const sellOrderId = order.orderId
+
+  select(sellOrderId)
+
+  emit('useSellPrice', sellPrice, sellOrderId)
+}
 </script>
 
 <template>
@@ -84,15 +126,13 @@ const { data: fiatRate } = useQuery({
           </tr>
         </thead>
 
-        <tbody v-if="askOrders.length">
+        <tbody v-if="askOrders.length" id="askOrdersList">
           <OrderItem
             v-for="order in rearrangedAskOrders"
             :key="order.orderId"
             :order="order"
             :order-type="'ask'"
-            @click="
-              $emit('useBuyPrice', Number(order.coinRatePrice), order.orderId)
-            "
+            @click="useBuyPrice(order)"
           />
         </tbody>
       </table>
@@ -161,15 +201,13 @@ const { data: fiatRate } = useQuery({
           </tr>
         </thead>
 
-        <tbody>
+        <tbody id="bidOrdersList">
           <OrderItem
             v-for="order in bidOrders"
             :key="order.orderId"
             :order="order"
             :order-type="'bid'"
-            @click="
-              $emit('useSellPrice', Number(order.coinRatePrice), order.orderId)
-            "
+            @click="useSellPrice(order)"
           />
         </tbody>
       </table>

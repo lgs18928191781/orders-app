@@ -8,17 +8,32 @@ const route = useRoute()
 const links: {
   name: string
   path: string
+  version?: number
   new?: boolean
   disabled?: boolean
 }[] = [
   {
-    name: 'Trade',
+    name: 'Orderbook',
     path: '/',
+    version: 2,
   },
+  // {
+  //   name: 'Pool',
+  //   path: '/pool',
+  //   // new: true,
+  // },
   {
-    name: 'Pool',
-    path: '/pool',
-    new: true,
+    name: 'Swap',
+    path: '/swap',
+    version: 0,
+  },
+  // {
+  //   name: 'Events',
+  //   path: '/whitelist',
+  // },
+  {
+    name: 'Leaderboard',
+    path: '/leaderboard',
   },
   // {
   //   name: 'Whitelist',
@@ -35,6 +50,10 @@ function isLinkActive(path: string) {
       return route.path.startsWith('/whitelist')
     case '/pool':
       return route.path.startsWith('/pool')
+    case '/leaderboard':
+      return route.path.startsWith('/leaderboard')
+    case '/swap':
+      return route.path.startsWith('/swap') || route.path.startsWith('/add')
 
     default:
       return false
@@ -69,6 +88,12 @@ function isLinkActive(path: string) {
           v-if="link.new"
         >
           New
+        </span>
+        <span
+          class="inline-flex items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400 -translate-y-2 -translate-x-1 absolute"
+          v-if="typeof link.version !== 'undefined'"
+        >
+          {{ 'V' + link.version }}
         </span>
       </component>
     </nav>

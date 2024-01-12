@@ -4,8 +4,7 @@ import { computed, inject, ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { useRoute } from 'vue-router'
 
-import { useAddressStore } from '@/store'
-import { connect } from '@/queries/unisat'
+import { useConnectionStore } from '@/stores/connection'
 import { getMyRewardsEssential } from '@/queries/pool'
 import { defaultPoolPair, selectedPoolPairKey } from '@/data/trading-pairs'
 
@@ -27,10 +26,10 @@ if (selectedPair.fromSymbol === 'rdex') {
   tabLabels.shift()
 }
 
-const loggedIn = ref(!!useAddressStore().get)
+const loggedIn = ref(useConnectionStore().connected)
 async function connectWallet() {
-  const address = await connect()
-  if (address) {
+  const connection = await useConnectionStore().connect('unisat')
+  if (connection.status === 'connected') {
     loggedIn.value = true
   }
 }
@@ -46,18 +45,18 @@ if (queryAction === 'release') {
   selectedTab.value = tabLabels.indexOf('Release')
 }
 
-const addressStore = useAddressStore()
+const connectionStore = useConnectionStore()
 const { data: rewardsEssential } = useQuery({
   queryKey: [
     'poolRewardsEssential',
-    { address: addressStore.get as string, tick: selectedPair.fromSymbol },
+    { address: connectionStore.getAddress, tick: selectedPair.fromSymbol },
   ],
   queryFn: () =>
     getMyRewardsEssential({
-      address: addressStore.get as string,
+      address: connectionStore.getAddress,
       tick: selectedPair.fromSymbol,
     }),
-  enabled: computed(() => !!addressStore.get),
+  enabled: computed(() => connectionStore.connected),
 })
 
 // hasReleasable
@@ -130,7 +129,7 @@ const hasReleasable = computed(() => {
     </TabGroup>
 
     <div class="flex flex-col items-center justify-center h-full gap-8" v-else>
-      <p class="text-gray-300">
+      <p class="text-zinc-300">
         Please connect your wallet first to use the pool.
       </p>
 

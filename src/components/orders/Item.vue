@@ -1,16 +1,17 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { XCircleIcon, BadgeCheckIcon } from 'lucide-vue-next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
 
-import { useAddressStore } from '@/store'
+import { useConnectionStore } from '@/stores/connection'
 import { cancelOrder, type Order, getFiatRate } from '@/queries/orders-api'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, useBtcUnit } from '@/lib/helpers'
-import Decimal from 'decimal.js'
+import { useSelectOrder } from '@/hooks/use-select-order'
 
-const address = useAddressStore().get!
+const address = useConnectionStore().getAddress
+const { isSelected } = useSelectOrder()
 
 const props = defineProps<{
   order: Order
@@ -24,6 +25,7 @@ const isMyOrder = computed(() => {
 
   return props.order.buyerAddress === address
 })
+
 const isFreeOrder = computed(() => {
   return props.orderType === 'ask' && props.order.freeState === 1
 })
@@ -35,6 +37,7 @@ const { mutate } = useMutation({
     ElMessage.success('Order canceled')
     const queryKey = props.orderType === 'ask' ? 'askOrders' : 'bidOrders'
     queryClient.invalidateQueries([queryKey])
+    queryClient.invalidateQueries(['excludedBalance'])
   },
   onError: (err: any) => {
     ElMessage.error(err.message)
@@ -46,13 +49,16 @@ async function onCancel() {
 
 // fiat price
 const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate'],
+  queryKey: ['fiatRate', { coin: 'btc' }],
   queryFn: getFiatRate,
 })
 </script>
 
 <template>
-  <tr class="cursor-pointer">
+  <tr
+    class="cursor-pointer text-xs hover:bg-orange-300/10"
+    :class="{ '!bg-orange-300/20': isSelected(order.orderId) }"
+  >
     <td class="td">
       <el-tooltip
         content="This order is official and free to take."

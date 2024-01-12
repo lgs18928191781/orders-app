@@ -3,18 +3,24 @@ import { Buffer } from 'buffer'
 import { isTaprootInput } from 'bitcoinjs-lib/src/psbt/bip371'
 import Decimal from 'decimal.js'
 
-import { useAddressStore, useBtcJsStore, useFeebStore } from '@/store'
+import { useBtcJsStore } from '@/stores/btcjs'
+import { useConnectionStore } from '@/stores/connection'
+import { useFeebStore } from '@/stores/feeb'
 import {
   DUST_UTXO_VALUE,
   FEEB_MULTIPLIER,
   MS_BRC20_UTXO_VALUE,
   MS_FEEB_MULTIPLIER,
+  OKX_TEMPLATE_PSBT,
   SIGHASH_ALL_ANYONECANPAY,
 } from '@/data/constants'
-import { getTxHex, getUtxos } from '@/queries/proxy'
+import { getUtxos } from '@/queries/proxy'
 import { raise } from './helpers'
 import { Output } from 'bitcoinjs-lib/src/transaction'
 import { getListingUtxos } from '@/queries/orders-api'
+import { toXOnly } from '@/lib/btc-helpers'
+import { useNetwork } from '@vueuse/core'
+import { useNetworkStore } from '@/stores/network'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -42,6 +48,10 @@ function sumOrNaN(txOutputs: TxOutput[] | Output[]) {
 }
 
 type PsbtInput = (typeof Psbt.prototype.data.inputs)[0]
+type PsbtInputExtended = PsbtInput & {
+  hash: string
+  index: number
+}
 function inputBytes(input: PsbtInput) {
   // todo: script length
   if (isTaprootInput(input)) {
@@ -134,7 +144,7 @@ export function calculatePsbtFee(psbt: Psbt, feeRate: number, isMs?: boolean) {
   // clone a new psbt to mock the finalization
   const clonedPsbt = psbt.clone()
   const address =
-    useAddressStore().get ??
+    useConnectionStore().getAddress ??
     raise('Please connect to your UniSat wallet first.')
 
   // mock the change output
@@ -154,12 +164,42 @@ export function calculatePsbtFee(psbt: Psbt, feeRate: number, isMs?: boolean) {
   return Math.round(fee * multiplier)
 }
 
+export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
+  input: T
+): T {
+  // check if the input is mine, and address is Taproot
+  // if so, fill in the internal key
+  const address =
+    useConnectionStore().getAddress ??
+    raise('Please connect to a wallet first.')
+
+  const isP2TR = address.startsWith('bc1p')
+  const lostInternalPubkey = !input.tapInternalKey
+
+  if (isP2TR && lostInternalPubkey) {
+    const tapInternalKey = toXOnly(
+      Buffer.from(useConnectionStore().getPubKey, 'hex')
+    )
+    const { output } = useBtcJsStore().get!.payments.p2tr({
+      internalPubkey: tapInternalKey,
+    })
+    console.log({
+      script1: input.witnessUtxo?.script.toString('hex'),
+      script2: output.toString('hex'),
+    })
+    if (input.witnessUtxo?.script.toString('hex') == output.toString('hex')) {
+      input.tapInternalKey = tapInternalKey
+    }
+  }
+
+  return input
+}
+
 // the difference between exclusiveChange and change
 // is that we filter out all the utxos that are currently listing
 // that way we dont generate contradictory psbts
 export async function exclusiveChange({
   psbt,
-  pubKey,
   extraSize,
   useSize,
   extraInputValue,
@@ -169,9 +209,9 @@ export async function exclusiveChange({
   estimate = false,
   partialPay = false,
   cutFrom = 1,
+  feeb,
 }: {
   psbt: Psbt
-  pubKey?: Buffer
   extraSize?: number
   useSize?: number
   extraInputValue?: number
@@ -181,11 +221,13 @@ export async function exclusiveChange({
   estimate?: boolean
   partialPay?: boolean
   cutFrom?: number
+  feeb?: number
 }) {
-  const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
+  // check if feeb is set
+  feeb = feeb ?? useFeebStore().get ?? raise('Choose a fee rate first.')
   // check if address is set
   const address =
-    useAddressStore().get ??
+    useConnectionStore().getAddress ??
     raise('Please connect to your UniSat wallet first.')
 
   // check if useSize is set but maxUtxosCount is larger than 1
@@ -239,12 +281,13 @@ export async function exclusiveChange({
       value: paymentUtxo.satoshis,
       script: paymentPrevOutputScript,
     }
-    const paymentInput: any = {
+    const paymentInput = {
       hash: paymentUtxo.txId,
       index: paymentUtxo.outputIndex,
       witnessUtxo: paymentWitnessUtxo,
       sighashType,
     }
+    fillInternalKey(paymentInput)
     const vin = psbt.inputCount
     let psbtClone: Psbt
     // .clone has bug when there is no input; so we have to manually add the output
@@ -274,7 +317,7 @@ export async function exclusiveChange({
           raise(
             'Input invalid. Please try again or contact customer service for assistance.'
           )
-      )
+      ) as any
     )
     const changeValue = totalInput - totalOutput - fee + (extraInputValue || 0)
     console.log({
@@ -290,7 +333,7 @@ export async function exclusiveChange({
       )
     }
 
-    // return the difference，which feans how much we actually paying
+    // return the difference，which means how much we actually paying
     return {
       difference: paymentUtxo.satoshis - changeValue,
       feeb,
@@ -308,16 +351,13 @@ export async function exclusiveChange({
     }
     const toUseSighashType =
       i > 0 && otherSighashType ? otherSighashType : sighashType
-    const paymentInput: any = {
+    const paymentInput = {
       hash: paymentUtxo.txId,
       index: paymentUtxo.outputIndex,
       witnessUtxo: paymentWitnessUtxo,
       sighashType: toUseSighashType,
     }
-
-    if (pubKey) {
-      paymentInput.tapInternalPubkey = pubKey
-    }
+    fillInternalKey(paymentInput)
 
     psbt.addInput(paymentInput)
 
@@ -332,7 +372,7 @@ export async function exclusiveChange({
       // totalInput = the inputs we add in now
       totalInput = sumOrNaN(
         psbt.data.inputs
-          .slice(cutFrom) // exclude the first input, which is the oridinal input
+          .slice(cutFrom) // exclude the first input, which is the ordinal input
           .map(
             (input) =>
               input.witnessUtxo ||
@@ -340,12 +380,11 @@ export async function exclusiveChange({
               raise(
                 'Input invalid. Please try again or contact customer service for assistance.'
               )
-          )
+          ) as any
       )
     } else {
       // we pay for the whole transaction
       totalOutput = sumOrNaN(psbt.txOutputs)
-      console.log({ inputs: psbt.data.inputs })
       totalInput = sumOrNaN(
         psbt.data.inputs.map(
           (input) =>
@@ -354,7 +393,7 @@ export async function exclusiveChange({
             raise(
               'Input invalid. Please try again or contact customer service for assistance.'
             )
-        )
+        ) as any
       )
     }
 
@@ -420,4 +459,17 @@ export function safeOutputValue(value: number | Decimal, isMs = false): number {
   }
 
   return value.round().toNumber()
+}
+
+export function initPsbt() {
+  const bitcoinJs = useBtcJsStore().get!
+
+  // depends on wallet
+  const wallet = useConnectionStore().last.wallet
+  if (wallet === 'unisat') {
+    return new bitcoinJs.Psbt()
+  }
+
+  // use templatePsbt otherwise for okx
+  return bitcoinJs.Psbt.fromHex(OKX_TEMPLATE_PSBT)
 }

@@ -3,7 +3,11 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
 import { inject, ref } from 'vue'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-import { HelpCircleIcon, ChevronRightIcon } from 'lucide-vue-next'
+import {
+  HelpCircleIcon,
+  ChevronRightIcon,
+  ExternalLinkIcon,
+} from 'lucide-vue-next'
 
 import { prettyBalance, prettyTimestamp, prettyTxid } from '@/lib/formatters'
 import {
@@ -11,25 +15,24 @@ import {
   getReleaseEssential,
   submitRelease,
 } from '@/queries/pool'
-import { useAddressStore } from '@/store'
+import { useConnectionStore } from '@/stores/connection'
 import {
   DEBUG,
   POOL_REWARDS_TICK,
   SIGHASH_SINGLE_ANYONECANPAY,
 } from '@/data/constants'
-import { buildReleasePsbt } from '@/lib/order-pool-builder'
+import { buildReleasePsbt } from '@/lib/builders/pool'
 import { defaultPoolPair, selectedPoolPairKey } from '@/data/trading-pairs'
+import { toTx, unit, useBtcUnit } from '@/lib/helpers'
 
 import ReleasingOverlay from '@/components/overlays/Loading.vue'
-import { ExternalLinkIcon } from 'lucide-vue-next'
-import { toTx, unit, useBtcUnit } from '@/lib/helpers'
 
 const props = defineProps<{
   record: PoolRecord
 }>()
 
 const queryClient = useQueryClient()
-const addressStore = useAddressStore()
+const connectionStore = useConnectionStore()
 
 const releasing = ref(false)
 
@@ -42,7 +45,7 @@ const { mutate: mutateFinishRecord } = useMutation({
       queryKey: [
         'poolReleasableRecords',
         {
-          address: addressStore.get as string,
+          address: connectionStore.getAddress,
           tick: selectedPair.fromSymbol,
         },
       ],
@@ -75,26 +78,26 @@ async function submitReleaseRecord() {
     const toSignInputs: ToSignInput[] = [
       {
         index: 0,
-        address: addressStore.get!,
+        address: connectionStore.getAddress,
         sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
       },
       {
         index: 1,
-        address: addressStore.get!,
+        address: connectionStore.getAddress,
         sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
       },
       {
         index: 2,
-        address: addressStore.get!,
+        address: connectionStore.getAddress,
         sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
       },
       {
         index: 3,
-        address: addressStore.get!,
+        address: connectionStore.getAddress,
         sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
       },
     ]
-    const signed = await window.unisat.signPsbt(releasePsbt.toHex(), {
+    const signed = await connectionStore.adapter.signPsbt(releasePsbt.toHex(), {
       autoFinalized: true,
       toSignInputs,
     })
@@ -238,7 +241,7 @@ async function submitReleaseRecord() {
             </DisclosureButton>
 
             <DisclosurePanel
-              class="text-gray-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5 text-xs"
+              class="text-zinc-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5 text-xs"
             >
               <div class="">
                 <div>Confirm Block Height</div>

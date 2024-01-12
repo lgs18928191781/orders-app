@@ -69,7 +69,7 @@ const choosePair = (pairId: number) => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute left-0 z-10 mt-2 origin-top rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden w-full"
+        class="absolute left-0 z-10 mt-2 origin-top rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto w-full"
       >
         <ListboxOption
           v-slot="{ active, selected }"

@@ -9,9 +9,11 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AddLiquiditySide: typeof import('./src/components/swap/pools/AddLiquiditySide.vue')['default']
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
+    AssetSelect: typeof import('./src/components/AssetSelect.vue')['default']
     ConfirmationModal: typeof import('./src/components/ConfirmationModal.vue')['default']
-    copy: typeof import('./src/components/pool/PanelRelease copy.vue')['default']
+    ConnectionModal: typeof import('./src/components/header/ConnectionModal.vue')['default']
     ElPopover: typeof import('element-plus/es')['ElPopover']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     EventClaimRecords: typeof import('./src/components/pool/EventClaimRecords.vue')['default']
@@ -46,6 +48,9 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     StandbyClaimRecords: typeof import('./src/components/pool/StandbyClaimRecords.vue')['default']
     StandbyExplainModal: typeof import('./src/components/pool/StandbyExplainModal.vue')['default']
+    SwapBlur: typeof import('./src/components/swap/SwapBlur.vue')['default']
+    SwapPoolPairSelect: typeof import('./src/components/swap/pools/SwapPoolPairSelect.vue')['default']
+    SwapSide: typeof import('./src/components/swap/SwapSide.vue')['default']
     TheHeader: typeof import('./src/components/header/TheHeader.vue')['default']
     TheNavbar: typeof import('./src/components/header/TheNavbar.vue')['default']
     Toast: typeof import('./src/components/ui/toast/Toast.vue')['default']
@@ -56,6 +61,6 @@ declare module '@vue/runtime-core' {
     ToastProvider: typeof import('./src/components/ui/toast/ToastProvider.vue')['default']
     ToastTitle: typeof import('./src/components/ui/toast/ToastTitle.vue')['default']
     ToastViewport: typeof import('./src/components/ui/toast/ToastViewport.vue')['default']
-    UnisatModal: typeof import('./src/components/header/UnisatModal.vue')['default']
+    WalletMissingModal: typeof import('./src/components/header/WalletMissingModal.vue')['default']
   }
 }

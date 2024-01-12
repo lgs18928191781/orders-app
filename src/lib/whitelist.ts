@@ -8,6 +8,7 @@ export default [
   'tb1pz4u0azj5kqq4e7shz976fxa4hks2dlxg2vsdvl5q670nqu9n77dsqw0cmk',
   'tb1pdscwqy90yujfvplge0k94hkz6d3hu22rrltfquwglspvp6jl39zs707kza',
   'tb1p6kzsmctegrx96et3fz2fjxv2tlt7dhjpqayx8eyw7s7flpwamsrsd8524x',
+  // cSpell:disable
   'tb1ptqark44ulu9vtelyzjgj3j4pyc6jg2q4mztkxssawyd0avjvs8wse6pqqw',
   'bc1pv3efxdwc2nkck5kg8updw62kxqt8mclshk3a2ywlazqa6n225n9qvd2v93',
   'bc1pwzgaktsp28weq69y6dsrvnn7s3f7mdd5prep6uzwv6yjmehkeyqsx4s8x7',

@@ -1,18 +1,17 @@
+import { useBtcJsStore } from '@/stores/btcjs'
+import { useConnectionStore } from '@/stores/connection'
+import { useDummiesStore } from '@/stores/dummies'
+import { useNetworkStore } from '@/stores/network'
 import {
-  useAddressStore,
-  useBtcJsStore,
-  useDummiesStore,
-  useNetworkStore,
-} from '@/store'
-import { exclusiveChange, safeOutputValue } from './build-helpers'
+  exclusiveChange,
+  fillInternalKey,
+  safeOutputValue,
+} from '../build-helpers'
 import {
-  DEBUG,
   DUMMY_UTXO_VALUE,
-  DUST_UTXO_VALUE,
   EXTRA_INPUT_MIN_VALUE,
   IS_DEV,
   ONE_SERVICE_FEE,
-  SELL_SERVICE_FEE,
   SERVICE_LIVENET_ADDRESS,
   SERVICE_LIVENET_RDEX_ADDRESS,
   SERVICE_TESTNET_ADDRESS,
@@ -28,11 +27,13 @@ import {
   getOneBrc20,
   getOneOrder,
   getSellFees,
+  getBuyEssentials,
 } from '@/queries/orders-api'
 import { getUtxos, type SimpleUtxo, getTxHex } from '@/queries/proxy'
 import { type TradingPair } from '@/data/trading-pairs'
-import { SIGHASH_NONE_ANYONECANPAY } from '../data/constants'
-import { assert } from '@vueuse/core'
+import { SIGHASH_NONE_ANYONECANPAY } from '../../data/constants'
+import { toXOnly } from '@/lib/btc-helpers'
+import { Buffer } from 'buffer'
 import { raise, raiseIf, raiseUnless } from '@/lib/helpers'
 
 export async function buildAskLimit({
@@ -46,7 +47,7 @@ export async function buildAskLimit({
 }) {
   const networkStore = useNetworkStore()
   const btcjs = useBtcJsStore().get!
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
 
   // Get address
   // Step 1: Get the ordinal utxo as input
@@ -108,9 +109,7 @@ export async function buildAskLimit({
   const ordinalValue = ordinalDetail.value
 
   // build psbt
-  const ask = new btcjs.Psbt({
-    network: btcjs.networks[networkStore.btcNetwork],
-  })
+  const ask = useConnectionStore().adapter.initPsbt()
 
   for (const output in ordinalPreTx.outs) {
     try {
@@ -118,13 +117,13 @@ export async function buildAskLimit({
     } catch (e: any) {}
   }
 
-  ask.addInput({
+  const input = fillInternalKey({
     hash: ordinalUtxo.txId,
     index: ordinalUtxo.outputIndex,
     witnessUtxo: ordinalPreTx.outs[ordinalUtxo.outputIndex],
-    sighashType:
-      btcjs.Transaction.SIGHASH_SINGLE | btcjs.Transaction.SIGHASH_ANYONECANPAY,
+    sighashType: SIGHASH_SINGLE_ANYONECANPAY,
   })
+  ask.addInput(input)
 
   // Step 2: Build output as what the seller want (BTC)
   ask.addOutput({
@@ -171,7 +170,7 @@ export async function buildBidLimit({
   const orderNetwork = networkStore.network
   const btcNetwork = networkStore.btcNetwork
   const btcjs = window.bitcoin
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const isPool = !!selectedPair.hasPool
 
   // new version of building bid
@@ -241,6 +240,7 @@ export async function buildBidLimit({
   } = await exclusiveChange({
     maxUtxosCount: USE_UTXO_COUNT_LIMIT,
     psbt: payPsbt,
+    sighashType: SIGHASH_ALL,
   })
 
   const uploadFee = bidFee - (EXTRA_INPUT_MIN_VALUE - extraInputValue)
@@ -281,21 +281,27 @@ export async function buildBuyTake({
   }
   selectedPair: TradingPair
 }) {
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const btcjs = useBtcJsStore().get!
   const btcNetwork = useNetworkStore().btcNetwork
   const dummiesStore = useDummiesStore()
 
   const isFree = order.freeState === 1
 
-  // get sell psbt from order detail api
-  const askPsbtRaw = await getOneOrder({
+  const askPsbtRaw = await getBuyEssentials({
     orderId: order.orderId,
-  }).then((order) => order.psbtRaw)
+    address,
+    tick: selectedPair.fromSymbol,
+    buyerChangeAmount: 0,
+  }).then((result) => result.psbtRaw)
+  console.log('🚀 ~ file: order-builder.ts:290 ~ askPsbtRaw:', askPsbtRaw)
 
   const askPsbt = btcjs.Psbt.fromHex(askPsbtRaw, {
     network: btcjs.networks[btcNetwork],
   })
+  console.log('🚀 ~ file: order-builder.ts:293 ~ askPsbt:', askPsbt)
+
+  return
 
   const buyPsbt = new btcjs.Psbt({
     network: btcjs.networks[btcNetwork],
@@ -317,6 +323,7 @@ export async function buildBuyTake({
       witnessUtxo: dummyTx.outs[dummyUtxo.outputIndex],
       sighashType: btcjs.Transaction.SIGHASH_ALL,
     }
+    fillInternalKey(dummyInput)
     buyPsbt.addInput(dummyInput)
     totalInput += dummyUtxo.satoshis
   }
@@ -342,6 +349,7 @@ export async function buildBuyTake({
     witnessUtxo: askPsbt.data.inputs[0].witnessUtxo,
     finalScriptWitness: askPsbt.data.inputs[0].finalScriptWitness,
   }
+  fillInternalKey(sellerInput)
 
   buyPsbt.addInput(sellerInput)
   totalInput += sellerInput.witnessUtxo!.value
@@ -421,7 +429,7 @@ export async function buildSellTake({
   selectedPair: TradingPair
 }) {
   const networkStore = useNetworkStore()
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const btcjs = useBtcJsStore().get!
 
   // Step 1: Get the ordinal utxo as input
@@ -473,12 +481,14 @@ export async function buildSellTake({
     } catch (e: any) {}
   }
 
-  sell.addInput({
+  const input = fillInternalKey({
     hash: ordinalUtxo.txId,
     index: ordinalUtxo.outputIndex,
     witnessUtxo: ordinalPreTx.outs[ordinalUtxo.outputIndex],
     sighashType: SIGHASH_SINGLE_ANYONECANPAY,
   })
+
+  sell.addInput(input)
 
   // Step 2: Build output as what the seller want (BTC)
   sell.addOutput({
@@ -533,7 +543,7 @@ export async function buildSellTakeV2({
   selectedPair: TradingPair
 }) {
   const networkStore = useNetworkStore()
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const btcjs = useBtcJsStore().get!
 
   // Step 1: Get the ordinal utxo as input
@@ -584,8 +594,8 @@ export async function buildSellTakeV2({
   })
   // check if the amount is correct
   const sellerOutputIndex = 2
-  const sellerOutputAmont = sell.txOutputs[sellerOutputIndex].value
-  raiseUnless(sellerOutputAmont === total, 'Amount mismatch')
+  const sellerOutputAmount = sell.txOutputs[sellerOutputIndex].value
+  raiseUnless(sellerOutputAmount === total, 'Amount mismatch')
 
   // check if the fee amount is met
   const { platformFee, releaseInscriptionFee } = order
@@ -636,7 +646,7 @@ export async function buildClaimTake({
 }: {
   claimPsbtRaw: string
 }) {
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const btcjs = useBtcJsStore().get!
   const btcNetwork = useNetworkStore().btcNetwork
   const dummiesStore = useDummiesStore()
@@ -661,12 +671,12 @@ export async function buildClaimTake({
   const dummyUtxos = dummiesStore.get!
   for (const dummyUtxo of dummyUtxos) {
     const dummyTx = btcjs.Transaction.fromHex(dummyUtxo.txHex)
-    const dummyInput = {
+    const dummyInput = fillInternalKey({
       hash: dummyUtxo.txId,
       index: dummyUtxo.outputIndex,
       witnessUtxo: dummyTx.outs[dummyUtxo.outputIndex],
       sighashType: btcjs.Transaction.SIGHASH_ALL,
-    }
+    })
     takePsbt.addInput(dummyInput)
     totalInput += dummyUtxo.satoshis
   }
@@ -686,12 +696,12 @@ export async function buildClaimTake({
   takePsbt.addOutput(ordOutput)
 
   // Step 4: sellerInput, in
-  const sellerInput = {
+  const sellerInput = fillInternalKey({
     hash: claimPsbt.txInputs[0].hash,
     index: claimPsbt.txInputs[0].index,
     witnessUtxo: claimPsbt.data.inputs[0].witnessUtxo,
     finalScriptWitness: claimPsbt.data.inputs[0].finalScriptWitness,
-  }
+  })
 
   takePsbt.addInput(sellerInput)
   totalInput += sellerInput.witnessUtxo!.value
