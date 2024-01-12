@@ -1201,7 +1201,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                       >
                         BID Order
                       </span>
-                      <span class="group-hover:underline">to buy</span>
+                      <span class="group-hover:underline">to sell</span>
                     </button>
                   </div>
                 </div>
