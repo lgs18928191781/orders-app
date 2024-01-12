@@ -13,9 +13,10 @@
     "init-bip39": "npx browserify --standalone bip39 - -o public/bip39.js <<<\"module.exports = require('bip39');\""
   },
   "dependencies": {
-    "@headlessui/vue": "^1.7.13",
+    "@headlessui/vue": "^1.7.16",
     "@tanstack/vue-query": "^4.29.11",
     "@vueuse/core": "^10.1.2",
+    "@vueuse/router": "^10.7.1",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "bitcoinjs-lib": "^6.1.0",
@@ -33,7 +34,7 @@
     "tailwind-merge": "^1.13.1",
     "tailwindcss-animate": "^1.0.7",
     "tiny-secp256k1": "^2.2.1",
-    "vue": "^3.3.4",
+    "vue": "^3.4.3",
     "vue-router": "^4.2.1"
   },
   "devDependencies": {

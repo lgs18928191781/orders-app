@@ -4,25 +4,26 @@ import { computed, inject } from 'vue'
 
 import { defaultPoolPair, selectedPoolPairKey } from '@/data/trading-pairs'
 import { getMyReleasedRecords } from '@/queries/pool'
-import { useAddressStore } from '@/store'
 
 import PanelReleaseHistoryItem from './PanelReleaseHistoryItem.vue'
+import { useConnectionStore } from '@/stores/connection'
+
+const connnectionStore = useConnectionStore()
 
 const selectedPair = inject(selectedPoolPairKey, defaultPoolPair)
-const addressStore = useAddressStore()
-const enabled = computed(() => !!addressStore.get)
+const enabled = computed(() => connnectionStore.connected)
 
 const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
   queryKey: [
     'poolReleaseHistory',
     {
-      address: addressStore.get as string,
+      address: connnectionStore.getAddress,
       tick: selectedPair.fromSymbol,
     },
   ],
   queryFn: () =>
     getMyReleasedRecords({
-      address: addressStore.get as string,
+      address: connnectionStore.getAddress,
       tick: selectedPair.fromSymbol,
     }),
   enabled,

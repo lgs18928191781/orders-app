@@ -8,7 +8,6 @@ import { useConnectionStore } from '@/stores/connection'
 import { cancelOrder, type Order, getFiatRate } from '@/queries/orders-api'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, useBtcUnit } from '@/lib/helpers'
-import Decimal from 'decimal.js'
 
 const address = useConnectionStore().getAddress
 
@@ -46,7 +45,7 @@ async function onCancel() {
 
 // fiat price
 const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate'],
+  queryKey: ['fiatRate', { coin: 'btc' }],
   queryFn: getFiatRate,
 })
 </script>

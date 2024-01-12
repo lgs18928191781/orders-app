@@ -27,7 +27,6 @@ export function finishPsbt(psbt: string): string {
     const rebuilt = new btcjs.Psbt()
     rebuilt.setVersion(original.version)
     rebuilt.setLocktime(original.locktime)
-    console.log(original.data.inputs[2])
 
     const useIndex = 2
     const input: any = {
@@ -91,6 +90,7 @@ export const connect: () => Promise<{
   const account: {
     address: string
     publicKey: string
+    compressedPublicKey: string
   } = await window.okxwallet.bitcoin.connect()
   if (account) {
     const address = account.address
@@ -106,7 +106,7 @@ export const connect: () => Promise<{
 
     return {
       address,
-      pubKey: account.publicKey,
+      pubKey: account.compressedPublicKey || account.publicKey,
     }
   }
 

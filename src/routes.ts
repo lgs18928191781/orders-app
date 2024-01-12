@@ -6,6 +6,8 @@ import { isRestrictedRegion } from '@/lib/helpers'
 
 const Home = () => import('./pages/Home.vue')
 const Recover = () => import('./pages/Recover.vue')
+const Swap = () => import('./pages/Swap.vue')
+const SwapPools = () => import('./pages/swap-pools/Index.vue')
 const Whitelist = () => import('./pages/Whitelist.vue')
 const Changelog = () => import('./pages/Changelog.vue')
 const Dev = () => import('./pages/Dev.vue')
@@ -14,6 +16,24 @@ const NoService = () => import('./pages/NoService.vue')
 
 const routes = [
   { path: '/orders/:pair?', component: Home, alias: '/' },
+  {
+    path: '/swap-pools/:pair',
+    component: SwapPools,
+    children: [
+      {
+        path: 'add',
+        alias: '',
+        name: 'swap-pools-add',
+        component: () => import('./pages/swap-pools/Add.vue'),
+      },
+      {
+        path: 'remove',
+        name: 'swap-pools-remove',
+        component: () => import('./pages/swap-pools/Remove.vue'),
+      },
+    ],
+  },
+  { path: '/swap', component: Swap },
   { path: '/whitelist', component: Whitelist },
   { path: '/changelog', component: Changelog },
   { path: '/pool/:pair?', component: Pool },

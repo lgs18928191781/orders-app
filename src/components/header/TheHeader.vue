@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Ref, computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import { ShieldAlertIcon, CheckCircle2 } from 'lucide-vue-next'
@@ -7,9 +7,10 @@ import { ShieldAlertIcon, CheckCircle2 } from 'lucide-vue-next'
 import { prettyAddress } from '@/lib/formatters'
 import { useDummiesStore } from '@/stores/dummies'
 import { useNetworkStore, type Network } from '@/stores/network'
-import { Wallet, useConnectionStore } from '@/stores/connection'
+import { useConnectionStore } from '@/stores/connection'
 import utils from '@/utils'
 import whitelist from '@/lib/whitelist'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
 
 import WalletMissingModal from './WalletMissingModal.vue'
 import AssetsDisplay from './AssetsDisplay.vue'
@@ -22,6 +23,8 @@ import okxIcon from '@/assets/okx-icon.png?url'
 const networkStore = useNetworkStore()
 const dummiesStore = useDummiesStore()
 
+const { openConnectionModal } = useConnectionModal()
+
 const unisatAccountsChangedHandler = (accounts: string[]) => {
   if (useConnectionStore().last.wallet !== 'unisat') return
 
@@ -33,7 +36,7 @@ const unisatAccountsChangedHandler = (accounts: string[]) => {
     },
   })
 }
-const okxAcountsChangedHandler = (accounts: string[]) => {
+const okxAccountsChangedHandler = (accounts: string[]) => {
   if (useConnectionStore().last.wallet !== 'okx') return
 
   ElMessage.warning({
@@ -76,13 +79,13 @@ onMounted(async () => {
   }
 
   if (window.okxwallet) {
-    window.okxwallet.on('accountsChanged', okxAcountsChangedHandler)
+    window.okxwallet.on('accountsChanged', okxAccountsChangedHandler)
   }
 })
 onBeforeUnmount(() => {
   // remove event listener
   window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
-  window.okxwallet?.removeListener('accountsChanged', okxAcountsChangedHandler)
+  window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
 })
 
 // connect / address related
@@ -94,11 +97,6 @@ const { data: address } = useQuery({
   retry: 0,
   enabled: computed(() => connectionStore.connected),
 })
-
-const connectionsModalOpen = ref(false)
-function popConnectionsModal() {
-  connectionsModalOpen.value = true
-}
 
 const enabled = computed(() => !!address.value)
 useQuery({
@@ -145,24 +143,11 @@ function copyAddress() {
   navigator.clipboard.writeText(address)
   ElMessage.success('Address copied to clipboard')
 }
-
-const walletMissingModalOpen = ref(false)
-const missingWallet: Ref<Wallet> = ref('unisat')
-function onWalletMissing(wallet: Wallet) {
-  missingWallet.value = wallet
-  walletMissingModalOpen.value = true
-}
 </script>
 
 <template>
-  <ConnectionsModal
-    v-model:open="connectionsModalOpen"
-    @wallet-missing="onWalletMissing"
-  />
-  <WalletMissingModal
-    v-model:open="walletMissingModalOpen"
-    :missing-wallet="missingWallet"
-  />
+  <ConnectionModal />
+  <WalletMissingModal />
 
   <header class="flex items-center justify-between px-6 py-4 select-none">
     <TheNavbar />
@@ -187,7 +172,7 @@ function onWalletMissing(wallet: Wallet) {
 
       <button
         class="h-10 rounded-lg border-2 border-orange-300 px-4 transition hover:text-orange-950 hover:bg-orange-300"
-        @click="popConnectionsModal"
+        @click="openConnectionModal"
         v-if="!connectionStore.connected"
       >
         Connect Wallet

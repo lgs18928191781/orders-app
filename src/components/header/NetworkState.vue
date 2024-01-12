@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Ref, computed, onMounted, ref, watch } from 'vue'
+import { Ref, computed, ref, watch } from 'vue'
 import { get, useStorage } from '@vueuse/core'
 import {
   Popover,
@@ -16,7 +16,7 @@ import { CarIcon, CheckIcon, Loader2Icon } from 'lucide-vue-next'
 
 import { useNetworkStore } from '@/stores/network'
 import { useFeebStore } from '@/stores/feeb'
-import { FeebPlan, getFeebPlans } from '@/queries/proxy'
+import { FeebPlan, getFeebPlans } from '@/queries/orders-api'
 import { calcFiatPrice, sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance } from '@/lib/formatters'
 import { getFiatRate } from '@/queries/orders-api'
@@ -29,13 +29,16 @@ import {
 } from '@/data/constants'
 import { getRewardClaimFees } from '@/queries/pool'
 import Decimal from 'decimal.js'
+import { BikeIcon } from 'lucide-vue-next'
+import { RocketIcon } from 'lucide-vue-next'
+import { BusIcon } from 'lucide-vue-next'
+import { SailboatIcon } from 'lucide-vue-next'
 
 // custom feeb plan
 const customFeeb = useStorage('customFeeb', 2)
 const customFeebPlan: Ref<FeebPlan> = ref({
   title: 'Custom',
   feeRate: customFeeb,
-  desc: '',
 })
 function updateCustomFeeb(e: any) {
   const target = e.target as HTMLInputElement
@@ -44,6 +47,20 @@ function updateCustomFeeb(e: any) {
   if (Number.isNaN(value)) return
 
   customFeeb.value = value
+}
+
+// feeb plan icons
+function getFeePlanIcon(planTitle: 'Slow' | 'Average' | 'Fast' | 'Custom') {
+  switch (planTitle) {
+    case 'Slow':
+      return BikeIcon
+    case 'Average':
+      return BusIcon
+    case 'Fast':
+      return RocketIcon
+    case 'Custom':
+      return SailboatIcon
+  }
 }
 
 // estimate miner fee for every actions
@@ -155,7 +172,7 @@ function getPoolActionsPriceDisplay(
 const networkStore = useNetworkStore()
 const { data: feebPlans, isLoading: isLoadingFeebPlans } = useQuery({
   queryKey: ['feebPlans', { network: networkStore.network }],
-  queryFn: () => getFeebPlans({ network: networkStore.network }),
+  queryFn: () => getFeebPlans(),
 })
 const selectableFeebPlans = computed(() => {
   if (!feebPlans.value) return
@@ -263,7 +280,7 @@ function onSwitchShow(open: boolean) {
 
 // fiat price
 const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate'],
+  queryKey: ['fiatRate', { coin: 'btc' }],
   queryFn: getFiatRate,
 })
 </script>
@@ -390,20 +407,27 @@ const { data: fiatRate } = useQuery({
                             ? 'bg-orange-300/75 text-white '
                             : 'bg-black ',
                         ]"
-                        class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
+                        class="relative flex cursor-pointer rounded-lg px-5 py-6 shadow-md focus:outline-none"
                       >
                         <div class="flex w-full items-center justify-between">
                           <div class="flex items-center">
                             <div class="text-sm">
-                              <RadioGroupLabel
-                                as="p"
-                                :class="
-                                  checked ? 'text-white' : 'text-zinc-300'
-                                "
-                                class="font-medium"
-                              >
-                                {{ plan.title }}
-                              </RadioGroupLabel>
+                              <div class="flex items-center gap-3">
+                                <component
+                                  :is="getFeePlanIcon(plan.title)"
+                                  class="w-6 h-6"
+                                ></component>
+
+                                <RadioGroupLabel
+                                  as="p"
+                                  :class="
+                                    checked ? 'text-white' : 'text-zinc-300'
+                                  "
+                                  class="font-medium text-lg"
+                                >
+                                  {{ plan.title }}
+                                </RadioGroupLabel>
+                              </div>
 
                               <RadioGroupDescription
                                 as="span"
@@ -440,7 +464,6 @@ const { data: fiatRate } = useQuery({
                                     {{ `${plan.feeRate} sat/vB` }}
                                   </span>
                                 </div>
-                                <div class="">{{ plan.desc }}</div>
                               </RadioGroupDescription>
                             </div>
                           </div>

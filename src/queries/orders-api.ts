@@ -3,9 +3,8 @@ import Decimal from 'decimal.js'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
-
 import sign from '@/lib/sign'
-import { ordersApiFetch } from '@/lib/fetch'
+import fetchWrapper, { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
 import { raise } from '@/lib/helpers'
 
 export const login = async () => {
@@ -31,6 +30,40 @@ export const getFiatRate = async (): Promise<number> => {
 
   // use per satoshi price
   return res?.usd?.btc ? new Decimal(res.usd.btc).dividedBy(1e8).toNumber() : 0
+}
+
+export const getBrcFiatRate = async (): Promise<Record<string, number>> => {
+  const res = await fetchWrapper(
+    `https://www.metalet.space/wallet-api/v3/coin/brc20/price`
+  )
+
+  // use per satoshi price
+  return res?.data?.priceInfo || {}
+}
+
+export type FeebPlan = {
+  feeRate: number
+  title: 'Slow' | 'Average' | 'Fast' | 'Custom'
+}
+export const getFeebPlans = async (): Promise<FeebPlan[]> => {
+  const res = await ordersCommonApiFetch(`fee/recommended`)
+
+  if (!res) return []
+
+  return [
+    {
+      title: 'Slow',
+      feeRate: res.hourFee,
+    },
+    {
+      title: 'Average',
+      feeRate: res.halfHourFee,
+    },
+    {
+      title: 'Fast',
+      feeRate: res.fastestFee,
+    },
+  ]
 }
 
 export type Notification = {
@@ -383,7 +416,7 @@ export const getOneBidOrder = async ({
   inscriptionId: string
 }): Promise<BidV20Order> => {
   const { publicKey, signature } = await sign()
-  const address = useAddressStore().get!
+  const address = useConnectionStore().getAddress
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
 
   const params = new URLSearchParams({

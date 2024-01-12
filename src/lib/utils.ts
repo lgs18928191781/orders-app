@@ -17,11 +17,20 @@ export function formatTok(
   fomat?: number
 ) {
   if (fomat) {
-    return new Decimal(tokenValue)
-      .div(10 ** tokenDecimal)
-      .toNumber()
-      .toFixed(fomat)
+    return removeTrailingZeros(
+      new Decimal(tokenValue)
+        .div(10 ** tokenDecimal)
+        .toNumber()
+        .toFixed(fomat)
+    )
   } else {
     return new Decimal(tokenValue).div(10 ** tokenDecimal).toNumber()
   }
+}
+
+function removeTrailingZeros(value: string) {
+  const regex = /\.?0+$/
+  const result = value.replace(regex, '')
+
+  return result
 }

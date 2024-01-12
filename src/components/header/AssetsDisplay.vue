@@ -84,7 +84,7 @@ const { data: myBrc20s } = useQuery({
       network: networkStore.network,
     },
   ],
-  queryFn: () => getBrc20s({ address: connectionStore.getAddress! }),
+  queryFn: () => getBrc20s({ address: connectionStore.getAddress }),
 
   enabled: computed(
     () => networkStore.network !== 'testnet' && !!connectionStore.getAddress

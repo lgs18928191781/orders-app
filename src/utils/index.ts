@@ -7,7 +7,7 @@ import { useNetworkStore } from '@/stores/network'
 import { useFeebStore } from '@/stores/feeb'
 import { useConnectionStore } from '@/stores/connection'
 import { getUtxos, getTxHex } from '@/queries/proxy'
-import { calculatePsbtFee } from '@/lib/build-helpers'
+import { calculatePsbtFee, fillInternalKey } from '@/lib/build-helpers'
 import { DUMMY_UTXO_VALUE } from '@/data/constants'
 import { raise } from '@/lib/helpers'
 import { toXOnly } from '@/lib/btc-helpers'
@@ -78,15 +78,16 @@ const utils = {
       const dummiesPsbt = new btcjs.Psbt({
         network: btcjs.networks[networkStore.btcNetwork],
       })
-      dummiesPsbt.addInput({
-        hash: paymentUtxo.txId,
-        index: paymentUtxo.outputIndex,
-        witnessUtxo: {
-          script: paymentScriptPk,
-          value: paymentUtxo.satoshis,
-        },
-        tapInternalKey: toXOnly(Buffer.from(useConnectionStore().getPubKey)),
-      })
+      dummiesPsbt.addInput(
+        fillInternalKey({
+          hash: paymentUtxo.txId,
+          index: paymentUtxo.outputIndex,
+          witnessUtxo: {
+            script: paymentScriptPk,
+            value: paymentUtxo.satoshis,
+          },
+        })
+      )
 
       dummiesPsbt.addOutput({ address: address, value: DUMMY_UTXO_VALUE })
       dummiesPsbt.addOutput({ address: address, value: DUMMY_UTXO_VALUE })
