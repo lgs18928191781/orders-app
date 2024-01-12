@@ -5,7 +5,7 @@ async function eventFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit
 ) {
-  const ordersApiUrl = `https://api.ordbook.io/book/event/${url}`
+  const ordersApiUrl = `https://www.orders.exchange/api-book/event/${url}`
   if (!options)
     options = {
       headers: {

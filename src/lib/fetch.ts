@@ -14,7 +14,7 @@ export async function ordersCommonApiFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit
 ) {
-  const ordersApiUrl = `https://api.ordbook.io/book/common/${url}`
+  const ordersApiUrl = `https://www.orders.exchange/api-book/common/${url}`
   if (!options)
     options = {
       headers: {
@@ -44,7 +44,7 @@ export async function ordersV2Fetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit
 ) {
-  const ordersApiUrl = `https://api.ordbook.io/book/brc20/order-v2/${url}`
+  const ordersApiUrl = `https://www.orders.exchange/api-book/brc20/order-v2/${url}`
   if (!options)
     options = {
       headers: {
@@ -74,7 +74,7 @@ export async function ordersApiFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit
 ) {
-  const ordersApiUrl = `https://api.ordbook.io/book/brc20/${url}`
+  const ordersApiUrl = `https://www.orders.exchange/api-book/brc20/${url}`
   if (!options)
     options = {
       headers: {
