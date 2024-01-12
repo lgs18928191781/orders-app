@@ -95,8 +95,12 @@ export const getAddress = async () => {
   if (isUnsupportedAddress(address)) {
     // await window.okxwallet.bitcoin.disconnect()
 
-    ElMessage.error('Please use a SegWit or Taproot address')
-    throw new Error('Please use a SegWit or Taproot address')
+    ElMessage.error(
+      'Please use a native SegWit or Taproot address (Starts with bc1)'
+    )
+    throw new Error(
+      'Please use a native SegWit or Taproot address (Starts with bc1)'
+    )
   }
 
   return address
@@ -125,7 +129,9 @@ export const connect: () => Promise<{
     if (isUnsupportedAddress(address)) {
       // await window.okxwallet.bitcoin.disconnect()
 
-      throw new Error('Please use a SegWit or Taproot address')
+      throw new Error(
+        'Please use a native SegWit or Taproot address (Starts with bc1)'
+      )
     }
 
     return {
