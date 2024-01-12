@@ -109,8 +109,6 @@ function decodePsbt() {
     <button @click="addRandom" class="p-2 rounded border border-zinc-500">
       Add Random String
     </button>
-    <p>
-      {{ selectedOrder }}
-    </p>
+    <p></p>
   </div>
 </template>
