@@ -484,23 +484,21 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 </script>
 
 <template>
-  <div
-    class="rounded-xl shadow-lg shadow-orange-300/10 border-2 border-orange-200/20 hover:shadow-orange-300/20 min-h-[75vh] flex flex-col"
-  >
+  <div class="flex flex-col">
     <OrderPanelHeader v-model:is-limit-exchange-mode="isLimitExchangeMode" />
 
     <!-- table -->
-    <div class="grid gap-x-8 p-8 grid-cols-5 flex-1">
+    <div class="grid grid-cols-2 flex-1 divide-x divide-zinc-800">
       <OrderList
         :askOrders="askOrders"
         :bidOrders="bidOrders"
-        class="col-span-3 self-stretch"
+        class="col-span-1 self-stretch p-4"
         @use-buy-price="(price: number, orderId: string) => setUseBuyPrice(price, orderId)"
         @use-sell-price="(price: number, orderId: string) => setUseSellPrice(price, orderId)"
       />
 
       <!-- operate panel -->
-      <div class="col-span-2 flex flex-col" v-if="isLimitExchangeMode">
+      <div class="col-span-1 flex flex-col p-4" v-if="isLimitExchangeMode">
         <div
           class="-mx-4 -mt-4 rounded-lg bg-zinc-800 p-4 shadow-md shadow-orange-300/20 flex-1 flex flex-col"
         >
@@ -873,7 +871,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
         </div>
       </div>
 
-      <div class="col-span-2 flex flex-col" v-else>
+      <div class="col-span-1 flex flex-col p-4" v-else>
         <!-- tabs -->
         <TabGroup :selectedIndex="takeModeTab" @change="changeTakeModeTab">
           <TabList

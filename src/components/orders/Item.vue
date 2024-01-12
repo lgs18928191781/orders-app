@@ -55,21 +55,11 @@ const { data: fiatRate } = useQuery({
 </script>
 
 <template>
-  <tr
-    class="cursor-pointer text-xs hover:bg-orange-300/10"
+  <div
+    class="cursor-pointer text-xs hover:bg-orange-300/10 col-span-3 grid grid-cols-3 gap-2"
     :class="{ '!bg-orange-300/20': isSelected(order.orderId) }"
   >
-    <td class="td">
-      <el-tooltip
-        content="This order is official and free to take."
-        placement="right"
-        effect="light"
-        v-if="isFreeOrder"
-      >
-        <BadgeCheckIcon class="box-content h-4 w-4 pr-2 text-orange-300" />
-      </el-tooltip>
-    </td>
-    <td class="td flex items-center gap-2">
+    <div class="td flex items-center gap-2">
       <span
         class="flex items-center"
         :class="{
@@ -86,11 +76,11 @@ const { data: fiatRate } = useQuery({
       <span class="text-xs text-zinc-500" v-if="showFiat && fiatRate">
         {{ '$' + calcFiatPrice(order.coinRatePrice, fiatRate) }}
       </span>
-    </td>
+    </div>
 
-    <td class="td-right">{{ order.coinAmount }}</td>
+    <div class="td-right">{{ order.coinAmount }}</div>
 
-    <td class="td-right">
+    <div class="td-right">
       <template v-if="isFreeOrder">
         <span
           class="rounded bg-green-700/30 px-2 py-1 text-xs font-bold text-green-500"
@@ -111,26 +101,16 @@ const { data: fiatRate } = useQuery({
           {{ '$' + calcFiatPrice(order.amount, fiatRate) }}
         </span>
       </span>
-    </td>
-
-    <td class="td">
-      <div class="flex h-full w-full items-center justify-center">
-        <button @click.stop="onCancel" title="Cancel Order" v-if="isMyOrder">
-          <XCircleIcon
-            class="h-4 w-4 text-zinc-500 transition hover:text-zinc-300"
-          />
-        </button>
-      </div>
-    </td>
-  </tr>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .td {
-  @apply py-1 text-left font-normal;
+  @apply py-1 text-left font-normal col-span-1;
 }
 
 .td-right {
-  @apply py-1 text-right font-normal;
+  @apply py-1 text-right font-normal col-span-1;
 }
 </style>

@@ -95,38 +95,38 @@ const useSellPrice = (order: Order) => {
 <template>
   <div class="flex flex-col gap-y-4 max-h-[60vh]">
     <div class="nicer-scrollbar h-full overflow-y-scroll pr-1" id="askOrders">
-      <table class="w-full">
-        <thead>
-          <tr class="">
-            <th class="th th-sticky"></th>
-            <th class="th th-sticky">Price ({{ unit }})</th>
-            <th class="th-right th-sticky">
-              <div class="flex items-center justify-end">
-                <span>Amount</span>
-                <span class="ml-2">
-                  {{ '$' + selectedPair.fromSymbol.toUpperCase() }}
-                </span>
-                <img
-                  :src="selectedPair.fromIcon"
-                  class="h-4 rounded-full inline ml-1"
-                />
-              </div>
-            </th>
-            <th class="th-right th-sticky">
-              <div class="flex items-center justify-end">
-                <span>Total</span>
-                <span class="ml-2">({{ unit }})</span>
-                <img
-                  :src="selectedPair.toIcon"
-                  class="h-4 rounded-full inline ml-1"
-                />
-              </div>
-            </th>
-            <th class="th th-sticky"></th>
-          </tr>
-        </thead>
+      <div class="w-full">
+        <div class="grid grid-cols-3 gap-2">
+          <div class="th th-sticky">Price ({{ unit }})</div>
+          <div class="th-right th-sticky">
+            <div class="flex items-center justify-end">
+              <span>Amount</span>
+              <span class="ml-2">
+                {{ '$' + selectedPair.fromSymbol.toUpperCase() }}
+              </span>
+              <img
+                :src="selectedPair.fromIcon"
+                class="h-4 rounded-full inline ml-1"
+              />
+            </div>
+          </div>
+          <div class="th-right th-sticky">
+            <div class="flex items-center justify-end">
+              <span>Total</span>
+              <span class="ml-2">({{ unit }})</span>
+              <img
+                :src="selectedPair.toIcon"
+                class="h-4 rounded-full inline ml-1"
+              />
+            </div>
+          </div>
+        </div>
 
-        <tbody v-if="askOrders.length" id="askOrdersList">
+        <div
+          v-if="askOrders.length"
+          id="askOrdersList"
+          class="grid grid-cols-3"
+        >
           <OrderItem
             v-for="order in rearrangedAskOrders"
             :key="order.orderId"
@@ -134,8 +134,8 @@ const useSellPrice = (order: Order) => {
             :order-type="'ask'"
             @click="useBuyPrice(order)"
           />
-        </tbody>
-      </table>
+        </div>
+      </div>
       <div
         class="flex h-3/4 w-full items-center justify-center"
         v-if="!askOrders.length"
@@ -221,7 +221,7 @@ const useSellPrice = (order: Order) => {
 
 <style scoped>
 .th {
-  @apply pb-2 pt-0 text-left text-sm font-normal text-zinc-500;
+  @apply pb-2 pt-0 text-left text-sm font-normal text-zinc-500 col-span-1;
 }
 
 .th-sticky {
@@ -229,6 +229,6 @@ const useSellPrice = (order: Order) => {
 }
 
 .th-right {
-  @apply pb-2 pt-0 text-right text-sm font-normal text-zinc-500;
+  @apply pb-2 pt-0 text-right text-sm font-normal text-zinc-500 col-span-1;
 }
 </style>

@@ -74,6 +74,5 @@ export const getOneLeaderboard = async ({
 
   const res = await eventFetch(`ranking/address?${params}`)
 
-  console.log('🚀 ~ getOneLeaderboard ~ res:', res)
   return res
 }

@@ -154,7 +154,9 @@ function copyAddress() {
   <ConnectionModal />
   <WalletMissingModal />
 
-  <header class="flex items-center justify-between px-6 py-4 select-none">
+  <header
+    class="flex items-center justify-between px-6 py-4 select-none bg-zinc-900 border-b-2 border-zinc-800"
+  >
     <TheNavbar />
 
     <div class="flex gap-2">

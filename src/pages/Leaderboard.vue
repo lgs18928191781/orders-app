@@ -10,6 +10,7 @@ import {
 } from '@/queries/leaderboard'
 
 import AssetSelect from '@/components/AssetSelect.vue'
+import { prettyBtcDisplay } from '@/lib/formatters'
 
 const tick = useStorage('tick', 'orxc')
 
@@ -37,7 +38,7 @@ const trophyColor = (index: number) => {
       return 'text-yellow-600'
 
     default:
-      return 'text-zinc-400'
+      return 'text-zinc-100'
   }
 }
 </script>
@@ -81,7 +82,7 @@ const trophyColor = (index: number) => {
         <div>
           <h3 class="text-lg font-semibold mb-2 text-zinc-100">Total Amount</h3>
           <p class="text-zinc-100">
-            {{ stats.totalAmount }}
+            {{ prettyBtcDisplay(stats.totalAmount) }}
           </p>
         </div>
 
@@ -95,7 +96,7 @@ const trophyColor = (index: number) => {
         <div class="">
           <h3 class="text-lg font-semibold mb-2 text-zinc-100">My Amount</h3>
           <p class="text-zinc-100">
-            {{ stats.addressTotalAmount }}
+            {{ prettyBtcDisplay(stats.addressTotalAmount) }}
           </p>
         </div>
       </div>
@@ -142,13 +143,15 @@ const trophyColor = (index: number) => {
 
                 <span class="text-zinc-100" v-else>{{ index + 1 }}</span>
               </td>
-              <td class="p-4 align-middle text-center">
+              <td
+                :class="['p-4 align-middle text-center', , trophyColor(index)]"
+              >
                 {{ row.address }}
               </td>
               <td
-                class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-center"
+                :class="['p-4 align-middle text-center', , trophyColor(index)]"
               >
-                {{ row.totalValue }}
+                {{ prettyBtcDisplay(row.totalValue) }}
               </td>
             </tr>
           </tbody>
