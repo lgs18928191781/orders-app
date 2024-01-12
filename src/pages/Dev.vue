@@ -9,7 +9,7 @@ import { useSelectOrder } from '@/hooks/use-select-order'
 
 const btcJsStore = useBtcJsStore()
 
-const { selectedOrder, select } = useSelectOrder()
+const { select } = useSelectOrder()
 function addRandom() {
   select('random')
 }
