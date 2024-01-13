@@ -9,7 +9,7 @@ import { useSelectOrder } from '@/hooks/use-select-order'
 
 const btcJsStore = useBtcJsStore()
 
-const { selectedOrder, select } = useSelectOrder()
+const { select } = useSelectOrder()
 function addRandom() {
   select('random')
 }
@@ -109,8 +109,6 @@ function decodePsbt() {
     <button @click="addRandom" class="p-2 rounded border border-zinc-500">
       Add Random String
     </button>
-    <p>
-      {{ selectedOrder }}
-    </p>
+    <p></p>
   </div>
 </template>
