@@ -206,7 +206,7 @@ watch(
 
 <style scoped>
 .main-btn {
-  @apply bg-orange-300/20 text-orange-300 font-medium block w-full py-3 rounded-2xl text-xl hover:bg-orange-300/30;
+  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
 }
 
 .main-btn.disabled {

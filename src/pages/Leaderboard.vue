@@ -50,7 +50,7 @@ const trophyColor = (index: number) => {
     </h1>
 
     <section
-      class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-orange-300/30 border border-orange-300/20"
+      class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-primary/30 border border-primary/20"
     >
       <div class="flex gap-8 items-center">
         <span class="text-lg text-zinc-300">Tick</span>
@@ -69,7 +69,7 @@ const trophyColor = (index: number) => {
       </div>
 
       <!-- a border -->
-      <div class="col-span-3 border-b border-orange-300/20 pt-4 mb-4"></div>
+      <div class="col-span-3 border-b border-primary/20 pt-4 mb-4"></div>
 
       <div class="grid grid-cols-2 gap-8" v-if="stats">
         <div>

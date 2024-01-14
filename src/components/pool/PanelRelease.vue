@@ -55,7 +55,7 @@ const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
           :class="[
             'text-sm font-medium leading-6 ',
             selectedIndex === 0
-              ? 'text-orange-300'
+              ? 'text-primary'
               : 'text-zinc-500 hover:text-zinc-300',
           ]"
         >
@@ -65,7 +65,7 @@ const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
           :class="[
             'text-sm font-medium leading-6 ',
             selectedIndex === 1
-              ? 'text-orange-300'
+              ? 'text-primary'
               : 'text-zinc-500 hover:text-zinc-300',
           ]"
         >

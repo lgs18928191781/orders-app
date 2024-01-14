@@ -27,9 +27,9 @@ const { data: issues } = useQuery({
 
 <template>
   <div
-    class="mx-auto max-w-3xl bg-zinc-900 rounded-xl shadow-lg shadow-orange-300/10 border-2 border-orange-200/20 hover:shadow-orange-300/20 min-h-[75vh] flex flex-col p-8 mt-8"
+    class="mx-auto max-w-3xl bg-zinc-900 rounded-xl shadow-lg shadow-primary/10 border-2 border-orange-200/20 hover:shadow-primary/20 min-h-[75vh] flex flex-col p-8 mt-8"
   >
-    <div class="border-b border-orange-300/30 pb-4 -mt-2">
+    <div class="border-b border-primary/30 pb-4 -mt-2">
       <h3 class="font-bold text-zinc-300 text-lg">
         Issues
         <span v-if="issues?.length">({{ issues.length }})</span>

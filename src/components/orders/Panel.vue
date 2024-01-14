@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Ref, computed, provide, ref, watch } from 'vue'
+import { Ref, computed, ref, watch } from 'vue'
 import {
   TabGroup,
   TabList,
@@ -42,49 +42,47 @@ import {
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
-import { selectPair, selectedPairKey } from '@/data/trading-pairs'
 import { IS_DEV, SELL_TX_SIZE } from '@/data/constants'
+import { useAreaHighlight } from '@/hooks/use-area-highlight'
+import { useTradingPair } from '@/hooks/use-trading-pair'
 
 import btcIcon from '@/assets/btc.svg?url'
 import OrderPanelHeader from './PanelHeader.vue'
 import OrderList from './List.vue'
 import OrderConfirmationModal from '../ConfirmationModal.vue'
-import { useAreaHighlight } from '@/hooks/use-area-highlight'
 
 const connectionStore = useConnectionStore()
 const address = connectionStore.getAddress
 const networkStore = useNetworkStore()
 const feebStore = useFeebStore()
 const { highlight } = useAreaHighlight()
-
-const selectedPair = selectPair()
-provide(selectedPairKey, selectedPair)
+const { selectedPair } = useTradingPair()
 
 const { data: askOrders, isFetched: isFetchedAskOrders } = useQuery({
   queryKey: [
     'askOrders',
-    { network: networkStore.network, tick: selectedPair.fromSymbol },
+    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
   ],
   queryFn: () =>
     getOrders({
       type: 'ask',
       network: networkStore.network,
       sort: 'desc',
-      tick: selectedPair.fromSymbol,
+      tick: selectedPair.value.fromSymbol,
     }),
   placeholderData: [],
 })
 const { data: bidOrders } = useQuery({
   queryKey: [
     'bidOrders',
-    { network: networkStore.network, tick: selectedPair.fromSymbol },
+    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
   ],
   queryFn: () =>
     getOrders({
       type: 'bid',
       network: networkStore.network,
       sort: 'desc',
-      tick: selectedPair.fromSymbol,
+      tick: selectedPair.value.fromSymbol,
     }),
   placeholderData: [],
 })
@@ -248,14 +246,14 @@ async function buildOrder() {
         const preBuildRes = await buildBidOffer({
           total: bidTotalExchangePrice.value,
           coinAmount: bidAmount.value,
-          selectedPair,
+          selectedPair: selectedPair.value,
         })
         buildRes = preBuildRes
       } else {
         buildRes = await buildAskLimit({
           total: Math.round(askExchangePrice.value * askLimitBrcAmount.value),
           amount: askLimitBrcAmount.value,
-          selectedPair,
+          selectedPair: selectedPair.value,
         })
       }
     } else {
@@ -265,7 +263,7 @@ async function buildOrder() {
 
         buildRes = await buildBuyTake({
           order: selectedBuyOrders.value[0],
-          selectedPair,
+          selectedPair: selectedPair.value,
         })
       } else if (takeModeTab.value === 1) {
         // sell
@@ -278,7 +276,7 @@ async function buildOrder() {
         const sellTake = await buildSellTake({
           total,
           amount: selectedSellCoinAmount.value,
-          selectedPair,
+          selectedPair: selectedPair.value,
           orderId: selectedSellOrders.value[0].orderId,
         }).catch(async (err) => {
           await sleep(500)
@@ -320,7 +318,7 @@ async function buildOrder() {
 async function goInscribe() {
   const adapter = connectionStore.adapter
 
-  await adapter?.inscribe(selectedPair.exactName)
+  await adapter?.inscribe(selectedPair.value.exactName)
 }
 
 // confirm modal
@@ -337,9 +335,9 @@ const limitExchangeType: Ref<'bid' | 'ask'> = ref('bid')
 const { data: marketPrice } = useQuery({
   queryKey: [
     'marketPrice',
-    { network: networkStore.network, tick: selectedPair.fromSymbol },
+    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
   ],
-  queryFn: () => getMarketPrice({ tick: selectedPair.fromSymbol }),
+  queryFn: () => getMarketPrice({ tick: selectedPair.value.fromSymbol }),
 })
 
 const bidExchangePrice = ref(0)
@@ -469,13 +467,13 @@ const { data: myBrc20Info } = useQuery({
     {
       address,
       network: networkStore.network,
-      tick: selectedPair.fromSymbol,
+      tick: selectedPair.value.fromSymbol,
     },
   ],
   queryFn: () =>
     getOneBrc20({
       address,
-      tick: selectedPair.fromSymbol,
+      tick: selectedPair.value.fromSymbol,
     }),
 
   enabled: computed(() => networkStore.network !== 'testnet' && !!address),
@@ -500,10 +498,10 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
       <!-- operate panel -->
       <div class="col-span-1 flex flex-col p-4" v-if="isLimitExchangeMode">
         <div
-          class="-mx-4 -mt-4 rounded-lg bg-zinc-800 p-4 shadow-md shadow-orange-300/20 flex-1 flex flex-col"
+          class="-mx-4 -mt-4 rounded-lg bg-zinc-800 p-4 shadow-md shadow-primary/20 flex-1 flex flex-col"
         >
           <div class="relative">
-            <h3 class="font-sm text-center font-bold text-orange-300">
+            <h3 class="font-sm text-center font-bold text-primary">
               Create Limit Order
             </h3>
 
@@ -645,7 +643,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                     class="mt-4 w-full rounded-md py-4 font-bold"
                     :class="
                       canPlaceBidOrder
-                        ? 'bg-orange-300 text-orange-950'
+                        ? 'bg-primary text-orange-950'
                         : 'bg-zinc-700 text-zinc-500'
                     "
                     @click="buildOrder"
@@ -780,12 +778,12 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                             >
                               <span
                                 v-if="selected"
-                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-orange-300"
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary"
                               >
                                 <CheckIcon class="h-5 w-5" aria-hidden="true" />
                               </span>
 
-                              <span :class="selected && 'text-orange-300'">
+                              <span :class="selected && 'text-primary'">
                                 {{ askCandidate.amount }}
                               </span>
                             </li>
@@ -799,7 +797,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                             <li
                               :class="[
                                 'flex cursor-pointer items-center justify-between rounded border-t border-zinc-700 p-2 text-zinc-300 transition',
-                                { 'bg-orange-500/20 text-orange-300': active },
+                                { 'bg-orange-500/20 text-primary': active },
                               ]"
                             >
                               <BookPlusIcon
@@ -827,7 +825,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 
                   <!-- how to -->
                   <div
-                    class="mt-4 text-right text-xs text-zinc-400 underline underline-offset-2 transition hover:text-orange-300"
+                    class="mt-4 text-right text-xs text-zinc-400 underline underline-offset-2 transition hover:text-primary"
                   >
                     <a
                       href="https://canary-sailor-7ad.notion.site/How-to-place-an-ASK-order-faedef7a12134b57a40962b06d75c024"
@@ -856,7 +854,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                     class="mt-4 w-full rounded-md py-4 font-bold"
                     :class="
                       canPlaceAskOrder
-                        ? 'bg-orange-300 text-orange-950'
+                        ? 'bg-primary text-orange-950'
                         : 'bg-zinc-700 text-zinc-500'
                     "
                     @click="buildOrder"
@@ -994,7 +992,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                         >
                           <span
                             v-if="selected"
-                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-orange-300"
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary"
                           >
                             <CheckIcon class="h-5 w-5" aria-hidden="true" />
                           </span>
@@ -1007,7 +1005,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                             }}
                             {{ unit }}
                           </span>
-                          <span :class="selected && 'text-orange-300'">
+                          <span :class="selected && 'text-primary'">
                             {{ psbt.coinAmount }}
                           </span>
                         </li>
@@ -1016,11 +1014,11 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                   </Listbox> -->
 
                   <div
-                    class="max-w-[67%] grow text-right text-orange-300 py-1"
+                    class="max-w-[67%] grow text-right text-primary py-1"
                     v-else
                   >
                     <button
-                      class="text-orange-300/80 flex items-center gap-2 justify-end w-full group"
+                      class="text-primary/80 flex items-center gap-2 justify-end w-full group"
                       @click="highlight('askOrdersList')"
                     >
                       <span class="group-hover:underline">Select an</span>
@@ -1163,7 +1161,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                         >
                           <span
                             v-if="selected"
-                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-orange-300"
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary"
                           >
                             <CheckIcon class="h-5 w-5" aria-hidden="true" />
                           </span>
@@ -1176,7 +1174,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                             }}
                             {{ unit }}
                           </span>
-                          <span :class="selected && 'text-orange-300'">
+                          <span :class="selected && 'text-primary'">
                             {{ psbt.coinAmount }}
                           </span>
                         </li>
@@ -1185,11 +1183,11 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                   </Listbox> -->
 
                   <div
-                    class="max-w-[67%] grow text-right text-orange-300 py-1"
+                    class="max-w-[67%] grow text-right text-primary py-1"
                     v-else
                   >
                     <button
-                      class="text-orange-300/80 flex items-center gap-2 justify-end w-full group"
+                      class="text-primary/80 flex items-center gap-2 justify-end w-full group"
                       @click="highlight('bidOrdersList')"
                     >
                       <span class="group-hover:underline">Select a</span>

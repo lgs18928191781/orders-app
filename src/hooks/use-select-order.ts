@@ -1,5 +1,5 @@
 import { createGlobalState } from '@vueuse/core'
-import { Ref, ref } from 'vue'
+import { ref } from 'vue'
 
 export const useSelectOrder = createGlobalState(() => {
   const selectedOrder = ref<String>()

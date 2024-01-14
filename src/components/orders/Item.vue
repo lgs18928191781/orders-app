@@ -56,8 +56,8 @@ const { data: fiatRate } = useQuery({
 
 <template>
   <div
-    class="cursor-pointer text-xs hover:bg-orange-300/10 col-span-3 grid grid-cols-3 gap-2"
-    :class="{ '!bg-orange-300/20': isSelected(order.orderId) }"
+    class="cursor-pointer text-xs hover:bg-primary/10 col-span-3 grid grid-cols-3 gap-2"
+    :class="{ '!bg-primary/20': isSelected(order.orderId) }"
   >
     <div class="td flex items-center gap-2">
       <span

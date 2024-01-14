@@ -50,7 +50,7 @@ function onDisconnect() {
       <MenuButton class="outline-none flex items-center gap-0.5">
         <img class="h-9 cursor-pointer" :src="logo" alt="Logo" />
         <span
-          class="inline-flex items-center rounded-md bg-black px-2 py-0.5 text-xs font-medium text-orange-100"
+          class="hidden lg:inline-flex items-center rounded-md bg-black px-2 py-0.5 text-xs font-medium text-orange-100"
         >
           Beta
         </span>
@@ -67,13 +67,10 @@ function onDisconnect() {
     >
       <MenuItems class="absolute left-0 z-10 mt-1 flex w-screen max-w-min">
         <div
-          class="w-56 shrink rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg ring-1 ring-zinc-900/5 overflow-hidden divide-y divide-zinc-700 shadow-orange-300/20"
+          class="w-56 shrink rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg ring-1 ring-zinc-900/5 overflow-hidden divide-y divide-zinc-700 shadow-primary/20"
         >
           <MenuItem>
-            <router-link
-              to="/"
-              class="p-4 block hover:text-orange-300 transition"
-            >
+            <router-link to="/" class="p-4 block hover:text-primary transition">
               Home
             </router-link>
           </MenuItem>
@@ -92,15 +89,11 @@ function onDisconnect() {
             >
               <SwitchLabel class="text-zinc-500">Unit</SwitchLabel>
               <Switch v-model="useBtcUnit" class="border-none flex">
-                <span
-                  :class="[useBtcUnit ? 'text-orange-300' : 'text-zinc-500']"
-                >
+                <span :class="[useBtcUnit ? 'text-primary' : 'text-zinc-500']">
                   BTC
                 </span>
                 <span class="px-2">/</span>
-                <span
-                  :class="[useBtcUnit ? 'text-zinc-500' : 'text-orange-300']"
-                >
+                <span :class="[useBtcUnit ? 'text-zinc-500' : 'text-primary']">
                   satoshis
                 </span>
               </Switch>
@@ -115,7 +108,7 @@ function onDisconnect() {
               <SwitchLabel class="text-zinc-500">Show $ Price</SwitchLabel>
               <Switch
                 v-model="showFiatPrice"
-                :class="showFiatPrice ? 'bg-orange-300' : 'bg-black'"
+                :class="showFiatPrice ? 'bg-primary' : 'bg-black'"
                 class="relative inline-flex h-6 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
               >
                 <span
@@ -130,7 +123,7 @@ function onDisconnect() {
           <MenuItem>
             <router-link
               to="/recover"
-              class="p-4 block hover:text-orange-300 transition"
+              class="p-4 block hover:text-primary transition"
             >
               Recover
             </router-link>
@@ -138,7 +131,7 @@ function onDisconnect() {
 
           <MenuItem>
             <button
-              class="p-4 block hover:text-orange-300 transition w-full text-left"
+              class="p-4 block hover:text-primary transition w-full text-left"
               @click="clearCache"
             >
               Clear Account Cache
@@ -147,7 +140,7 @@ function onDisconnect() {
 
           <MenuItem v-if="connectionStore.has">
             <button
-              class="p-4 block hover:text-orange-300 transition w-full text-left"
+              class="p-4 block hover:text-primary transition w-full text-left"
               @click="onDisconnect"
             >
               Disconnect
@@ -157,7 +150,7 @@ function onDisconnect() {
           <MenuItem>
             <router-link
               to="/changelog"
-              class="p-4 block hover:text-orange-300 transition"
+              class="p-4 block hover:text-primary transition"
             >
               Changelog
             </router-link>

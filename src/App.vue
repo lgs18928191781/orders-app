@@ -42,7 +42,7 @@ queryClient.setDefaultOptions({
 
 <template>
   <Toaster />
-  <NotAvailableOverlay v-if="isMobile && !DEBUG" />
+  <NotAvailableOverlay v-if="false" />
 
   <template v-else>
     <TheHeader v-if="geoStore.pass" />

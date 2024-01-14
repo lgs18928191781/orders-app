@@ -185,7 +185,7 @@ watch(
         class="bg-transparent text-4xl quiet-input flex-1 w-12 p-0 leading-loose"
         :class="
           hasEnough
-            ? 'text-zinc-100 caret-orange-300'
+            ? 'text-zinc-100 caret-primary'
             : 'text-red-500 caret-red-500'
         "
         placeholder="0"

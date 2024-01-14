@@ -156,7 +156,7 @@ const isModelOpen = ref(false)
 
     <!-- total -->
     <div class="mt-2 flex items-center gap-4">
-      <div class="flex items-baseline gap- text-orange-300">
+      <div class="flex items-baseline gap- text-primary">
         <span class="font-bold text-lg">
           {{ isLoadingRewardsEssential ? '-' : standbyRewardsEssential?.total }}
         </span>
@@ -168,7 +168,7 @@ const isModelOpen = ref(false)
 
       <!-- claim button -->
       <button
-        class="rounded bg-orange-300 text-orange-950 px-4 py-1 shadow-md shadow-orange-300/20 text-sm hover:shadow-orange-300/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
+        class="rounded bg-primary text-orange-950 px-4 py-1 shadow-md shadow-primary/20 text-sm hover:shadow-primary/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
         @click="onClaimReward"
         :disabled="
           !standbyRewardsEssential || standbyRewardsEssential.total === 0
@@ -194,7 +194,7 @@ const isModelOpen = ref(false)
         :class="[
           'text-sm font-medium leading-6 outline-none',
           selectedIndex === 0
-            ? 'text-orange-300 underline decoration-2 underline-offset-4'
+            ? 'text-primary underline decoration-2 underline-offset-4'
             : 'text-zinc-500 hover:text-zinc-300',
         ]"
         >Standby Records</Tab
@@ -204,7 +204,7 @@ const isModelOpen = ref(false)
         :class="[
           'text-sm font-medium leading-6 outline-none',
           selectedIndex === 1
-            ? 'text-orange-300 underline decoration-2 underline-offset-4'
+            ? 'text-primary underline decoration-2 underline-offset-4'
             : 'text-zinc-500 hover:text-zinc-300',
         ]"
         >Claim History</Tab
@@ -213,7 +213,7 @@ const isModelOpen = ref(false)
     <TabPanels class="mt-8">
       <TabPanel class="h-[40vh] overflow-y-auto nicer-scrollbar pr-2">
         <button
-          class="text-zinc-300 mb-2 underline hover:text-orange-300 underline-offset-4 hover:underline-offset-2 text-sm"
+          class="text-zinc-300 mb-2 underline hover:text-primary underline-offset-4 hover:underline-offset-2 text-sm"
           @click="isModelOpen = true"
         >
           What are these records?
@@ -227,33 +227,33 @@ const isModelOpen = ref(false)
             <tr>
               <th
                 scope="col"
-                class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-orange-300 sm:pl-0 sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-primary sm:pl-0 sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
               >
                 Order ID
               </th>
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-orange-300 sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
               >
                 Amount
               </th>
 
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-orange-300 sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
               >
                 #Day
               </th>
 
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-orange-300 sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
               >
                 Percentage
               </th>
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-orange-300 sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
               >
                 Reward
               </th>
@@ -278,7 +278,7 @@ const isModelOpen = ref(false)
                     @click="onCopyOrderId(standby.orderId)"
                   >
                     <CopyIcon
-                      class="w-4 h-4 text-zinc-500 hover:text-orange-300"
+                      class="w-4 h-4 text-zinc-500 hover:text-primary"
                     />
                   </button>
                 </div>

@@ -104,7 +104,7 @@ function goToMissingWallet() {
               <div class="mt-5 sm:mt-6">
                 <button
                   type="button"
-                  class="inline-flex w-full justify-center rounded-md bg-orange-300 px-3 py-2 text-sm font-semibold text-orange-950 shadow-sm transition-colors hover:bg-orange-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-300"
+                  class="inline-flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-orange-950 shadow-sm transition-colors hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   @click="goToMissingWallet"
                   ref="goButtonRef"
                 >

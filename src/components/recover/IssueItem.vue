@@ -115,7 +115,7 @@ async function onRecover() {
 
     <div class="mt-4 flex items-center justify-between">
       <div class="space-2">
-        <div class="flex gap-1 text-orange-300">
+        <div class="flex gap-1 text-primary">
           <div>{{ issue.coinAmount }}</div>
           <div>${{ issue.tick.toUpperCase() }}</div>
         </div>
@@ -127,7 +127,7 @@ async function onRecover() {
 
       <div class="">
         <button
-          class="text-orange-300 border border-orange-300/30 px-4 py-1 rounded-md shadow-md shadow-orange-300/10 hover:shadow-orange-300/30 hover:bg-orange-300 hover:text-orange-950 transition-all duration-200"
+          class="text-primary border border-primary/30 px-4 py-1 rounded-md shadow-md shadow-primary/10 hover:shadow-primary/30 hover:bg-primary hover:text-orange-950 transition-all duration-200"
           @click="onRecover"
         >
           Recover

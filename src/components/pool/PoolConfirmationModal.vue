@@ -194,7 +194,7 @@ async function submitOrder() {
             <div class="" v-else-if="builtInfo">
               <div class="flex items-center gap-4">
                 <span class="text-zinc-500">Order Type</span>
-                <span class="font-bold uppercase text-orange-300">
+                <span class="font-bold uppercase text-primary">
                   {{
                     builtBtcInfo
                       ? 'bidirectional ' + builtInfo.type
@@ -216,7 +216,7 @@ async function submitOrder() {
                     class="flex items-center gap-2 mb-4 justify-center"
                     v-if="builtBtcInfo"
                   >
-                    <h3 class="text-center text-orange-300">
+                    <h3 class="text-center text-primary">
                       ${{ builtInfo.fromSymbol.toUpperCase() + ' Liquidity' }}
                     </h3>
                     <el-popover
@@ -228,7 +228,7 @@ async function submitOrder() {
                     >
                       <template #reference>
                         <HelpCircleIcon
-                          class="h-4 w-4 text-zinc-400 hover:!text-orange-300"
+                          class="h-4 w-4 text-zinc-400 hover:!text-primary"
                           aria-hidden="true"
                         />
                       </template>
@@ -286,7 +286,7 @@ async function submitOrder() {
                 <!-- btc to brc side -->
                 <div class="space-y-2 pl-4" v-if="builtBtcInfo">
                   <div class="flex items-center gap-2 mb-4 justify-center">
-                    <h3 class="text-center text-orange-300">
+                    <h3 class="text-center text-primary">
                       {{ 'BTC Liquidity' }}
                     </h3>
                     <el-popover
@@ -298,7 +298,7 @@ async function submitOrder() {
                     >
                       <template #reference>
                         <HelpCircleIcon
-                          class="h-4 w-4 text-zinc-400 hover:!text-orange-300"
+                          class="h-4 w-4 text-zinc-400 hover:!text-primary"
                           aria-hidden="true"
                         />
                       </template>

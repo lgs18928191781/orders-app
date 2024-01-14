@@ -323,7 +323,7 @@ async function submitOrder() {
               <div class="grid grid-cols-2 items-center">
                 <div class="flex items-center gap-4">
                   <span class="text-zinc-500">Order Type</span>
-                  <span class="font-bold uppercase text-orange-300">
+                  <span class="font-bold uppercase text-primary">
                     {{ builtInfo.type }}
                   </span>
                 </div>

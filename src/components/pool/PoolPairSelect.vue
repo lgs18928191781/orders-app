@@ -39,7 +39,7 @@ const choosePair = (pairId: number) => {
   >
     <div>
       <ListboxButton
-        class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-orange-300 shadow-sm hover:bg-opacity-80 transition-all"
+        class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-primary shadow-sm hover:bg-opacity-80 transition-all"
         v-slot="{ open }"
       >
         <div class="flex">
@@ -93,7 +93,7 @@ const choosePair = (pairId: number) => {
                 <span
                   :class="[
                     'font-bold ml-2 uppercase',
-                    selected && 'text-orange-300',
+                    selected && 'text-primary',
                   ]"
                 >
                   ${{ pair.fromSymbol }}-{{ pair.toSymbol }}
@@ -115,7 +115,7 @@ const choosePair = (pairId: number) => {
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-orange-300 ml-4"
+              class="h-5 w-5 text-primary ml-4"
               aria-hidden="true"
             />
           </button>

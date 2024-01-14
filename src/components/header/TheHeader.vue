@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import { prettyAddress } from '@/lib/formatters'
+import { prettyAddress, prettyOneSideAddress } from '@/lib/formatters'
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
 import whitelist from '@/lib/whitelist'
@@ -17,6 +17,7 @@ import TheNavbar from './TheNavbar.vue'
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
 import { isUnsupportedAddress } from '@/lib/helpers'
+import { MenuIcon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
@@ -117,22 +118,6 @@ const { data: address } = useQuery({
   enabled: computed(() => connectionStore.connected),
 })
 
-async function switchNetwork() {
-  if (!window.unisat) {
-    ElMessage.warning('Please install the Unisat wallet extension first.')
-    return
-  }
-
-  const network = networkStore.network === 'testnet' ? 'livenet' : 'testnet'
-  const switchRes = await window.unisat.switchNetwork(network)
-  if (switchRes) {
-    networkStore.set(network)
-  }
-
-  // reload page
-  window.location.reload()
-}
-
 const walletIcon = computed(() => {
   const connection = connectionStore.last
 
@@ -155,58 +140,52 @@ function copyAddress() {
   <WalletMissingModal />
 
   <header
-    class="flex items-center justify-between px-6 py-4 select-none bg-zinc-900 border-b-2 border-zinc-800"
+    class="flex items-center justify-between px-4 lg:px-6 py-2 lg:py-4 select-none bg-zinc-900 border-b-2 border-zinc-800"
   >
     <TheNavbar />
 
     <div class="flex gap-2">
-      <div class="hidden lg:block">
-        <!-- <el-tooltip
-          effect="light"
-          placement="bottom"
-          :content="`Click to switch to ${
-            networkStore.network === 'testnet' ? 'livenet' : 'testnet'
-          } `"
-        >
-          <button
-            class="h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition hover:text-orange-300"
-            @click="switchNetwork"
-          >
-            {{ networkStore.network }}
-          </button>
-        </el-tooltip> -->
-      </div>
-
       <button
-        class="h-10 rounded-lg border-2 border-orange-300 px-4 transition hover:text-orange-950 hover:bg-orange-300"
+        class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
         @click="openConnectionModal"
         v-if="!connectionStore.connected"
       >
         Connect Wallet
       </button>
 
-      <div v-else class="flex items-center gap-2">
-        <div
-          class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
-        >
+      <template v-else>
+        <div class="items-center gap-2 hidden lg:flex">
           <div
-            class="lg:flex gap-2 pr-3 hidden cursor-pointer"
-            @click="copyAddress"
-            title="copy address"
+            class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
           >
-            <img class="h-5" :src="walletIcon" alt="Unisat" v-if="walletIcon" />
-            <span class="text-sm text-orange-300">
-              {{ address ? prettyAddress(address, 4) : '-' }}
-            </span>
+            <div
+              class="flex gap-2 pr-3 cursor-pointer"
+              @click="copyAddress"
+              title="copy address"
+            >
+              <img
+                class="h-5"
+                :src="walletIcon"
+                alt="Unisat"
+                v-if="walletIcon"
+              />
+              <span class="text-sm text-primary">
+                {{ address ? prettyAddress(address, 4) : '-' }}
+              </span>
+            </div>
+
+            <AssetsDisplay />
+
+            <NetworkState />
           </div>
 
-          <AssetsDisplay />
-
-          <NetworkState />
+          <Notifications />
         </div>
 
-        <Notifications />
-      </div>
+        <button class="lg:hidden">
+          <MenuIcon class="h-6 w-6" />
+        </button>
+      </template>
     </div>
   </header>
 </template>

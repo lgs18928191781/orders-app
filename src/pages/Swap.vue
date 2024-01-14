@@ -205,7 +205,7 @@ watch(
     class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-125 xl:scale-150 origin-top"
   >
     <div
-      class="border border-orange-300/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
+      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
     >
       <!-- header -->
       <div class="px-3 flex gap-4">
@@ -246,13 +246,13 @@ watch(
             />
 
             <button
-              class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-orange-300/80"
+              class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
               :class="{
                 'rotate-180': fromSymbol === 'btc',
               }"
               @click="flipAsset"
             >
-              <ArrowUpDownIcon class="h-4 w-4 text-orange-300" />
+              <ArrowUpDownIcon class="h-4 w-4 text-primary" />
             </button>
           </div>
         </div>
@@ -291,7 +291,7 @@ watch(
 
 <style scoped>
 .main-btn {
-  @apply bg-orange-300/20 text-orange-300 font-medium block w-full py-3 rounded-2xl text-xl hover:bg-orange-300/30;
+  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
 }
 
 .main-btn.disabled {

@@ -125,7 +125,7 @@ async function submitReleaseRecord() {
 
   <div class="py-4 mx-4 bg-zinc-950 rounded-lg px-4">
     <h3 class="items-center flex justify-between">
-      <span class="text-orange-300" v-if="record.poolType === 3">
+      <span class="text-primary" v-if="record.poolType === 3">
         {{
           `${record.coinAmount} ${record.tick.toUpperCase()} / ${prettyBalance(
             record.amount,
@@ -133,7 +133,7 @@ async function submitReleaseRecord() {
           )} ${unit}`
         }}
       </span>
-      <span class="text-orange-300" v-else>
+      <span class="text-primary" v-else>
         {{ `${record.coinAmount} ${record.tick.toUpperCase()}` }}
       </span>
 
@@ -183,7 +183,7 @@ async function submitReleaseRecord() {
               >
                 {{ record.tick.toUpperCase() }}
               </span>
-              <span class="hover:text-orange-300 underline">
+              <span class="hover:text-primary underline">
                 {{ prettyTxid(record.dealCoinTx, 4) }}
               </span>
 
@@ -200,7 +200,7 @@ async function submitReleaseRecord() {
               >
                 BTC
               </span>
-              <span class="hover:text-orange-300 underline">
+              <span class="hover:text-primary underline">
                 {{ prettyTxid(record.dealTx, 4) }}
               </span>
 
@@ -288,7 +288,7 @@ async function submitReleaseRecord() {
 
       <button
         :class="[
-          'rounded-md bg-orange-300 text-orange-950 px-6 py-2 shadow-md shadow-orange-300/20',
+          'rounded-md bg-primary text-orange-950 px-6 py-2 shadow-md shadow-primary/20',
           { 'opacity-30 saturate-50': record.claimState !== 'ready' },
         ]"
         @click.prevent="submitReleaseRecord"

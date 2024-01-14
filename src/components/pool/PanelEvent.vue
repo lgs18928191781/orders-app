@@ -155,7 +155,7 @@ async function onConfirm() {}
 
     <!-- total -->
     <div class="mt-2 flex items-center gap-4">
-      <div class="flex items-baseline gap- text-orange-300">
+      <div class="flex items-baseline gap- text-primary">
         <span class="font-bold text-lg">
           {{ isLoadingRewardsEssential ? '-' : eventRewardsEssential?.total }}
         </span>
@@ -167,7 +167,7 @@ async function onConfirm() {}
 
       <!-- claim button -->
       <button
-        class="rounded bg-orange-300 text-orange-950 px-4 py-1 shadow-md shadow-orange-300/20 text-sm hover:shadow-orange-300/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
+        class="rounded bg-primary text-orange-950 px-4 py-1 shadow-md shadow-primary/20 text-sm hover:shadow-primary/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
         @click="onClaimReward"
         :disabled="!eventRewardsEssential || eventRewardsEssential.total === 0"
         v-if="eventRewardsEssential && eventRewardsEssential.total > 0"
@@ -192,7 +192,7 @@ async function onConfirm() {}
           :class="[
             'text-sm font-medium leading-6',
             selectedIndex === 0
-              ? 'text-orange-300 underline decoration-2 underline-offset-4'
+              ? 'text-primary underline decoration-2 underline-offset-4'
               : 'text-zinc-500 hover:text-zinc-300',
           ]"
         >
@@ -202,7 +202,7 @@ async function onConfirm() {}
           :class="[
             'text-sm font-medium leading-6',
             selectedIndex === 1
-              ? 'text-orange-300 underline decoration-2 underline-offset-4'
+              ? 'text-primary underline decoration-2 underline-offset-4'
               : 'text-zinc-500 hover:text-zinc-300',
           ]"
         >

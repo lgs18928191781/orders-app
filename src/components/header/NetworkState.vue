@@ -218,7 +218,7 @@ watch(
 const traffic = computed(() => {
   if (!feebPlans.value) return '-'
 
-  const avgFeeRate = feebPlans.value[1].feeRate
+  const avgFeeRate = feebPlans.value[2].feeRate
 
   if (avgFeeRate < 20) return 'Low'
   if (avgFeeRate < 50) return 'Normal'
@@ -313,7 +313,7 @@ const { data: fiatRate } = useQuery({
         <Loader2Icon class="text-zinc-500 h-4 w-4 mx-auto animate-spin" />
       </span>
 
-      <span class="text-orange-300 text-left min-w-[60px]" v-else>
+      <span class="text-primary text-left min-w-[60px]" v-else>
         {{
           selectedFeebPlan
             ? `${selectedFeebPlan.title} ${selectedFeebPlan.feeRate}`
@@ -333,7 +333,7 @@ const { data: fiatRate } = useQuery({
       leave-to-class="transform opacity-0 scale-95"
     >
       <PopoverPanel
-        class="absolute z-50 right-0 mt-4 w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none px-4 shadow-orange-300/20"
+        class="absolute z-50 right-0 mt-4 w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none px-4 shadow-primary/20"
       >
         <div class="divide-y-2 divide-zinc-700">
           <div class="py-4">
@@ -406,11 +406,9 @@ const { data: fiatRate } = useQuery({
                       <div
                         :class="[
                           active
-                            ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-orange-300'
+                            ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-primary'
                             : '',
-                          checked
-                            ? 'bg-orange-300/75 text-white '
-                            : 'bg-black ',
+                          checked ? 'bg-primary/75 text-white ' : 'bg-black ',
                         ]"
                         class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
                       >
@@ -497,7 +495,7 @@ const { data: fiatRate } = useQuery({
                     v-for="action in makeActions"
                     :key="action.title"
                   >
-                    <div class="text-orange-300">
+                    <div class="text-primary">
                       {{ action.title }}
                     </div>
 
@@ -519,7 +517,7 @@ const { data: fiatRate } = useQuery({
                     v-for="action in takeActions"
                     :key="action.title"
                   >
-                    <div class="text-orange-300">
+                    <div class="text-primary">
                       {{ action.title }}
                     </div>
 
@@ -541,7 +539,7 @@ const { data: fiatRate } = useQuery({
                     v-for="action in poolActions"
                     :key="action.title"
                   >
-                    <div class="text-orange-300">
+                    <div class="text-primary">
                       {{ action.title }}
                     </div>
 

@@ -26,39 +26,6 @@ export function useSwapPoolPair() {
   if (selected) {
     selectedPairId.value = selected.id
   }
-  // let order: 'asc' | 'desc' = 'asc'
-  // if (
-  //   selected &&
-  //   selected.token1Symbol.toUpperCase() === fromSymbol.value.toUpperCase()
-  // ) {
-  //   order = 'asc'
-  // } else {
-  //   order = 'desc'
-  // }
-
-  // derive fromIcon and toIcon
-  // const fromIcon = computed(() => {
-  //   if (selectedPair.value) {
-  //     if (order === 'asc') {
-  //       return selectedPair.value.token1Icon
-  //     } else {
-  //       return selectedPair.value.token2Icon
-  //     }
-  //   }
-
-  //   return null
-  // })
-  // const toIcon = computed(() => {
-  //   if (selectedPair.value) {
-  //     if (order === 'asc') {
-  //       return selectedPair.value.token2Icon
-  //     } else {
-  //       return selectedPair.value.token1Icon
-  //     }
-  //   }
-
-  //   return null
-  // })
 
   function selectPair(id: number) {
     selectedPairId.value = id

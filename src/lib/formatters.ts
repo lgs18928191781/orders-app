@@ -11,6 +11,9 @@ export function prettyTimestamp(timestamp: number, isInSeconds = false) {
 export const prettyAddress = (address: string, len = 6) => {
   return `${address.slice(0, len)}...${address.slice(-len)}`
 }
+export const prettyOneSideAddress = (address: string, len = 6) => {
+  return `...${address.slice(-len)}`
+}
 
 export const prettyTxid = (txid: string, len = 6) => {
   return `${txid.slice(0, len)}...${txid.slice(-len)}`

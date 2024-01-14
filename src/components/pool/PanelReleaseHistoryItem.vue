@@ -25,7 +25,7 @@ const status = computed(() => {
 <template>
   <div class="py-4 mx-4 bg-zinc-950 rounded-lg px-4">
     <h3 class="items-center flex justify-between">
-      <span class="text-orange-300" v-if="record.poolType === 3">
+      <span class="text-primary" v-if="record.poolType === 3">
         {{
           `${record.coinAmount} ${record.tick.toUpperCase()} / ${prettyBalance(
             record.amount,
@@ -33,7 +33,7 @@ const status = computed(() => {
           )} ${unit}`
         }}
       </span>
-      <span class="text-orange-300" v-else>
+      <span class="text-primary" v-else>
         {{ `${record.coinAmount} ${record.tick.toUpperCase()}` }}
       </span>
 
@@ -84,7 +84,7 @@ const status = computed(() => {
             @click="toBlock(record.releaseTxBlock)"
             v-if="record.releaseTxBlock"
           >
-            <span class="hover:text-orange-300 underline">
+            <span class="hover:text-primary underline">
               {{ record.releaseTxBlock }}
             </span>
 
@@ -100,7 +100,7 @@ const status = computed(() => {
             @click="toBlock(record.dealCoinTxBlock)"
             v-if="record.dealCoinTxBlock"
           >
-            <span class="hover:text-orange-300 underline">
+            <span class="hover:text-primary underline">
               {{ record.dealCoinTxBlock }}
             </span>
 
@@ -124,7 +124,7 @@ const status = computed(() => {
             class="flex items-center gap-2 hover:cursor-pointer"
             @click="toTx(record.releaseTx)"
           >
-            <span class="hover:text-orange-300 underline">
+            <span class="hover:text-primary underline">
               {{ prettyTxid(record.releaseTx, 4) }}
             </span>
 
@@ -164,7 +164,7 @@ const status = computed(() => {
                 <span class="inline-flex items-center gap-1 ml-1">
                   <span>{{ record.rewardAmount }}</span>
                   <span
-                    class="text-xs bg-zinc-700/30 px-2 py-0.5 rounded text-orange-300"
+                    class="text-xs bg-zinc-700/30 px-2 py-0.5 rounded text-primary"
                   >
                     base amount
                   </span>
@@ -206,7 +206,7 @@ const status = computed(() => {
           <span
             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-900 capitalize"
             :class="[
-              status === 'unconfirmed' ? 'text-orange-300' : 'text-green-500',
+              status === 'unconfirmed' ? 'text-primary' : 'text-green-500',
             ]"
           >
             {{ status }}

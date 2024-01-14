@@ -15,6 +15,9 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        primary: '#FFA02A',
+      },
       keyframes: {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-6deg)' },

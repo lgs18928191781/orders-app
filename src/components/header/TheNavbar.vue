@@ -65,16 +65,16 @@ function isLinkActive(path: string) {
   <div class="flex items-center">
     <NavbarMenu />
 
-    <nav class="ml-6 flex items-center gap-x-2">
+    <nav class="hidden ml-6 lg:flex items-center gap-x-2">
       <component
         :class="[
           'px-4 py-2 text-sm font-medium rounded-md transition-all',
           isLinkActive(link.path)
-            ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
+            ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
             : 'text-zinc-300',
           link.disabled
             ? 'text-zinc-500 cursor-default'
-            : 'hover:bg-black hover:text-orange-300',
+            : 'hover:bg-black hover:text-primary',
         ]"
         v-for="link in links"
         :key="link.name"
