@@ -1,6 +1,7 @@
 import { ElMessage } from 'element-plus'
-
 import { useBtcJsStore } from '@/stores/btcjs'
+
+// Add into life circle
 
 function checkMetalet() {
     if (!window.metaidwallet) {
@@ -9,20 +10,25 @@ function checkMetalet() {
     }
 }
 
-export function initPsbt() {
-    const bitcoinJs = useBtcJsStore().get!
-
-    return new bitcoinJs.Psbt()
+function checkMetaletStatus(res: any) {
+    if (res?.status) {
+        ElMessage.warning(`Metalet connect status: ${res?.status}`)
+        throw new Error(`Metalet connect status: ${res?.status}`)
+    }
+    return res
 }
 
-export function finishPsbt<T>(psbt: T): T {
-    return psbt
+export const connect: () => Promise<connectRes> = async () => {
+    checkMetalet()
+    const connetRes = await window.metaidwallet.btc.connect()
+    return checkMetaletStatus(connetRes)
 }
 
 export const getAddress = async () => {
     checkMetalet()
+    const addressRes = await window.metaidwallet.btc.getAddress()
+    const address = checkMetaletStatus(addressRes)
 
-    const address = await window.metaidwallet.btc.getAddress()
     if (address) {
         if (
             address.startsWith('1') ||
@@ -37,17 +43,24 @@ export const getAddress = async () => {
     return address
 }
 
+export function initPsbt() {
+    const bitcoinJs = useBtcJsStore().get!
+    return new bitcoinJs.Psbt()
+}
+
+export function finishPsbt<T>(psbt: T): T {
+    return psbt
+}
+
+export const getPubKey = async () => {
+    checkMetalet()
+    const pubKeyRes = await window.metaidwallet.btc.getPublicKey()
+    return checkMetaletStatus(pubKeyRes)
+}
+
 interface connectRes {
     address: string
     pubKey: string
-}
-
-export const connect: () => Promise<connectRes> = async () => {
-    const connetRes = await window.metaidwallet.btc.connect()
-    if (connetRes?.address && connetRes?.pubKey) {
-        return connetRes as connectRes
-    }
-    throw new Error(`Metalet connect status: ${connetRes?.status}`)
 }
 
 export const disconnect = async () => { }

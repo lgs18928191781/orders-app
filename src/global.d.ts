@@ -81,9 +81,11 @@ interface Window {
     removeListener: (eventName: string, handler: ({ mvcAddress: string, btcAddress: string }) => void) => void
     btc: {
       getAddress: () => Promise<string>
+      getPublicKey: () => Promise<string>
       connect: () => Promise<{ address?: string, pubKey?: string, status?: string }>
       getBalance: (chain: string) => Promise<{ total: number }>
       inscribeTransfer: (tick: string) => Promise<string>
+      signMessage: (message: string) => Promise<string>
       signPsbt: (psbtHex: string, option?: any) => Promise<string>
       pushPsbt: (psbt: string) => Promise<string>
       signPsbts: (psbtHexs: string[], options?: any[]) => Promise<string[]>

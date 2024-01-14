@@ -8,6 +8,8 @@ import * as metaletAdapter from '@/wallet-adapters/metalet'
 import { login } from '@/queries/orders-api'
 
 function getWalletAdapter(wallet: Wallet) {
+  console.log('getWalletAdapter', wallet);
+
   switch (wallet) {
     case 'unisat':
       return unisatAdapter
@@ -15,6 +17,19 @@ function getWalletAdapter(wallet: Wallet) {
       return okxAdapter
     case 'metalet':
       return metaletAdapter
+    default:
+      throw new Error(`Unsupported wallet: ${wallet}`)
+  }
+}
+
+function getWalletProvider(wallet: Wallet) {
+  switch (wallet) {
+    case 'unisat':
+      return window.unisat
+    case 'okx':
+      return window.unisat
+    case 'metalet':
+      return window.metaidwallet
     default:
       throw new Error(`Unsupported wallet: ${wallet}`)
   }
@@ -48,11 +63,12 @@ export const useConnectionStore = defineStore('connection', {
     getPubKey: (state) => state.last.pubKey,
     provider: (state) => {
       if (!state.last) return null
-
-      return state.last.wallet === 'unisat' ? window.unisat : window.okxwallet
+      return getWalletProvider(state.last.wallet)
     },
     adapter: (state) => {
       if (!state.last) throw new Error('No connection')
+      console.log('adapter this', this,);
+      console.log('adapter state', state, state.last);
 
       const adapter: {
         initPsbt: () => Psbt
@@ -77,11 +93,13 @@ export const useConnectionStore = defineStore('connection', {
 
   actions: {
     async connect(wallet: Wallet) {
+      console.log('this.last', JSON.stringify(this.last));
+
       const connection: WalletConnection = this.last
         ? (JSON.parse(JSON.stringify(this.last)) as WalletConnection)
         : {
           wallet,
-          status: 'connected',
+          status: 'disconnected',
           address: '',
           pubKey: '',
         }
@@ -99,7 +117,6 @@ export const useConnectionStore = defineStore('connection', {
 
         await login()
       }
-
       return this.last
     },
 
@@ -107,12 +124,11 @@ export const useConnectionStore = defineStore('connection', {
       // get address again from wallet
       if (!this.connected) return
 
-      const address = await this.adapter.getAddress()
-      const pubKey = await this.adapter.getPubKey()
-
       this.last.status = 'connected'
-      this.last.address = address
-      this.last.pubKey = pubKey
+      this.last.address = await this.adapter.getAddress()
+      this.last.pubKey = await this.adapter.getPubKey()
+      console.log("this last wallet", this.last.wallet);
+
 
       await login()
 

@@ -18,13 +18,13 @@ export default async function sign() {
   // if not found, then sign and in store.
   const message = 'orders.exchange'
 
-  let publicKey: string
-  let signature: string
+  let publicKey = connection.pubKey
+  let signature = ''
 
   if (connection.wallet === 'unisat') {
     publicKey = await window.unisat.getPublicKey()
     signature = await window.unisat.signMessage(message)
-  } else {
+  } else if (connection.wallet === 'okx') {
     const account: {
       address: string
       publicKey: string
@@ -35,6 +35,9 @@ export default async function sign() {
     signature = await window.okxwallet.bitcoin.signMessage(message, {
       from: account.address,
     })
+  } else if (connection.wallet === 'metalet') {
+    publicKey = await window.metaidwallet.btc.getPublicKey()
+    signature = await window.metaidwallet.btc.signMessage(message)
   }
 
   credentialsStore.add({ publicKey, signature, address })
