@@ -17,20 +17,14 @@ const connectionStore = useConnectionStore()
 const tick = useStorage('tick', 'rdex')
 
 const { data: stats, isFetching: isFetchingStats } = useQuery({
-  queryKey: [
-    'leaderboardStats',
-    { tick: tick.value, address: connectionStore.getAddress },
-  ],
+  queryKey: ['leaderboardStats', { tick, address: connectionStore.getAddress }],
   queryFn: () => getOneLeaderboardStats({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
   staleTime: 1000 * 10,
 })
 
 const { data: leaderboard, isFetching: isFetchingLeaderboard } = useQuery({
-  queryKey: [
-    'leaderboard',
-    { tick: tick.value, address: connectionStore.getAddress },
-  ],
+  queryKey: ['leaderboard', { tick, address: connectionStore.getAddress }],
   queryFn: () => getOneLeaderboard({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
   staleTime: 1000 * 10,

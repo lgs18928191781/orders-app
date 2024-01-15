@@ -1,37 +1,30 @@
 <script lang="ts" setup>
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { TrophyIcon, Loader2Icon } from 'lucide-vue-next'
+import { Loader2Icon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
-import { useStorage } from '@vueuse/core'
+import { ElMessage } from 'element-plus'
 
-import AssetSelect from '@/components/AssetSelect.vue'
-import { DEBUG, POOL_REWARDS_TICK } from '@/data/constants'
+import { DEBUG } from '@/data/constants'
 import { useConnectionStore } from '@/stores/connection'
-import EventSelect from '@/components/events/EventSelect.vue'
 import events from '@/data/events'
 import { getClaimFees, getEventStats, postClaimReward } from '@/queries/events'
 import { sleep } from '@/lib/helpers'
-import { ElMessage } from 'element-plus'
 import { buildClaim } from '@/lib/builders/orders-v2'
 import { useBtcJsStore } from '@/stores/btcjs'
+
 import EventRecords from '@/components/events/Records.vue'
+import EventSelect from '@/components/events/EventSelect.vue'
 
 const connectionStore = useConnectionStore()
 
 const event = ref(events[events.length - 1].symbol)
 const { data: eventStats, isFetching: isFetchingEventStats } = useQuery({
-  queryKey: [
-    'events',
-    { event: event.value, address: connectionStore.getAddress },
-  ],
+  queryKey: ['events', { event, address: connectionStore.getAddress }],
   queryFn: () => getEventStats({ event: event.value }),
   enabled: computed(() => !!event.value),
 })
 const { data: claimFees, isFetching: isFetchingClaimFees } = useQuery({
-  queryKey: [
-    'claimFees',
-    { event: event.value, address: connectionStore.getAddress },
-  ],
+  queryKey: ['claimFees', { event, address: connectionStore.getAddress }],
   queryFn: () => getClaimFees(),
   enabled: computed(() => !!event.value),
 })
@@ -111,10 +104,7 @@ async function onClaimReward() {
         <span class="text-lg text-zinc-300">Choose Event</span>
 
         <div class="flex gap-4 items-center">
-          <EventSelect
-            :event-symbol="event"
-            @update:event-symbol="event = $event"
-          />
+          <EventSelect v-model:event-symbol="event" />
 
           <Loader2Icon
             class="w-6 h-6 text-zinc-300 animate-spin-slow"

@@ -184,7 +184,6 @@ export const getRewardHistory = async ({ event }: { event: string }) => {
     return res.results
   })
 
-  console.log('🚀 ~ getRewardHistory ~ history:', history)
   return history
 }
 
@@ -203,6 +202,5 @@ export const getClaimHistory = async ({ event }: { event: string }) => {
     return res.results
   })
 
-  console.log('🚀 ~ getClaimHistory ~ history:', history)
   return history
 }

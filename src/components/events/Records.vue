@@ -17,7 +17,7 @@ const props = defineProps({
 const { data: rewardHistory } = useQuery({
   queryKey: [
     'rewardHistory',
-    { event: props.event, address: connectionStore.getAddress },
+    { event: computed(() => props.event), address: connectionStore.getAddress },
   ],
   queryFn: () => getRewardHistory({ event: props.event }),
   select: (data) => {
@@ -29,7 +29,7 @@ const { data: rewardHistory } = useQuery({
 const { data: claimHistory } = useQuery({
   queryKey: [
     'claimHistory',
-    { event: props.event, address: connectionStore.getAddress },
+    { event: computed(() => props.event), address: connectionStore.getAddress },
   ],
   queryFn: () => getClaimHistory({ event: props.event }),
   select: (data) => {
