@@ -1,27 +1,36 @@
 <script lang="ts" setup>
 import { useQuery } from '@tanstack/vue-query'
 import { TrophyIcon, Loader2Icon } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 
 import {
   getOneLeaderboard,
   getOneLeaderboardStats,
 } from '@/queries/leaderboard'
+import { useConnectionStore } from '@/stores/connection'
 
 import AssetSelect from '@/components/AssetSelect.vue'
 
-const tick = useStorage('tick', 'orxc')
+const connectionStore = useConnectionStore()
+
+const tick = useStorage('tick', 'rdex')
 
 const { data: stats, isFetching: isFetchingStats } = useQuery({
-  queryKey: ['leaderboardStats', { tick }],
+  queryKey: [
+    'leaderboardStats',
+    { tick: tick.value, address: connectionStore.getAddress },
+  ],
   queryFn: () => getOneLeaderboardStats({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
   staleTime: 1000 * 10,
 })
 
 const { data: leaderboard, isFetching: isFetchingLeaderboard } = useQuery({
-  queryKey: ['leaderboard', { tick }],
+  queryKey: [
+    'leaderboard',
+    { tick: tick.value, address: connectionStore.getAddress },
+  ],
   queryFn: () => getOneLeaderboard({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
   staleTime: 1000 * 10,

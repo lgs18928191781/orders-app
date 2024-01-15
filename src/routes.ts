@@ -9,6 +9,7 @@ const Recover = () => import('./pages/Recover.vue')
 const Swap = () => import('./pages/Swap.vue')
 const SwapPools = () => import('./pages/swap-pools/Index.vue')
 const Whitelist = () => import('./pages/Whitelist.vue')
+const Events = () => import('./pages/Events.vue')
 const Leaderboard = () => import('./pages/Leaderboard.vue')
 const Changelog = () => import('./pages/Changelog.vue')
 const Dev = () => import('./pages/Dev.vue')
@@ -37,6 +38,7 @@ const routes = [
   },
   { path: '/swap', component: Swap },
   { path: '/whitelist', component: Whitelist },
+  { path: '/events', component: Events },
   { path: '/leaderboard', component: Leaderboard },
   { path: '/changelog', component: Changelog },
   // { path: '/pool/:pair?', component: Pool },
