@@ -394,7 +394,7 @@ const cannotTakeSellOrderReason = computed(() => {
   if (!connectionStore.connected) {
     return 'Connect wallet first'
   }
-  if (selectedBuyOrders.value.length === 0) {
+  if (selectedSellOrders.value.length === 0) {
     return 'Select an order'
   }
 
