@@ -1,28 +1,33 @@
 <script lang="ts" setup>
 import { useQuery } from '@tanstack/vue-query'
 import { TrophyIcon, Loader2Icon } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 
 import {
   getOneLeaderboard,
   getOneLeaderboardStats,
 } from '@/queries/leaderboard'
+import { useConnectionStore } from '@/stores/connection'
+import assets from '@/data/assets'
 
 import AssetSelect from '@/components/AssetSelect.vue'
 import { prettyBtcDisplay } from '@/lib/formatters'
 
-const tick = useStorage('tick', 'orxc')
+const connectionStore = useConnectionStore()
+
+const activityAssets = assets.filter((a) => a.symbol === 'btcs')
+const tick = useStorage('tick', activityAssets[0].symbol)
 
 const { data: stats, isFetching: isFetchingStats } = useQuery({
-  queryKey: ['leaderboardStats', { tick }],
+  queryKey: ['leaderboardStats', { tick, address: connectionStore.getAddress }],
   queryFn: () => getOneLeaderboardStats({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
   staleTime: 1000 * 10,
 })
 
 const { data: leaderboard, isFetching: isFetchingLeaderboard } = useQuery({
-  queryKey: ['leaderboard', { tick }],
+  queryKey: ['leaderboard', { tick, address: connectionStore.getAddress }],
   queryFn: () => getOneLeaderboard({ tick: tick.value.toLowerCase() }),
   enabled: computed(() => !!tick.value),
   staleTime: 1000 * 10,
@@ -58,6 +63,7 @@ const trophyColor = (index: number) => {
         <div class="flex gap-4 items-center">
           <AssetSelect
             :asset-symbol="tick"
+            :use-assets="activityAssets"
             @update:asset-symbol="tick = $event"
           />
 

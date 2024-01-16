@@ -392,7 +392,7 @@ const cannotTakeSellOrderReason = computed(() => {
   if (!connectionStore.connected) {
     return 'Connect wallet first'
   }
-  if (selectedBuyOrders.value.length === 0) {
+  if (selectedSellOrders.value.length === 0) {
     return 'Select an order'
   }
 
@@ -1197,7 +1197,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                       >
                         BID Order
                       </span>
-                      <span class="group-hover:underline">to buy</span>
+                      <span class="group-hover:underline">to sell</span>
                     </button>
                   </div>
                 </div>

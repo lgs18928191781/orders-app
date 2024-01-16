@@ -10,6 +10,7 @@ import { useGeoStore } from '@/stores/geo'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import TheHeader from '@/components/header/TheHeader.vue'
 import NotAvailableOverlay from '@/components/overlays/NotAvailable.vue'
+import BuildingOverlay from '@/components/overlays/Building.vue'
 
 const btcJsStore = useBtcJsStore()
 const geoStore = useGeoStore()
@@ -42,6 +43,7 @@ queryClient.setDefaultOptions({
 
 <template>
   <Toaster />
+  <BuildingOverlay />
   <NotAvailableOverlay v-if="false" />
 
   <template v-else>

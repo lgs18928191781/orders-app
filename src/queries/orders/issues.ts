@@ -1,51 +1,27 @@
-import { ordersApiFetch } from '@/lib/fetch'
+import { ordersApiFetch, ordersV2Fetch } from '@/lib/fetch'
 import sign from '@/lib/sign'
 
 export type Issue = {
-  address: string
-  amount: 0
-  bidCount: 0
-  calEndBlock: 0
-  calStartBlock: 0
-  coinAddress: string
-  coinAmount: 0
-  coinDecimalNum: 0
-  coinPrice: 0
-  coinPriceDecimalNum: 0
-  coinPsbtRaw: string
-  coinRatePrice: 0
-  dealCoinTx: string
-  dealCoinTxBlock: 0
-  dealCoinTxBlockState: 1
-  dealInscriptionId: string
-  dealInscriptionTime: 0
-  dealInscriptionTx: string
-  dealInscriptionTxIndex: 0
-  dealInscriptionTxOutValue: 0
-  dealTime: 0
-  dealTx: string
-  decimalNum: 0
-  decreasing: 0
+  amount: number
+  buyerAddress: string
+  coinAmount: number
+  coinDecimalNum: number
+  coinPrice: number
+  coinPriceDecimalNum: number
+  coinRatePrice: number
+  decimalNum: number
+  freeState: 1
   inscriptionId: string
-  multiSigScriptAddress: string
-  multiSigScriptAddressTickAvailableState: 0
   net: string
   orderId: string
-  pair: string
-  percentage: 0
-  percentageExtra: 0
-  poolState: 1
-  poolType: 1
+  orderState: 1
+  orderType: 1
+  platformFee: number
   psbtRaw: string
-  releaseTime: 0
-  releaseTx: string
-  releaseTxBlock: 0
-  rewardAmount: 0
-  rewardExtraAmount: 0
-  rewardRealAmount: 0
+  sellerAddress: string
+  takePsbtRaw: string
   tick: string
-  timestamp: 0
-  utxoId: string
+  timestamp: number
 }
 export const getIssues = async ({
   address,
@@ -54,10 +30,11 @@ export const getIssues = async ({
 }): Promise<Issue[]> => {
   const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
-    address,
+    buyerAddress: address,
+    orderState: '50', // 50: issue
   })
 
-  return await ordersApiFetch(`pool/err/orders?${params}`, {
+  return await ordersV2Fetch(`orders?${params}`, {
     headers: {
       'X-Signature': signature,
       'X-Public-Key': publicKey,
@@ -66,15 +43,15 @@ export const getIssues = async ({
 }
 
 export type IssueDetail = {
-  coinAmount: 0
+  coinAmount: number
   coinPsbtRaw: string
   coinTransferPsbtRaw: string
-  fee: 0
+  fee: number
   inscriptionId: string
   net: string
   orderId: string
   psbtRaw: string
-  rewardCoinAmount: 0
+  rewardCoinAmount: number
   rewardPsbtRaw: string
   tick: string
 }

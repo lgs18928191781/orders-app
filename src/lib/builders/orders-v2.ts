@@ -27,6 +27,8 @@ import { useFeebStore } from '@/stores/feeb'
 import { getExcludedUtxos } from '@/queries/excluded-utxos'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { SimpleUtxo, getTxHex } from '@/queries/proxy'
+import { getClaimFees } from '@/queries/events'
+import Decimal from 'decimal.js'
 
 export async function buildBidOffer({
   total,
@@ -296,5 +298,43 @@ export async function buildSellTake({
     toSymbol: selectedPair.toSymbol,
     fromValue: amount,
     toValue: total,
+  }
+}
+
+export async function buildClaim() {
+  const networkStore = useNetworkStore()
+  const btcjs = useBtcJsStore().get!
+
+  const { feeAddress, rewardInscriptionFee, rewardSendFee } =
+    await getClaimFees()
+  const totalFees = new Decimal(rewardInscriptionFee).plus(rewardSendFee)
+
+  // build psbt
+  const rewardClaimPsbt = new btcjs.Psbt({
+    network: btcjs.networks[networkStore.btcNetwork],
+  })
+    .addOutput({
+      address: feeAddress,
+      value: safeOutputValue(rewardInscriptionFee),
+    })
+    .addOutput({
+      address: feeAddress,
+      value: safeOutputValue(rewardSendFee),
+    })
+
+  const { fee, feeb } = await exclusiveChange({
+    psbt: rewardClaimPsbt,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+    sighashType: SIGHASH_ALL,
+  })
+
+  return {
+    order: rewardClaimPsbt,
+    type: 'pool reward claiming',
+    amount: new Decimal(safeOutputValue(totalFees)),
+    toAddress: feeAddress,
+    feeb,
+    feeSend: rewardSendFee,
+    feeInscription: rewardInscriptionFee,
   }
 }
