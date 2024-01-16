@@ -1,5 +1,11 @@
 const changelog = [
   {
+    version: '2.0.1',
+    emoji: '🌈',
+    date: '2024-1-17',
+    changes: ['Add Events and Leaderboard module.', 'Fix some bugs.'],
+  },
+  {
     version: '2.0.0',
     emoji: '🌕',
     date: '2024-1-12',
