@@ -140,7 +140,7 @@ function copyAddress() {
   <WalletMissingModal />
 
   <header
-    class="flex items-center justify-between px-4 lg:px-6 py-2 lg:py-4 select-none bg-zinc-900 border-b-2 border-zinc-800"
+    class="flex items-center justify-between px-4 lg:px-6 py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
   >
     <TheNavbar />
 

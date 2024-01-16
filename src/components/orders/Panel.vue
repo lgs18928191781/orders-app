@@ -482,7 +482,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col bg-zinc-900 lg:mx-3 lg:rounded-lg">
     <OrderPanelHeader v-model:is-limit-exchange-mode="isLimitExchangeMode" />
 
     <!-- table -->

@@ -48,7 +48,7 @@ function onDisconnect() {
   <Menu class="relative" as="div">
     <div class="flex items-center">
       <MenuButton class="outline-none flex items-center gap-0.5">
-        <img class="h-9 cursor-pointer" :src="logo" alt="Logo" />
+        <img class="h-8 lg:h-9 cursor-pointer" :src="logo" alt="Logo" />
         <span
           class="hidden lg:inline-flex items-center rounded-md bg-black px-2 py-0.5 text-xs font-medium text-orange-100"
         >
