@@ -7,13 +7,14 @@ import { ElMessage } from 'element-plus'
 import { DEBUG } from '@/data/constants'
 import { useConnectionStore } from '@/stores/connection'
 import events from '@/data/events'
-import { getClaimFees, getEventStats, postClaimReward } from '@/queries/events'
+import { getEventStats, postClaimReward } from '@/queries/events'
 import { sleep } from '@/lib/helpers'
 import { buildClaim } from '@/lib/builders/orders-v2'
 import { useBtcJsStore } from '@/stores/btcjs'
 
 import EventRecords from '@/components/events/Records.vue'
 import EventSelect from '@/components/events/EventSelect.vue'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 const connectionStore = useConnectionStore()
 
@@ -23,14 +24,8 @@ const { data: eventStats, isFetching: isFetchingEventStats } = useQuery({
   queryFn: () => getEventStats({ event: event.value }),
   enabled: computed(() => !!event.value),
 })
-const { data: claimFees, isFetching: isFetchingClaimFees } = useQuery({
-  queryKey: ['claimFees', { event, address: connectionStore.getAddress }],
-  queryFn: () => getClaimFees(),
-  enabled: computed(() => !!event.value),
-})
 
-const isBuilding = ref(false)
-const isOpenConfirmationModal = ref(false)
+const { openBuilding, closeBuilding } = useBuildingOverlay()
 const builtInfo = ref<void | Awaited<ReturnType<any>>>()
 const { mutate: mutateClaimReward } = useMutation({
   mutationFn: postClaimReward,
@@ -51,16 +46,14 @@ async function onClaimReward() {
   try {
     if (!eventStats.value) return
     // build pay Tx
-    isOpenConfirmationModal.value = true
-    isBuilding.value = true
+    openBuilding()
 
     const res = await buildClaim().catch(async (e) => {
       await sleep(500)
       console.log(e)
       ElMessage.error(e.message)
-      isOpenConfirmationModal.value = false
     })
-    isBuilding.value = false
+    closeBuilding()
     builtInfo.value = res
 
     if (!res) return

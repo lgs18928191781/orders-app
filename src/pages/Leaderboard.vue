@@ -9,12 +9,14 @@ import {
   getOneLeaderboardStats,
 } from '@/queries/leaderboard'
 import { useConnectionStore } from '@/stores/connection'
+import assets from '@/data/assets'
 
 import AssetSelect from '@/components/AssetSelect.vue'
 
 const connectionStore = useConnectionStore()
 
-const tick = useStorage('tick', 'rdex')
+const activityAssets = assets.filter((a) => a.symbol === 'btcs')
+const tick = useStorage('tick', activityAssets[0].symbol)
 
 const { data: stats, isFetching: isFetchingStats } = useQuery({
   queryKey: ['leaderboardStats', { tick, address: connectionStore.getAddress }],
@@ -60,6 +62,7 @@ const trophyColor = (index: number) => {
         <div class="flex gap-4 items-center">
           <AssetSelect
             :asset-symbol="tick"
+            :use-assets="activityAssets"
             @update:asset-symbol="tick = $event"
           />
 
