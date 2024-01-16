@@ -7,6 +7,7 @@ import * as okxAdapter from '@/wallet-adapters/okx'
 import * as metaletAdapter from '@/wallet-adapters/metalet'
 import { login } from '@/queries/orders-api'
 import { ElMessage } from 'element-plus'
+import { IS_DEV } from '@/data/constants'
 
 export type Wallet = 'unisat' | 'okx' | 'metalet'
 export type WalletConnection = {
@@ -31,7 +32,17 @@ export const useConnectionStore = defineStore('connection', {
     has: (state) => !!state.last,
     connected: (state) =>
       state.last.status === 'connected' && !!state.last.address,
-    getAddress: (state) => state.last.address,
+    getAddress: (state) => {
+      if (IS_DEV && import.meta.env.VITE_TESTING_ADDRESS) {
+        console.log(
+          'Using testing address',
+          import.meta.env.VITE_TESTING_ADDRESS
+        )
+        return import.meta.env.VITE_TESTING_ADDRESS
+      }
+
+      return state.last.address
+    },
     isTaproot: (state) => state.last.address.startsWith('bc1p'),
     getPubKey: (state) => state.last.pubKey,
     provider: (state) => {

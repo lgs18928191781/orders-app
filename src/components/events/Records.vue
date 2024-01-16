@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { getClaimHistory, getRewardHistory } from '@/queries/events'
-import { useConnectionStore } from '@/stores/connection'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
+
+import { getClaimHistory, getRewardHistory } from '@/queries/events'
+import { useConnectionStore } from '@/stores/connection'
+
+import RewardRecordItem from '@/components/events/RewardRecordItem.vue'
 
 const connectionStore = useConnectionStore()
 
@@ -63,9 +66,11 @@ const { data: claimHistory } = useQuery({
     <TabPanels class="mt-8">
       <TabPanel>
         <template v-if="rewardHistory">
-          <div v-for="record in rewardHistory" v-if="rewardHistory.length">
-            {{ record }}
-          </div>
+          <RewardRecordItem
+            v-for="record in rewardHistory"
+            :record="record"
+            v-if="rewardHistory.length"
+          />
 
           <div class="text-lg font-bold text-center text-zinc-500" v-else>
             No reward history

@@ -93,7 +93,6 @@ export const getEventStats = async ({
       res.totalRewardExtraAmount -
       res.hadClaimRewardAmount
     if (total < 0) total = 0
-    if (!total && IS_DEV) total = 100
 
     return {
       ...res,
