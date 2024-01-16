@@ -140,52 +140,54 @@ function copyAddress() {
   <WalletMissingModal />
 
   <header
-    class="flex items-center justify-between px-4 lg:px-6 py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
+    class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
   >
-    <TheNavbar />
+    <div class="max-w-8xl flex items-center justify-between mx-auto px-3">
+      <TheNavbar />
 
-    <div class="flex gap-2">
-      <button
-        class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
-        @click="openConnectionModal"
-        v-if="!connectionStore.connected"
-      >
-        Connect Wallet
-      </button>
+      <div class="flex gap-2">
+        <button
+          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
+          @click="openConnectionModal"
+          v-if="!connectionStore.connected"
+        >
+          Connect Wallet
+        </button>
 
-      <template v-else>
-        <div class="items-center gap-2 hidden lg:flex">
-          <div
-            class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
-          >
+        <template v-else>
+          <div class="items-center gap-2 hidden lg:flex">
             <div
-              class="flex gap-2 pr-3 cursor-pointer"
-              @click="copyAddress"
-              title="copy address"
+              class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
             >
-              <img
-                class="h-5"
-                :src="walletIcon"
-                alt="Unisat"
-                v-if="walletIcon"
-              />
-              <span class="text-sm text-primary">
-                {{ address ? prettyAddress(address, 4) : '-' }}
-              </span>
+              <div
+                class="flex gap-2 pr-3 cursor-pointer"
+                @click="copyAddress"
+                title="copy address"
+              >
+                <img
+                  class="h-5"
+                  :src="walletIcon"
+                  alt="Unisat"
+                  v-if="walletIcon"
+                />
+                <span class="text-sm text-primary">
+                  {{ address ? prettyAddress(address, 4) : '-' }}
+                </span>
+              </div>
+
+              <AssetsDisplay />
+
+              <NetworkState />
             </div>
 
-            <AssetsDisplay />
-
-            <NetworkState />
+            <Notifications />
           </div>
 
-          <Notifications />
-        </div>
-
-        <button class="lg:hidden">
-          <MenuIcon class="h-6 w-6" />
-        </button>
-      </template>
+          <button class="lg:hidden">
+            <MenuIcon class="h-6 w-6" />
+          </button>
+        </template>
+      </div>
     </div>
   </header>
 </template>

@@ -51,3 +51,7 @@ input[type='number'] {
 input:focus {
   @apply !border-primary !ring-primary;
 }
+
+.primary-panel {
+  @apply bg-zinc-900 rounded-lg;
+}

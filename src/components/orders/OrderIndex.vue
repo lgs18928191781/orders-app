@@ -50,6 +50,8 @@ import btcIcon from '@/assets/btc.svg?url'
 import OrderPanelHeader from './PanelHeader.vue'
 import OrderList from './List.vue'
 import OrderConfirmationModal from '../ConfirmationModal.vue'
+import OrdersPanel from '@/components/orders/OrdersPanel.vue'
+import InfoPanel from '@/components/orders/InfoPanel.vue'
 
 const connectionStore = useConnectionStore()
 const address = connectionStore.getAddress
@@ -482,21 +484,21 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 </script>
 
 <template>
-  <div class="flex flex-col bg-zinc-900 lg:mx-3 lg:rounded-lg">
-    <OrderPanelHeader v-model:is-limit-exchange-mode="isLimitExchangeMode" />
+  <div class="grid grid-cols-10 mx-auto px-3 mb-3 grow max-w-8xl">
+    <InfoPanel class="col-span-4" />
 
     <!-- table -->
-    <div class="grid grid-cols-2 flex-1 divide-x divide-zinc-800">
-      <OrderList
+    <div class="col-span-3 flex-1 divide-x divide-zinc-800">
+      <!-- <OrderList
         :askOrders="askOrders"
         :bidOrders="bidOrders"
         class="col-span-1 self-stretch p-4"
         @use-buy-price="(price: number, orderId: string) => setUseBuyPrice(price, orderId)"
         @use-sell-price="(price: number, orderId: string) => setUseSellPrice(price, orderId)"
-      />
+      /> -->
 
       <!-- operate panel -->
-      <div class="col-span-1 flex flex-col p-4" v-if="isLimitExchangeMode">
+      <div class="flex flex-col p-4" v-if="isLimitExchangeMode">
         <div
           class="-mx-4 -mt-4 rounded-lg bg-zinc-800 p-4 shadow-md shadow-primary/20 flex-1 flex flex-col"
         >
@@ -869,7 +871,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
         </div>
       </div>
 
-      <div class="col-span-1 flex flex-col p-4" v-else>
+      <div class="flex flex-col p-4" v-else>
         <!-- tabs -->
         <TabGroup :selectedIndex="takeModeTab" @change="changeTakeModeTab">
           <TabList
@@ -948,70 +950,6 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                       ${{ selectedPair.fromSymbol }}
                     </div>
                   </div>
-
-                  <!-- <Listbox
-                    v-model="selectedBuyOrders"
-                    multiple
-                    as="div"
-                    class="relative max-w-[67%] grow"
-                    v-if="useBuyOrderId"
-                  >
-                    <ListboxButton
-                      class="relative w-full cursor-default rounded bg-zinc-700 py-2 pl-3 pr-20 text-right text-sm focus:outline-none"
-                    >
-                      <span class="block truncate">
-                        {{ selectedBuyCoinAmount }}
-                      </span>
-
-                      <span
-                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
-                      >
-                        <span class="uppercase"
-                          >${{ selectedPair.fromSymbol }}</span
-                        >
-                        <ChevronsUpDownIcon
-                          class="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </ListboxButton>
-
-                    <ListboxOptions
-                      class="absolute z-10 mt-4 max-h-60 w-full translate-x-2 overflow-auto rounded-md border border-zinc-500 bg-zinc-900 p-2 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                    >
-                      <ListboxOption
-                        v-for="psbt in candidateBuyOrders"
-                        v-slot="{ active, selected }"
-                        as="template"
-                        :key="psbt.orderId"
-                        :value="psbt"
-                      >
-                        <li
-                          class="relative flex cursor-pointer items-center justify-between rounded py-2 pl-10 pr-2 transition"
-                          :class="active && 'bg-orange-500/20'"
-                        >
-                          <span
-                            v-if="selected"
-                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary"
-                          >
-                            <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                          </span>
-                          <span class="text-sm text-zinc-500">
-                            {{
-                              prettyBalance(
-                                Number(psbt.coinRatePrice),
-                                useBtcUnit
-                              )
-                            }}
-                            {{ unit }}
-                          </span>
-                          <span :class="selected && 'text-primary'">
-                            {{ psbt.coinAmount }}
-                          </span>
-                        </li>
-                      </ListboxOption>
-                    </ListboxOptions>
-                  </Listbox> -->
 
                   <div
                     class="max-w-[67%] grow text-right text-primary py-1"
@@ -1118,70 +1056,6 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                     </div>
                   </div>
 
-                  <!-- <Listbox
-                    v-model="selectedSellOrders"
-                    multiple
-                    as="div"
-                    class="relative max-w-[67%] grow"
-                    v-if="useSellOrderId"
-                  >
-                    <ListboxButton
-                      class="relative w-full cursor-default rounded bg-zinc-700 py-2 pl-3 pr-20 text-right text-sm focus:outline-none"
-                    >
-                      <span class="block truncate">
-                        {{ selectedSellCoinAmount }}
-                      </span>
-
-                      <span
-                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
-                      >
-                        <span class="uppercase"
-                          >${{ selectedPair.fromSymbol }}</span
-                        >
-                        <ChevronsUpDownIcon
-                          class="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </ListboxButton>
-
-                    <ListboxOptions
-                      class="absolute z-10 mt-4 max-h-60 w-full translate-x-2 overflow-auto rounded-md border border-zinc-500 bg-zinc-900 p-2 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                    >
-                      <ListboxOption
-                        v-for="psbt in candidateSellOrders"
-                        v-slot="{ active, selected }"
-                        as="template"
-                        :key="psbt.orderId"
-                        :value="psbt"
-                      >
-                        <li
-                          class="relative flex cursor-pointer items-center justify-between rounded py-2 pl-10 pr-2 transition"
-                          :class="active && 'bg-orange-500/20'"
-                        >
-                          <span
-                            v-if="selected"
-                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary"
-                          >
-                            <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                          </span>
-                          <span class="text-sm text-zinc-500">
-                            {{
-                              prettyBalance(
-                                Number(psbt.coinRatePrice),
-                                useBtcUnit
-                              )
-                            }}
-                            {{ unit }}
-                          </span>
-                          <span :class="selected && 'text-primary'">
-                            {{ psbt.coinAmount }}
-                          </span>
-                        </li>
-                      </ListboxOption>
-                    </ListboxOptions>
-                  </Listbox> -->
-
                   <div
                     class="max-w-[67%] grow text-right text-primary py-1"
                     v-else
@@ -1202,20 +1076,6 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
                   </div>
                 </div>
               </div>
-
-              <!-- brc-20 availability -->
-              <!-- <div
-                class="z-[-1] -mt-1 overflow-hidden rounded-lg bg-zinc-950 text-xs text-zinc-500"
-              >
-                <div class="px-6 py-2">
-                  <h4 class="text-sm">Balance</h4>
-
-                  <div class="mt-4">
-                    <div class="">Available: 2000</div>
-                    <div class="">Transferable: 2000</div>
-                  </div>
-                </div>
-              </div> -->
 
               <!-- sell -->
               <div class="mt-12">
@@ -1245,6 +1105,8 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
         </TabGroup>
       </div>
     </div>
+
+    <OrdersPanel class="col-span-3" />
 
     <!-- modal -->
     <OrderConfirmationModal

@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import OrderPanel from '@/components/orders/Panel.vue'
+import OrderIndex from '@/components/orders/OrderIndex.vue'
 </script>
 
 <template>
-  <div class="w-svw min-h-[50rem]">
-    <OrderPanel />
+  <div class="w-svw grow flex flex-col">
+    <!-- <MobileIndex class="flex lg:hidden" /> -->
+    <OrderIndex />
   </div>
 </template>

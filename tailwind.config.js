@@ -18,6 +18,9 @@ export default {
       colors: {
         primary: '#FFA02A',
       },
+      maxWidth: {
+        '8xl': '90rem',
+      },
       keyframes: {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-6deg)' },
