@@ -7,6 +7,7 @@ import { getClaimHistory, getRewardHistory } from '@/queries/events'
 import { useConnectionStore } from '@/stores/connection'
 
 import RewardRecordItem from '@/components/events/RewardRecordItem.vue'
+import ClaimRecordItem from '@/components/events/ClaimRecordItem.vue'
 
 const connectionStore = useConnectionStore()
 
@@ -44,10 +45,10 @@ const { data: claimHistory } = useQuery({
 
 <template>
   <TabGroup as="div">
-    <TabList class="flex gap-8">
+    <TabList class="flex gap-2">
       <Tab as="template" v-slot="{ selected }">
         <button
-          class="text-lg font-bold"
+          class="text-lg font-bold py-1 px-2"
           :class="[selected ? 'text-orange-300 underline' : 'text-zinc-300']"
         >
           Reward History
@@ -55,7 +56,7 @@ const { data: claimHistory } = useQuery({
       </Tab>
       <Tab as="template" v-slot="{ selected }">
         <button
-          class="text-lg font-bold"
+          class="text-lg font-bold py-1 px-2"
           :class="[selected ? 'text-orange-300 underline' : 'text-zinc-300']"
         >
           Claim History
@@ -64,7 +65,7 @@ const { data: claimHistory } = useQuery({
     </TabList>
 
     <TabPanels class="mt-8">
-      <TabPanel>
+      <TabPanel class="space-y-2">
         <template v-if="rewardHistory">
           <RewardRecordItem
             v-for="record in rewardHistory"
@@ -77,11 +78,13 @@ const { data: claimHistory } = useQuery({
           </div>
         </template>
       </TabPanel>
-      <TabPanel>
+      <TabPanel class="space-y-2">
         <template v-if="claimHistory">
-          <div v-for="record in claimHistory" v-if="claimHistory.length">
-            {{ record }}
-          </div>
+          <ClaimRecordItem
+            v-for="record in claimHistory"
+            :record="record"
+            v-if="claimHistory.length"
+          />
 
           <div class="text-lg font-bold text-center text-zinc-500" v-else>
             No claim history

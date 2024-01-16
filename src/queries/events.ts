@@ -194,12 +194,24 @@ export const getClaimHistory = async ({ event }: { event: string }) => {
     rewardType: event,
   })
 
-  const history = await rewardFetch(`user/orders?${params}`).then((res) => {
-    // if is empty object, return empty array
-    if (Object.keys(res).length === 0) return []
+  const history = await rewardFetch(`user/orders?${params}`)
+    .then((res) => {
+      // if is empty object, return empty array
+      if (Object.keys(res).length === 0) return []
 
-    return res.results
-  })
+      return res?.results || []
+    })
+    .then((res) => {
+      return res.map((item: any) => {
+        if (item.rewardState === 3) {
+          item.rewardState = 'finished'
+        } else {
+          item.rewardState = 'pending'
+        }
+
+        return item
+      })
+    })
 
   return history
 }
