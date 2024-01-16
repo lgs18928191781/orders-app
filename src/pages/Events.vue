@@ -25,17 +25,15 @@ const { data: eventStats, isFetching: isFetchingEventStats } = useQuery({
   enabled: computed(() => !!event.value),
 })
 
+const queryClient = useQueryClient()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const builtInfo = ref<void | Awaited<ReturnType<any>>>()
 const { mutate: mutateClaimReward } = useMutation({
   mutationFn: postClaimReward,
   onSuccess: () => {
     ElMessage.success('Reward claimed')
-    useQueryClient().invalidateQueries({
-      queryKey: [
-        'events',
-        { event: event.value, address: connectionStore.getAddress },
-      ],
+    queryClient.invalidateQueries({
+      queryKey: ['events', { event, address: connectionStore.getAddress }],
     })
   },
   onError: (err: any) => {
@@ -53,7 +51,6 @@ async function onClaimReward() {
       console.log(e)
       ElMessage.error(e.message)
     })
-    closeBuilding()
     builtInfo.value = res
 
     if (!res) return
@@ -73,6 +70,7 @@ async function onClaimReward() {
       feeRawTx,
       rewardType: Number(event.value),
     })
+    closeBuilding()
   } catch (e: any) {
     if (DEBUG) {
       console.log(e)
@@ -80,6 +78,7 @@ async function onClaimReward() {
     } else {
       ElMessage.error('Error while claiming reward.')
     }
+    closeBuilding()
   }
 }
 </script>
