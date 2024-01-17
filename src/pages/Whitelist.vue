@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus'
 import { LoaderIcon } from 'lucide-vue-next'
 
 import { sleep } from '@/lib/helpers'
-import { buildClaimTake } from '@/lib/order-builder'
+import { buildClaimTake } from '@/lib/builders/orders'
 import { getOneClaim, updateClaim } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 

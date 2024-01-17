@@ -6,7 +6,7 @@ import {
   exclusiveChange,
   fillInternalKey,
   safeOutputValue,
-} from './build-helpers'
+} from '../build-helpers'
 import {
   DUMMY_UTXO_VALUE,
   EXTRA_INPUT_MIN_VALUE,
@@ -27,10 +27,11 @@ import {
   getOneBrc20,
   getOneOrder,
   getSellFees,
+  getBuyEssentials,
 } from '@/queries/orders-api'
 import { getUtxos, type SimpleUtxo, getTxHex } from '@/queries/proxy'
 import { type TradingPair } from '@/data/trading-pairs'
-import { SIGHASH_NONE_ANYONECANPAY } from '../data/constants'
+import { SIGHASH_NONE_ANYONECANPAY } from '../../data/constants'
 import { toXOnly } from '@/lib/btc-helpers'
 import { Buffer } from 'buffer'
 import { raise, raiseIf, raiseUnless } from '@/lib/helpers'
@@ -116,20 +117,18 @@ export async function buildAskLimit({
     } catch (e: any) {}
   }
 
-  const input = {
+  const input = fillInternalKey({
     hash: ordinalUtxo.txId,
     index: ordinalUtxo.outputIndex,
     witnessUtxo: ordinalPreTx.outs[ordinalUtxo.outputIndex],
-    sighashType: SIGHASH_ALL_ANYONECANPAY,
-  }
-  fillInternalKey(input)
+    sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+  })
   ask.addInput(input)
 
   // Step 2: Build output as what the seller want (BTC)
   ask.addOutput({
     address,
     value: safeOutputValue(total),
-    // tapInternalKey: toXOnly(Buffer.from(useConnectionStore().getPubKey, 'hex')),
   })
 
   return {
@@ -289,14 +288,20 @@ export async function buildBuyTake({
 
   const isFree = order.freeState === 1
 
-  // get sell psbt from order detail api
-  const askPsbtRaw = await getOneOrder({
+  const askPsbtRaw = await getBuyEssentials({
     orderId: order.orderId,
-  }).then((order) => order.psbtRaw)
+    address,
+    tick: selectedPair.fromSymbol,
+    buyerChangeAmount: 0,
+  }).then((result) => result.psbtRaw)
+  console.log('🚀 ~ file: order-builder.ts:290 ~ askPsbtRaw:', askPsbtRaw)
 
   const askPsbt = btcjs.Psbt.fromHex(askPsbtRaw, {
     network: btcjs.networks[btcNetwork],
   })
+  console.log('🚀 ~ file: order-builder.ts:293 ~ askPsbt:', askPsbt)
+
+  return
 
   const buyPsbt = new btcjs.Psbt({
     network: btcjs.networks[btcNetwork],

@@ -17,6 +17,15 @@ export const raiseUnless = (cond: boolean, err: string): void => {
   if (!cond) raise(err)
 }
 
+export const isUnsupportedAddress = (address: string) => {
+  return (
+    address.startsWith('1') ||
+    address.startsWith('3') ||
+    address.startsWith('m') ||
+    address.startsWith('n')
+  )
+}
+
 export const generateRandomString = (length: number = 32) => {
   let randomString = ''
   const characters =

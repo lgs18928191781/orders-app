@@ -10,6 +10,7 @@ import { useGeoStore } from '@/stores/geo'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import TheHeader from '@/components/header/TheHeader.vue'
 import NotAvailableOverlay from '@/components/overlays/NotAvailable.vue'
+import BuildingOverlay from '@/components/overlays/Building.vue'
 
 import Decimal from 'decimal.js'
 
@@ -132,6 +133,7 @@ queryClient.setDefaultOptions({
 
 <template>
   <Toaster />
+  <BuildingOverlay />
   <NotAvailableOverlay v-if="isMobile && !DEBUG" />
 
   <template v-else>

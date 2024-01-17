@@ -8,13 +8,27 @@ import {
   ListboxOptions,
 } from '@headlessui/vue'
 
-import assets from '@/data/assets'
-import { prettySymbol } from '@/lib/formatters'
+import events from '@/data/events'
 
-const assetSymbol = defineModel('assetSymbol', { required: true, type: String })
-const selectedAsset = computed(() => {
-  const selected = assets.find(
-    (a) => a.symbol.toUpperCase() === assetSymbol.value.toUpperCase()
+const sortByLatest = (a: any, b: any) => {
+  if (a.id > b.id) {
+    return -1
+  }
+  if (a.id < b.id) {
+    return 1
+  }
+  return 0
+}
+const eventsSorted = events.sort(sortByLatest)
+
+const eventSymbol = defineModel('eventSymbol', {
+  required: true,
+  type: String,
+  default: events[events.length - 1].symbol,
+})
+const selectedEvent = computed(() => {
+  const selected = events.find(
+    (e) => e.symbol.toUpperCase() === eventSymbol.value.toUpperCase()
   )
   if (!selected) {
     return null
@@ -28,25 +42,21 @@ const selectedAsset = computed(() => {
   <Listbox
     as="div"
     class="relative inline-block text-left"
-    :model-value="assetSymbol"
-    @update:model-value="$emit('update:assetSymbol', $event)"
+    :model-value="eventSymbol"
+    @update:model-value="$emit('update:eventSymbol', $event)"
   >
     <ListboxButton v-slot="{ open }" as="template">
       <button
         :class="[
           open ? 'bg-zinc-700' : 'bg-zinc-900',
-          'rounded-full  p-1 px-2 text-xl flex items-center gap-1 border border-zinc-700 hover:bg-zinc-700',
+          'rounded-full  p-2 px-4 text-xl flex items-center gap-1 border border-zinc-700 hover:bg-zinc-700',
         ]"
       >
-        <img
-          :src="selectedAsset.icon"
-          class="w-6 h-6 rounded-full"
-          v-if="selectedAsset"
-        />
-        <div class="mr-1" v-if="selectedAsset">
-          {{ prettySymbol(selectedAsset.symbol) }}
+        <span v-if="selectedEvent"> {{ selectedEvent.id }}. </span>
+        <div class="mr-1" v-if="selectedEvent">
+          {{ selectedEvent.title }}
         </div>
-        <div v-else class="text-base pl-2 text-orange-300">Select token</div>
+        <div v-else class="text-base pl-2 text-orange-300">Select Event</div>
         <ChevronDownIcon class="h-5 w-5" />
       </button>
     </ListboxButton>
@@ -60,13 +70,13 @@ const selectedAsset = computed(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute right-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800"
+        class="absolute left-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar divide-y divide-zinc-800 border border-orange-300/10 shadow shadow-orange-300/30"
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="asset in assets"
-          :key="asset.id"
-          :value="asset.symbol"
+          v-for="(event, index) in eventsSorted"
+          :key="event.id"
+          :value="event.symbol"
         >
           <button
             :class="[
@@ -74,10 +84,16 @@ const selectedAsset = computed(() => {
               active && 'bg-black',
             ]"
           >
-            <img :src="asset.icon" class="h-6 rounded-full" />
+            <div class="text-base text-zinc-500">{{ index + 1 }}.</div>
 
             <div class="text-base font-bold">
-              {{ prettySymbol(asset.symbol) }}
+              {{ event.title }}
+              <span
+                v-if="index === 0"
+                class="text-xs text-red-500 bg-red-500/20 py-1 rounded mr-4 px-2"
+              >
+                LIVE
+              </span>
             </div>
 
             <CheckIcon

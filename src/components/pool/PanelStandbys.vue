@@ -15,7 +15,7 @@ import {
 } from '@/queries/pool'
 import { prettyBalance, prettyTxid } from '@/lib/formatters'
 import { sleep, unit, useBtcUnit } from '@/lib/helpers'
-import { buildStandbyClaim } from '@/lib/order-pool-builder'
+import { buildStandbyClaim } from '@/lib/builders/pool'
 import { DEBUG, EVENT_REWARDS_TICK } from '@/data/constants'
 
 import StandbyExplainModal from './StandbyExplainModal.vue'

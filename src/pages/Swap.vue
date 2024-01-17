@@ -451,6 +451,10 @@ watch(
 
       <!-- confirm button -->
       <button class="main-btn" v-else>Swap</button>
+
+      <button class="disabled main-btn" v-else :disabled="true" @click="">
+        Coming Soon!
+      </button>
     </div>
 
     <!-- background blur -->

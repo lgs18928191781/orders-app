@@ -7,6 +7,7 @@ import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
 import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { SWAP_READY } from '@/data/constants'
 
 const { fromSymbol, toSymbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -178,7 +179,7 @@ watch(
       @amount-cleared="hasAmount = false"
     />
 
-    <!-- flip -->
+    <!-- plus icon -->
     <div class="py-2">
       <PlusIcon class="mx-auto h-5 w-5 text-zinc-500" />
     </div>
@@ -186,18 +187,24 @@ watch(
     <AddLiquiditySide v-model:symbol="toSymbol" v-model:amount="toAmount" />
   </div>
 
-  <!-- disabled button -->
-  <button
-    :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-    v-if="unmet"
-    :disabled="!unmet.handler"
-    @click="!!unmet.handler && unmet.handler()"
-  >
-    {{ unmet.message || '' }}
-  </button>
+  <template v-if="SWAP_READY">
+    <!-- disabled button -->
+    <button
+      :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+      v-if="unmet"
+      :disabled="!unmet.handler"
+      @click="!!unmet.handler && unmet.handler()"
+    >
+      {{ unmet.message || '' }}
+    </button>
 
-  <!-- confirm button -->
-  <button class="main-btn" v-else>Swap</button>
+    <!-- confirm button -->
+    <button class="main-btn" v-else>Swap</button>
+  </template>
+
+  <button class="disabled main-btn" v-else :disabled="true" @click="">
+    Coming Soon!
+  </button>
 </template>
 
 <style scoped>

@@ -22,7 +22,10 @@ interface Window {
         publicKey: string
         compressedPublicKey: string
       }>
+      on: (event: string, callback: (data: any) => void) => void
+      removeListener: (event: string, callback: (data: any) => void) => void
       disconnect: () => Promise<void>
+      getPublicKey: () => Promise<string>
       signMessage: (
         message: string,
         { from }: { from: string }
@@ -40,7 +43,16 @@ interface Window {
       }) => Promise<string>
       signPsbt: (
         psbt: string,
-        { from, type }: { from: string; type?: any }
+        {
+          from,
+          type,
+          autoFinalized,
+        }?: {
+          from?: string
+          type?: any
+          autoFinalized?: boolean
+          toSignInputs?: any[]
+        }
       ) => Promise<string>
       inscribe: ({
         type,

@@ -31,14 +31,26 @@ export const getAddress = async () => {
       addresses[0].startsWith('m') ||
       addresses[0].startsWith('n')
     ) {
-      ElMessage.error('Please use a SegWit address')
-      throw new Error('Please use a SegWit address')
+      ElMessage.error(
+        'Please use a native SegWit or Taproot address (Starts with bc1)'
+      )
+      throw new Error(
+        'Please use a native SegWit or Taproot address (Starts with bc1)'
+      )
     }
 
     return addresses[0]
   }
 
   return ''
+}
+
+export const getPubKey = async () => {
+  if (!window.unisat) {
+    return ''
+  }
+
+  return await window.unisat.getPublicKey()
 }
 
 export const connect: () => Promise<{
@@ -54,7 +66,9 @@ export const connect: () => Promise<{
       connectRes[0].startsWith('m') ||
       connectRes[0].startsWith('n')
     ) {
-      throw new Error('Please use a SegWit address')
+      throw new Error(
+        'Please use a native SegWit or Taproot address (Starts with bc1)'
+      )
     }
 
     // get the pubKey from the address

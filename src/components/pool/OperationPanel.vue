@@ -129,7 +129,7 @@ const hasReleasable = computed(() => {
     </TabGroup>
 
     <div class="flex flex-col items-center justify-center h-full gap-8" v-else>
-      <p class="text-gray-300">
+      <p class="text-zinc-300">
         Please connect your wallet first to use the pool.
       </p>
 
