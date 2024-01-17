@@ -7,7 +7,11 @@ import { ElMessage } from 'element-plus'
 import { DEBUG } from '@/data/constants'
 import { useConnectionStore } from '@/stores/connection'
 import events from '@/data/events'
-import { getEventStats, postClaimReward } from '@/queries/events'
+import {
+  getEventRemains,
+  getEventStats,
+  postClaimReward,
+} from '@/queries/events'
 import { sleep } from '@/lib/helpers'
 import { buildClaim } from '@/lib/builders/orders-v2'
 import { useBtcJsStore } from '@/stores/btcjs'
@@ -22,6 +26,12 @@ const event = ref(events[events.length - 1].symbol)
 const { data: eventStats, isFetching: isFetchingEventStats } = useQuery({
   queryKey: ['events', { event, address: connectionStore.getAddress }],
   queryFn: () => getEventStats({ event: event.value }),
+  enabled: computed(() => !!event.value),
+})
+
+const { data: eventRemains, isFetching: isFetchingEventRemains } = useQuery({
+  queryKey: ['eventsRemains', { event }],
+  queryFn: () => getEventRemains({ event: event.value }),
   enabled: computed(() => !!event.value),
 })
 
@@ -95,13 +105,23 @@ async function onClaimReward() {
       <div class="flex gap-8 items-center">
         <span class="text-lg text-zinc-300">Choose Event</span>
 
-        <div class="flex gap-4 items-center">
-          <EventSelect v-model:event-symbol="event" />
+        <div class="">
+          <div class="flex gap-4 items-center">
+            <EventSelect v-model:event-symbol="event" />
 
-          <Loader2Icon
-            class="w-6 h-6 text-zinc-300 animate-spin-slow"
-            v-if="isFetchingEventStats"
-          />
+            <Loader2Icon
+              class="w-6 h-6 text-zinc-300 animate-spin-slow"
+              v-if="isFetchingEventStats || isFetchingEventRemains"
+            />
+          </div>
+
+          <div
+            v-if="eventRemains && eventRemains.remainingInfo"
+            class="flex items-center mt-2 space-x-2"
+          >
+            <span class="text-zinc-500">Rewards pool remaining: </span>
+            <span>{{ eventRemains.remainingInfo }}</span>
+          </div>
         </div>
       </div>
 

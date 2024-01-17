@@ -66,6 +66,24 @@ async function rewardFetch(
   return jsoned.data
 }
 
+export const getEventRemains = async ({
+  event,
+}: {
+  event: string
+}): Promise<{
+  rewardTick: string
+  remainingInfo: string
+}> => {
+  const params = new URLSearchParams({
+    net: 'livenet',
+    rewardType: event,
+  })
+
+  const remains = await eventFetch(`reward/pool/info?${params}`)
+
+  return remains
+}
+
 export const getEventStats = async ({
   event,
 }: {
@@ -100,7 +118,6 @@ export const getEventStats = async ({
     }
   })
 
-  console.log('🚀 ~ stats:', stats)
   return stats
 }
 
