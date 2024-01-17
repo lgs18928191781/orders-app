@@ -10,7 +10,7 @@ import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useTradingPair } from '@/hooks/use-trading-pair'
 
-import OrderItem from './Item.vue'
+import OrderItem from './OrderItem.vue'
 
 const networkStore = useNetworkStore()
 const { select } = useSelectOrder()
@@ -139,7 +139,7 @@ const { data: fiatRate } = useQuery({
           </div>
         </div>
         <div
-          class="flex h-3/4 w-full items-center justify-center"
+          class="flex h-full w-full items-center justify-center"
           v-if="!askOrders || !askOrders.length"
         >
           <span class="text-zinc-500">No ask orders</span>

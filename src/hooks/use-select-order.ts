@@ -8,6 +8,17 @@ import Decimal from 'decimal.js'
 export const useSelectOrder = createGlobalState(() => {
   const selectedOrder = ref<Order>()
 
+  const selectedAskOrder = computed(() => {
+    if (!selectedOrder.value) return
+
+    return selectedOrder.value.orderType === 1 ? selectedOrder.value : undefined
+  })
+  const selectedBidOrder = computed(() => {
+    if (!selectedOrder.value) return
+
+    return selectedOrder.value.orderType === 2 ? selectedOrder.value : undefined
+  })
+
   const isSelected = (orderId: string) => {
     return selectedOrder.value?.orderId === orderId
   }
@@ -38,5 +49,12 @@ export const useSelectOrder = createGlobalState(() => {
     }
   }
 
-  return { select, selectedOrder, isSelected, selectedOrderType }
+  return {
+    select,
+    selectedOrder,
+    selectedAskOrder,
+    selectedBidOrder,
+    isSelected,
+    selectedOrderType,
+  }
 })

@@ -1,18 +1,17 @@
 <script lang="ts" setup>
-import { Ref, computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { TabPanel } from '@headlessui/vue'
 import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import { get } from '@vueuse/core'
 
 import { prettyBalance, prettyBtcDisplay } from '@/lib/formatters'
-import { unit, useBtcUnit } from '@/lib/helpers'
+import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
 import { calculateFee } from '@/lib/build-helpers'
 import { buildBuyTake } from '@/lib/builders/orders-v2'
-import { getOrders, type Order } from '@/queries/orders-api'
+import { getFiatRate } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
-import { useNetworkStore } from '@/stores/network'
 import { IS_DEV } from '@/data/constants'
 import { useAreaHighlight } from '@/hooks/use-area-highlight'
 import { useTradingPair } from '@/hooks/use-trading-pair'
@@ -24,30 +23,30 @@ const connectionStore = useConnectionStore()
 const feebStore = useFeebStore()
 const { highlight } = useAreaHighlight()
 const { selectedPair } = useTradingPair()
-const { select, selectedOrder, isSelected, selectedOrderType } =
-  useSelectOrder()
-
-const selectedBuyOrders: Ref<Order[]> = ref([])
-
-const selectedBuyCoinAmount = computed(() => {
-  return selectedBuyOrders.value.reduce((acc, cur) => {
-    return acc + Number(cur.coinAmount)
-  }, 0)
-})
+const { selectedAskOrder } = useSelectOrder()
 
 const totalPrice = computed(() => {
-  if (!selectedOrder.value) return 0
+  if (!selectedAskOrder.value)
+    return {
+      display: '0',
+      value: 0,
+    }
 
-  const total = selectedOrder.value.price.times(selectedOrder.value.coinAmount)
+  const total = selectedAskOrder.value.price.times(
+    selectedAskOrder.value.coinAmount
+  )
 
-  return prettyBtcDisplay(total)
+  return {
+    display: prettyBtcDisplay(total),
+    value: total.toNumber(),
+  }
 })
 
 const buyFees = computed(() => {
-  if (!selectedBuyCoinAmount.value) return 0
+  if (!selectedAskOrder.value) return 0
   if (!feebStore.get) return 0
 
-  const ordersCount = selectedBuyOrders.value.length
+  const ordersCount = 1
 
   return calculateFee(feebStore.get, 4, 6) * ordersCount
 })
@@ -58,8 +57,6 @@ const prettyBuyFees = computed(() => {
 
   return `≈ ${prettyBalance(feeInBtc, get(useBtcUnit))} ${get(unit)}`
 })
-
-// watch use BuyOrderId change, update selected orders
 
 const buildProcessTip = ref('Building Transaction...')
 async function buildOrder() {
@@ -76,10 +73,10 @@ async function buildOrder() {
 
   try {
     // buy
-    if (!selectedBuyOrders.value.length) return
+    if (!selectedAskOrder.value) return
 
     buildRes = await buildBuyTake({
-      order: selectedBuyOrders.value[0],
+      order: selectedAskOrder.value,
       selectedPair: selectedPair.value,
     })
   } catch (error: any) {
@@ -106,18 +103,24 @@ function setIsOpen(value: boolean) {
 const isBuilding = ref(false)
 const builtInfo = ref()
 
-const canTakeBuyOrder = computed(() => {
-  return selectedBuyOrders.value.length > 0 && connectionStore.connected
+const canTakeOrder = computed(() => {
+  return connectionStore.connected && selectedAskOrder.value
 })
-const cannotTakeBuyOrderReason = computed(() => {
+const cannotTakeOrderReason = computed(() => {
   if (!connectionStore.connected) {
     return 'Connect wallet first'
   }
-  if (selectedBuyOrders.value.length === 0) {
+  if (!selectedAskOrder.value) {
     return 'Select an order'
   }
 
   return ''
+})
+
+// fiat price
+const { data: fiatRate } = useQuery({
+  queryKey: ['fiatRate', { coin: 'btc' }],
+  queryFn: getFiatRate,
 })
 </script>
 
@@ -132,15 +135,26 @@ const cannotTakeBuyOrderReason = computed(() => {
           <span class="ml-2 text-zinc-500">Price</span>
         </div>
 
-        <div class="relative max-w-[67%] grow">
-          <div class="w-full py-2 pl-2 pr-12 text-right outline-none">
-            {{ prettyBalance(selectedOrder?.price, useBtcUnit) }}
+        <div class="grow max-w-[67%]">
+          <div class="flex items-center justify-end">
+            <div class="w-full p-2 text-right outline-none">
+              {{ prettyBalance(selectedAskOrder?.price, useBtcUnit) }}
+            </div>
+            <span
+              class="pointer-events-none flex items-center pr-2 text-zinc-400"
+            >
+              {{ unit }}
+            </span>
           </div>
-          <span
-            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
+
+          <div
+            class="text-sm text-zinc-500 text-right pr-2 -mt-2"
+            v-if="showFiat && fiatRate && selectedAskOrder"
           >
-            {{ unit }}
-          </span>
+            {{
+              '$' + calcFiatPrice(selectedAskOrder.price.toNumber(), fiatRate)
+            }}
+          </div>
         </div>
       </div>
 
@@ -157,9 +171,9 @@ const cannotTakeBuyOrderReason = computed(() => {
           <span class="ml-2 text-zinc-500">Amount</span>
         </div>
 
-        <div class="max-w-[67%] grow flex items-center" v-if="selectedOrder">
+        <div class="max-w-[67%] grow flex items-center" v-if="selectedAskOrder">
           <div class="w-full p-2 text-right outline-none">
-            {{ selectedOrder.coinAmount }}
+            {{ selectedAskOrder.coinAmount }}
           </div>
           <div
             class="pointer-events-none flex items-center pr-2 text-zinc-400 uppercase"
@@ -170,7 +184,7 @@ const cannotTakeBuyOrderReason = computed(() => {
 
         <div class="max-w-[67%] grow text-right text-primary py-1" v-else>
           <button
-            class="text-primary/80 w-full group flex items-center justify-end gap-1"
+            class="text-primary/80 w-full group flex items-center justify-end gap-2"
             @click="highlight('askOrdersList')"
           >
             <span class="group-hover:underline">Select an</span>
@@ -186,34 +200,49 @@ const cannotTakeBuyOrderReason = computed(() => {
     </div>
 
     <!-- buy -->
-    <div class="">
+    <div class="mt-8">
       <div class="flex items-center justify-between text-sm">
         <span class="text-zinc-500">Total</span>
-        <span class="text-zinc-300">{{ totalPrice }}</span>
+        <div class="">
+          <div class="text-zinc-300">{{ totalPrice.display }}</div>
+          <div
+            class="text-sm text-zinc-500 text-right"
+            v-if="showFiat && fiatRate && totalPrice.value"
+          >
+            {{ '$' + calcFiatPrice(totalPrice.value, fiatRate) }}
+          </div>
+        </div>
       </div>
 
-      <div class="flex items-center justify-between text-sm">
+      <div
+        class="flex items-center justify-between text-sm"
+        :class="[showFiat ? 'mt-4' : 'mt-2']"
+      >
         <span class="text-zinc-500">Gas</span>
-        <span class="text-zinc-300">{{ prettyBuyFees }}</span>
+        <div class="">
+          <div class="text-zinc-300">{{ prettyBuyFees }}</div>
+          <div
+            class="text-sm text-zinc-500 text-right"
+            v-if="showFiat && fiatRate && buyFees"
+          >
+            {{ '$' + calcFiatPrice(buyFees, fiatRate) }}
+          </div>
+        </div>
       </div>
 
       <button
         class="mt-4 w-full rounded-md py-4 font-bold"
         :class="
-          canTakeBuyOrder
-            ? 'bg-green-500 text-white'
-            : 'bg-zinc-700 text-zinc-500'
+          canTakeOrder ? 'bg-green-500 text-white' : 'bg-zinc-700 text-zinc-500'
         "
         @click="buildOrder"
-        :disabled="!canTakeBuyOrder"
+        :disabled="!canTakeOrder"
       >
         {{
-          cannotTakeBuyOrderReason ||
+          cannotTakeOrderReason ||
           `Buy $${selectedPair.fromSymbol.toUpperCase()}`
         }}
       </button>
     </div>
   </TabPanel>
 </template>
-
-<style scoped></style>

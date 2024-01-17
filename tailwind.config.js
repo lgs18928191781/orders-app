@@ -20,6 +20,7 @@ export default {
       },
       maxWidth: {
         '8xl': '90rem',
+        '9xl': '100rem',
       },
       keyframes: {
         wiggle: {

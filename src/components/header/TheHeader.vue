@@ -142,7 +142,7 @@ function copyAddress() {
   <header
     class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
   >
-    <div class="max-w-8xl flex items-center justify-between mx-auto px-3">
+    <div class="max-w-9xl flex items-center justify-between mx-auto px-3">
       <TheNavbar />
 
       <div class="flex gap-2">

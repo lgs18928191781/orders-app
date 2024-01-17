@@ -39,6 +39,8 @@ declare module '@vue/runtime-core' {
     Notifications: typeof import('./src/components/header/Notifications.vue')['default']
     OperationPanel: typeof import('./src/components/pool/OperationPanel.vue')['default']
     OrderIndex: typeof import('./src/components/orders/OrderIndex.vue')['default']
+    OrderItem: typeof import('./src/components/orders/OrderItem.vue')['default']
+    OrderList: typeof import('./src/components/orders/OrderList.vue')['default']
     OrdersIndex: typeof import('./src/components/orders/OrdersIndex.vue')['default']
     OrdersPanel: typeof import('./src/components/orders/OrdersPanel.vue')['default']
     PairSelect: typeof import('./src/components/orders/PairSelect.vue')['default']

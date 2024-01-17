@@ -408,7 +408,9 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 </script>
 
 <template>
-  <div class="col-span-3 flex-1 divide-x divide-zinc-800 primary-panel">
+  <div
+    class="col-span-3 flex-1 divide-x divide-zinc-800 primary-panel min-h-[40vh]"
+  >
     <!-- operate panel -->
     <div class="flex flex-col p-4" v-if="isLimitExchangeMode">
       <div

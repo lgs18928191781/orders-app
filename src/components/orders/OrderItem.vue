@@ -28,8 +28,8 @@ const props = defineProps<{
 
 const isMyOrder = computed(() => {
   if (IS_DEV) {
-    // 30% to be true
-    if (Math.random() < 0.2) {
+    // 10% to be true
+    if (Math.random() < 0.1) {
       return true
     }
   }
@@ -102,7 +102,7 @@ const { data: fiatRate } = useQuery({
         </TooltipProvider>
       </div>
 
-      <div class="text-xs text-zinc-300" v-if="showFiat && fiatRate">
+      <div class="text-xs text-zinc-500" v-if="showFiat && fiatRate">
         {{ '$' + calcFiatPrice(order.coinRatePrice, fiatRate) }}
       </div>
     </div>
