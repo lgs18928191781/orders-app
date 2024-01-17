@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 
 import {
+  getActivityAssetTicks,
   getOneLeaderboard,
   getOneLeaderboardStats,
 } from '@/queries/leaderboard'
@@ -12,11 +13,33 @@ import { useConnectionStore } from '@/stores/connection'
 import assets from '@/data/assets'
 
 import AssetSelect from '@/components/AssetSelect.vue'
+import { prettyBtcDisplay, prettyTimestamp } from '@/lib/formatters'
 
 const connectionStore = useConnectionStore()
 
-const activityAssets = assets.filter((a) => a.symbol === 'btcs')
-const tick = useStorage('tick', activityAssets[0].symbol)
+const { data: activityAssets } = useQuery({
+  queryKey: ['activityAssets'],
+  queryFn: () => getActivityAssetTicks(),
+  staleTime: 1000 * 60 * 60,
+})
+const activityAssetsInfo = computed(() => {
+  if (!activityAssets.value) return []
+
+  return activityAssets.value.map((tick) => {
+    const asset = assets.find((asset) => asset.symbol === tick.tick)
+
+    return {
+      ...tick,
+      info: asset,
+    }
+  })
+})
+const tick = useStorage('tick', activityAssetsInfo.value[0]?.tick)
+const selectedInfo = computed(() => {
+  if (!tick.value) return null
+
+  return activityAssetsInfo.value.find((a) => a.tick === tick.value)
+})
 
 const { data: stats, isFetching: isFetchingStats } = useQuery({
   queryKey: ['leaderboardStats', { tick, address: connectionStore.getAddress }],
@@ -45,10 +68,24 @@ const trophyColor = (index: number) => {
       return 'text-zinc-400'
   }
 }
+
+const currentLevelProgress = computed(() => {
+  if (!stats.value) return 0
+
+  const progress =
+    ((stats.value.totalAmount - stats.value.tickCurrentLevelLimitAmount) /
+      (stats.value.tickNextLevelLimitAmount -
+        stats.value.tickCurrentLevelLimitAmount)) *
+    100
+
+  console.log({ progress })
+
+  return progress
+})
 </script>
 
 <template>
-  <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
+  <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
     <h1 class="text-2xl font-semibold text-center mb-6 text-zinc-100">
       Leaderboard
     </h1>
@@ -62,7 +99,7 @@ const trophyColor = (index: number) => {
         <div class="flex gap-4 items-center">
           <AssetSelect
             :asset-symbol="tick"
-            :use-assets="activityAssets"
+            :use-assets="activityAssetsInfo"
             @update:asset-symbol="tick = $event"
           />
 
@@ -76,7 +113,53 @@ const trophyColor = (index: number) => {
       <!-- a border -->
       <div class="col-span-3 border-b border-orange-300/20 pt-4 mb-4"></div>
 
-      <div class="grid grid-cols-2 gap-8" v-if="stats">
+      <div class="space-y-4" v-if="stats">
+        <div class="grid grid-cols-6">
+          <div class="text-zinc-300">Activity at</div>
+          <div class="col-span-5">
+            {{ prettyTimestamp(stats.eventStartTime) }} -
+            {{ prettyTimestamp(stats.eventEndTime) }}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-6 gap-4">
+          <div class="text-zinc-300">Current Lvl</div>
+          <div class="col-span-2 flex gap-4 items-center">
+            <span>{{ stats.tickCurrentLevel }}</span>
+
+            <div class="">
+              <!-- progress bar -->
+              <div
+                class="relative h-2 bg-zinc-700 rounded-full overflow-hidden w-48"
+              >
+                <div
+                  class="absolute top-0 left-0 h-full bg-green-500 rounded-full"
+                  :style="{ width: currentLevelProgress + '%' }"
+                ></div>
+              </div>
+
+              <div class="mt-1 text-xs text-zinc-300">
+                {{ prettyBtcDisplay(stats.totalAmount) }} /
+                {{ prettyBtcDisplay(stats.tickNextLevelLimitAmount, true) }}
+              </div>
+            </div>
+          </div>
+          <div class="text-zinc-300">Current Reward</div>
+          <div class="col-span-2">{{ stats.tickCurrentLevelRewardAmount }}</div>
+        </div>
+
+        <div class="grid grid-cols-6 gap-4">
+          <div class="text-zinc-300">Next Lvl</div>
+          <div class="col-span-2">{{ stats.tickNextLevel }}</div>
+          <div class="text-zinc-300">Next Reward</div>
+          <div class="col-span-2">{{ stats.tickNextLevelRewardAmount }}</div>
+        </div>
+      </div>
+
+      <!-- divider -->
+      <div class="col-span-3 border-b border-orange-300/20 pt-8 mb-8"></div>
+
+      <div class="grid grid-cols-2 gap-x-4 gap-y-8" v-if="stats">
         <div>
           <h3 class="text-lg font-semibold mb-2 text-zinc-100">Total Orders</h3>
           <p class="text-zinc-100">
@@ -87,7 +170,7 @@ const trophyColor = (index: number) => {
         <div>
           <h3 class="text-lg font-semibold mb-2 text-zinc-100">Total Amount</h3>
           <p class="text-zinc-100">
-            {{ stats.totalAmount }}
+            {{ prettyBtcDisplay(stats.totalAmount) }}
           </p>
         </div>
 
@@ -101,7 +184,7 @@ const trophyColor = (index: number) => {
         <div class="">
           <h3 class="text-lg font-semibold mb-2 text-zinc-100">My Amount</h3>
           <p class="text-zinc-100">
-            {{ stats.addressTotalAmount }}
+            {{ prettyBtcDisplay(stats.addressTotalAmount) }}
           </p>
         </div>
       </div>
@@ -154,7 +237,7 @@ const trophyColor = (index: number) => {
               <td
                 class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-center"
               >
-                {{ row.totalValue }}
+                {{ prettyBtcDisplay(row.totalValue) }}
               </td>
             </tr>
           </tbody>

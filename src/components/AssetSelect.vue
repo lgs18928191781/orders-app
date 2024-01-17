@@ -11,9 +11,7 @@ import {
 import assets from '@/data/assets'
 import { prettySymbol } from '@/lib/formatters'
 
-const brcAssets = assets.filter((a) => a.symbol !== 'btc')
-const props = defineProps(['useAssets'])
-const useAssets = props.useAssets || brcAssets
+defineProps(['useAssets'])
 const assetSymbol = defineModel('assetSymbol', { required: true, type: String })
 const selectedAsset = computed(() => {
   const selected = assets.find(
@@ -63,13 +61,13 @@ const selectedAsset = computed(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute right-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800 border border-orange-300/10 shadow shadow-orange-300/30"
+        class="absolute left-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800 border border-orange-300/10 shadow shadow-orange-300/30"
       >
         <ListboxOption
           v-slot="{ active, selected }"
           v-for="asset in useAssets"
-          :key="asset.id"
-          :value="asset.symbol"
+          :key="asset.tick"
+          :value="asset.tick"
         >
           <button
             :class="[
@@ -77,10 +75,10 @@ const selectedAsset = computed(() => {
               active && 'bg-black',
             ]"
           >
-            <img :src="asset.icon" class="h-6 rounded-full" />
+            <img :src="asset.info.icon" class="h-6 rounded-full" />
 
             <div class="text-base font-bold">
-              {{ prettySymbol(asset.symbol) }}
+              {{ prettySymbol(asset.tick) }}
             </div>
 
             <CheckIcon
