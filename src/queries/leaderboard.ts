@@ -45,7 +45,6 @@ export const getActivityAssetTicks = async (): Promise<
   const ticks = await eventFetch(`ranking/tick?${params}`).then(
     (res) => res?.results ?? []
   )
-  console.log({ ticks })
 
   return ticks
 }

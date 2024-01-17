@@ -78,8 +78,6 @@ const currentLevelProgress = computed(() => {
         stats.value.tickCurrentLevelLimitAmount)) *
     100
 
-  console.log({ progress })
-
   return progress
 })
 </script>
