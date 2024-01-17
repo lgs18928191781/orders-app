@@ -5,11 +5,7 @@ import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import {
-  getIssueDetail,
-  submitRecover,
-  type Issue,
-} from '@/queries/orders/issues'
+import { getIssueDetail, submitRecover, type Issue } from '@/queries/issues'
 import { prettyTimestamp } from '@/lib/formatters'
 import { buildRecoverPsbt } from '@/lib/builders/pool'
 import { DEBUG, SIGHASH_SINGLE_ANYONECANPAY } from '@/data/constants'

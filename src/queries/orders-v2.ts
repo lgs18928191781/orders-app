@@ -2,7 +2,7 @@ import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import sign from '@/lib/sign'
 import { ordersV2Fetch } from '@/lib/fetch'
-import { Order } from './orders-api'
+import Decimal from 'decimal.js'
 
 export const getPlatformPublicKey = async (): Promise<{
   platformPublicKey: string
@@ -20,6 +20,77 @@ export const getPlatformPublicKey = async (): Promise<{
   })
 
   return res
+}
+
+export type Order = {
+  amount: number
+  buyerAddress: string
+  coinAmount: number
+  coinDecimalNum: number
+  coinRatePrice: number
+  coinPrice: number
+  net: 'livenet' | 'testnet'
+  orderId: string
+  orderState: number
+  orderType: number
+  orderTypeStr: 'ask' | 'bid'
+  price: Decimal
+  freeState?: 1 | 0
+  sellerAddress: string
+  tick: string
+  timestamp: number
+}
+export const getOrders = async ({
+  type,
+  network,
+  sort = 'asc',
+  tick = 'rdex',
+}: {
+  type: 'bid' | 'ask'
+  network: 'livenet' | 'testnet'
+  sort: 'asc' | 'desc'
+  tick: string
+}) => {
+  const orderType = type === 'ask' ? 1 : 2
+  const sortType = sort === 'asc' ? 1 : -1
+  const address = useConnectionStore().getAddress
+  const { publicKey, signature } = await sign()
+
+  const params = new URLSearchParams({
+    net: network,
+    orderType: String(orderType),
+    orderState: '1',
+    sortKey: 'coinPrice',
+    sortType: String(sortType),
+    tick,
+    address,
+  })
+  const orders: Order[] = await ordersV2Fetch(`orders?${params}`, {
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+  })
+    .then(({ results }) => results)
+    .then((orders) => {
+      // if orders is empty, return empty array
+      if (!orders) return []
+
+      // order's coinRatePrice is incorrect, so we need to calculate it
+      orders.forEach((order: Order) => {
+        order.coinRatePrice = new Decimal(
+          order.amount / order.coinAmount
+        ).toNumber()
+
+        // add price and orderTypeStr
+        order.price = new Decimal(order.amount / order.coinAmount)
+        order.orderTypeStr = order.orderType === 1 ? 'ask' : 'bid'
+      })
+
+      return orders
+    })
+
+  return orders
 }
 
 type DetailedOrder = Order & {

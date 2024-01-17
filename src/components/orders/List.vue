@@ -2,7 +2,8 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed, watch } from 'vue'
 
-import { getFiatRate, getMarketPrice, getOrders } from '@/queries/orders-api'
+import { getFiatRate, getMarketPrice } from '@/queries/orders-api'
+import { getOrders } from '@/queries/orders-v2'
 import { useNetworkStore } from '@/stores/network'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
@@ -118,12 +119,15 @@ const { data: fiatRate } = useQuery({
 
     <!-- orders -->
     <div class="flex flex-col grow">
-      <div class="nicer-scrollbar h-full overflow-y-scroll pr-1" id="askOrders">
+      <div
+        class="nicer-scrollbar flex-auto h-1 overflow-y-scroll pr-1"
+        id="askOrders"
+      >
         <div class="w-full">
           <div
             v-if="askOrders && askOrders.length"
             id="askOrdersList"
-            class="space-y-4"
+            class="space-y-1"
           >
             <OrderItem
               v-for="order in rearrangedAskOrders"
@@ -167,7 +171,7 @@ const { data: fiatRate } = useQuery({
         </el-tooltip>
       </div>
 
-      <div class="nicer-scrollbar h-full overflow-y-scroll pr-1">
+      <div class="nicer-scrollbar flex-auto h-1 overflow-y-scroll pr-1">
         <div class="w-full">
           <div
             id="bidOrdersList"

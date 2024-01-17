@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import { get } from '@vueuse/core'
 
-import { prettyBalance } from '@/lib/formatters'
+import { prettyBalance, prettyBtcDisplay } from '@/lib/formatters'
 import { unit, useBtcUnit } from '@/lib/helpers'
 import { calculateFee } from '@/lib/build-helpers'
 import { buildBuyTake } from '@/lib/builders/orders-v2'
@@ -21,43 +21,13 @@ import btcIcon from '@/assets/btc.svg?url'
 import { useSelectOrder } from '@/hooks/use-select-order'
 
 const connectionStore = useConnectionStore()
-const networkStore = useNetworkStore()
 const feebStore = useFeebStore()
 const { highlight } = useAreaHighlight()
 const { selectedPair } = useTradingPair()
 const { select, selectedOrder, isSelected, selectedOrderType } =
   useSelectOrder()
 
-const { data: askOrders, isFetched: isFetchedAskOrders } = useQuery({
-  queryKey: [
-    'askOrders',
-    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
-  ],
-  queryFn: () =>
-    getOrders({
-      type: 'ask',
-      network: networkStore.network,
-      sort: 'desc',
-      tick: selectedPair.value.fromSymbol,
-    }),
-  placeholderData: [],
-})
-
 const selectedBuyOrders: Ref<Order[]> = ref([])
-
-const candidateBuyOrders = computed(() => {
-  if (useBuyPrice.value === 0) return []
-  if (!askOrders.value) return []
-
-  return askOrders.value
-    .filter((item) => {
-      return (
-        Number(item.coinRatePrice) === useBuyPrice.value &&
-        item.orderId === useBuyOrderId.value
-      )
-    })
-    .slice(0, 1)
-})
 
 const selectedBuyCoinAmount = computed(() => {
   return selectedBuyOrders.value.reduce((acc, cur) => {
@@ -65,17 +35,12 @@ const selectedBuyCoinAmount = computed(() => {
   }, 0)
 })
 
-const buyTotal = computed(() => {
-  if (!selectedBuyCoinAmount.value) return 0
+const totalPrice = computed(() => {
+  if (!selectedOrder.value) return 0
 
-  return (
-    prettyBalance(
-      selectedBuyCoinAmount.value * useBuyPrice.value,
-      get(useBtcUnit)
-    ) +
-    ' ' +
-    get(unit)
-  )
+  const total = selectedOrder.value.price.times(selectedOrder.value.coinAmount)
+
+  return prettyBtcDisplay(total)
 })
 
 const buyFees = computed(() => {
@@ -94,24 +59,7 @@ const prettyBuyFees = computed(() => {
   return `≈ ${prettyBalance(feeInBtc, get(useBtcUnit))} ${get(unit)}`
 })
 
-const useBuyPrice = ref(0)
-const useBuyOrderId = ref()
-
-const price = computed(() => {
-  if (!selectedPair.value) return 0
-  if (!selectedOrder.value) return 0
-
-  return selectedOrder.value.coinPrice
-})
-
 // watch use BuyOrderId change, update selected orders
-watch(useBuyOrderId, (buyOrderId) => {
-  if (!buyOrderId || !askOrders.value) {
-    selectedBuyOrders.value = []
-  } else {
-    selectedBuyOrders.value = candidateBuyOrders.value
-  }
-})
 
 const buildProcessTip = ref('Building Transaction...')
 async function buildOrder() {
@@ -175,7 +123,7 @@ const cannotTakeBuyOrderReason = computed(() => {
 
 <template>
   <TabPanel class="flex flex-col justify-between h-full">
-    <div class="">
+    <div>
       <div
         class="flex items-center justify-between rounded-md border border-zinc-500 p-2"
       >
@@ -186,7 +134,7 @@ const cannotTakeBuyOrderReason = computed(() => {
 
         <div class="relative max-w-[67%] grow">
           <div class="w-full py-2 pl-2 pr-12 text-right outline-none">
-            {{ prettyBalance(useBuyPrice, useBtcUnit) }}
+            {{ prettyBalance(selectedOrder?.price, useBtcUnit) }}
           </div>
           <span
             class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
@@ -209,9 +157,9 @@ const cannotTakeBuyOrderReason = computed(() => {
           <span class="ml-2 text-zinc-500">Amount</span>
         </div>
 
-        <div class="max-w-[67%] grow flex items-center" v-if="useBuyOrderId">
+        <div class="max-w-[67%] grow flex items-center" v-if="selectedOrder">
           <div class="w-full p-2 text-right outline-none">
-            {{ selectedBuyCoinAmount }}
+            {{ selectedOrder.coinAmount }}
           </div>
           <div
             class="pointer-events-none flex items-center pr-2 text-zinc-400 uppercase"
@@ -222,17 +170,16 @@ const cannotTakeBuyOrderReason = computed(() => {
 
         <div class="max-w-[67%] grow text-right text-primary py-1" v-else>
           <button
-            class="text-primary/80 flex items-center gap-2 justify-end w-full group"
+            class="text-primary/80 w-full group flex items-center justify-end gap-1"
             @click="highlight('askOrdersList')"
           >
             <span class="group-hover:underline">Select an</span>
 
             <span
-              class="text-red-500 font-bold bg-red-500/20 py-0.5 px-2 rounded-md"
+              class="text-red-500 font-bold bg-red-500/20 py-0.5 px-1 rounded-md"
             >
               ASK Order
             </span>
-            <span class="group-hover:underline">to buy</span>
           </button>
         </div>
       </div>
@@ -242,7 +189,7 @@ const cannotTakeBuyOrderReason = computed(() => {
     <div class="">
       <div class="flex items-center justify-between text-sm">
         <span class="text-zinc-500">Total</span>
-        <span class="text-zinc-300">{{ buyTotal }}</span>
+        <span class="text-zinc-300">{{ totalPrice }}</span>
       </div>
 
       <div class="flex items-center justify-between text-sm">

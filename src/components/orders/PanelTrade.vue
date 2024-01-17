@@ -56,51 +56,6 @@ const feebStore = useFeebStore()
 const { highlight } = useAreaHighlight()
 const { selectedPair } = useTradingPair()
 
-const { data: askOrders, isFetched: isFetchedAskOrders } = useQuery({
-  queryKey: [
-    'askOrders',
-    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
-  ],
-  queryFn: () =>
-    getOrders({
-      type: 'ask',
-      network: networkStore.network,
-      sort: 'desc',
-      tick: selectedPair.value.fromSymbol,
-    }),
-  placeholderData: [],
-})
-const { data: bidOrders } = useQuery({
-  queryKey: [
-    'bidOrders',
-    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
-  ],
-  queryFn: () =>
-    getOrders({
-      type: 'bid',
-      network: networkStore.network,
-      sort: 'desc',
-      tick: selectedPair.value.fromSymbol,
-    }),
-  placeholderData: [],
-})
-// watch ask orders data
-// when it finish loaded, scroll to the bottom
-watch(
-  isFetchedAskOrders,
-  (isFetchedAskOrders) => {
-    if (!isFetchedAskOrders) return
-
-    setTimeout(() => {
-      const el = document.getElementById('askOrders')
-      if (el) {
-        el.scrollTop = el.scrollHeight
-      }
-    }, 100)
-  },
-  { immediate: true }
-)
-
 const takeModeTab = ref(0)
 function changeTakeModeTab(index: number) {
   takeModeTab.value = index
@@ -112,33 +67,6 @@ function deviatePrice(price: number, deviator: number): number {
 
 const selectedBuyOrders: Ref<Order[]> = ref([])
 const selectedSellOrders: Ref<Order[]> = ref([])
-
-const candidateBuyOrders = computed(() => {
-  if (useBuyPrice.value === 0) return []
-  if (!askOrders.value) return []
-
-  return askOrders.value
-    .filter((item) => {
-      return (
-        Number(item.coinRatePrice) === useBuyPrice.value &&
-        item.orderId === useBuyOrderId.value
-      )
-    })
-    .slice(0, 1)
-})
-const candidateSellOrders = computed(() => {
-  if (useSellPrice.value === 0) return []
-  if (!bidOrders.value) return []
-
-  return bidOrders.value
-    .filter((item) => {
-      return (
-        Number(item.coinRatePrice) === useSellPrice.value &&
-        item.orderId === useSellOrderId.value
-      )
-    })
-    .slice(0, 1)
-})
 
 const selectedBuyCoinAmount = computed(() => {
   return selectedBuyOrders.value.reduce((acc, cur) => {
@@ -851,7 +779,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
       </div>
     </div>
 
-    <div class="flex flex-col p-4" v-else>
+    <div class="flex flex-col p-4 h-full" v-else>
       <!-- tabs -->
       <TabGroup :selectedIndex="takeModeTab" @change="changeTakeModeTab">
         <TabList

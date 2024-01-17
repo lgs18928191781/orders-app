@@ -20,7 +20,7 @@ export const prettyTxid = (txid: string, len = 6) => {
 }
 
 export const prettyBalance = (
-  balance: number | string,
+  balance: number | string | Decimal | undefined,
   useBtcUnit: boolean | RemovableRef<boolean> = true
 ) => {
   if (balance === 0 || balance === '0') return new Decimal(0)
@@ -39,7 +39,7 @@ export const prettyBalance = (
   return new Decimal(balance).toFixed()
 }
 
-export const prettyBtcDisplay = (balance: number | string) => {
+export const prettyBtcDisplay = (balance: number | string | Decimal) => {
   return `${prettyBalance(balance)} BTC`
 }
 

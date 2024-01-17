@@ -78,8 +78,8 @@ const { data: fiatRate } = useQuery({
       'hover:bg-primary/15 cursor-pointer': !isMyOrder,
     }"
   >
-    <div class="td flex items-center gap-1">
-      <span
+    <div class="td">
+      <div
         class="flex items-center"
         :class="{
           'text-red-500': orderType === 'ask',
@@ -100,11 +100,11 @@ const { data: fiatRate } = useQuery({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </span>
+      </div>
 
-      <span class="text-xs text-zinc-500" v-if="showFiat && fiatRate">
+      <div class="text-xs text-zinc-300" v-if="showFiat && fiatRate">
         {{ '$' + calcFiatPrice(order.coinRatePrice, fiatRate) }}
-      </span>
+      </div>
     </div>
 
     <div class="td-right">{{ order.coinAmount }}</div>
@@ -118,18 +118,18 @@ const { data: fiatRate } = useQuery({
         </span>
       </template>
 
-      <span v-else class="inline-grid grid-cols-5 items-center gap-1">
-        <span :class="showFiat && fiatRate ? 'col-span-3' : 'col-span-5'">{{
-          prettyBalance(order.amount, useBtcUnit)
-        }}</span>
+      <div v-else class="">
+        <div :class="showFiat && fiatRate ? 'col-span-3' : 'col-span-5'">
+          {{ prettyBalance(order.amount, useBtcUnit) }}
+        </div>
 
-        <span
+        <div
           class="text-xs text-zinc-500 col-span-2"
           v-if="showFiat && fiatRate"
         >
           {{ '$' + calcFiatPrice(order.amount, fiatRate) }}
-        </span>
-      </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
