@@ -34,7 +34,7 @@ const activityAssetsInfo = computed(() => {
     }
   })
 })
-const tick = useStorage('tick', activityAssetsInfo.value[0]?.tick)
+const tick = useStorage('tick', 'btcs')
 const selectedInfo = computed(() => {
   if (!tick.value) return null
 
