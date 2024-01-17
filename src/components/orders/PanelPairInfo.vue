@@ -8,7 +8,6 @@ import KLineChart from '@/components/orders/KLineChart.vue'
     <OrdersPanelHeader />
     <div class="p-4 space-y-4 flex flex-col grow">
       <KLineChart />
-      <MyOrders />
     </div>
   </div>
 </template>

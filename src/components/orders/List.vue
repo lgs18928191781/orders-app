@@ -1,50 +1,83 @@
 <script lang="ts" setup>
 import { useQuery } from '@tanstack/vue-query'
-import { computed, inject } from 'vue'
-import { ElMessage } from 'element-plus'
+import { computed, watch } from 'vue'
 
-import { getFiatRate, getMarketPrice, type Order } from '@/queries/orders-api'
+import { getFiatRate, getMarketPrice, getOrders } from '@/queries/orders-api'
 import { useNetworkStore } from '@/stores/network'
-import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
-import { useConnectionStore } from '@/stores/connection'
 import { useSelectOrder } from '@/hooks/use-select-order'
+import { useTradingPair } from '@/hooks/use-trading-pair'
 
 import OrderItem from './Item.vue'
 
 const networkStore = useNetworkStore()
-const address = useConnectionStore().getAddress
 const { select } = useSelectOrder()
+const { selectedPair } = useTradingPair()
 
-const props = withDefaults(
-  defineProps<{
-    askOrders?: Order[]
-    bidOrders?: Order[]
-  }>(),
-  {
-    askOrders: () => [],
-    bidOrders: () => [],
-  }
+const { data: askOrders, isFetched: isFetchedAskOrders } = useQuery({
+  queryKey: [
+    'askOrders',
+    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
+  ],
+  queryFn: () =>
+    getOrders({
+      type: 'ask',
+      network: networkStore.network,
+      sort: 'desc',
+      tick: selectedPair.value.fromSymbol,
+    }),
+  placeholderData: [],
+})
+const { data: bidOrders } = useQuery({
+  queryKey: [
+    'bidOrders',
+    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
+  ],
+  queryFn: () =>
+    getOrders({
+      type: 'bid',
+      network: networkStore.network,
+      sort: 'desc',
+      tick: selectedPair.value.fromSymbol,
+    }),
+  placeholderData: [],
+})
+// watch ask orders data
+// when it finish loaded, scroll to the bottom
+watch(
+  isFetchedAskOrders,
+  (isFetchedAskOrders) => {
+    if (!isFetchedAskOrders) return
+
+    setTimeout(() => {
+      const el = document.getElementById('askOrders')
+      if (el) {
+        el.scrollTop = el.scrollHeight
+      }
+    }, 100)
+  },
+  { immediate: true }
 )
+
 const rearrangedAskOrders = computed(() => {
+  if (!askOrders.value) return []
+
   // extract all free orders and put them at the bottom
-  const freeOrders = props.askOrders.filter((order) => order.freeState === 1)
-  const nonFreeOrders = props.askOrders.filter((order) => order.freeState !== 1)
+  const freeOrders = askOrders.value.filter((order) => order.freeState === 1)
+  const nonFreeOrders = askOrders.value.filter((order) => order.freeState !== 1)
 
   return [...nonFreeOrders, ...freeOrders]
 })
 
 const emit = defineEmits(['useBuyPrice', 'useSellPrice'])
 
-const selectedPair = inject(selectedPairKey, defaultPair)
-
 const { data: marketPrice } = useQuery({
   queryKey: [
     'marketPrice',
-    { network: networkStore.network, tick: selectedPair.fromSymbol },
+    { network: networkStore.network, tick: selectedPair.value.fromSymbol },
   ],
-  queryFn: () => getMarketPrice({ tick: selectedPair.fromSymbol }),
+  queryFn: () => getMarketPrice({ tick: selectedPair.value.fromSymbol }),
 })
 
 // fiat price
@@ -52,168 +85,111 @@ const { data: fiatRate } = useQuery({
   queryKey: ['fiatRate'],
   queryFn: getFiatRate,
 })
-
-const useBuyPrice = (order: Order) => {
-  // first check if the order is mine; if so, throw error
-  const isMine = order.sellerAddress === address
-  if (isMine) {
-    ElMessage.error({
-      message: 'You cannot take your own order',
-      grouping: true,
-    })
-    return
-  }
-
-  const buyPrice = Number(order.coinRatePrice)
-  const buyOrderId = order.orderId
-
-  select(buyOrderId)
-
-  emit('useBuyPrice', buyPrice, buyOrderId)
-}
-
-const useSellPrice = (order: Order) => {
-  // first check if the order is mine; if so, throw error
-  const isMine = order.buyerAddress === address
-  if (isMine) {
-    ElMessage.error({
-      message: 'You cannot take your own order',
-      grouping: true,
-    })
-    return
-  }
-
-  const sellPrice = Number(order.coinRatePrice)
-  const sellOrderId = order.orderId
-
-  select(sellOrderId)
-
-  emit('useSellPrice', sellPrice, sellOrderId)
-}
 </script>
 
 <template>
-  <div class="flex flex-col gap-y-4 max-h-[60vh]">
-    <div class="nicer-scrollbar h-full overflow-y-scroll pr-1" id="askOrders">
-      <div class="w-full">
-        <div class="grid grid-cols-3 gap-2">
-          <div class="th th-sticky">Price ({{ unit }})</div>
-          <div class="th-right th-sticky">
-            <div class="flex items-center justify-end">
-              <span>Amount</span>
-              <span class="ml-2">
-                {{ '$' + selectedPair.fromSymbol.toUpperCase() }}
-              </span>
-              <img
-                :src="selectedPair.fromIcon"
-                class="h-4 rounded-full inline ml-1"
-              />
-            </div>
+  <div class="grow py-2 flex flex-col">
+    <!-- head -->
+    <div class="grid grid-cols-3 gap-1 px-2">
+      <div class="th th-sticky">Price ({{ unit }})</div>
+      <div class="th-right th-sticky">
+        <div class="flex items-center justify-end">
+          <span>Amount</span>
+          <span class="ml-2">
+            {{ '$' + selectedPair.fromSymbol.toUpperCase() }}
+          </span>
+          <img
+            :src="selectedPair.fromIcon"
+            class="h-4 rounded-full inline ml-1"
+          />
+        </div>
+      </div>
+      <div class="th-right th-sticky">
+        <div class="flex items-center justify-end">
+          <span>Total</span>
+          <span class="ml-2">({{ unit }})</span>
+          <img
+            :src="selectedPair.toIcon"
+            class="h-4 rounded-full inline ml-1"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- orders -->
+    <div class="flex flex-col grow">
+      <div class="nicer-scrollbar h-full overflow-y-scroll pr-1" id="askOrders">
+        <div class="w-full">
+          <div
+            v-if="askOrders && askOrders.length"
+            id="askOrdersList"
+            class="space-y-4"
+          >
+            <OrderItem
+              v-for="order in rearrangedAskOrders"
+              :key="order.orderId"
+              :order="order"
+              :order-type="'ask'"
+              @click="select(order)"
+            />
           </div>
-          <div class="th-right th-sticky">
-            <div class="flex items-center justify-end">
-              <span>Total</span>
-              <span class="ml-2">({{ unit }})</span>
-              <img
-                :src="selectedPair.toIcon"
-                class="h-4 rounded-full inline ml-1"
-              />
-            </div>
+        </div>
+        <div
+          class="flex h-3/4 w-full items-center justify-center"
+          v-if="!askOrders || !askOrders.length"
+        >
+          <span class="text-zinc-500">No ask orders</span>
+        </div>
+      </div>
+
+      <div class="py-2 px-2">
+        <el-tooltip :content="`Market Price`" placement="right" effect="light">
+          <div class="inline-flex items-center">
+            <span
+              :class="[
+                'text-lg',
+                marketPrice ? 'text-green-500' : 'text-zinc-500',
+              ]"
+            >
+              {{
+                marketPrice
+                  ? prettyBalance(marketPrice, useBtcUnit) + ' ' + unit
+                  : '-'
+              }}
+            </span>
+            <span
+              class="text-xs text-zinc-500 pl-2"
+              v-if="showFiat && fiatRate && marketPrice"
+            >
+              {{ '$' + calcFiatPrice(marketPrice, fiatRate) }}
+            </span>
+          </div>
+        </el-tooltip>
+      </div>
+
+      <div class="nicer-scrollbar h-full overflow-y-scroll pr-1">
+        <div class="w-full">
+          <div
+            id="bidOrdersList"
+            v-if="bidOrders && bidOrders.length"
+            class="space-y-1"
+          >
+            <OrderItem
+              v-for="order in bidOrders"
+              :key="order.orderId"
+              :order="order"
+              :order-type="'bid'"
+              @click="select(order)"
+            />
           </div>
         </div>
 
         <div
-          v-if="askOrders.length"
-          id="askOrdersList"
-          class="grid grid-cols-3"
+          class="flex h-full items-center justify-center"
+          v-if="!bidOrders || !bidOrders.length"
         >
-          <OrderItem
-            v-for="order in rearrangedAskOrders"
-            :key="order.orderId"
-            :order="order"
-            :order-type="'ask'"
-            @click="useBuyPrice(order)"
-          />
+          <span class="text-zinc-500">No bid orders</span>
         </div>
-      </div>
-      <div
-        class="flex h-3/4 w-full items-center justify-center"
-        v-if="!askOrders.length"
-      >
-        <span class="text-zinc-500">No ask orders</span>
-      </div>
-    </div>
-
-    <div class="">
-      <el-tooltip :content="`Market Price`" placement="right" effect="light">
-        <div class="inline-flex items-center">
-          <span
-            :class="[
-              'text-lg',
-              marketPrice ? 'text-green-500' : 'text-zinc-500',
-            ]"
-          >
-            {{
-              marketPrice
-                ? prettyBalance(marketPrice, useBtcUnit) + ' ' + unit
-                : '-'
-            }}
-          </span>
-          <span
-            class="text-xs text-zinc-500 pl-2"
-            v-if="showFiat && fiatRate && marketPrice"
-          >
-            {{ '$' + calcFiatPrice(marketPrice, fiatRate) }}
-          </span>
-        </div>
-      </el-tooltip>
-    </div>
-
-    <div class="nicer-scrollbar h-full overflow-y-scroll pr-1">
-      <table class="-mt-8 w-full" v-if="bidOrders.length">
-        <thead class="invisible">
-          <tr class="">
-            <th class="th"></th>
-            <th class="th">Price ({{ unit }})</th>
-            <th class="th-right">
-              <div class="flex items-center justify-end">
-                <span>Amount</span>
-                <span class="ml-2">
-                  {{ '$' + selectedPair.fromSymbol.toUpperCase() }}
-                </span>
-                <img
-                  :src="selectedPair.fromIcon"
-                  class="h-4 rounded-full inline ml-1"
-                />
-              </div>
-            </th>
-            <th class="th-right">
-              <div class="flex items-center justify-end">
-                <span>Total</span>
-                <span class="ml-2">({{ unit }})</span>
-                <img
-                  :src="selectedPair.toIcon"
-                  class="h-4 rounded-full inline ml-1"
-                />
-              </div>
-            </th>
-            <th class="th"></th>
-          </tr>
-        </thead>
-
-        <tbody id="bidOrdersList">
-          <OrderItem
-            v-for="order in bidOrders"
-            :key="order.orderId"
-            :order="order"
-            :order-type="'bid'"
-            @click="useSellPrice(order)"
-          />
-        </tbody>
-      </table>
-
-      <div class="flex h-full items-center justify-center" v-else>
-        <span class="text-zinc-500">No bid orders</span>
       </div>
     </div>
   </div>

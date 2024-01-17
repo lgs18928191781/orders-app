@@ -1,14 +1,22 @@
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
-import { XCircleIcon, BadgeCheckIcon } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
+import { UserIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
 import { cancelOrder, type Order, getFiatRate } from '@/queries/orders-api'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, useBtcUnit } from '@/lib/helpers'
 import { useSelectOrder } from '@/hooks/use-select-order'
+import { IS_DEV } from '@/data/constants'
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const address = useConnectionStore().getAddress
 const { isSelected } = useSelectOrder()
@@ -19,6 +27,13 @@ const props = defineProps<{
 }>()
 
 const isMyOrder = computed(() => {
+  if (IS_DEV) {
+    // 30% to be true
+    if (Math.random() < 0.2) {
+      return true
+    }
+  }
+
   if (props.orderType === 'ask') {
     return props.order.sellerAddress === address
   }
@@ -56,10 +71,14 @@ const { data: fiatRate } = useQuery({
 
 <template>
   <div
-    class="cursor-pointer text-xs hover:bg-primary/10 col-span-3 grid grid-cols-3 gap-2"
-    :class="{ '!bg-primary/20': isSelected(order.orderId) }"
+    class="text-xs grid grid-cols-3 gap-1 py-1 rounded-sm px-2"
+    :class="{
+      '!bg-primary/20': isSelected(order.orderId) && !isMyOrder,
+      'opacity-60 cursor-default': isMyOrder,
+      'hover:bg-primary/15 cursor-pointer': !isMyOrder,
+    }"
   >
-    <div class="td flex items-center gap-2">
+    <div class="td flex items-center gap-1">
       <span
         class="flex items-center"
         :class="{
@@ -71,6 +90,16 @@ const { data: fiatRate } = useQuery({
         <span v-else>
           {{ prettyBalance(order.coinRatePrice, useBtcUnit) }}
         </span>
+        <TooltipProvider v-if="isMyOrder">
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <UserIcon class="w-3 h-3 ml-1 cursor-default" />
+            </TooltipTrigger>
+            <TooltipContent class="duration-500">
+              <p>Your order</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </span>
 
       <span class="text-xs text-zinc-500" v-if="showFiat && fiatRate">
@@ -83,7 +112,7 @@ const { data: fiatRate } = useQuery({
     <div class="td-right">
       <template v-if="isFreeOrder">
         <span
-          class="rounded bg-green-700/30 px-2 py-1 text-xs font-bold text-green-500"
+          class="rounded bg-green-700/30 px-2 text-xs font-bold text-green-500"
         >
           FREE
         </span>
@@ -107,10 +136,10 @@ const { data: fiatRate } = useQuery({
 
 <style scoped>
 .td {
-  @apply py-1 text-left font-normal col-span-1;
+  @apply text-left font-normal col-span-1;
 }
 
 .td-right {
-  @apply py-1 text-right font-normal col-span-1;
+  @apply text-right font-normal col-span-1;
 }
 </style>

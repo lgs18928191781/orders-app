@@ -38,7 +38,7 @@ export const useConnectionStore = defineStore('connection', {
           'Using testing address',
           import.meta.env.VITE_TESTING_ADDRESS
         )
-        return import.meta.env.VITE_TESTING_ADDRESS
+        return import.meta.env.VITE_TESTING_ADDRESS as string
       }
 
       return state.last.address
