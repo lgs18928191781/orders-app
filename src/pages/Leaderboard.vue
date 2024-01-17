@@ -114,10 +114,11 @@ const currentLevelProgress = computed(() => {
       <div class="space-y-4" v-if="stats">
         <div class="grid grid-cols-6">
           <div class="text-zinc-300">Activity at</div>
-          <div class="col-span-5">
+          <div class="col-span-5" v-if="stats.eventStartTime">
             {{ prettyTimestamp(stats.eventStartTime) }} -
             {{ prettyTimestamp(stats.eventEndTime) }}
           </div>
+          <div class="col-span-5" v-else>-</div>
         </div>
 
         <div class="grid grid-cols-6 gap-4">
