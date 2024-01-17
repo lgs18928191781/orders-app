@@ -20,7 +20,6 @@ export default class SwapAlgo {
     //SwapAlgo.instance = this
     this.token1SwapAmount = token1SwapAmount
     this.token2SwapAmount = token2SwapAmount
-    debugger
   }
 
   get currentSwapLpAmount() {
@@ -218,8 +217,8 @@ export default class SwapAlgo {
       new Decimal(amount1).sub(new Decimal(aimAddAmount).mul(10 ** decimal1))
     )
     return {
-      slip1: new Decimal(p1).sub(p).div(p).mul(100).toNumber().toFixed(2) + '%',
-      slip2: new Decimal(q1).sub(q).div(q).mul(100).toNumber().toFixed(2) + '%',
+      slip1: new Decimal(p1).sub(p).div(p).mul(100).toNumber().toFixed(2),
+      slip2: new Decimal(q1).sub(q).div(q).mul(100).toNumber().toFixed(2),
     }
   }
 }

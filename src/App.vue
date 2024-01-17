@@ -19,6 +19,7 @@ const geoStore = useGeoStore()
 // After loaded, check if window width is less than 768px; if so, set isMobile to true
 const isMobile = ref(false)
 
+
 const swapTokenInfo = reactive({
   token1: 'token1',
   token2: 'token2',

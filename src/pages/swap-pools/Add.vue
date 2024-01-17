@@ -55,6 +55,9 @@ const conditions: Ref<
     met: false,
   },
 ])
+
+const calcAddLp = () => {}
+
 const hasUnmet = computed(() => {
   return conditions.value.some((c) => !c.met)
 })
@@ -165,7 +168,7 @@ watch(
 </script>
 
 <template>
-  <div class="text-sm space-y-0.5 my-8">
+  <div class="my-8 space-y-0.5 text-sm">
     <AddLiquiditySide
       v-model:symbol="fromSymbol"
       v-model:amount="fromAmount"
@@ -177,7 +180,7 @@ watch(
 
     <!-- flip -->
     <div class="py-2">
-      <PlusIcon class="h-5 w-5 mx-auto text-zinc-500" />
+      <PlusIcon class="mx-auto h-5 w-5 text-zinc-500" />
     </div>
 
     <AddLiquiditySide v-model:symbol="toSymbol" v-model:amount="toAmount" />
@@ -199,10 +202,10 @@ watch(
 
 <style scoped>
 .main-btn {
-  @apply bg-orange-300/20 text-orange-300 font-medium block w-full py-3 rounded-2xl text-xl hover:bg-orange-300/30;
+  @apply block w-full rounded-2xl bg-orange-300/20 py-3 text-xl font-medium text-orange-300 hover:bg-orange-300/30;
 }
 
 .main-btn.disabled {
-  @apply bg-zinc-800 text-zinc-300/50 cursor-not-allowed;
+  @apply cursor-not-allowed bg-zinc-800 text-zinc-300/50;
 }
 </style>

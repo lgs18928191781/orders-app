@@ -11,6 +11,8 @@ import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
 import { formatSat, formatTok, removeTrailingZeros } from '@/lib/utils'
 import SwapAlgo from '@/lib/swapAlgo'
 import Decimal from 'decimal.js'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
+import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 const { openConnectionModal } = useConnectionModal()
 
 enum swapOp {
@@ -23,7 +25,7 @@ const toSymbol = ref('btc')
 // amount
 const fromAmount = ref()
 const toAmount = ref()
-
+const tiggleRate = ref(false)
 const swapCalc = new SwapAlgo(
   new Decimal(240367974941).toNumber(),
   new Decimal(2320854897223186).toNumber()
@@ -45,6 +47,26 @@ watch(toSymbol, (newSymbol) => {
   }
 })
 
+const tokenRateCalc = computed(() => {
+  if (fromSymbol.value === 'btc') {
+    const token1RemoveAmount = formatSat(1, 8)
+    const { token2AddAmount } = swapCalc.swapToken2ToToken1ByToken1(
+      token1RemoveAmount,
+      swapCalc.token1SwapAmount,
+      swapCalc.token2SwapAmount
+    )
+    return formatTok(token2AddAmount, 8, 8)
+  } else {
+    const token2RemoveAmount = formatSat(1, 8)
+    const { token1AddAmount } = swapCalc.swapToken1ToToken2ByToken2(
+      token2RemoveAmount,
+      swapCalc.token1SwapAmount,
+      swapCalc.token2SwapAmount
+    )
+    return formatTok(token1AddAmount, 8, 8)
+  }
+})
+
 const calcTokenSwap = (e: Event, op: swapOp) => {
   if (op == swapOp.pay) {
     if (fromSymbol.value === 'btc') {
@@ -56,7 +78,6 @@ const calcTokenSwap = (e: Event, op: swapOp) => {
       )
       toAmount.value = formatTok(token1RemoveAmount, 8, 8)
     } else {
-      debugger
       const token1AddAmount = formatSat(e.target?.value, 8)
       const { token2RemoveAmount } = swapCalc.swapToken1ToToken2(
         token1AddAmount,
@@ -83,6 +104,15 @@ const calcTokenSwap = (e: Event, op: swapOp) => {
       )
       fromAmount.value = formatTok(token1AddAmount, 8, 8)
     }
+  }
+}
+
+function accept(open, close) {
+  console.log(open)
+  if (open) {
+    close()
+  } else {
+    open = true
   }
 }
 
@@ -114,10 +144,11 @@ const tokenImspact = computed(() => {
     pairData,
     dirForward
   )
+
   console.log('token1Impact, token2Impact', slip1, slip2)
   return {
-    slip1,
-    slip2,
+    slip1: Math.abs(+slip1) >= 100 ? 100 : slip1,
+    slip2: Math.abs(+slip2) >= 100 ? 100 : slip2,
   }
 })
 
@@ -327,22 +358,71 @@ watch(
         />
       </div>
 
+      <Popover
+        v-slot="{ open, close }"
+        class="rounded-2xl border border-zinc-700 p-3"
+      >
+        <PopoverButton
+          class="flex w-full items-center justify-between text-sm focus:outline-none"
+        >
+          <div class="flex items-center">
+            <span class="mr-1">1</span
+            ><span class="mr-1">{{ toSymbol.toUpperCase() }}</span>
+            <span class="mr-1"
+              ><span class="mr-1">≈</span>{{ tokenRateCalc }}</span
+            ><span class="mr-1">{{ fromSymbol.toUpperCase() }}</span>
+          </div>
+          <ChevronDownIcon
+            class="h-6 w-6"
+            :class="{ 'rotate-180 transform': open }"
+          />
+        </PopoverButton>
+        <div v-if="open">
+          <transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="translate-y-1 opacity-0 "
+            enter-to-class="translate-y-0 opacity-100 "
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="translate-y-0 opacity-100 "
+            leave-to-class="translate-y-1 opacity-0 "
+          >
+            <PopoverPanel class="text-sm" static>
+              <div class="mt-2 grid grid-cols-1">
+                <div class="mt-1 flex w-full items-center justify-between">
+                  <span>Exchange rate impact:</span>
+                  <span>{{ tokenImspact.slip2 }}%</span>
+                </div>
+                <div class="mt-3 flex w-full items-center justify-between">
+                  <span>Swap fee:</span>
+                  <span></span>
+                </div>
+              </div>
+
+              <img src="" alt="" />
+            </PopoverPanel>
+          </transition>
+        </div>
+      </Popover>
+
       <!--price impact-->
       <div
-        class="flex items-center justify-between rounded-3xl border border-orange-300/30 p-3 text-sm"
+        v-if="
+          Math.abs(+tokenImspact.slip1) > 1 || Math.abs(+tokenImspact.slip2) > 1
+        "
+        class="flex items-center justify-between rounded-2xl border border-orange-300/30 p-3 text-sm"
       >
         <div>Price Impact Warning</div>
 
         <div>
           <span class="mr-5"
-            >${{ fromSymbol.toUpperCase() }}:<span class="text-red-500">{{
-              tokenImspact.slip1
-            }}</span></span
+            >${{ fromSymbol.toUpperCase() }}:<span class="text-red-500"
+              >{{ tokenImspact.slip1 }}%</span
+            ></span
           >
           <span
-            >{{ toSymbol.toUpperCase() }}:<span class="text-green-500">{{
-              tokenImspact.slip2
-            }}</span>
+            >{{ toSymbol.toUpperCase() }}:<span class="text-green-500"
+              >{{ tokenImspact.slip2 }}%</span
+            >
           </span>
         </div>
       </div>
