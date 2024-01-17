@@ -9,17 +9,13 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    123: typeof import('./src/components/swap/pools/123.vue')['default']
     AddLiquiditySide: typeof import('./src/components/swap/pools/AddLiquiditySide.vue')['default']
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
     AssetSelect: typeof import('./src/components/swap/AssetSelect.vue')['default']
     ConfirmationModal: typeof import('./src/components/ConfirmationModal.vue')['default']
     ConnectionModal: typeof import('./src/components/header/ConnectionModal.vue')['default']
-    ConnectionsModal: typeof import('./src/components/header/ConnectionsModal.vue')['default']
-    ElPopover: typeof import('element-plus/es')['ElPopover']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     EventClaimRecords: typeof import('./src/components/pool/EventClaimRecords.vue')['default']
-    Index: typeof import('./src/components/swap/pools/Index.vue')['default']
     IssueItem: typeof import('./src/components/recover/IssueItem.vue')['default']
     Item: typeof import('./src/components/orders/Item.vue')['default']
     List: typeof import('./src/components/orders/List.vue')['default']
