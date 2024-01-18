@@ -1,20 +1,18 @@
 <script lang="ts" setup>
 import { useQuery } from '@tanstack/vue-query'
 
-import { useConnectionStore } from '@/stores/connection'
 import { useTradingPair } from '@/hooks/use-trading-pair'
 import { useNetworkStore } from '@/stores/network'
 import { getMarketPrice } from '@/queries/orders-api'
+import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { unit, useBtcUnit } from '@/lib/helpers'
+import { SHOWING_TRADE_STATS } from '@/data/constants'
 
 import PairSelect from './PairSelect.vue'
-import { prettyBalance, prettySymbol } from '@/lib/formatters'
-import { showFiat, unit, useBtcUnit } from '@/lib/helpers'
-import { SHOWING_TRADE_STATS } from '@/data/constants'
 
 defineProps(['isLimitExchangeMode'])
 defineEmits(['update:isLimitExchangeMode'])
 
-const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const { fromSymbol } = useTradingPair()
 
@@ -46,12 +44,6 @@ const { data: marketPrice } = useQuery({
               : '-'
           }}
         </div>
-        <!-- <span
-          class="text-xs text-zinc-500 pl-2"
-          v-if="showFiat && fiatRate && marketPrice"
-        >
-          {{ '$' + calcFiatPrice(marketPrice, fiatRate) }}
-        </span> -->
       </div>
     </div>
     <div

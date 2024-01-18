@@ -6,9 +6,9 @@ import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 
 import { prettyBalance } from '@/lib/formatters'
-import { sleep, unit, useBtcUnit } from '@/lib/helpers'
+import { calcFiatPrice, showFiat, sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { buildBidOffer } from '@/lib/builders/orders-v2'
-import { getMarketPrice } from '@/queries/orders-api'
+import { getFiatRate, getMarketPrice } from '@/queries/orders-api'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 import { IS_DEV } from '@/data/constants'
@@ -112,7 +112,7 @@ const cannotPlaceOrderReason = computed(() => {
   if (price.value <= 0) {
     return 'Enter a price'
   }
-  if (amount.value <= 0) {
+  if (!amount.value || amount.value <= 0) {
     return 'Enter an amount'
   }
   if (totalExchangePrice.value < 10000) {
@@ -120,6 +120,12 @@ const cannotPlaceOrderReason = computed(() => {
   }
 
   return ''
+})
+
+// fiat price
+const { data: fiatRate } = useQuery({
+  queryKey: ['fiatRate', { coin: 'btc' }],
+  queryFn: getFiatRate,
 })
 </script>
 
@@ -133,23 +139,32 @@ const cannotPlaceOrderReason = computed(() => {
             <span class="ml-2 text-zinc-500">Price</span>
           </div>
 
-          <div class="relative max-w-[67%] grow">
-            <input
-              type="text"
-              class="w-full rounded bg-zinc-700 py-2 pl-2 pr-16 text-right placeholder-zinc-500 outline-none"
-              :placeholder="unit"
-              :value="
-                useBtcUnit
-                  ? new Decimal(price).dividedBy(1e8).toDP().toFixed()
-                  : price
-              "
-              @input="(event: any) => updatePrice(event.target.value)"
-            />
-            <span
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
+          <div class="max-w-[67%] grow rounded bg-zinc-700 py-0.5">
+            <div class="relative w-full">
+              <input
+                type="text"
+                class="w-full bg-transparent py-2 pl-2 pr-16 text-right placeholder-zinc-500 quiet-input"
+                :placeholder="unit"
+                :value="
+                  useBtcUnit
+                    ? new Decimal(price).dividedBy(1e8).toDP().toFixed()
+                    : price
+                "
+                @input="(event: any) => updatePrice(event.target.value)"
+              />
+              <span
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
+              >
+                {{ unit }}
+              </span>
+            </div>
+
+            <div
+              class="text-sm text-zinc-500 text-right pr-2 -mt-2"
+              v-if="showFiat && fiatRate && price"
             >
-              {{ unit }}
-            </span>
+              {{ '$' + calcFiatPrice(price, fiatRate) }}
+            </div>
           </div>
         </div>
 
@@ -197,9 +212,18 @@ const cannotPlaceOrderReason = computed(() => {
     <div class="">
       <div class="flex items-center justify-between text-sm">
         <span class="text-zinc-500">Total</span>
-        <span class="text-zinc-300">
-          {{ `${prettyBalance(totalExchangePrice, useBtcUnit)} ${unit}` }}
-        </span>
+        <div class="">
+          <div class="text-zinc-300">
+            {{ `${prettyBalance(totalExchangePrice, useBtcUnit)} ${unit}` }}
+          </div>
+
+          <div
+            class="text-sm text-zinc-500 text-right"
+            v-if="showFiat && fiatRate && totalExchangePrice"
+          >
+            {{ '$' + calcFiatPrice(totalExchangePrice, fiatRate) }}
+          </div>
+        </div>
       </div>
 
       <button
@@ -212,7 +236,7 @@ const cannotPlaceOrderReason = computed(() => {
         @click="buildOrder"
         :disabled="!canPlaceOrder"
       >
-        {{ cannotPlaceOrderReason || 'Place Bid Order' }}
+        {{ cannotPlaceOrderReason || 'Place Limit Sell Order' }}
       </button>
     </div>
   </TabPanel>

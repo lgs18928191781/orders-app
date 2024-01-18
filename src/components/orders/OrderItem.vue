@@ -9,7 +9,6 @@ import { cancelOrder, type Order, getFiatRate } from '@/queries/orders-api'
 import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, useBtcUnit } from '@/lib/helpers'
 import { useSelectOrder } from '@/hooks/use-select-order'
-import { IS_DEV } from '@/data/constants'
 
 import {
   Tooltip,
@@ -27,13 +26,6 @@ const props = defineProps<{
 }>()
 
 const isMyOrder = computed(() => {
-  if (IS_DEV) {
-    // 10% to be true
-    if (Math.random() < 0.1) {
-      return true
-    }
-  }
-
   if (props.orderType === 'ask') {
     return props.order.sellerAddress === address
   }
@@ -58,9 +50,6 @@ const { mutate } = useMutation({
     ElMessage.error(err.message)
   },
 })
-async function onCancel() {
-  mutate({ orderId: props.order.orderId })
-}
 
 // fiat price
 const { data: fiatRate } = useQuery({

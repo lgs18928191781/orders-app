@@ -19,7 +19,6 @@ import { useTradingPair } from '@/hooks/use-trading-pair'
 import btcIcon from '@/assets/btc.svg?url'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
-import PanelMarketSell from '@/components/orders/PanelMarketSell.vue'
 
 const connectionStore = useConnectionStore()
 const { openBuilding, closeBuilding } = useBuildingOverlay()

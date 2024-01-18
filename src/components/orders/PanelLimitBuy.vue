@@ -12,14 +12,15 @@ import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 
-import { prettyBalance } from '@/lib/formatters'
-import { sleep, unit, useBtcUnit } from '@/lib/helpers'
+import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { calcFiatPrice, showFiat, sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { buildAskLimit } from '@/lib/builders/orders'
 import {
   getOrdiBalance,
   getOneBrc20,
   getMarketPrice,
   type Brc20Transferable,
+  getFiatRate,
 } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
@@ -139,7 +140,7 @@ const cannotPlaceOrderReason = computed(() => {
     return 'Enter a price'
   }
   if (limitBrcAmount.value <= 0) {
-    return 'Enter an amount'
+    return `Select an ${prettySymbol(selectedPair.value.fromSymbol)} amount`
   }
   if (totalExchangePrice.value < 10000) {
     return 'Order should > 0.0001 BTC'
@@ -176,6 +177,12 @@ const { data: myBrc20Info } = useQuery({
   enabled: computed(() => networkStore.network !== 'testnet' && !!address),
 })
 const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
+
+// fiat price
+const { data: fiatRate } = useQuery({
+  queryKey: ['fiatRate', { coin: 'btc' }],
+  queryFn: getFiatRate,
+})
 </script>
 
 <template>
@@ -188,23 +195,32 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
             <span class="ml-2 text-zinc-500">Price</span>
           </div>
 
-          <div class="relative max-w-[67%] grow">
-            <input
-              type="text"
-              class="w-full rounded bg-zinc-700 py-2 pl-2 pr-16 text-right placeholder-zinc-500 outline-none"
-              :placeholder="unit"
-              :value="
-                useBtcUnit
-                  ? new Decimal(price).dividedBy(1e8).toDP().toFixed()
-                  : price
-              "
-              @input="(event: any) => updatePrice(event.target.value)"
-            />
-            <span
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
+          <div class="max-w-[67%] grow rounded bg-zinc-700 py-0.5">
+            <div class="relative w-full">
+              <input
+                type="text"
+                class="w-full py-2 pl-2 pr-16 text-right placeholder-zinc-500 quiet-input bg-transparent"
+                :placeholder="unit"
+                :value="
+                  useBtcUnit
+                    ? new Decimal(price).dividedBy(1e8).toDP().toFixed()
+                    : price
+                "
+                @input="(event: any) => updatePrice(event.target.value)"
+              />
+              <span
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
+              >
+                {{ unit }}
+              </span>
+            </div>
+
+            <div
+              class="text-sm text-zinc-500 text-right pr-2 -mt-2"
+              v-if="showFiat && fiatRate && price"
             >
-              {{ unit }}
-            </span>
+              {{ '$' + calcFiatPrice(price, fiatRate) }}
+            </div>
           </div>
         </div>
 
@@ -301,6 +317,13 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
               </ListboxOption>
 
               <ListboxOption
+                v-if="!myBrc20Info?.transferBalanceList.length"
+                class="text-right cursor-default px-2 py-4 text-zinc-500"
+              >
+                No Transferable Balance
+              </ListboxOption>
+
+              <ListboxOption
                 as="template"
                 v-slot="{ active, selected }"
                 @click="goInscribe"
@@ -363,7 +386,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
         @click="buildOrder"
         :disabled="!canPlaceOrder"
       >
-        {{ cannotPlaceOrderReason || 'Place Ask Order' }}
+        {{ cannotPlaceOrderReason || 'Place Limit Buy Order' }}
       </button>
     </div>
   </TabPanel>

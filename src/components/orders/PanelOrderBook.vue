@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue'
-
+import { Switch, SwitchGroup } from '@headlessui/vue'
 import { useStorage } from '@vueuse/core'
-import OrderList from './OrderList.vue'
-import { DollarSignIcon } from 'lucide-vue-next'
-import { useScrollOrdersArea } from '@/hooks/use-scroll-orders-area'
 import { watch } from 'vue'
+import { DollarSignIcon } from 'lucide-vue-next'
+
+import { useScrollOrdersArea } from '@/hooks/use-scroll-orders-area'
+
+import OrderList from './OrderList.vue'
 
 const showFiatPrice = useStorage('show-fiat-price', true)
 const { scroll } = useScrollOrdersArea()
