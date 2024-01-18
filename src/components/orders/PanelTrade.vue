@@ -48,18 +48,30 @@ import { useTradingPair } from '@/hooks/use-trading-pair'
 
 import btcIcon from '@/assets/btc.svg?url'
 import PanelBuy from '@/components/orders/PanelBuy.vue'
+import PanelSell from '@/components/orders/PanelSell.vue'
+import { useSelectOrder } from '@/hooks/use-select-order'
 
 const connectionStore = useConnectionStore()
 const address = connectionStore.getAddress
 const networkStore = useNetworkStore()
 const feebStore = useFeebStore()
-const { highlight } = useAreaHighlight()
 const { selectedPair } = useTradingPair()
+const { selectedOrderType } = useSelectOrder()
 
 const takeModeTab = ref(0)
 function changeTakeModeTab(index: number) {
   takeModeTab.value = index
 }
+watch(
+  () => selectedOrderType.value,
+  (value) => {
+    if (value === 'bid') {
+      takeModeTab.value = 1
+    } else {
+      takeModeTab.value = 0
+    }
+  }
+)
 
 function deviatePrice(price: number, deviator: number): number {
   return new Decimal(price * deviator).toDP(new Decimal(price).dp()).toNumber()
@@ -68,89 +80,10 @@ function deviatePrice(price: number, deviator: number): number {
 const selectedBuyOrders: Ref<Order[]> = ref([])
 const selectedSellOrders: Ref<Order[]> = ref([])
 
-const selectedBuyCoinAmount = computed(() => {
-  return selectedBuyOrders.value.reduce((acc, cur) => {
-    return acc + Number(cur.coinAmount)
-  }, 0)
-})
 const selectedSellCoinAmount = computed(() => {
   return selectedSellOrders.value.reduce((acc, cur) => {
     return acc + Number(cur.coinAmount)
   }, 0)
-})
-
-const buyTotal = computed(() => {
-  if (!selectedBuyCoinAmount.value) return 0
-
-  return (
-    prettyBalance(
-      selectedBuyCoinAmount.value * useBuyPrice.value,
-      get(useBtcUnit)
-    ) +
-    ' ' +
-    get(unit)
-  )
-})
-
-const buyFees = computed(() => {
-  if (!selectedBuyCoinAmount.value) return 0
-  if (!feebStore.get) return 0
-
-  const ordersCount = selectedBuyOrders.value.length
-
-  return calculateFee(feebStore.get, 4, 6) * ordersCount
-})
-const sellFees = computed(() => {
-  if (!feebStore.get) return 0
-
-  return SELL_TX_SIZE * feebStore.get
-})
-
-const prettyBuyFees = computed(() => {
-  if (!buyFees.value) return '0'
-
-  const feeInBtc = buyFees.value
-
-  return `≈ ${prettyBalance(feeInBtc, get(useBtcUnit))} ${get(unit)}`
-})
-const prettySellFees = computed(() => {
-  if (!sellFees.value) return '0'
-
-  const feeInBtc = sellFees.value
-
-  return `≈ ${prettyBalance(feeInBtc, get(useBtcUnit))} ${get(unit)}`
-})
-
-const useBuyPrice = ref(0)
-const useSellPrice = ref(0)
-const useBuyOrderId = ref()
-const useSellOrderId = ref()
-
-function setUseBuyPrice(price: number, orderId: string) {
-  takeModeTab.value = 0
-  useBuyPrice.value = price
-  useBuyOrderId.value = orderId
-}
-function setUseSellPrice(price: number, orderId: string) {
-  takeModeTab.value = 1
-  useSellPrice.value = price
-  useSellOrderId.value = orderId
-}
-
-// watch use BuyOrderId change, update selected orders
-watch(useBuyOrderId, (buyOrderId) => {
-  if (!buyOrderId || !askOrders.value) {
-    selectedBuyOrders.value = []
-  } else {
-    selectedBuyOrders.value = candidateBuyOrders.value
-  }
-})
-watch(useSellOrderId, (sellOrderId) => {
-  if (!sellOrderId || !bidOrders.value) {
-    selectedSellOrders.value = []
-  } else {
-    selectedSellOrders.value = candidateSellOrders.value
-  }
 })
 
 const buildProcessTip = ref('Building Transaction...')
@@ -292,34 +225,6 @@ const cannotPlaceBidOrderReason = computed(() => {
   }
   if (bidTotalExchangePrice.value < 10000) {
     return 'Order should > 0.0001 BTC'
-  }
-
-  return ''
-})
-
-const canTakeBuyOrder = computed(() => {
-  return selectedBuyOrders.value.length > 0 && connectionStore.connected
-})
-const cannotTakeBuyOrderReason = computed(() => {
-  if (!connectionStore.connected) {
-    return 'Connect wallet first'
-  }
-  if (selectedBuyOrders.value.length === 0) {
-    return 'Select an order'
-  }
-
-  return ''
-})
-
-const canTakeSellOrder = computed(() => {
-  return selectedSellOrders.value.length > 0 && connectionStore.connected
-})
-const cannotTakeSellOrderReason = computed(() => {
-  if (!connectionStore.connected) {
-    return 'Connect wallet first'
-  }
-  if (selectedSellOrders.value.length === 0) {
-    return 'Select an order'
   }
 
   return ''
@@ -811,108 +716,8 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
         </TabList>
 
         <TabPanels class="mt-8 flex-1">
-          <!-- buy panel -->
           <PanelBuy />
-
-          <!-- sell panel -->
-          <TabPanel class="flex flex-col justify-between h-full">
-            <div class="">
-              <div
-                class="flex items-center justify-between rounded-md border border-zinc-500 p-2"
-              >
-                <div class="flex items-center">
-                  <img :src="btcIcon" alt="btc icon" class="h-6 w-6" />
-                  <span class="ml-2 text-zinc-500">Price</span>
-                </div>
-
-                <div class="relative max-w-[67%] grow">
-                  <div class="w-full py-2 pl-2 pr-12 text-right outline-none">
-                    {{ prettyBalance(useSellPrice, useBtcUnit) }}
-                  </div>
-                  <span
-                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
-                  >
-                    {{ unit }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- estimate -->
-              <!-- <div class="mt-2 text-right text-sm">≈$12.99</div> -->
-
-              <!-- amount -->
-
-              <div
-                class="mt-4 flex items-center justify-between rounded-md border border-zinc-500 p-2"
-              >
-                <div class="flex items-center">
-                  <img
-                    :src="selectedPair.fromIcon"
-                    alt="btc icon"
-                    class="h-6 w-6 rounded-full"
-                  />
-                  <span class="ml-2 text-zinc-500">Amount</span>
-                </div>
-
-                <div
-                  class="max-w-[67%] grow flex items-center"
-                  v-if="useSellOrderId"
-                >
-                  <div class="w-full p-2 text-right outline-none">
-                    {{ selectedSellCoinAmount }}
-                  </div>
-                  <div
-                    class="pointer-events-none flex items-center pr-2 text-zinc-400 uppercase"
-                  >
-                    ${{ selectedPair.fromSymbol }}
-                  </div>
-                </div>
-
-                <div
-                  class="max-w-[67%] grow text-right text-primary py-1"
-                  v-else
-                >
-                  <button
-                    class="text-primary/80 flex items-center gap-2 justify-end w-full group"
-                    @click="highlight('bidOrdersList')"
-                  >
-                    <span class="group-hover:underline">Select a</span>
-
-                    <span
-                      class="text-green-500 font-bold bg-green-500/20 py-0.5 px-2 rounded-md"
-                    >
-                      BID Order
-                    </span>
-                    <span class="group-hover:underline">to sell</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- sell -->
-            <div class="mt-12">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-zinc-500">Gas</span>
-                <span class="text-zinc-300">{{ prettySellFees }}</span>
-              </div>
-
-              <button
-                class="mt-4 w-full rounded-md py-4 font-bold"
-                :class="
-                  canTakeSellOrder
-                    ? 'bg-green-500 text-white'
-                    : 'bg-zinc-700 text-zinc-500'
-                "
-                @click="buildOrder"
-                :disabled="!canTakeSellOrder"
-              >
-                {{
-                  cannotTakeSellOrderReason ||
-                  `Sell $${selectedPair.fromSymbol.toUpperCase()}`
-                }}
-              </button>
-            </div>
-          </TabPanel>
+          <PanelSell />
         </TabPanels>
       </TabGroup>
     </div>

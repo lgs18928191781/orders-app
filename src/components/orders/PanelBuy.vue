@@ -6,20 +6,21 @@ import { useQuery } from '@tanstack/vue-query'
 import { get } from '@vueuse/core'
 
 import { prettyBalance, prettyBtcDisplay } from '@/lib/formatters'
-import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
+import { calcFiatPrice, showFiat, sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { calculateFee } from '@/lib/build-helpers'
 import { buildBuyTake } from '@/lib/builders/orders-v2'
 import { getFiatRate } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
-import { IS_DEV } from '@/data/constants'
 import { useAreaHighlight } from '@/hooks/use-area-highlight'
 import { useTradingPair } from '@/hooks/use-trading-pair'
 
 import btcIcon from '@/assets/btc.svg?url'
 import { useSelectOrder } from '@/hooks/use-select-order'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 const connectionStore = useConnectionStore()
+const { openBuilding, closeBuilding } = useBuildingOverlay()
 const feebStore = useFeebStore()
 const { highlight } = useAreaHighlight()
 const { selectedPair } = useTradingPair()
@@ -58,21 +59,16 @@ const prettyBuyFees = computed(() => {
   return `≈ ${prettyBalance(feeInBtc, get(useBtcUnit))} ${get(unit)}`
 })
 
-const buildProcessTip = ref('Building Transaction...')
 async function buildOrder() {
   const feeb = feebStore.get
   if (!feeb) {
     throw new Error('Choose a fee rate first.')
   }
 
-  setIsOpen(true)
-  isBuilding.value = true
   let buildRes: any
 
-  buildProcessTip.value = 'Building Transaction...'
-
   try {
-    // buy
+    openBuilding()
     if (!selectedAskOrder.value) return
 
     buildRes = await buildBuyTake({
@@ -80,14 +76,12 @@ async function buildOrder() {
       selectedPair: selectedPair.value,
     })
   } catch (error: any) {
+    await sleep(500)
     ElMessage.error(error.message)
-    setIsOpen(false)
     builtInfo.value = undefined
-
-    if (IS_DEV) throw error
+  } finally {
+    closeBuilding()
   }
-
-  isBuilding.value = false
 
   if (!buildRes) return
   console.log({ buildRes })
@@ -95,12 +89,6 @@ async function buildOrder() {
   return
 }
 
-// confirm modal
-const isOpen = ref(false)
-function setIsOpen(value: boolean) {
-  isOpen.value = value
-}
-const isBuilding = ref(false)
 const builtInfo = ref()
 
 const canTakeOrder = computed(() => {
@@ -216,7 +204,7 @@ const { data: fiatRate } = useQuery({
 
       <div
         class="flex items-center justify-between text-sm"
-        :class="[showFiat ? 'mt-4' : 'mt-2']"
+        :class="[showFiat && buyFees ? 'mt-4' : 'mt-2']"
       >
         <span class="text-zinc-500">Gas</span>
         <div class="">
