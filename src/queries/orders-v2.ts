@@ -93,6 +93,50 @@ export const getOrders = async ({
   return orders
 }
 
+export const getMyOpenOrders = async ({
+  network,
+  address,
+}: {
+  network: 'livenet' | 'testnet'
+  address: string
+}) => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    net: network,
+    orderState: '1',
+  })
+
+  const orders: Order[] = await ordersV2Fetch(
+    `orders/user/${address}?${params}`,
+    {
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+    }
+  )
+    .then(({ results }) => results)
+    .then((orders) => {
+      // if orders is empty, return empty array
+      if (!orders) return []
+
+      // order's coinRatePrice is incorrect, so we need to calculate it
+      orders.forEach((order: Order) => {
+        order.coinRatePrice = new Decimal(
+          order.amount / order.coinAmount
+        ).toNumber()
+
+        // add price and orderTypeStr
+        order.price = new Decimal(order.amount / order.coinAmount)
+        order.orderTypeStr = order.orderType === 1 ? 'ask' : 'bid'
+      })
+
+      return orders
+    })
+
+  return orders
+}
+
 type DetailedOrder = Order & {
   psbtRaw: string
   takePsbtRaw: string

@@ -21,7 +21,7 @@ watch(showFiatPrice, (showFiatPrice) => {
     <div
       class="p-4 bg-zinc-800 flex items-center lg:flex-row gap-4 rounded-t-lg justify-between"
     >
-      <div class="">Order Book</div>
+      <div class="font-bold">Order Book</div>
 
       <SwitchGroup
         as="div"

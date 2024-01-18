@@ -17,7 +17,7 @@ const isLimitExchangeMode = ref(false)
 </script>
 
 <template>
-  <div class="grid grid-cols-10 mx-auto px-3 mb-3 grow w-full max-w-9xl gap-3">
+  <div class="grid grid-cols-10 mx-auto px-3 mb-6 grow w-full max-w-9xl gap-3">
     <div class="col-span-7 flex flex-col">
       <div class="grid grid-cols-7 gap-3 mb-3">
         <PanelPairInfo class="col-span-4" />
