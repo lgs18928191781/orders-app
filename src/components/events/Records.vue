@@ -1,0 +1,98 @@
+<script setup lang="ts">
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
+import { useQuery } from '@tanstack/vue-query'
+import { computed } from 'vue'
+
+import { getClaimHistory, getRewardHistory } from '@/queries/events'
+import { useConnectionStore } from '@/stores/connection'
+
+import RewardRecordItem from '@/components/events/RewardRecordItem.vue'
+import ClaimRecordItem from '@/components/events/ClaimRecordItem.vue'
+
+const connectionStore = useConnectionStore()
+
+const props = defineProps({
+  event: {
+    type: String,
+    required: true,
+  },
+})
+
+const { data: rewardHistory } = useQuery({
+  queryKey: [
+    'rewardHistory',
+    { event: computed(() => props.event), address: connectionStore.getAddress },
+  ],
+  queryFn: () => getRewardHistory({ event: props.event }),
+  select: (data) => {
+    return data
+  },
+  enabled: computed(() => connectionStore.connected),
+})
+
+const { data: claimHistory } = useQuery({
+  queryKey: [
+    'claimHistory',
+    { event: computed(() => props.event), address: connectionStore.getAddress },
+  ],
+  queryFn: () => getClaimHistory({ event: props.event }),
+  select: (data) => {
+    return data
+  },
+  enabled: computed(() => connectionStore.connected),
+})
+</script>
+
+<template>
+  <TabGroup as="div">
+    <TabList class="flex gap-2">
+      <Tab as="template" v-slot="{ selected }">
+        <button
+          class="text-lg font-bold py-1 px-2"
+          :class="[selected ? 'text-orange-300 underline' : 'text-zinc-300']"
+        >
+          Reward History
+        </button>
+      </Tab>
+      <Tab as="template" v-slot="{ selected }">
+        <button
+          class="text-lg font-bold py-1 px-2"
+          :class="[selected ? 'text-orange-300 underline' : 'text-zinc-300']"
+        >
+          Claim History
+        </button>
+      </Tab>
+    </TabList>
+
+    <TabPanels class="mt-8">
+      <TabPanel class="space-y-2">
+        <template v-if="rewardHistory">
+          <RewardRecordItem
+            v-for="record in rewardHistory"
+            :record="record"
+            v-if="rewardHistory.length"
+          />
+
+          <div class="text-lg font-bold text-center text-zinc-500" v-else>
+            No reward history
+          </div>
+        </template>
+      </TabPanel>
+      <TabPanel class="space-y-2">
+        <template v-if="claimHistory">
+          <ClaimRecordItem
+            v-for="record in claimHistory"
+            :record="record"
+            v-if="claimHistory.length"
+          />
+
+          <div class="text-lg font-bold text-center text-zinc-500" v-else>
+            No claim history
+          </div>
+        </template>
+      </TabPanel>
+    </TabPanels>
+  </TabGroup>
+</template>
+
+<style scoped></style>

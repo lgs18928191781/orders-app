@@ -19,6 +19,7 @@ const swapCalc = new SwapAlgo(
   new Decimal(1996988856407348).toNumber(),
   new Decimal(128338790502).toNumber()
 )
+import { SWAP_READY } from '@/data/constants'
 
 const { fromSymbol, toSymbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -211,7 +212,7 @@ watch(
       @keyup="calcAddLp($event, AddOp.token1ToToken2)"
     />
 
-    <!-- flip -->
+    <!-- plus icon -->
     <div class="py-2">
       <PlusIcon class="mx-auto h-5 w-5 text-zinc-500" />
     </div>
@@ -223,18 +224,24 @@ watch(
     />
   </div>
 
-  <!-- disabled button -->
-  <button
-    :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-    v-if="unmet"
-    :disabled="!unmet.handler"
-    @click="!!unmet.handler && unmet.handler()"
-  >
-    {{ unmet.message || '' }}
-  </button>
+  <template v-if="SWAP_READY">
+    <!-- disabled button -->
+    <button
+      :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+      v-if="unmet"
+      :disabled="!unmet.handler"
+      @click="!!unmet.handler && unmet.handler()"
+    >
+      {{ unmet.message || '' }}
+    </button>
 
-  <!-- confirm button -->
-  <button class="main-btn" v-else>Swap</button>
+    <!-- confirm button -->
+    <button class="main-btn" v-else>Swap</button>
+  </template>
+
+  <button class="disabled main-btn" v-else :disabled="true" @click="">
+    Coming Soon!
+  </button>
 </template>
 
 <style scoped>

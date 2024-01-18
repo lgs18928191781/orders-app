@@ -184,7 +184,7 @@ const { data: myBrc20s } = useQuery({
                     leave-to-class="transform scale-95 opacity-0"
                   >
                     <DisclosurePanel
-                      class="text-gray-300 text-xs bg-black rounded-md p-2 -mx-2"
+                      class="text-zinc-300 text-xs bg-black rounded-md p-2 -mx-2"
                     >
                       <p class="">
                         There are 2 parts of your overall BTC balance that you

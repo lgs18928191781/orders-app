@@ -19,6 +19,8 @@ import { raise } from './helpers'
 import { Output } from 'bitcoinjs-lib/src/transaction'
 import { getListingUtxos } from '@/queries/orders-api'
 import { toXOnly } from '@/lib/btc-helpers'
+import { useNetwork } from '@vueuse/core'
+import { useNetworkStore } from '@/stores/network'
 
 const TX_EMPTY_SIZE = 4 + 1 + 1 + 4
 const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
@@ -162,7 +164,9 @@ export function calculatePsbtFee(psbt: Psbt, feeRate: number, isMs?: boolean) {
   return Math.round(fee * multiplier)
 }
 
-export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
+export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
+  input: T
+): T {
   // check if the input is mine, and address is Taproot
   // if so, fill in the internal key
   const address =
@@ -173,9 +177,18 @@ export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
   const lostInternalPubkey = !input.tapInternalKey
 
   if (isP2TR && lostInternalPubkey) {
-    const pubKey = toXOnly(Buffer.from(useConnectionStore().getPubKey, 'hex'))
-    if (input.witnessUtxo?.script.toString('hex') == address) {
-      input.tapInternalKey = pubKey
+    const tapInternalKey = toXOnly(
+      Buffer.from(useConnectionStore().getPubKey, 'hex')
+    )
+    const { output } = useBtcJsStore().get!.payments.p2tr({
+      internalPubkey: tapInternalKey,
+    })
+    console.log({
+      script1: input.witnessUtxo?.script.toString('hex'),
+      script2: output.toString('hex'),
+    })
+    if (input.witnessUtxo?.script.toString('hex') == output.toString('hex')) {
+      input.tapInternalKey = tapInternalKey
     }
   }
 
@@ -187,7 +200,6 @@ export function fillInternalKey(input: PsbtInputExtended): PsbtInputExtended {
 // that way we dont generate contradictory psbts
 export async function exclusiveChange({
   psbt,
-  pubKey,
   extraSize,
   useSize,
   extraInputValue,
@@ -197,9 +209,9 @@ export async function exclusiveChange({
   estimate = false,
   partialPay = false,
   cutFrom = 1,
+  feeb,
 }: {
   psbt: Psbt
-  pubKey?: Buffer
   extraSize?: number
   useSize?: number
   extraInputValue?: number
@@ -209,8 +221,10 @@ export async function exclusiveChange({
   estimate?: boolean
   partialPay?: boolean
   cutFrom?: number
+  feeb?: number
 }) {
-  const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
+  // check if feeb is set
+  feeb = feeb ?? useFeebStore().get ?? raise('Choose a fee rate first.')
   // check if address is set
   const address =
     useConnectionStore().getAddress ??
@@ -371,7 +385,6 @@ export async function exclusiveChange({
     } else {
       // we pay for the whole transaction
       totalOutput = sumOrNaN(psbt.txOutputs)
-      console.log({ inputs: psbt.data.inputs })
       totalInput = sumOrNaN(
         psbt.data.inputs.map(
           (input) =>

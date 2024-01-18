@@ -9,10 +9,13 @@ const Recover = () => import('./pages/Recover.vue')
 const Swap = () => import('./pages/Swap.vue')
 const SwapPools = () => import('./pages/swap-pools/Index.vue')
 const Whitelist = () => import('./pages/Whitelist.vue')
+const Events = () => import('./pages/Events.vue')
+const Leaderboard = () => import('./pages/Leaderboard.vue')
 const Changelog = () => import('./pages/Changelog.vue')
 const Dev = () => import('./pages/Dev.vue')
 const Pool = () => import('./pages/Pool.vue')
 const NoService = () => import('./pages/NoService.vue')
+const Maintaining = () => import('./pages/Maintaining.vue')
 
 const routes = [
   { path: '/orders/:pair?', component: Home, alias: '/' },
@@ -35,12 +38,34 @@ const routes = [
   },
   { path: '/swap', component: Swap },
   { path: '/whitelist', component: Whitelist },
+  { path: '/events', component: Events },
+  { path: '/leaderboard', component: Leaderboard },
   { path: '/changelog', component: Changelog },
-  { path: '/pool/:pair?', component: Pool },
+  // { path: '/pool/:pair?', component: Pool },
   { path: '/recover', component: Recover },
   { path: '/dev', component: Dev },
   { path: '/not-available', component: NoService },
+  { path: '/maintaining', component: Maintaining },
 ]
+
+export const maintenanceGuard = async (to: any, from: any, next: any) => {
+  if (
+    import.meta.env.VITE_IS_MAINTAINING === 'yes' &&
+    to.path !== '/maintaining' &&
+    to.path !== '/not-available'
+  ) {
+    next('/maintaining')
+  } else {
+    if (
+      import.meta.env.VITE_IS_MAINTAINING !== 'yes' &&
+      to.path === '/maintaining'
+    ) {
+      next('/')
+    } else {
+      next()
+    }
+  }
+}
 
 export const geoGuard = async (to: any, from: any, next: any) => {
   const geoStore = useGeoStore()

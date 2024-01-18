@@ -33,6 +33,7 @@ import { BikeIcon } from 'lucide-vue-next'
 import { RocketIcon } from 'lucide-vue-next'
 import { BusIcon } from 'lucide-vue-next'
 import { SailboatIcon } from 'lucide-vue-next'
+import { PlaneIcon } from 'lucide-vue-next'
 
 // custom feeb plan
 const customFeeb = useStorage('customFeeb', 2)
@@ -50,12 +51,14 @@ function updateCustomFeeb(e: any) {
 }
 
 // feeb plan icons
-function getFeePlanIcon(planTitle: 'Slow' | 'Average' | 'Fast' | 'Custom') {
+function getFeePlanIcon(planTitle: FeebPlan['title']) {
   switch (planTitle) {
-    case 'Slow':
+    case 'Eco':
       return BikeIcon
-    case 'Average':
+    case 'Slow':
       return BusIcon
+    case 'Avg':
+      return PlaneIcon
     case 'Fast':
       return RocketIcon
     case 'Custom':
@@ -64,15 +67,7 @@ function getFeePlanIcon(planTitle: 'Slow' | 'Average' | 'Fast' | 'Custom') {
 }
 
 // estimate miner fee for every actions
-const transactionActions = [
-  {
-    title: 'Buy',
-    size: BUY_TX_SIZE,
-  },
-  {
-    title: 'Sell',
-    size: SELL_TX_SIZE,
-  },
+const makeActions = [
   {
     title: 'Ask',
     size: 0,
@@ -80,6 +75,16 @@ const transactionActions = [
   {
     title: 'Bid',
     size: BID_TX_SIZE,
+  },
+]
+const takeActions = [
+  {
+    title: 'Buy',
+    size: BUY_TX_SIZE,
+  },
+  {
+    title: 'Sell',
+    size: SELL_TX_SIZE,
   },
 ]
 
@@ -348,7 +353,7 @@ const { data: fiatRate } = useQuery({
                       aria-hidden="true"
                       v-for="i in Array.from({ length: colorCarsCount })"
                     />
-                    <!-- gray cars -->
+                    <!-- zinc cars -->
                     <CarIcon
                       class="h-6 w-6 text-zinc-700"
                       aria-hidden="true"
@@ -407,7 +412,7 @@ const { data: fiatRate } = useQuery({
                             ? 'bg-orange-300/75 text-white '
                             : 'bg-black ',
                         ]"
-                        class="relative flex cursor-pointer rounded-lg px-5 py-6 shadow-md focus:outline-none"
+                        class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
                       >
                         <div class="flex w-full items-center justify-between">
                           <div class="flex items-center">
@@ -425,7 +430,7 @@ const { data: fiatRate } = useQuery({
                                   "
                                   class="font-medium text-lg"
                                 >
-                                  {{ plan.title }}
+                                  {{ plan.fullTitle || plan.title }}
                                 </RadioGroupLabel>
                               </div>
 
@@ -485,11 +490,11 @@ const { data: fiatRate } = useQuery({
               <div class="item-label align-top leading-none">Estimated Gas</div>
 
               <div class="mt-4">
-                <h3 class="text-zinc-500">Transaction Actions</h3>
-                <div class="mt-3 divide divide-y-2 divide-zinc-700">
+                <h3 class="text-zinc-500">Make Order Actions</h3>
+                <div class="mt-1.5">
                   <div
-                    class="flex items-center justify-between py-1.5"
-                    v-for="action in transactionActions"
+                    class="flex items-center justify-between py-3 border-y border-zinc-700"
+                    v-for="action in makeActions"
                     :key="action.title"
                   >
                     <div class="text-orange-300">
@@ -507,8 +512,30 @@ const { data: fiatRate } = useQuery({
                   </div>
                 </div>
 
-                <h3 class="text-zinc-500 mt-8">Pool Actions</h3>
-                <div class="mt-3 divide divide-y-2 divide-zinc-700">
+                <h3 class="text-zinc-500 mt-12">Take Order Actions</h3>
+                <div class="mt-1.5">
+                  <div
+                    class="flex items-center justify-between py-3 border-y border-zinc-700"
+                    v-for="action in takeActions"
+                    :key="action.title"
+                  >
+                    <div class="text-orange-300">
+                      {{ action.title }}
+                    </div>
+
+                    <div class="text-right flex gap-4">
+                      <div class="font-bold">
+                        {{ getPoolActionsPriceDisplay(action.size).inCrypto }}
+                        <div class="pl-2 text-zinc-500 text-xs">
+                          {{ getPoolActionsPriceDisplay(action.size).inFiat }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- <h3 class="text-zinc-500 mt-8">Pool Actions</h3> -->
+                <!-- <div class="mt-3 divide divide-y-2 divide-zinc-700">
                   <div
                     class="flex items-center justify-between py-1.5"
                     v-for="action in poolActions"
@@ -539,7 +566,7 @@ const { data: fiatRate } = useQuery({
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>

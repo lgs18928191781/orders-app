@@ -1,5 +1,24 @@
 const changelog = [
   {
+    version: '2.0.1',
+    emoji: '🌈',
+    date: '2024-1-17',
+    changes: ['Add Events and Leaderboard module.', 'Fix some bugs.'],
+  },
+  {
+    version: '2.0.0',
+    emoji: '🌕',
+    date: '2024-1-12',
+    changes: [
+      'We are now officially in the 2.0 era! 🎉🎉🎉',
+      'The orderbook architecture has been completely rewritten, resulting in a much more robust and simpler orderbook system. The system no longer relies on a plp design to function.',
+      'Scaffold a brand new AMM-based Swap module (V0). Now in preview mode.',
+      'Add a leaderboard page to show the top traders of every BRC20 token.',
+      'Add OKX wallet support. Metalet wallet support is on the way.',
+      'Numerous usability improvements, bug fixes, and UI polishing.',
+    ],
+  },
+  {
     version: '1.5.1',
     emoji: '🎃',
     date: '2023-12-27',

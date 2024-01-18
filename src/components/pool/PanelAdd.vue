@@ -25,10 +25,7 @@ import {
   getOneBrc20,
 } from '@/queries/orders-api'
 import { getMyPooledInscriptions } from '@/queries/pool'
-import {
-  buildAddBrcLiquidity,
-  buildAddBtcLiquidity,
-} from '@/lib/order-pool-builder'
+import { buildAddBrcLiquidity, buildAddBtcLiquidity } from '@/lib/builders/pool'
 import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance } from '@/lib/formatters'
 

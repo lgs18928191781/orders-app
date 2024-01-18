@@ -21,7 +21,7 @@ import {
   POOL_REWARDS_TICK,
   SIGHASH_SINGLE_ANYONECANPAY,
 } from '@/data/constants'
-import { buildReleasePsbt } from '@/lib/order-pool-builder'
+import { buildReleasePsbt } from '@/lib/builders/pool'
 import { defaultPoolPair, selectedPoolPairKey } from '@/data/trading-pairs'
 import { toTx, unit, useBtcUnit } from '@/lib/helpers'
 
@@ -241,7 +241,7 @@ async function submitReleaseRecord() {
             </DisclosureButton>
 
             <DisclosurePanel
-              class="text-gray-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5 text-xs"
+              class="text-zinc-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5 text-xs"
             >
               <div class="">
                 <div>Confirm Block Height</div>

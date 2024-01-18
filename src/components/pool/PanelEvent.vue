@@ -12,7 +12,7 @@ import {
 } from '@/queries/pool'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
-import { buildEventClaim } from '@/lib/order-pool-builder'
+import { buildEventClaim } from '@/lib/builders/pool'
 import { DEBUG, EVENT_REWARDS_TICK } from '@/data/constants'
 
 import EventClaimRecords from './EventClaimRecords.vue'

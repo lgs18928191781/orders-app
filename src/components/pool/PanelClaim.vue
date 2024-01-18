@@ -11,7 +11,7 @@ import { DEBUG, IS_DEV, POOL_REWARDS_TICK } from '@/data/constants'
 
 import ClaimRecords from '@/components/pool/PanelClaimRecords.vue'
 import { sleep } from '@/lib/helpers'
-import { buildRewardClaim } from '@/lib/order-pool-builder'
+import { buildRewardClaim } from '@/lib/builders/pool'
 import { useBtcJsStore } from '@/stores/btcjs'
 
 const selectedPair = inject(selectedPoolPairKey, defaultPoolPair)

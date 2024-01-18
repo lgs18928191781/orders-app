@@ -3,26 +3,47 @@ import * as ecc from 'tiny-secp256k1'
 import { type Psbt } from 'bitcoinjs-lib'
 
 import { useBtcJsStore } from '@/stores/btcjs'
+import { useConnectionStore } from '@/stores/connection'
 
 export function createValidator() {
   const ECPair = useBtcJsStore().ECPair
 
   if (!ECPair) throw new Error('ECPair is not set!')
 
-  const validator = (
+  const legacyValidator = (
     pubkey: Buffer,
     msghash: Buffer,
     signature: Buffer
   ): boolean => ECPair.fromPublicKey(pubkey).verify(msghash, signature)
 
-  return validator
+  const schnorrValidator = (
+    pubkey: Buffer,
+    msghash: Buffer,
+    signature: Buffer
+  ): boolean => ecc.verifySchnorr(msghash, pubkey, signature)
+
+  // determine which validator to use
+  const isTaproot = useConnectionStore().isTaproot
+  console.log(
+    '🚀 ~ file: btc-helpers.ts:27 ~ createValidator ~ isTaproot:',
+    isTaproot
+  )
+
+  return isTaproot ? schnorrValidator : legacyValidator
 }
 
 export function validatePsbt({ psbt, type }: { psbt: Psbt; type: 'ask' }) {
   const validator = createValidator()
 
   if (type === 'ask') {
-    return psbt.validateSignaturesOfAllInputs(validator)
+    // validate the first input;
+    // if taproot, tweak pubkey and validate
+    let pubkey
+    if (useConnectionStore().isTaproot) {
+      // pubkey = toXOnly(Buffer.from(useConnectionStore().getPubKey, 'hex'))
+      pubkey = Buffer.from(useConnectionStore().getPubKey, 'hex')
+    }
+    return psbt.validateSignaturesOfInput(0, validator)
   }
 }
 

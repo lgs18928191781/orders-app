@@ -4,8 +4,15 @@ import { type Psbt } from 'bitcoinjs-lib'
 import { fetchBalance } from '@/queries/proxy'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
-import { generateRandomString } from '@/lib/helpers'
-import { OKX_TEMPLATE_PSBT } from '@/data/constants'
+import {
+  generateRandomString,
+  isUnsupportedAddress,
+  raise,
+} from '@/lib/helpers'
+import {
+  OKX_TEMPLATE_PSBT,
+  SIGHASH_SINGLE_ANYONECANPAY,
+} from '@/data/constants'
 
 function checkOkx() {
   if (!window.okxwallet) {
@@ -18,43 +25,58 @@ export function initPsbt() {
   const bitcoinJs = useBtcJsStore().get!
 
   // use templatePsbt otherwise for okx
-  return bitcoinJs.Psbt.fromHex(OKX_TEMPLATE_PSBT)
+  // return bitcoinJs.Psbt.fromHex(OKX_TEMPLATE_PSBT)
+  return new bitcoinJs.Psbt()
 }
 
-export function finishPsbt(psbt: string): string {
-  const btcjs = useBtcJsStore().get!
-  const rebuild = (original: Psbt) => {
-    const rebuilt = new btcjs.Psbt()
-    rebuilt.setVersion(original.version)
-    rebuilt.setLocktime(original.locktime)
+export function finishPsbt(psbtStr: string): string {
+  return psbtStr
+  const btcjs = useBtcJsStore().get ?? raise('btcjs not initialized')
 
-    const useIndex = 2
-    const input: any = {
-      hash: original.txInputs[useIndex].hash,
-      index: original.txInputs[useIndex].index,
-    }
-    if (original.data.inputs[useIndex].witnessUtxo) {
-      input.witnessUtxo = original.data.inputs[useIndex].witnessUtxo
-    }
-    if (original.data.inputs[useIndex].nonWitnessUtxo) {
-      input.nonWitnessUtxo = original.data.inputs[useIndex].nonWitnessUtxo
-    }
-    if (original.data.inputs[useIndex].partialSig) {
-      input.partialSig = original.data.inputs[useIndex].partialSig
-    }
-    if (original.data.inputs[useIndex].finalScriptWitness) {
-      input.finalScriptWitness =
-        original.data.inputs[useIndex].finalScriptWitness
-    }
-    rebuilt.addInput(input)
-    rebuilt.addOutput(original.txOutputs[useIndex])
+  const psbtObj = btcjs.Psbt.fromHex(psbtStr)
 
-    return rebuilt
+  console.log({ before: psbtObj })
+  // finalize psbt
+  try {
+    psbtObj.finalizeAllInputs()
+  } catch (err) {
+    console.error(err)
   }
+  console.log({ after: psbtObj })
 
-  const psbtObj = btcjs.Psbt.fromHex(psbt)
+  // return psbt
+  // const rebuild = (original: Psbt) => {
+  //   const rebuilt = new btcjs.Psbt()
+  //   rebuilt.setVersion(original.version)
+  //   rebuilt.setLocktime(original.locktime)
 
-  return rebuild(psbtObj).toHex()
+  //   const useIndex = 2
+  //   const input: any = {
+  //     hash: original.txInputs[useIndex].hash,
+  //     index: original.txInputs[useIndex].index,
+  //   }
+  //   if (original.data.inputs[useIndex].witnessUtxo) {
+  //     input.witnessUtxo = original.data.inputs[useIndex].witnessUtxo
+  //   }
+  //   if (original.data.inputs[useIndex].nonWitnessUtxo) {
+  //     input.nonWitnessUtxo = original.data.inputs[useIndex].nonWitnessUtxo
+  //   }
+  //   if (original.data.inputs[useIndex].partialSig) {
+  //     input.partialSig = original.data.inputs[useIndex].partialSig
+  //   }
+  //   if (original.data.inputs[useIndex].finalScriptWitness) {
+  //     input.finalScriptWitness =
+  //       original.data.inputs[useIndex].finalScriptWitness
+  //   }
+  //   rebuilt.addInput(input)
+  //   rebuilt.addOutput(original.txOutputs[useIndex])
+
+  //   return rebuilt
+  // }
+
+  // const psbtObj = btcjs.Psbt.fromHex(psbt)
+
+  // return rebuild(psbtObj).toHex()
 }
 
 export const getAddress = async () => {
@@ -70,17 +92,26 @@ export const getAddress = async () => {
   if (!account) return ''
 
   const address = account.address
-  if (
-    address.startsWith('1') ||
-    address.startsWith('3') ||
-    address.startsWith('m') ||
-    address.startsWith('n')
-  ) {
-    ElMessage.error('Please use a SegWit or Taproot address')
-    throw new Error('Please use a SegWit or Taproot address')
+  if (isUnsupportedAddress(address)) {
+    // await window.okxwallet.bitcoin.disconnect()
+
+    ElMessage.error(
+      'Please use a native SegWit or Taproot address (Starts with bc1)'
+    )
+    throw new Error(
+      'Please use a native SegWit or Taproot address (Starts with bc1)'
+    )
   }
 
   return address
+}
+
+export const getPubKey = async () => {
+  if (!window.unisat) {
+    return ''
+  }
+
+  return await window.okxwallet.bitcoin.getPublicKey()
 }
 
 export const connect: () => Promise<{
@@ -95,13 +126,12 @@ export const connect: () => Promise<{
   if (account) {
     const address = account.address
     // if it's a legacy address(1... or m..., n...), throw error
-    if (
-      address.startsWith('1') ||
-      address.startsWith('3') ||
-      address.startsWith('m') ||
-      address.startsWith('n')
-    ) {
-      throw new Error('Please use a SegWit or Taproot address')
+    if (isUnsupportedAddress(address)) {
+      // await window.okxwallet.bitcoin.disconnect()
+
+      throw new Error(
+        'Please use a native SegWit or Taproot address (Starts with bc1)'
+      )
     }
 
     return {
@@ -148,13 +178,10 @@ export const inscribe = async (tick: string) => {
 export const signPsbt = async (psbt: string, options?: any) => {
   checkOkx()
 
-  const address = useConnectionStore().getAddress
-
-  const signed = await window.okxwallet.bitcoin.signPsbt(psbt, {
-    from: address,
-  })
+  const signed = await window.okxwallet.bitcoin.signPsbt(psbt, options)
 
   console.log({ equal: psbt === signed })
+  console.log({ signed: useBtcJsStore().get!.Psbt.fromHex(signed) })
 
   return signed
 }

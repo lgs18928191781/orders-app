@@ -6,6 +6,8 @@ import * as unisatAdapter from '@/wallet-adapters/unisat'
 import * as okxAdapter from '@/wallet-adapters/okx'
 import * as metaletAdapter from '@/wallet-adapters/metalet'
 import { login } from '@/queries/orders-api'
+import { ElMessage } from 'element-plus'
+import { IS_DEV } from '@/data/constants'
 
 export type Wallet = 'unisat' | 'okx' | 'metalet'
 export type WalletConnection = {
@@ -30,7 +32,18 @@ export const useConnectionStore = defineStore('connection', {
     has: (state) => !!state.last,
     connected: (state) =>
       state.last.status === 'connected' && !!state.last.address,
-    getAddress: (state) => state.last.address,
+    getAddress: (state) => {
+      if (IS_DEV && import.meta.env.VITE_TESTING_ADDRESS) {
+        console.log(
+          'Using testing address',
+          import.meta.env.VITE_TESTING_ADDRESS
+        )
+        return import.meta.env.VITE_TESTING_ADDRESS
+      }
+
+      return state.last.address
+    },
+    isTaproot: (state) => state.last.address.startsWith('bc1p'),
     getPubKey: (state) => state.last.pubKey,
     provider: (state) => {
       if (!state.last) return null
@@ -44,6 +57,7 @@ export const useConnectionStore = defineStore('connection', {
         initPsbt: () => Psbt
         finishPsbt: (psbt: string) => string
         getAddress: () => Promise<string>
+        getPubKey: () => Promise<string>
         connect: () => Promise<{
           address: string
           pubKey: string
@@ -71,22 +85,31 @@ export const useConnectionStore = defineStore('connection', {
             pubKey: '',
           }
 
-      const connectRes =
-        wallet === 'unisat'
-          ? await unisatAdapter.connect()
-          : await okxAdapter.connect()
+      try {
+        const connectRes =
+          wallet === 'unisat'
+            ? await unisatAdapter.connect()
+            : await okxAdapter.connect()
 
-      connection.address = connectRes.address
-      connection.pubKey = connectRes.pubKey
+        connection.address = connectRes.address
+        connection.pubKey = connectRes.pubKey
 
-      connection.status = 'connected'
-      connection.wallet = wallet
+        connection.status = 'connected'
+        connection.wallet = wallet
 
-      this.last = connection
+        this.last = connection
 
-      await login()
+        await login()
 
-      return this.last
+        return this.last
+      } catch (e: any) {
+        ElMessage.error(e.message)
+        connection.status = 'disconnected'
+        connection.wallet = wallet
+        this.last = connection
+
+        return this.last
+      }
     },
 
     async sync() {
@@ -98,8 +121,11 @@ export const useConnectionStore = defineStore('connection', {
           ? await unisatAdapter.getAddress()
           : await okxAdapter.getAddress()
 
+      const pubKey = await this.adapter.getPubKey()
+
       this.last.status = 'connected'
       this.last.address = address
+      this.last.pubKey = pubKey
 
       await login()
 
@@ -115,6 +141,7 @@ export const useConnectionStore = defineStore('connection', {
 
       this.last.status = 'disconnected'
       this.last.address = ''
+      this.last.pubKey = ''
     },
   },
 })

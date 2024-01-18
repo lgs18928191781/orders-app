@@ -43,7 +43,8 @@ export const getBrcFiatRate = async (): Promise<Record<string, number>> => {
 
 export type FeebPlan = {
   feeRate: number
-  title: 'Slow' | 'Average' | 'Fast' | 'Custom'
+  title: 'Eco' | 'Slow' | 'Avg' | 'Fast' | 'Custom'
+  fullTitle?: string
 }
 export const getFeebPlans = async (): Promise<FeebPlan[]> => {
   const res = await ordersCommonApiFetch(`fee/recommended`)
@@ -52,11 +53,16 @@ export const getFeebPlans = async (): Promise<FeebPlan[]> => {
 
   return [
     {
+      title: 'Eco',
+      fullTitle: 'Economy',
+      feeRate: res.economyFee,
+    },
+    {
       title: 'Slow',
       feeRate: res.hourFee,
     },
     {
-      title: 'Average',
+      title: 'Avg',
       feeRate: res.halfHourFee,
     },
     {
@@ -429,13 +435,7 @@ export const getOneBidOrder = async ({
   })
 
   const order: BidV20Order = await ordersApiFetch(
-    `order/bid-v2/do/pre?${params}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    `order/bid-v2/do/pre?${params}`
   ).then((order) => {
     order.furtherFee =
       order.releaseInscriptionFee +
@@ -444,6 +444,36 @@ export const getOneBidOrder = async ({
 
     return order
   })
+  return order
+}
+
+export const getBuyEssentials = async ({
+  orderId,
+  address,
+  tick,
+  buyerChangeAmount,
+}: {
+  orderId: string
+  address: string
+  tick: string
+  buyerChangeAmount: number
+}): Promise<DetailedOrder> => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    buyerAddress: address,
+    tick,
+    platformDummy: '1',
+  })
+
+  const order: DetailedOrder = await ordersApiFetch(
+    `order/${orderId}?${params}`,
+    {
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+    }
+  )
 
   return order
 }

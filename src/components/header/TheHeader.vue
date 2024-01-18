@@ -1,14 +1,11 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useQuery } from '@tanstack/vue-query'
-import { ShieldAlertIcon, CheckCircle2 } from 'lucide-vue-next'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import { prettyAddress } from '@/lib/formatters'
-import { useDummiesStore } from '@/stores/dummies'
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
-import utils from '@/utils'
 import whitelist from '@/lib/whitelist'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
@@ -19,30 +16,50 @@ import Notifications from './Notifications.vue'
 import TheNavbar from './TheNavbar.vue'
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
+import { isUnsupportedAddress } from '@/lib/helpers'
 
 const networkStore = useNetworkStore()
-const dummiesStore = useDummiesStore()
+const queryClient = useQueryClient()
+const connectionStore = useConnectionStore()
 
 const { openConnectionModal } = useConnectionModal()
 
 const unisatAccountsChangedHandler = (accounts: string[]) => {
-  if (useConnectionStore().last.wallet !== 'unisat') return
+  if (connectionStore.last.wallet !== 'unisat') return
+  if (!accounts[0]) {
+    // disconnect
+    connectionStore.disconnect()
+    return
+  }
+
+  if (isUnsupportedAddress(accounts[0])) return
 
   ElMessage.warning({
     message: 'Unisat account changed. Refreshing page...',
     type: 'warning',
     onClose: () => {
+      queryClient.invalidateQueries()
       window.location.reload()
     },
   })
 }
-const okxAccountsChangedHandler = (accounts: string[]) => {
-  if (useConnectionStore().last.wallet !== 'okx') return
+const okxAccountsChangedHandler = (accounts: string[] | null) => {
+  if (connectionStore.last.wallet !== 'okx') return
+  if (!accounts) {
+    // disconnect
+    connectionStore.disconnect()
+    return
+  }
+
+  console.log({ accounts })
+
+  if (isUnsupportedAddress(accounts[0])) return
 
   ElMessage.warning({
     message: 'Okx account changed. Refreshing page...',
     type: 'warning',
     onClose: () => {
+      queryClient.invalidateQueries()
       window.location.reload()
     },
   })
@@ -79,37 +96,25 @@ onMounted(async () => {
   }
 
   if (window.okxwallet) {
-    window.okxwallet.on('accountsChanged', okxAccountsChangedHandler)
+    window.okxwallet.bitcoin.on('accountsChanged', okxAccountsChangedHandler)
   }
 })
 onBeforeUnmount(() => {
   // remove event listener
   window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
-  window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
+  window.okxwallet.bitcoin?.removeListener(
+    'accountsChanged',
+    okxAccountsChangedHandler
+  )
 })
 
 // connect / address related
-const connectionStore = useConnectionStore()
 const { data: address } = useQuery({
   queryKey: ['address', { network: networkStore.network }],
   queryFn: async () =>
     connectionStore.sync().then((connection) => connection?.address),
   retry: 0,
   enabled: computed(() => connectionStore.connected),
-})
-
-const enabled = computed(() => !!address.value)
-useQuery({
-  queryKey: [
-    'dummies',
-    { network: networkStore.network, address: address.value },
-  ],
-  queryFn: async () =>
-    utils.checkAndSelectDummies({
-      checkOnly: true,
-    }),
-  retry: 0,
-  enabled,
 })
 
 async function switchNetwork() {
@@ -180,7 +185,7 @@ function copyAddress() {
 
       <div v-else class="flex items-center gap-2">
         <div
-          class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 px-4"
+          class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
         >
           <div
             class="lg:flex gap-2 pr-3 hidden cursor-pointer"
@@ -196,34 +201,6 @@ function copyAddress() {
           <AssetsDisplay />
 
           <NetworkState />
-
-          <!-- ready button -->
-          <div class="pl-3" v-if="!dummiesStore.has">
-            <el-tooltip effect="light" placement="bottom-end">
-              <template #content>
-                <h3 class="my-2 text-sm font-bold text-orange-300">
-                  Create 2 dummies UTXOs to begin
-                </h3>
-                <div
-                  class="mb-2 max-w-sm space-y-2 text-sm leading-relaxed text-zinc-300"
-                >
-                  <p>
-                    When using Orders.Exchange for the first time, it's
-                    necessary to prepare two UTXOs of 600 satoshis as a
-                    prerequisite for the transaction.
-                  </p>
-                  <p>Click to complete this preparation.</p>
-                </div>
-              </template>
-              <ShieldAlertIcon
-                class="h-5 text-red-500"
-                @click="utils.checkAndSelectDummies({})"
-              />
-            </el-tooltip>
-          </div>
-          <div class="pl-3" v-else>
-            <CheckCircle2 class="h-5 text-orange-300" />
-          </div>
         </div>
 
         <Notifications />

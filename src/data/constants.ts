@@ -1,9 +1,11 @@
 import changelog from './changelog'
 
+// Environments
 export const VERSION = changelog[0].version
 export const CHARGE_SERVICE_FEES = false
 export const DEBUG = false
 export const IS_DEV = import.meta.env.VITE_ENVIRONMENT === 'development'
+export const SWAP_READY = false
 
 // all kinds of satoshis value
 export const DUMMY_UTXO_VALUE = 600
@@ -24,9 +26,8 @@ export const RELEASE_PAYLOAD_SIZE = 391
 export const RELEASE_TX_SIZE = RELEASE_PAYLOAD_SIZE + 68 + 31
 export const RECOVER_TX_SIZE = 363
 export const BUY_TX_SIZE = 500
-// export const SELL_TX_SIZE = 2320
-export const SELL_TX_SIZE = 1166
-export const BID_TX_SIZE = 750
+export const SELL_TX_SIZE = 673
+export const BID_TX_SIZE = 111 + 154 // pay + grant
 export const SEND_TX_SIZE = 140
 
 // Sighash types
@@ -60,3 +61,7 @@ export const USE_UTXO_COUNT_LIMIT = 5
 // okx
 export const OKX_TEMPLATE_PSBT =
   '70736274ff0100a0020000000200000000000000000000000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000000000000100000000ffffffff0200000000000000001976a914000000000000000000000000000000000000000088ac00000000000000001976a914000000000000000000000000000000000000000088ac000000000001011f0000000000000000160014ae47938f7acd1623e6e10e1ebcc33c2a7cb6e30d0001011f0000000000000000160014ae47938f7acd1623e6e10e1ebcc33c2a7cb6e30d000000'
+
+// All kinds of transactions' types and specifications
+export const BUY_PRICE_OUTPUT_INDEX = 2
+export const BUY_PAY_INPUT_INDEX = 4

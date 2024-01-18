@@ -10,27 +10,23 @@ import { Loader, ArrowDownIcon } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
 
 import { prettyBtcDisplay, prettyCoinDisplay } from '@/lib/formatters'
-import {
-  pushBidOrder,
-  pushAskOrder,
-  pushBuyTake,
-  pushSellTakeV2,
-} from '@/queries/orders-api'
+import { pushAskOrder, pushBuyTake } from '@/queries/orders-api'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import {
   DEBUG,
   SIGHASH_ALL,
-  SIGHASH_ALL_ANYONECANPAY,
   IS_DEV,
+  BUY_PAY_INPUT_INDEX,
+  SIGHASH_ALL_ANYONECANPAY,
 } from '@/data/constants'
 import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
-import { toXOnly, validatePsbt } from '@/lib/btc-helpers'
-import { Buffer } from 'buffer'
+import { validatePsbt } from '@/lib/btc-helpers'
 import { fillInternalKey } from '@/lib/build-helpers'
+import { postBidOrder, postBuyTake, postSellTake } from '@/queries/orders-v2'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -81,59 +77,56 @@ async function submitBidOrder() {
   const builtInfo = toRaw(props.builtInfo)
 
   try {
-    // 1. sign secondary order which is used to create the actual utxo to pay for the bid order
-    console.log({ before: builtInfo.secondaryOrder.toHex() })
-    const payPsbtSigned = await adapter.signPsbt(
-      builtInfo.secondaryOrder.toHex()
-    )
-    const payPsbt = btcjs.Psbt.fromHex(payPsbtSigned)
-    console.log({ after: payPsbtSigned })
-    console.log({ payPsbt })
-    return
-    // extract tx from signed payPsbt
-    const preTxRaw = payPsbt.extractTransaction().toHex()
+    const bidGrant = builtInfo.order
+    let payTxRaw
+    if (builtInfo.secondaryOrder) {
+      // 1. sign secondary order which is used to create the actual utxo to pay for the bid grant order
+      const payPsbtSigned = await adapter.signPsbt(
+        builtInfo.secondaryOrder.toHex()
+      )
+      const payPsbt = btcjs.Psbt.fromHex(payPsbtSigned)
+      // extract tx from signed payPsbt
+      payTxRaw = payPsbt.extractTransaction().toHex()
 
-    // 2. now we can add that utxo to the bid order
-    const bidPsbt = builtInfo.order
-    const addingInput = {
-      hash: payPsbt.extractTransaction().getId(),
-      index: 0,
-      witnessUtxo: {
-        script: payPsbt.extractTransaction().outs[0].script,
-        value: payPsbt.extractTransaction().outs[0].value,
-      },
-      sighashType: SIGHASH_ALL_ANYONECANPAY,
+      // 2. now we can add that utxo to the bid order
+      const addingInput = fillInternalKey({
+        hash: payPsbt.extractTransaction().getId(),
+        index: 0,
+        witnessUtxo: {
+          script: payPsbt.extractTransaction().outs[0].script,
+          value: payPsbt.extractTransaction().outs[0].value,
+        },
+        sighashType: SIGHASH_ALL,
+      })
+      bidGrant.addInput(addingInput)
     }
-    fillInternalKey(addingInput)
-    bidPsbt.addInput(addingInput)
-    console.log(
-      '🚀 ~ file: ConfirmationModal.vue:83 ~ submitBidOrder ~ bidPsbt:',
-      bidPsbt
-    )
-    return
 
     // 3. we sign the bid order
-    const signed = await adapter.signPsbt(bidPsbt.toHex())
+    const signed = await adapter.signPsbt(bidGrant.toHex(), {
+      autoFinalized: true,
+      toSignInputs: [
+        {
+          index: 0,
+          address: connectionStore.getAddress,
+          sighashTypes: [SIGHASH_ALL],
+        },
+      ],
+    })
+    // extract
+    console.log({ grant: btcjs.Psbt.fromHex(signed) })
+    const grantTxRaw = btcjs.Psbt.fromHex(signed).extractTransaction().toHex()
 
     // 4. push the bid order to the api
-    const pushRes = await pushBidOrder({
-      psbtRaw: signed,
-      preTxRaw: preTxRaw,
+    const pushRes = await postBidOrder({
+      preTxRaw: grantTxRaw,
+      mergeTxRaw: payTxRaw,
       network: networkStore.ordersNetwork,
       address: connectionStore.getAddress,
       tick: selectedPair.fromSymbol,
-      feeb: builtInfo.feeb,
-      fee: builtInfo.mainFee,
       total: builtInfo.total,
-      using: builtInfo.using,
-      orderId: builtInfo.orderId,
+      coinAmount: builtInfo.toValue,
     })
-
-    // // 5. if pushRes is not null, we can now push the secondary order to the blockchain
-    // if (pushRes) {
-    //   const res = await window.adapter.pushPsbt(payPsbtSigned)
-    //   console.log('unisat push result', res)
-    // }
+    console.log('bid order push result', pushRes)
   } catch (err: any) {
     if (DEBUG) {
       console.error(err)
@@ -163,9 +156,9 @@ async function submitBidOrder() {
     type: 'success',
     onClose: () => {
       // reload
-      // if (!DEBUG) {
-      window.location.reload()
-      // }
+      if (!IS_DEV) {
+        window.location.reload()
+      }
     },
   })
 }
@@ -182,28 +175,45 @@ async function submitOrder() {
   try {
     let pushRes: any
     let signed: string
+    let inputsCount: number
+    let toSignInputs: any[]
     // 2. push
     switch (builtInfo!.type) {
       case 'buy':
       case 'free claim':
-        signed = await adapter.signPsbt(builtInfo.order.toHex())
+        // toSignInputs gathering:
+        // index-2 input is brc
+        // then add every other inputs after index-5
+        inputsCount = builtInfo.order.data.inputs.length
+        toSignInputs = []
+        for (let i = BUY_PAY_INPUT_INDEX; i < inputsCount; i++) {
+          toSignInputs.push({
+            index: i,
+            address: connectionStore.getAddress,
+            sighashTypes: [SIGHASH_ALL],
+          })
+        }
+        console.log({ toSignInputs })
+        signed = await adapter.signPsbt(builtInfo.order.toHex(), {
+          autoFinalized: false,
+          toSignInputs,
+        })
 
-        pushRes = await pushBuyTake({
+        pushRes = await postBuyTake({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,
           orderId: builtInfo.orderId,
         })
         break
       case 'sell':
-        console.log({ address: connectionStore.getAddress })
-        // re-sign
+        // sign
         const before = builtInfo.order.toHex()
 
         // toSignInputs gathering:
         // index-2 input is brc
         // then add every other inputs after index-5
-        const inputsCount = builtInfo.order.data.inputs.length
-        const toSignInputs = [
+        inputsCount = builtInfo.order.data.inputs.length
+        toSignInputs = [
           {
             index: 2,
             address: connectionStore.getAddress,
@@ -217,6 +227,7 @@ async function submitOrder() {
             sighashTypes: [SIGHASH_ALL],
           })
         }
+        console.log({ toSignInputs })
 
         signed = await adapter.signPsbt(builtInfo.order.toHex(), {
           autoFinalized: false,
@@ -226,30 +237,18 @@ async function submitOrder() {
 
         const afterPsbt = useBtcJsStore().get!.Psbt.fromHex(after)
 
-        pushRes = await pushSellTakeV2({
-          psbtRaw: signed,
-          network: networkStore.ordersNetwork,
+        pushRes = await postSellTake({
           orderId: builtInfo.orderId,
-          address: connectionStore.getAddress,
-          value: builtInfo.value,
-          amount: builtInfo.amount,
-          networkFee: builtInfo.selfFee,
+          psbtRaw: signed,
+          networkFee: builtInfo.networkFee,
           networkFeeRate: builtInfo.networkFeeRate,
         })
         break
       case 'ask':
         signed = await adapter.signPsbt(builtInfo.order.toHex())
-        const finished = adapter.finishPsbt(signed)
-        const isValid = validatePsbt({
-          psbt: btcjs.Psbt.fromHex(finished),
-          type: 'ask',
-        })
-        if (!isValid) {
-          throw new Error('Sign failed. Please contact support.')
-        }
 
         pushRes = await pushAskOrder({
-          psbtRaw: finished,
+          psbtRaw: signed,
           network: networkStore.ordersNetwork,
           address: connectionStore.getAddress,
           tick: selectedPair.fromSymbol,
@@ -275,11 +274,6 @@ async function submitOrder() {
     emit('update:isLimitExchangeMode', false)
     return
   }
-
-  // Start cooldowner: observe certain input utxo (payment or brc20), see if its consumption is witnessed by the network
-  // cooldowner.start({
-  //   observing: builtInfo.observing,
-  // })
 
   // Show success message
   emit('update:isOpen', false)
@@ -312,7 +306,9 @@ async function submitOrder() {
         <DialogPanel
           class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-orange-200/10 transition-all"
         >
-          <DialogTitle class="text-lg">Confirmation</DialogTitle>
+          <DialogTitle class="text-lg text-zinc-300">
+            Confirm Transaction
+          </DialogTitle>
 
           <DialogDescription as="div" class="mt-8 text-sm">
             <div
@@ -403,9 +399,12 @@ async function submitOrder() {
                 <div class="col-span-1 text-right">
                   <div
                     class="flex items-center justify-end gap-2"
-                    v-if="builtInfo.isFree"
+                    v-if="builtInfo.isFree || builtInfo.serviceFee === 0"
                   >
-                    <span class="text-zinc-500 line-through">
+                    <span
+                      class="text-zinc-500 line-through"
+                      v-if="builtInfo.isFree"
+                    >
                       {{ prettyBtcDisplay(2000) }}
                     </span>
                     <span
