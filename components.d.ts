@@ -56,6 +56,8 @@ declare module '@vue/runtime-core' {
     PanelHeader: typeof import('./src/components/orders/PanelHeader.vue')['default']
     PanelHistory: typeof import('./src/components/pool/PanelHistory.vue')['default']
     PanelLimitOrders: typeof import('./src/components/orders/PanelLimitOrders.vue')['default']
+    PanelMarketBuy: typeof import('./src/components/orders/PanelMarketBuy.vue')['default']
+    PanelMarketSell: typeof import('./src/components/orders/PanelMarketSell.vue')['default']
     PanelOrderBook: typeof import('./src/components/orders/PanelOrderBook.vue')['default']
     PanelOrderHistory: typeof import('./src/components/orders/PanelOrderHistory.vue')['default']
     PanelPairInfo: typeof import('./src/components/orders/PanelPairInfo.vue')['default']

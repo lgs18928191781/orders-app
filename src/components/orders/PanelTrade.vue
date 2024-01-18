@@ -313,11 +313,9 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 </script>
 
 <template>
-  <div
-    class="col-span-3 flex-1 divide-x divide-zinc-800 primary-panel min-h-[40vh]"
-  >
+  <div class="col-span-3 flex-1 primary-panel min-h-[40vh]">
     <!-- operate panel -->
-    <div class="flex flex-col p-4" v-if="isLimitExchangeMode">
+    <div class="flex flex-col p-4" v-if="false">
       <div
         class="-mx-4 -mt-4 rounded-lg bg-zinc-800 p-4 shadow-md shadow-primary/20 flex-1 flex flex-col"
       >
@@ -686,7 +684,9 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
       </div>
     </div>
 
-    <div class="flex flex-col p-4 h-full" v-else>
+    
+
+    <div class="flex flex-col p-4 h-full flex-auto">
       <!-- tabs -->
       <TabGroup :selectedIndex="takeModeTab" @change="changeTakeModeTab">
         <TabList
