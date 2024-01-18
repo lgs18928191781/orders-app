@@ -10,7 +10,11 @@ export default class SwapAlgo {
   public token1SwapAmount: number = 0
   public token2SwapAmount: number = 0
   public swapLpAmount: number = 0
-  constructor(token1SwapAmount: number, token2SwapAmount: number) {
+  constructor(
+    token1SwapAmount: number,
+    token2SwapAmount: number,
+    swapLpAmount: number
+  ) {
     // if (SwapAlgo.instance) {
     //   this.token1SwapAmount = token1SwapAmount
     //   this.token2SwapAmount = token2SwapAmount
@@ -20,6 +24,7 @@ export default class SwapAlgo {
     //SwapAlgo.instance = this
     this.token1SwapAmount = token1SwapAmount
     this.token2SwapAmount = token2SwapAmount
+    this.swapLpAmount = swapLpAmount
   }
 
   get currentSwapLpAmount() {

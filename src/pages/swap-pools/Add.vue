@@ -4,9 +4,21 @@ import { PlusIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-
+import SwapAlgo from '@/lib/swapAlgo'
+import Decimal from 'decimal.js'
 import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { formatSat, formatTok } from '@/lib/utils'
+enum AddOp {
+  token1ToToken2 = 1,
+  token2ToToken1 = 2,
+}
+
+const swapCalc = new SwapAlgo(
+  new Decimal(176259823276).toNumber(),
+  new Decimal(1996988856407348).toNumber(),
+  new Decimal(128338790502).toNumber()
+)
 
 const { fromSymbol, toSymbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -56,7 +68,27 @@ const conditions: Ref<
   },
 ])
 
-const calcAddLp = () => {}
+const calcAddLp = (e: Event, op: AddOp) => {
+  if (op == AddOp.token1ToToken2) {
+    const token1AddAmount = formatSat(e.target?.value, 8)
+    const { lpMinted, token2AddAmount } = swapCalc.countLpAddAmount(
+      token1AddAmount,
+      swapCalc.token1SwapAmount,
+      swapCalc.token2SwapAmount,
+      swapCalc.swapLpAmount
+    )
+    toAmount.value = formatTok(token2AddAmount, 8, 8)
+  } else {
+    const token2AddAmount = formatSat(e.target?.value, 8)
+    const { lpMinted, token1AddAmount } = swapCalc.countLpAddAmountWithToken2(
+      token2AddAmount,
+      swapCalc.token1SwapAmount,
+      swapCalc.token2SwapAmount,
+      swapCalc.swapLpAmount
+    )
+    fromAmount.value = formatTok(token1AddAmount, 8, 8)
+  }
+}
 
 const hasUnmet = computed(() => {
   return conditions.value.some((c) => !c.met)
@@ -176,6 +208,7 @@ watch(
       @not-enough="hasEnough = false"
       @amount-entered="hasAmount = true"
       @amount-cleared="hasAmount = false"
+      @keyup="calcAddLp($event, AddOp.token1ToToken2)"
     />
 
     <!-- flip -->
@@ -183,7 +216,11 @@ watch(
       <PlusIcon class="mx-auto h-5 w-5 text-zinc-500" />
     </div>
 
-    <AddLiquiditySide v-model:symbol="toSymbol" v-model:amount="toAmount" />
+    <AddLiquiditySide
+      v-model:symbol="toSymbol"
+      v-model:amount="toAmount"
+      @keyup="calcAddLp($event, AddOp.token2ToToken1)"
+    />
   </div>
 
   <!-- disabled button -->

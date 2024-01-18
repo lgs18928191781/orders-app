@@ -25,10 +25,11 @@ const toSymbol = ref('btc')
 // amount
 const fromAmount = ref()
 const toAmount = ref()
-const tiggleRate = ref(false)
+
 const swapCalc = new SwapAlgo(
-  new Decimal(240367974941).toNumber(),
-  new Decimal(2320854897223186).toNumber()
+  new Decimal(176259823276).toNumber(),
+  new Decimal(1996988856407348).toNumber(),
+  new Decimal(128338790502).toNumber()
 )
 // watch for changes to both symbols
 // the rule is when one changes from brc to btc, the other changes from btc to brc
