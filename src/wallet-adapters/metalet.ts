@@ -79,12 +79,12 @@ export const inscribe = async (tick: string): Promise<string> => {
 }
 
 export const signPsbt = async (
-    psbt: string,
-    option?: any
+    psbtHex: string,
+    options?: any
 ): Promise<string> => {
     checkMetalet()
 
-    return await window.metaidwallet.btc.signPsbt(psbt, option)
+    return await window.metaidwallet.btc.signPsbt({ psbtHex, options })
 }
 
 export const signPsbts = async (
