@@ -93,16 +93,10 @@ export const getOrders = async ({
   return orders
 }
 
-export const getMyOpenOrders = async ({
-  network,
-  address,
-}: {
-  network: 'livenet' | 'testnet'
-  address: string
-}) => {
+export const getMyOpenOrders = async ({ address }: { address: string }) => {
   const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
-    net: network,
+    net: useNetworkStore().network,
     orderState: '1',
   })
 
