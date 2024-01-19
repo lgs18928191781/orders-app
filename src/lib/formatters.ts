@@ -2,8 +2,14 @@ import { RemovableRef } from '@vueuse/core'
 import dayjs from 'dayjs/esm/index.js'
 import Decimal from 'decimal.js'
 
-export function prettyTimestamp(timestamp: number, isInSeconds = false) {
+export function prettyTimestamp(
+  timestamp: number,
+  isInSeconds = false,
+  cutThisYear = false
+) {
   if (isInSeconds) timestamp = timestamp * 1000
+
+  if (cutThisYear) return dayjs(timestamp).format('MM-DD HH:mm:ss')
 
   return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
 }

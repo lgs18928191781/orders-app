@@ -1,19 +1,9 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-
-import OrderConfirmationModal from '../ConfirmationModal.vue'
+import OrderConfirmationModal from '@/components/overlays/ConfirmationModal.vue'
 import PanelOrderBook from '@/components/orders/PanelOrderBook.vue'
 import PanelPairInfo from '@/components/orders/PanelPairInfo.vue'
-import PanelOrderHistory from '@/components/orders/PanelOrderHistory.vue'
+import PanelHistoryIndex from '@/components/orders/history/PanelHistoryIndex.vue'
 import PanelTrade from '@/components/orders/PanelTrade.vue'
-
-// confirm modal
-const isOpen = ref(false)
-const isBuilding = ref(false)
-const builtInfo = ref()
-
-// limit exchange mode
-const isLimitExchangeMode = ref(false)
 </script>
 
 <template>
@@ -26,18 +16,12 @@ const isLimitExchangeMode = ref(false)
         <PanelTrade class="col-span-3 grow" />
       </div>
 
-      <PanelOrderHistory />
+      <PanelHistoryIndex />
     </div>
 
     <PanelOrderBook class="col-span-3" />
 
     <!-- modal -->
-    <OrderConfirmationModal
-      v-model:is-open="isOpen"
-      v-model:is-building="isBuilding"
-      v-model:built-info="builtInfo"
-      v-model:is-limit-exchange-mode="isLimitExchangeMode"
-      :build-process-tip="'Building Transaction'"
-    />
+    <OrderConfirmationModal />
   </div>
 </template>

@@ -69,6 +69,7 @@ export async function buildBidOffer({
 
   // the value of the input should be the total value plus the fee
   const bidGrantInputValue = total + bidGrantFee
+  console.log('🚀 ~ bidGrantInputValue:', bidGrantInputValue)
 
   // 3.5 Optimization: if we find a utxo with roughly the same value as bidGrantInputValue, we can skip the next step and use it directly
   const excludedUtxos = await getExcludedUtxos()
@@ -114,6 +115,7 @@ export async function buildBidOffer({
     order: bidGrant,
     secondaryOrder: pay,
     type: 'bid',
+    typeForDisplay: 'limit buy',
     feeb,
     networkFee: payFee + bidGrantFee,
     mainFee: bidGrantFee,

@@ -1,44 +1,30 @@
 <script lang="ts" setup>
-import { Ref, computed, ref, watch } from 'vue'
-import {
-  TabPanel,
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from '@headlessui/vue'
-import { CheckIcon, ChevronsUpDownIcon, BookPlusIcon } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import { TabPanel } from '@headlessui/vue'
 import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 
-import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { prettyBalance } from '@/lib/formatters'
 import { calcFiatPrice, showFiat, sleep, unit, useBtcUnit } from '@/lib/helpers'
-import { buildAskLimit } from '@/lib/builders/orders'
-import {
-  getOrdiBalance,
-  getOneBrc20,
-  getMarketPrice,
-  type Brc20Transferable,
-  getFiatRate,
-} from '@/queries/orders-api'
-import { useConnectionStore } from '@/stores/connection'
+import { buildBidOffer } from '@/lib/builders/orders-v2'
+import { getFiatRate, getMarketPrice } from '@/queries/orders-api'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 import { IS_DEV } from '@/data/constants'
 import { useTradingPair } from '@/hooks/use-trading-pair'
-import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useSelectOrder } from '@/hooks/use-select-order'
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 
 import btcIcon from '@/assets/btc.svg?url'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
-const connectionStore = useConnectionStore()
-const address = connectionStore.getAddress
 const networkStore = useNetworkStore()
 const feebStore = useFeebStore()
 const { selectedPair } = useTradingPair()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
-const { selectedAskOrder } = useSelectOrder()
+const { selectedBidOrder } = useSelectOrder()
+const { openModal } = useConfirmationModal()
 
 // price related
 const price = ref(0)
@@ -58,11 +44,11 @@ function deviatePrice(price: number, deviator: number): number {
   return new Decimal(price * deviator).toDP(new Decimal(price).dp()).toNumber()
 }
 watch(
-  selectedAskOrder,
-  (selectedAskOrder) => {
-    if (!selectedAskOrder) return
+  selectedBidOrder,
+  (selectedBidOrder) => {
+    if (!selectedBidOrder) return
 
-    const priceInBtc = selectedAskOrder.price.dividedBy(1e8).toNumber()
+    const priceInBtc = selectedBidOrder.price.dividedBy(1e8).toNumber()
     updatePrice(priceInBtc)
   },
   { immediate: true }
@@ -78,11 +64,12 @@ async function buildOrder() {
 
   try {
     openBuilding()
-    buildRes = await buildAskLimit({
-      total: Math.round(price.value * limitBrcAmount.value),
-      amount: limitBrcAmount.value,
+    const preBuildRes = await buildBidOffer({
+      total: totalExchangePrice.value,
+      coinAmount: amount.value,
       selectedPair: selectedPair.value,
     })
+    buildRes = preBuildRes
   } catch (error: any) {
     await sleep(500)
     ElMessage.error(error.message)
@@ -95,14 +82,8 @@ async function buildOrder() {
 
   if (!buildRes) return
   console.log({ buildRes })
-  builtInfo.value = buildRes
+  openModal(buildRes)
   return
-}
-
-async function goInscribe() {
-  const adapter = connectionStore.adapter
-
-  await adapter?.inscribe(selectedPair.value.exactName)
 }
 
 const builtInfo = ref()
@@ -115,68 +96,30 @@ const { data: marketPrice } = useQuery({
   queryFn: () => getMarketPrice({ tick: selectedPair.value.fromSymbol }),
 })
 
-const exchangeOrdiAmount = ref(0)
-const limitBrcAmount = computed(() => {
-  if (networkStore.network === 'testnet') {
-    return exchangeOrdiAmount.value
-  }
-
-  if (!selectedAskCandidate.value) return 0
-
-  return Number(selectedAskCandidate.value.amount)
-})
+const amount = ref()
 const totalExchangePrice = computed(() => {
-  return Math.round(price.value * limitBrcAmount.value)
+  return Math.round(price.value * amount.value)
 })
+
+const hasEnoughPrice = computed(
+  () => IS_DEV || totalExchangePrice.value >= 10000
+)
 const canPlaceOrder = computed(() => {
-  return (
-    price.value > 0 &&
-    limitBrcAmount.value > 0 &&
-    totalExchangePrice.value >= 10000
-  )
+  return price.value > 0 && amount.value > 0 && hasEnoughPrice.value
 })
 const cannotPlaceOrderReason = computed(() => {
   if (price.value <= 0) {
     return 'Enter a price'
   }
-  if (limitBrcAmount.value <= 0) {
-    return `Select an ${prettySymbol(selectedPair.value.fromSymbol)} amount`
+  if (!amount.value || amount.value <= 0) {
+    return 'Enter an amount'
   }
-  if (totalExchangePrice.value < 10000) {
+  if (!hasEnoughPrice.value) {
     return 'Order should > 0.0001 BTC'
   }
 
   return ''
 })
-
-const { data: ordiBalance } = useQuery({
-  queryKey: [
-    'ordiBalance',
-    {
-      address,
-      network: networkStore.network,
-    },
-  ],
-  queryFn: () => getOrdiBalance(address, networkStore.network),
-})
-const { data: myBrc20Info } = useQuery({
-  queryKey: [
-    'myBrc20Info',
-    {
-      address,
-      network: networkStore.network,
-      tick: selectedPair.value.fromSymbol,
-    },
-  ],
-  queryFn: () =>
-    getOneBrc20({
-      address,
-      tick: selectedPair.value.fromSymbol,
-    }),
-
-  enabled: computed(() => networkStore.network !== 'testnet' && !!address),
-})
-const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 
 // fiat price
 const { data: fiatRate } = useQuery({
@@ -199,7 +142,7 @@ const { data: fiatRate } = useQuery({
             <div class="relative w-full">
               <input
                 type="text"
-                class="w-full py-2 pl-2 pr-16 text-right placeholder-zinc-500 quiet-input bg-transparent"
+                class="w-full bg-transparent py-2 pl-2 pr-16 text-right placeholder-zinc-500 quiet-input"
                 :placeholder="unit"
                 :value="
                   useBtcUnit
@@ -227,7 +170,7 @@ const { data: fiatRate } = useQuery({
         <div
           class="cursor-pointer pt-2 text-right text-xs text-zinc-500"
           v-if="marketPrice"
-          @click="price = deviatePrice(marketPrice!, 1.01)"
+          @click="price = deviatePrice(marketPrice!, 0.99)"
           title="Use market price"
         >
           {{
@@ -235,9 +178,6 @@ const { data: fiatRate } = useQuery({
           }}
         </div>
       </div>
-
-      <!-- estimate -->
-      <!-- <div class="mt-2 text-right text-sm">≈$12.99</div> -->
 
       <!-- amount -->
       <div class="mt-4 rounded-md border border-zinc-500 p-2">
@@ -251,129 +191,38 @@ const { data: fiatRate } = useQuery({
             <span class="ml-2 text-zinc-500">Amount</span>
           </div>
 
-          <div
-            class="relative max-w-[67%] grow"
-            v-if="networkStore.network === 'testnet'"
-          >
+          <div class="relative max-w-[67%] grow">
             <input
-              type="text"
+              type="number"
               class="w-full rounded bg-zinc-700 py-2 pl-2 pr-16 text-right placeholder-zinc-500 outline-none"
-              :placeholder="'$' + selectedPair.fromSymbol"
-              v-model.number="exchangeOrdiAmount"
+              placeholder="0"
+              v-model.number="amount"
             />
             <span
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400 uppercase"
+              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
             >
               ${{ selectedPair.fromSymbol }}
             </span>
           </div>
-
-          <Listbox
-            v-model="selectedAskCandidate"
-            v-else
-            as="div"
-            class="relative max-w-[67%] grow"
-          >
-            <ListboxButton
-              class="relative w-full cursor-default rounded bg-zinc-700 py-2 pl-3 pr-20 text-right text-sm focus:outline-none"
-            >
-              <span class="block truncate">
-                {{ selectedAskCandidate?.amount || '-' }}
-              </span>
-
-              <span
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
-              >
-                <span class="uppercase"> ${{ selectedPair.fromSymbol }} </span>
-                <ChevronsUpDownIcon class="h-5 w-5" aria-hidden="true" />
-              </span>
-            </ListboxButton>
-
-            <ListboxOptions
-              class="absolute z-10 mt-4 max-h-60 w-full translate-x-2 overflow-auto rounded-md border border-zinc-500 bg-zinc-900 p-2 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-            >
-              <ListboxOption
-                v-for="askCandidate in myBrc20Info?.transferBalanceList"
-                v-slot="{ active, selected }"
-                as="template"
-                :key="askCandidate.inscriptionId"
-                :value="askCandidate"
-              >
-                <li
-                  class="relative flex cursor-pointer items-center justify-end rounded py-2 pl-10 pr-2 transition"
-                  :class="active && 'bg-orange-500/20'"
-                >
-                  <span
-                    v-if="selected"
-                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary"
-                  >
-                    <CheckIcon class="h-5 w-5" aria-hidden="true" />
-                  </span>
-
-                  <span :class="selected && 'text-primary'">
-                    {{ askCandidate.amount }}
-                  </span>
-                </li>
-              </ListboxOption>
-
-              <ListboxOption
-                v-if="!myBrc20Info?.transferBalanceList.length"
-                class="text-right cursor-default px-2 py-4 text-zinc-500"
-              >
-                No Transferable Balance
-              </ListboxOption>
-
-              <ListboxOption
-                as="template"
-                v-slot="{ active, selected }"
-                @click="goInscribe"
-              >
-                <li
-                  :class="[
-                    'flex cursor-pointer items-center justify-between rounded border-t border-zinc-700 p-2 text-zinc-300 transition',
-                    { 'bg-orange-500/20 text-primary': active },
-                  ]"
-                >
-                  <BookPlusIcon class="mr-2 h-5 w-5" aria-hidden="true" />
-                  <span>Inscribe Transfer</span>
-                </li>
-              </ListboxOption>
-            </ListboxOptions>
-          </Listbox>
         </div>
-
-        <div
-          class="cursor-pointer pt-2 text-right text-xs text-zinc-500"
-          v-if="networkStore.network === 'testnet'"
-          @click="exchangeOrdiAmount = ordiBalance || 0"
-          :title="`Sell all $${selectedPair.fromSymbol.toUpperCase()}`"
-        >
-          {{
-            `Balance: ${ordiBalance} $${selectedPair.fromSymbol.toUpperCase()}`
-          }}
-        </div>
-      </div>
-
-      <!-- how to -->
-      <div
-        class="mt-4 text-right text-xs text-zinc-400 underline underline-offset-2 transition hover:text-primary"
-      >
-        <a
-          href="https://canary-sailor-7ad.notion.site/How-to-place-an-ASK-order-faedef7a12134b57a40962b06d75c024"
-          target="_blank"
-        >
-          How to place an ASK order?
-        </a>
       </div>
     </div>
 
-    <!-- buy -->
     <div class="">
       <div class="flex items-center justify-between text-sm">
         <span class="text-zinc-500">Total</span>
-        <span class="text-zinc-300">
-          {{ `${prettyBalance(totalExchangePrice, useBtcUnit)} ${unit}` }}
-        </span>
+        <div class="">
+          <div class="text-zinc-300">
+            {{ `${prettyBalance(totalExchangePrice, useBtcUnit)} ${unit}` }}
+          </div>
+
+          <div
+            class="text-sm text-zinc-500 text-right"
+            v-if="showFiat && fiatRate && totalExchangePrice"
+          >
+            {{ '$' + calcFiatPrice(totalExchangePrice, fiatRate) }}
+          </div>
+        </div>
       </div>
 
       <button
@@ -386,7 +235,7 @@ const { data: fiatRate } = useQuery({
         @click="buildOrder"
         :disabled="!canPlaceOrder"
       >
-        {{ cannotPlaceOrderReason || 'Place Limit Buy Order' }}
+        {{ cannotPlaceOrderReason || 'Place Limit Sell Order' }}
       </button>
     </div>
   </TabPanel>

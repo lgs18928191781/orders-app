@@ -1,21 +1,12 @@
 <script setup lang="ts">
-import { getMyOpenOrders } from '@/queries/orders-v2'
-import { useConnectionStore } from '@/stores/connection'
-import { useNetworkStore } from '@/stores/network'
+import { ref } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
-import { useQuery } from '@tanstack/vue-query'
 
-const networkStore = useNetworkStore()
-const connectionStore = useConnectionStore()
+import PanelOpenOrders from '@/components/orders/history/PanelOpenOrders.vue'
+import PanelOrderHistory from '@/components/orders/history/PanelOrderHistory.vue'
+import PanelMarketTrades from '@/components/orders/history/PanelMarketTrades.vue'
 
-const { data: openOrders, isFetching: isFetchingOpenOrders } = useQuery({
-  queryKey: ['myOpenOrders', { network: networkStore.network }],
-  queryFn: () =>
-    getMyOpenOrders({
-      address: connectionStore.getAddress,
-    }),
-  placeholderData: [],
-})
+const openOrdersCount = ref(2)
 </script>
 
 <template>
@@ -24,11 +15,14 @@ const { data: openOrders, isFetching: isFetchingOpenOrders } = useQuery({
       <Tab as="template" v-slot="{ selected }">
         <button
           :class="[
-            selected ? 'text-primary underline' : 'text-zinc-300',
+            selected
+              ? 'text-primary underline underline-offset-4'
+              : 'text-zinc-300',
             'font-bold py-1 px-2 outline-none',
           ]"
         >
-          Open Orders
+          <span>Open Orders</span>
+          <span v-if="openOrdersCount > 0">({{ openOrdersCount }})</span>
         </button>
       </Tab>
       <Tab as="template" v-slot="{ selected }">
@@ -53,10 +47,10 @@ const { data: openOrders, isFetching: isFetchingOpenOrders } = useQuery({
       </Tab>
     </TabList>
 
-    <TabPanels class="p-3 flex items-center justify-center grow">
-      <TabPanel>Content 1</TabPanel>
-      <TabPanel>Content 2</TabPanel>
-      <TabPanel>Content 3</TabPanel>
+    <TabPanels class="p-3 grow">
+      <PanelOpenOrders />
+      <PanelOrderHistory />
+      <PanelMarketTrades />
     </TabPanels>
   </TabGroup>
 </template>

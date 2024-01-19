@@ -9,27 +9,27 @@ import PanelSell from '@/components/orders/PanelSell.vue'
 
 const { selectedOrderType } = useSelectOrder()
 
-const takeModeTab = ref(0)
-function changeTakeModeTab(index: number) {
-  takeModeTab.value = index
+const modeTab = ref(0)
+function changeModeTab(index: number) {
+  modeTab.value = index
 }
 watch(
   () => selectedOrderType.value,
   (value) => {
-    if (value === 'bid') {
-      takeModeTab.value = 1
+    if (value === 'ask') {
+      modeTab.value = 1
     } else {
-      takeModeTab.value = 0
+      modeTab.value = 0
     }
   }
 )
 </script>
 
 <template>
-  <div class="col-span-3 flex-1 primary-panel min-h-[40vh] lg:min-h-[60vh]">
+  <div class="col-span-3 flex-1 primary-panel min-h-[40vh] lg:min-h-[50vh]">
     <div class="flex flex-col p-4 h-full flex-auto">
       <!-- tabs -->
-      <TabGroup :selectedIndex="takeModeTab" @change="changeTakeModeTab">
+      <TabGroup :selectedIndex="modeTab" @change="changeModeTab">
         <TabList
           class="flex items-center justify-center gap-4"
           v-slot="{ selectedIndex }"

@@ -3,6 +3,7 @@ import { useNetworkStore } from '@/stores/network'
 import sign from '@/lib/sign'
 import { ordersV2Fetch } from '@/lib/fetch'
 import Decimal from 'decimal.js'
+import { sleep } from '@/lib/helpers'
 
 export const getPlatformPublicKey = async (): Promise<{
   platformPublicKey: string
@@ -34,6 +35,7 @@ export type Order = {
   orderState: number
   orderType: number
   orderTypeStr: 'ask' | 'bid'
+  orderTypeStrInDisplay: 'buy' | 'sell'
   price: Decimal
   freeState?: 1 | 0
   sellerAddress: string
@@ -63,7 +65,6 @@ export const getOrders = async ({
     sortKey: 'coinPrice',
     sortType: String(sortType),
     tick,
-    address,
   })
   const orders: Order[] = await ordersV2Fetch(`orders?${params}`, {
     headers: {
@@ -85,6 +86,7 @@ export const getOrders = async ({
         // add price and orderTypeStr
         order.price = new Decimal(order.amount / order.coinAmount)
         order.orderTypeStr = order.orderType === 1 ? 'ask' : 'bid'
+        order.orderTypeStrInDisplay = order.orderType === 1 ? 'sell' : 'buy'
       })
 
       return orders
@@ -123,9 +125,84 @@ export const getMyOpenOrders = async ({ address }: { address: string }) => {
         // add price and orderTypeStr
         order.price = new Decimal(order.amount / order.coinAmount)
         order.orderTypeStr = order.orderType === 1 ? 'ask' : 'bid'
+        order.orderTypeStrInDisplay = order.orderType === 1 ? 'sell' : 'buy'
       })
 
       return orders
+    })
+    .then((orders) => {
+      // copy 10 times to mock the real-time data
+      const copiedOrders = [...orders]
+      // for (let i = 0; i < 10; i++) {
+      //   copiedOrders.push(...orders)
+      // }
+
+      return copiedOrders
+    })
+
+  return orders
+}
+
+type OrderHistory = Order & {
+  orderStateStr: 'open' | 'done' | 'canceled'
+}
+export const getMyOrderHistory = async ({ address }: { address: string }) => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    net: useNetworkStore().network,
+    orderState: '3',
+  })
+
+  const orders: OrderHistory[] = await ordersV2Fetch(
+    `orders/user/${address}?${params}`,
+    {
+      headers: {
+        'X-Signature': signature,
+        'X-Public-Key': publicKey,
+      },
+    }
+  )
+    .then(({ results }) => results)
+    .then((orders) => {
+      // if orders is empty, return empty array
+      if (!orders) return []
+
+      // order's coinRatePrice is incorrect, so we need to calculate it
+      orders.forEach((order: OrderHistory) => {
+        order.coinRatePrice = new Decimal(
+          order.amount / order.coinAmount
+        ).toNumber()
+
+        // add price and orderTypeStr
+        order.price = new Decimal(order.amount / order.coinAmount)
+        order.orderTypeStr = order.orderType === 1 ? 'ask' : 'bid'
+        order.orderTypeStrInDisplay = order.orderType === 1 ? 'sell' : 'buy'
+        switch (order.orderState) {
+          case 1:
+            order.orderStateStr = 'open'
+            break
+          case 2:
+            order.orderStateStr = 'done'
+            break
+          case 3:
+            order.orderStateStr = 'canceled'
+            break
+          default:
+            order.orderStateStr = 'open'
+            break
+        }
+      })
+
+      return orders
+    })
+    .then((orders) => {
+      // copy 10 times to mock the real-time data
+      const copiedOrders = [...orders]
+      // for (let i = 0; i < 10; i++) {
+      //   copiedOrders.push(...orders)
+      // }
+
+      return copiedOrders
     })
 
   return orders

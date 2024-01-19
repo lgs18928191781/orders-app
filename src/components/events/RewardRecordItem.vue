@@ -22,7 +22,7 @@ const onCopyOrderId = () => {
   <div class="py-4 bg-zinc-950 rounded-lg px-4">
     <h3 class="items-center flex justify-between">
       <div class="flex items-center text-lg">
-        <span class="font-bold text-orange-300" v-if="record.rewardAmount">
+        <span class="font-bold text-primary" v-if="record.rewardAmount">
           {{ record.rewardAmount }} {{ EVENT_REWARDS_TICK.toUpperCase() }}
         </span>
         <span v-else class="text-zinc-500">Calculating...</span>
@@ -45,7 +45,7 @@ const onCopyOrderId = () => {
 
             <button title="copy order id" @click="onCopyOrderId">
               <CopyIcon
-                class="w-4 h-4 text-zinc-500 cursor-pointer hover:text-orange-300"
+                class="w-4 h-4 text-zinc-500 cursor-pointer hover:text-primary"
               />
             </button>
           </div>
@@ -73,7 +73,7 @@ const onCopyOrderId = () => {
 
         <!-- <div class="flex items-center">
           <span class="w-40 shrink-0 inline-block text-zinc-500">Reward</span>
-          <span class="font-bold text-orange-300" v-if="record.rewardAmount">
+          <span class="font-bold text-primary" v-if="record.rewardAmount">
             {{ record.rewardAmount }} {{ EVENT_REWARDS_TICK.toUpperCase() }}
           </span>
           <span v-else class="text-zinc-500">Calculating...</span>
