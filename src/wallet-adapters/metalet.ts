@@ -10,10 +10,9 @@ function checkMetalet() {
     }
 }
 
-function checkMetaletStatus(res: any) {
+function checkMetaletStatus(res: any, actionName: string) {
     if (res?.status) {
-        ElMessage.warning(`Metalet connect status: ${res?.status}`)
-        throw new Error(`Metalet connect status: ${res?.status}`)
+        throw new Error(`Metalet ${actionName} status: ${res?.status}`)
     }
     return res
 }
@@ -21,13 +20,13 @@ function checkMetaletStatus(res: any) {
 export const connect: () => Promise<connectRes> = async () => {
     checkMetalet()
     const connetRes = await window.metaidwallet.btc.connect()
-    return checkMetaletStatus(connetRes)
+    return checkMetaletStatus(connetRes, 'connect')
 }
 
 export const getAddress = async () => {
     checkMetalet()
     const addressRes = await window.metaidwallet.btc.getAddress()
-    const address = checkMetaletStatus(addressRes)
+    const address = checkMetaletStatus(addressRes, 'get address')
 
     if (address) {
         if (
@@ -55,7 +54,7 @@ export function finishPsbt<T>(psbt: T): T {
 export const getPubKey = async () => {
     checkMetalet()
     const pubKeyRes = await window.metaidwallet.btc.getPublicKey()
-    return checkMetaletStatus(pubKeyRes)
+    return checkMetaletStatus(pubKeyRes, 'get public key')
 }
 
 interface connectRes {
@@ -100,4 +99,10 @@ export const pushPsbt = async (psbtHex: string): Promise<string> => {
     checkMetalet()
 
     return await window.metaidwallet.btc.pushPsbt(psbtHex)
+}
+
+export const signMessage = async (message: string): Promise<string> => {
+    checkMetalet()
+    const messageBase64 = await window.metaidwallet.btc.signMessage(message)
+    return checkMetaletStatus(messageBase64, "get signature")
 }

@@ -8,8 +8,6 @@ import * as metaletAdapter from '@/wallet-adapters/metalet'
 import { login } from '@/queries/orders-api'
 
 function getWalletAdapter(wallet: Wallet) {
-  console.log('getWalletAdapter', wallet);
-
   switch (wallet) {
     case 'unisat':
       return unisatAdapter
@@ -42,6 +40,7 @@ export type WalletConnection = {
   address: string
   pubKey: string
 }
+
 export const useConnectionStore = defineStore('connection', {
   state: () => {
     return {
@@ -67,8 +66,6 @@ export const useConnectionStore = defineStore('connection', {
     },
     adapter: (state) => {
       if (!state.last) throw new Error('No connection')
-      console.log('adapter this', this,);
-      console.log('adapter state', state, state.last);
 
       const adapter: {
         initPsbt: () => Psbt
@@ -85,6 +82,7 @@ export const useConnectionStore = defineStore('connection', {
         signPsbt: (psbt: string, options?: any) => Promise<string>
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
+        signMessage: (message: string) => Promise<string>
       } = getWalletAdapter(state.last.wallet)
 
       return adapter
@@ -93,7 +91,6 @@ export const useConnectionStore = defineStore('connection', {
 
   actions: {
     async connect(wallet: Wallet) {
-      console.log('this.last', JSON.stringify(this.last));
 
       const connection: WalletConnection = this.last
         ? (JSON.parse(JSON.stringify(this.last)) as WalletConnection)
@@ -127,8 +124,6 @@ export const useConnectionStore = defineStore('connection', {
       this.last.status = 'connected'
       this.last.address = await this.adapter.getAddress()
       this.last.pubKey = await this.adapter.getPubKey()
-      console.log("this last wallet", this.last.wallet);
-
 
       await login()
 

@@ -1,7 +1,9 @@
+import { useDebounceFn } from '@vueuse/core'
 import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
 
-export default async function sign() {
+async function sign() {
+  const connectionStore = useConnectionStore()
   const connection = useConnectionStore().last
   if (!connection.address || connection.status === 'disconnected') {
     throw new Error('Please connect to a wallet first.')
@@ -23,7 +25,7 @@ export default async function sign() {
 
   if (connection.wallet === 'unisat') {
     publicKey = await window.unisat.getPublicKey()
-    signature = await window.unisat.signMessage(message)
+    signature = await connectionStore.adapter.signMessage(message)
   } else if (connection.wallet === 'okx') {
     const account: {
       address: string
@@ -37,10 +39,26 @@ export default async function sign() {
     })
   } else if (connection.wallet === 'metalet') {
     publicKey = await window.metaidwallet.btc.getPublicKey()
-    signature = await window.metaidwallet.btc.signMessage(message)
+    signature = await connectionStore.adapter.signMessage(message)
   }
 
   credentialsStore.add({ publicKey, signature, address })
 
   return { publicKey, signature, address }
 }
+
+function debounce<T extends (...args: any[]) => any>(func: T, delay: number) {
+  let timeoutId: number
+
+  return function (this: any, ...args: Parameters<T>) {
+    clearTimeout(timeoutId)
+
+    timeoutId = setTimeout(() => {
+      func.apply(this, args)
+    }, delay)
+  } as T
+}
+
+export default debounce(sign, 500);
+
+// export default useDebounceFn(sign, 1000)

@@ -127,3 +127,7 @@ export const pushPsbt = async (psbt: string): Promise<string> => {
 
   return await window.unisat.pushPsbt(psbt)
 }
+
+export const signMessage = async (message: string): Promise<string> => {
+  return await window.unisat.signMessage(message)
+}
