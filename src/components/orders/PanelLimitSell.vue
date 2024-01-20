@@ -13,14 +13,13 @@ import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
-import { calcFiatPrice, showFiat, sleep, unit, useBtcUnit } from '@/lib/helpers'
+import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { buildAskLimit } from '@/lib/builders/orders'
 import {
   getOrdiBalance,
   getOneBrc20,
   getMarketPrice,
   type Brc20Transferable,
-  getFiatRate,
 } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
@@ -30,6 +29,7 @@ import { useTradingPair } from '@/hooks/use-trading-pair'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
+import { useFiat } from '@/hooks/use-fiat'
 
 import btcIcon from '@/assets/btc.svg?url'
 
@@ -41,6 +41,8 @@ const { selectedPair } = useTradingPair()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const { openModal } = useConfirmationModal()
 const { selectedAskOrder } = useSelectOrder()
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 // price related
 const price = ref(0)
@@ -176,12 +178,6 @@ const { data: myBrc20Info } = useQuery({
   enabled: computed(() => networkStore.network !== 'testnet' && !!address),
 })
 const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
-
-// fiat price
-const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate', { coin: 'btc' }],
-  queryFn: getFiatRate,
-})
 </script>
 
 <template>
@@ -216,9 +212,9 @@ const { data: fiatRate } = useQuery({
 
             <div
               class="text-sm text-zinc-500 text-right pr-2 -mt-2"
-              v-if="showFiat && fiatRate && price"
+              v-if="isShowingFiat && fiatRate && price"
             >
-              {{ '$' + calcFiatPrice(price, fiatRate) }}
+              {{ getFiatPriceDisplay(price, fiatRate) }}
             </div>
           </div>
         </div>
@@ -370,9 +366,19 @@ const { data: fiatRate } = useQuery({
     <div class="">
       <div class="flex items-center justify-between text-sm">
         <span class="text-zinc-500">Total</span>
-        <span class="text-zinc-300">
-          {{ `${prettyBalance(totalExchangePrice, useBtcUnit)} ${unit}` }}
-        </span>
+
+        <div class="">
+          <div class="text-zinc-300">
+            {{ `${prettyBalance(totalExchangePrice, useBtcUnit)} ${unit}` }}
+          </div>
+
+          <div
+            class="text-sm text-zinc-500 text-right"
+            v-if="isShowingFiat && fiatRate && totalExchangePrice"
+          >
+            {{ getFiatPriceDisplay(totalExchangePrice, fiatRate) }}
+          </div>
+        </div>
       </div>
 
       <button

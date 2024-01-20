@@ -1,14 +1,13 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { ElMessage } from 'element-plus'
 import { UserIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
-import { cancelOrder, type Order, getFiatRate } from '@/queries/orders-api'
+import { type Order } from '@/queries/orders-api'
 import { prettyBalance } from '@/lib/formatters'
-import { calcFiatPrice, showFiat, useBtcUnit } from '@/lib/helpers'
+import { useBtcUnit } from '@/lib/helpers'
 import { useSelectOrder } from '@/hooks/use-select-order'
+import { useFiat } from '@/hooks/use-fiat'
 
 import {
   Tooltip,
@@ -19,6 +18,8 @@ import {
 
 const address = useConnectionStore().getAddress
 const { isSelected } = useSelectOrder()
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 const props = defineProps<{
   order: Order
@@ -35,26 +36,6 @@ const isMyOrder = computed(() => {
 
 const isFreeOrder = computed(() => {
   return props.orderType === 'ask' && props.order.freeState === 1
-})
-
-const queryClient = useQueryClient()
-const { mutate } = useMutation({
-  mutationFn: cancelOrder,
-  onSuccess: () => {
-    ElMessage.success('Order canceled')
-    const queryKey = props.orderType === 'ask' ? 'askOrders' : 'bidOrders'
-    queryClient.invalidateQueries([queryKey])
-    queryClient.invalidateQueries(['excludedBalance'])
-  },
-  onError: (err: any) => {
-    ElMessage.error(err.message)
-  },
-})
-
-// fiat price
-const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate', { coin: 'btc' }],
-  queryFn: getFiatRate,
 })
 </script>
 
@@ -91,8 +72,8 @@ const { data: fiatRate } = useQuery({
         </TooltipProvider>
       </div>
 
-      <div class="text-xs text-zinc-500" v-if="showFiat && fiatRate">
-        {{ '$' + calcFiatPrice(order.coinRatePrice, fiatRate) }}
+      <div class="text-xs text-zinc-500" v-if="isShowingFiat && fiatRate">
+        {{ '$' + getFiatPriceDisplay(order.coinRatePrice, fiatRate) }}
       </div>
     </div>
 
@@ -108,15 +89,15 @@ const { data: fiatRate } = useQuery({
       </template>
 
       <div v-else class="">
-        <div :class="showFiat && fiatRate ? 'col-span-3' : 'col-span-5'">
+        <div :class="isShowingFiat && fiatRate ? 'col-span-3' : 'col-span-5'">
           {{ prettyBalance(order.amount, useBtcUnit) }}
         </div>
 
         <div
           class="text-xs text-zinc-500 col-span-2"
-          v-if="showFiat && fiatRate"
+          v-if="isShowingFiat && fiatRate"
         >
-          {{ '$' + calcFiatPrice(order.amount, fiatRate) }}
+          {{ getFiatPriceDisplay(order.amount, fiatRate) }}
         </div>
       </div>
     </div>

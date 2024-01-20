@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
+import { TabGroup, TabList, Tab, TabPanels } from '@headlessui/vue'
 
 import PanelOpenOrders from '@/components/orders/history/PanelOpenOrders.vue'
 import PanelOrderHistory from '@/components/orders/history/PanelOrderHistory.vue'
 import PanelMarketTrades from '@/components/orders/history/PanelMarketTrades.vue'
 
-const openOrdersCount = ref(2)
+const openOrdersCount = ref(0)
 </script>
 
 <template>
@@ -48,7 +48,7 @@ const openOrdersCount = ref(2)
     </TabList>
 
     <TabPanels class="p-3 grow">
-      <PanelOpenOrders />
+      <PanelOpenOrders v-model:open-orders-count="openOrdersCount" />
       <PanelOrderHistory />
       <PanelMarketTrades />
     </TabPanels>

@@ -6,18 +6,19 @@ import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 
 import { prettyBalance } from '@/lib/formatters'
-import { calcFiatPrice, showFiat, sleep, unit, useBtcUnit } from '@/lib/helpers'
+import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { buildBidOffer } from '@/lib/builders/orders-v2'
-import { getFiatRate, getMarketPrice } from '@/queries/orders-api'
+import { getMarketPrice } from '@/queries/orders-api'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 import { IS_DEV } from '@/data/constants'
 import { useTradingPair } from '@/hooks/use-trading-pair'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { useFiat } from '@/hooks/use-fiat'
 
 import btcIcon from '@/assets/btc.svg?url'
-import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 const networkStore = useNetworkStore()
 const feebStore = useFeebStore()
@@ -25,6 +26,8 @@ const { selectedPair } = useTradingPair()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const { selectedBidOrder } = useSelectOrder()
 const { openModal } = useConfirmationModal()
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 // price related
 const price = ref(0)
@@ -120,12 +123,6 @@ const cannotPlaceOrderReason = computed(() => {
 
   return ''
 })
-
-// fiat price
-const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate', { coin: 'btc' }],
-  queryFn: getFiatRate,
-})
 </script>
 
 <template>
@@ -160,9 +157,9 @@ const { data: fiatRate } = useQuery({
 
             <div
               class="text-sm text-zinc-500 text-right pr-2 -mt-2"
-              v-if="showFiat && fiatRate && price"
+              v-if="isShowingFiat && fiatRate && price"
             >
-              {{ '$' + calcFiatPrice(price, fiatRate) }}
+              {{ getFiatPriceDisplay(price, fiatRate) }}
             </div>
           </div>
         </div>
@@ -218,9 +215,9 @@ const { data: fiatRate } = useQuery({
 
           <div
             class="text-sm text-zinc-500 text-right"
-            v-if="showFiat && fiatRate && totalExchangePrice"
+            v-if="isShowingFiat && fiatRate && totalExchangePrice"
           >
-            {{ '$' + calcFiatPrice(totalExchangePrice, fiatRate) }}
+            {{ getFiatPriceDisplay(totalExchangePrice, fiatRate) }}
           </div>
         </div>
       </div>

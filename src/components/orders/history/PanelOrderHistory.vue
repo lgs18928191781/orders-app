@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import { TabPanel } from '@headlessui/vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { ElMessage } from 'element-plus'
-import {
-  XSquareIcon,
-  MenuIcon,
-  XIcon,
-  CalendarSearchIcon,
-  Loader2Icon,
-} from 'lucide-vue-next'
+import { useQuery } from '@tanstack/vue-query'
+import { CalendarSearchIcon, Loader2Icon } from 'lucide-vue-next'
 
-import { prettyBtcDisplay, prettyTimestamp } from '@/lib/formatters'
-import { cancelOrder } from '@/queries/orders-api'
+import {
+  prettyBtcDisplay,
+  prettySymbol,
+  prettyTimestamp,
+} from '@/lib/formatters'
 import { getMyOrderHistory } from '@/queries/orders-v2'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
@@ -27,21 +23,6 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
     }),
   placeholderData: [],
 })
-
-const queryClient = useQueryClient()
-const { mutate } = useMutation({
-  mutationFn: cancelOrder,
-  onSuccess: () => {
-    ElMessage.success('Order canceled')
-    queryClient.invalidateQueries(['myOpenOrders'])
-    queryClient.invalidateQueries(['askOrders'])
-    queryClient.invalidateQueries(['bidOrders'])
-    queryClient.invalidateQueries(['excludedBalance'])
-  },
-  onError: (err: any) => {
-    ElMessage.error(err.message)
-  },
-})
 </script>
 
 <template>
@@ -51,10 +32,11 @@ const { mutate } = useMutation({
       class="grid grid-cols-12 gap-2 text-zinc-500 border-b border-zinc-700 pb-4"
     >
       <div class="col-span-2">Order Time</div>
+      <div class="col-span-2">Pair</div>
       <div class="col-span-1">Side</div>
-      <div class="col-span-3">Price</div>
+      <div class="col-span-2">Price</div>
       <div class="col-span-2">Amount</div>
-      <div class="col-span-3">Total</div>
+      <div class="col-span-2">Total</div>
       <div class="col-span-1 text-right">Status</div>
     </div>
 
@@ -86,6 +68,11 @@ const { mutate } = useMutation({
         <div class="col-span-2">
           {{ prettyTimestamp(order.timestamp, false, true) }}
         </div>
+
+        <div class="col-span-2">
+          {{ `${prettySymbol(order.tick)}/BTC` }}
+        </div>
+
         <div
           class="col-span-1 capitalize"
           :class="[
@@ -96,11 +83,15 @@ const { mutate } = useMutation({
         >
           {{ order.orderTypeStrInDisplay }}
         </div>
-        <div class="col-span-3">{{ prettyBtcDisplay(order.price) }}</div>
+        <div class="col-span-2 break-all">
+          {{ prettyBtcDisplay(order.price) }}
+        </div>
         <div class="col-span-2">{{ order.coinAmount }}</div>
-        <div class="col-span-3">{{ prettyBtcDisplay(order.amount) }}</div>
+        <div class="col-span-2 break-all">
+          {{ prettyBtcDisplay(order.amount) }}
+        </div>
         <div
-          class="col-span-1 text-right"
+          class="col-span-1 text-right capitalize"
           :class="[order.orderStateStr === 'canceled' && 'text-zinc-500']"
         >
           {{ order.orderStateStr }}

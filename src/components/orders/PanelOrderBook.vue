@@ -5,13 +5,14 @@ import { watch } from 'vue'
 import { DollarSignIcon } from 'lucide-vue-next'
 
 import { useScrollOrdersArea } from '@/hooks/use-scroll-orders-area'
+import { useFiat } from '@/hooks/use-fiat'
 
 import OrderList from './OrderList.vue'
 
-const showFiatPrice = useStorage('show-fiat-price', true)
+const { isShowingFiat } = useFiat()
 const { scroll } = useScrollOrdersArea()
 
-watch(showFiatPrice, (showFiatPrice) => {
+watch(isShowingFiat, () => {
   scroll()
 })
 </script>
@@ -28,14 +29,14 @@ watch(showFiatPrice, (showFiatPrice) => {
         class="flex items-center justify-between font-normal gap-2"
       >
         <Switch
-          v-model="showFiatPrice"
-          :class="showFiatPrice ? 'bg-primary' : 'bg-black'"
+          v-model="isShowingFiat"
+          :class="isShowingFiat ? 'bg-primary' : 'bg-black'"
           class="relative inline-flex h-6 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
           v-slot="{ checked }"
         >
           <span
             aria-hidden="true"
-            :class="showFiatPrice ? 'translate-x-6' : 'translate-x-0'"
+            :class="isShowingFiat ? 'translate-x-6' : 'translate-x-0'"
             class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
           >
             <DollarSignIcon

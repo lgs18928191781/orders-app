@@ -6,19 +6,19 @@ import { useQuery } from '@tanstack/vue-query'
 import { get } from '@vueuse/core'
 
 import { prettyBalance, prettyBtcDisplay } from '@/lib/formatters'
-import { calcFiatPrice, showFiat, sleep, unit, useBtcUnit } from '@/lib/helpers'
+import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { calculateFee } from '@/lib/build-helpers'
 import { buildSellTake } from '@/lib/builders/orders-v2'
-import { getFiatRate } from '@/queries/orders-api'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { IS_DEV } from '@/data/constants'
 import { useAreaHighlight } from '@/hooks/use-area-highlight'
 import { useTradingPair } from '@/hooks/use-trading-pair'
-
-import btcIcon from '@/assets/btc.svg?url'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { useFiat } from '@/hooks/use-fiat'
+
+import btcIcon from '@/assets/btc.svg?url'
 
 const connectionStore = useConnectionStore()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
@@ -26,6 +26,8 @@ const feebStore = useFeebStore()
 const { highlight } = useAreaHighlight()
 const { selectedPair } = useTradingPair()
 const { selectedBidOrder } = useSelectOrder()
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 const totalPrice = computed(() => {
   if (!selectedBidOrder.value)
@@ -122,12 +124,6 @@ const cannotTakeOrderReason = computed(() => {
 
   return ''
 })
-
-// fiat price
-const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate', { coin: 'btc' }],
-  queryFn: getFiatRate,
-})
 </script>
 
 <template>
@@ -155,10 +151,10 @@ const { data: fiatRate } = useQuery({
 
           <div
             class="text-sm text-zinc-500 text-right pr-2 -mt-2"
-            v-if="showFiat && fiatRate && selectedBidOrder"
+            v-if="isShowingFiat && fiatRate && selectedBidOrder"
           >
             {{
-              '$' + calcFiatPrice(selectedBidOrder.price.toNumber(), fiatRate)
+              getFiatPriceDisplay(selectedBidOrder.price.toNumber(), fiatRate)
             }}
           </div>
         </div>
@@ -213,25 +209,25 @@ const { data: fiatRate } = useQuery({
           <div class="text-zinc-300">{{ totalPrice.display }}</div>
           <div
             class="text-sm text-zinc-500 text-right"
-            v-if="showFiat && fiatRate && totalPrice.value"
+            v-if="isShowingFiat && fiatRate && totalPrice.value"
           >
-            {{ '$' + calcFiatPrice(totalPrice.value, fiatRate) }}
+            {{ getFiatPriceDisplay(totalPrice.value, fiatRate) }}
           </div>
         </div>
       </div>
 
       <div
         class="flex items-center justify-between text-sm"
-        :class="[showFiat && sellFees ? 'mt-4' : 'mt-2']"
+        :class="[isShowingFiat && sellFees ? 'mt-4' : 'mt-2']"
       >
         <span class="text-zinc-500">Gas</span>
         <div class="">
           <div class="text-zinc-300">{{ prettySellFees }}</div>
           <div
             class="text-sm text-zinc-500 text-right"
-            v-if="showFiat && fiatRate && sellFees"
+            v-if="isShowingFiat && fiatRate && sellFees"
           >
-            {{ '$' + calcFiatPrice(sellFees, fiatRate) }}
+            {{ getFiatPriceDisplay(sellFees, fiatRate) }}
           </div>
         </div>
       </div>

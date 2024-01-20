@@ -2,19 +2,22 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed, watch } from 'vue'
 
-import { getFiatRate, getMarketPrice } from '@/queries/orders-api'
+import { getMarketPrice } from '@/queries/orders-api'
 import { getOrders } from '@/queries/orders-v2'
 import { useNetworkStore } from '@/stores/network'
 import { prettyBalance } from '@/lib/formatters'
-import { calcFiatPrice, showFiat, unit, useBtcUnit } from '@/lib/helpers'
+import { unit, useBtcUnit } from '@/lib/helpers'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useTradingPair } from '@/hooks/use-trading-pair'
+import { useFiat } from '@/hooks/use-fiat'
 
 import OrderItem from './OrderItem.vue'
 
 const networkStore = useNetworkStore()
 const { select } = useSelectOrder()
 const { selectedPair } = useTradingPair()
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 const { data: askOrders, isFetched: isFetchedAskOrders } = useQuery({
   queryKey: [
@@ -79,12 +82,6 @@ const { data: marketPrice } = useQuery({
     { network: networkStore.network, tick: selectedPair.value.fromSymbol },
   ],
   queryFn: () => getMarketPrice({ tick: selectedPair.value.fromSymbol }),
-})
-
-// fiat price
-const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate'],
-  queryFn: getFiatRate,
 })
 </script>
 
@@ -163,9 +160,9 @@ const { data: fiatRate } = useQuery({
             </span>
             <span
               class="text-xs text-zinc-500 pl-2"
-              v-if="showFiat && fiatRate && marketPrice"
+              v-if="isShowingFiat && fiatRate && marketPrice"
             >
-              {{ '$' + calcFiatPrice(marketPrice, fiatRate) }}
+              {{ getFiatPriceDisplay(marketPrice, fiatRate) }}
             </span>
           </div>
         </el-tooltip>

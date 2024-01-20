@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { TabPanel } from '@headlessui/vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
@@ -10,7 +11,11 @@ import {
   Loader2Icon,
 } from 'lucide-vue-next'
 
-import { prettyBtcDisplay, prettyTimestamp } from '@/lib/formatters'
+import {
+  prettyBtcDisplay,
+  prettySymbol,
+  prettyTimestamp,
+} from '@/lib/formatters'
 import { cancelOrder } from '@/queries/orders-api'
 import { getMyOpenOrders } from '@/queries/orders-v2'
 import { useConnectionStore } from '@/stores/connection'
@@ -18,6 +23,8 @@ import { useNetworkStore } from '@/stores/network'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
+
+const ordersCount = defineModel('openOrdersCount')
 
 const { data: openOrders, isFetching: isFetchingOpenOrders } = useQuery({
   queryKey: ['myOpenOrders', { network: networkStore.network }],
@@ -27,6 +34,14 @@ const { data: openOrders, isFetching: isFetchingOpenOrders } = useQuery({
     }),
   placeholderData: [],
 })
+watch(openOrders, (val) => {
+  if (!val) {
+    ordersCount.value = 0
+    return
+  }
+
+  ordersCount.value = val.length
+})
 
 const queryClient = useQueryClient()
 const { mutate } = useMutation({
@@ -34,6 +49,7 @@ const { mutate } = useMutation({
   onSuccess: () => {
     ElMessage.success('Order canceled')
     queryClient.invalidateQueries(['myOpenOrders'])
+    queryClient.invalidateQueries(['myOrderHistory'])
     queryClient.invalidateQueries(['askOrders'])
     queryClient.invalidateQueries(['bidOrders'])
     queryClient.invalidateQueries(['excludedBalance'])
@@ -50,11 +66,12 @@ const { mutate } = useMutation({
     <div
       class="grid grid-cols-12 gap-2 text-zinc-500 border-b border-zinc-700 pb-4"
     >
-      <div class="col-span-2">Date</div>
+      <div class="col-span-2">Order Time</div>
+      <div class="col-span-2">Pair</div>
       <div class="col-span-1">Side</div>
-      <div class="col-span-3">Price</div>
+      <div class="col-span-2">Price</div>
       <div class="col-span-2">Amount</div>
-      <div class="col-span-3">Total</div>
+      <div class="col-span-2">Total</div>
       <div class="col-span-1 text-right flex items-center justify-end">
         <MenuIcon class="h-5 w-5" />
       </div>
@@ -88,6 +105,11 @@ const { mutate } = useMutation({
         <div class="col-span-2">
           {{ prettyTimestamp(order.timestamp, false, true) }}
         </div>
+
+        <div class="col-span-2">
+          {{ `${prettySymbol(order.tick)}/BTC` }}
+        </div>
+
         <div
           class="col-span-1 capitalize"
           :class="[
@@ -98,9 +120,13 @@ const { mutate } = useMutation({
         >
           {{ order.orderTypeStrInDisplay }}
         </div>
-        <div class="col-span-3">{{ prettyBtcDisplay(order.price) }}</div>
+        <div class="col-span-2 break-all">
+          {{ prettyBtcDisplay(order.price) }}
+        </div>
         <div class="col-span-2">{{ order.coinAmount }}</div>
-        <div class="col-span-3">{{ prettyBtcDisplay(order.amount) }}</div>
+        <div class="col-span-2 break-all">
+          {{ prettyBtcDisplay(order.amount) }}
+        </div>
         <div class="col-span-1 text-right">
           <button
             class="text-zinc-700 hover:text-primary group"
