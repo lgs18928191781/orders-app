@@ -11,9 +11,12 @@ import {
 import { getMyOrderHistory } from '@/queries/orders-v2'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
+import { useFiat } from '@/hooks/use-fiat'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
   queryKey: ['myOrderHistory', { network: networkStore.network }],
@@ -61,7 +64,7 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
       v-else
     >
       <div
-        class="grid grid-cols-12 gap-2 text-zinc-300"
+        class="grid grid-cols-12 gap-2 text-zinc-300 items-start"
         v-for="order in orderHistory"
         :key="order.orderId"
       >
@@ -83,13 +86,27 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
         >
           {{ order.orderTypeStrInDisplay }}
         </div>
-        <div class="col-span-2 break-all">
-          {{ prettyBtcDisplay(order.price) }}
+
+        <div class="col-span-2">
+          <div class="break-all">
+            {{ prettyBtcDisplay(order.price) }}
+          </div>
+          <div class="text-xs text-zinc-500" v-if="isShowingFiat && fiatRate">
+            {{ getFiatPriceDisplay(order.price.toNumber(), fiatRate) }}
+          </div>
         </div>
+
         <div class="col-span-2">{{ order.coinAmount }}</div>
-        <div class="col-span-2 break-all">
-          {{ prettyBtcDisplay(order.amount) }}
+
+        <div class="col-span-2">
+          <div class="break-all">
+            {{ prettyBtcDisplay(order.amount) }}
+          </div>
+          <div class="text-xs text-zinc-500" v-if="isShowingFiat && fiatRate">
+            {{ getFiatPriceDisplay(order.amount, fiatRate) }}
+          </div>
         </div>
+
         <div
           class="col-span-1 text-right capitalize"
           :class="[order.orderStateStr === 'canceled' && 'text-zinc-500']"

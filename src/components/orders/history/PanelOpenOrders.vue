@@ -20,9 +20,12 @@ import { cancelOrder } from '@/queries/orders-api'
 import { getMyOpenOrders } from '@/queries/orders-v2'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
+import { useFiat } from '@/hooks/use-fiat'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 const ordersCount = defineModel('openOrdersCount')
 
@@ -98,7 +101,7 @@ const { mutate } = useMutation({
       v-else
     >
       <div
-        class="grid grid-cols-12 gap-2 text-zinc-300"
+        class="grid grid-cols-12 gap-2 text-zinc-300 items-start"
         v-for="order in openOrders"
         :key="order.orderId"
       >
@@ -120,13 +123,27 @@ const { mutate } = useMutation({
         >
           {{ order.orderTypeStrInDisplay }}
         </div>
-        <div class="col-span-2 break-all">
-          {{ prettyBtcDisplay(order.price) }}
+
+        <div class="col-span-2">
+          <div class="break-all">
+            {{ prettyBtcDisplay(order.price) }}
+          </div>
+          <div class="text-xs text-zinc-500" v-if="isShowingFiat && fiatRate">
+            {{ getFiatPriceDisplay(order.price.toNumber(), fiatRate) }}
+          </div>
         </div>
+
         <div class="col-span-2">{{ order.coinAmount }}</div>
-        <div class="col-span-2 break-all">
-          {{ prettyBtcDisplay(order.amount) }}
+
+        <div class="col-span-2">
+          <div class="break-all">
+            {{ prettyBtcDisplay(order.amount) }}
+          </div>
+          <div class="text-xs text-zinc-500" v-if="isShowingFiat && fiatRate">
+            {{ getFiatPriceDisplay(order.amount, fiatRate) }}
+          </div>
         </div>
+
         <div class="col-span-1 text-right">
           <button
             class="text-zinc-700 hover:text-primary group"

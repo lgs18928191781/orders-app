@@ -73,7 +73,7 @@ const isFreeOrder = computed(() => {
       </div>
 
       <div class="text-xs text-zinc-500" v-if="isShowingFiat && fiatRate">
-        {{ '$' + getFiatPriceDisplay(order.coinRatePrice, fiatRate) }}
+        {{ getFiatPriceDisplay(order.coinRatePrice, fiatRate) }}
       </div>
     </div>
 
