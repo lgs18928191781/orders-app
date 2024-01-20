@@ -1,7 +1,7 @@
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import sign from '@/lib/sign'
-import { ordersV2Fetch } from '@/lib/fetch'
+import { ordersApiFetch, ordersV2Fetch } from '@/lib/fetch'
 import Decimal from 'decimal.js'
 import { sleep } from '@/lib/helpers'
 
@@ -443,6 +443,47 @@ export const postSellTake = async ({
       psbtRaw,
     }),
   })
+
+  return res
+}
+
+export type KLineInterval = '15m' | '1h' | '4h' | '1d' | '1w'
+export const getKLineStats = async ({
+  tick,
+  interval,
+  limit,
+}: {
+  tick: string
+  interval: KLineInterval
+  limit: number
+}): Promise<
+  {
+    open: string
+    close: string
+    high: string
+    low: string
+    volume: number
+    timestamp: number
+  }[]
+> => {
+  const { publicKey, signature } = await sign()
+  const params = new URLSearchParams({
+    net: useNetworkStore().network,
+    tick,
+    interval,
+    limit: String(limit),
+  })
+
+  const res = await ordersApiFetch(`kline?${params}`, {
+    headers: {
+      'X-Signature': signature,
+      'X-Public-Key': publicKey,
+    },
+  })
+    .then(({ list }) => list)
+    .catch(() => {
+      return []
+    })
 
   return res
 }

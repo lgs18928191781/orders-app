@@ -40,8 +40,8 @@ watch(isShowingFiat, () => {
             class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
           >
             <DollarSignIcon
-              class="h-5 w-5 text-orange-800 transition"
-              :class="{ '-rotate-12': checked }"
+              class="h-5 w-5 p-px text-orange-800 transition duration-300"
+              :class="{ 'rotate-180': checked }"
             />
           </span>
         </Switch>
