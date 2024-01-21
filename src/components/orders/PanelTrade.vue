@@ -12,7 +12,7 @@ function changeModeTab(index: number) {
 </script>
 
 <template>
-  <div class="col-span-3 flex-1 primary-panel min-h-[40vh] lg:min-h-[50vh]">
+  <div class="col-span-3 flex-1 primary-panel min-h-[40vh] lg:min-h-[45vh]">
     <div class="flex flex-col p-4 h-full flex-auto">
       <!-- tabs -->
       <TabGroup :selected-index="modeTab" @change="changeModeTab">

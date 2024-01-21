@@ -75,7 +75,7 @@ const klineOptions = ref({
   borderColor: '#a78bfa',
 
   pointStyle: false,
-  aspectRatio: 1,
+  aspectRatio: 4 / 3,
   plugins: {
     legend: {
       display: false,
@@ -135,9 +135,7 @@ const klineOptions = ref({
       </TabGroup>
     </div>
 
-    <div
-      class="bg-black rounded-md aspect-square flex items-center justify-center p-2"
-    >
+    <div class="bg-black rounded-md flex items-center justify-center p-2">
       <Line id="my-chart-id" :data="klineStats" :options="klineOptions" />
     </div>
   </div>
