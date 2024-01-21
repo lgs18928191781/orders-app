@@ -92,7 +92,7 @@ defineEmits(['update:isOpen'])
               <div class="mt-5 sm:mt-6">
                 <button
                   type="button"
-                  class="inline-flex w-full justify-center rounded-md bg-orange-400 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+                  class="inline-flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
                   @click="$emit('update:isOpen', false)"
                 >
                   Got it!

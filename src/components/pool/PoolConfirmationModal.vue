@@ -176,7 +176,7 @@ async function submitOrder() {
       <div class="flex min-h-full items-center justify-center p-4 text-center">
         <DialogPanel
           :class="[
-            'w-full transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-orange-200/10 transition-all',
+            'w-full transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-primary/10 transition-all',
             builtBtcInfo ? 'max-w-3xl' : 'max-w-lg',
           ]"
         >
@@ -224,7 +224,7 @@ async function submitOrder() {
                       :width="400"
                       trigger="hover"
                       content="You provide BRC20 liquidity to the pool by signing a PSBT."
-                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10"
+                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10"
                     >
                       <template #reference>
                         <HelpCircleIcon
@@ -294,7 +294,7 @@ async function submitOrder() {
                       :width="400"
                       trigger="hover"
                       content="You provide BTC liquidity to the pool by offering a PSBT which spends the BTC UTXO. Once the liquidity is used, the BTC will send back to your address automatically."
-                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10"
+                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10"
                     >
                       <template #reference>
                         <HelpCircleIcon

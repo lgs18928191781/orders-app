@@ -68,7 +68,7 @@ const hasReleasable = computed(() => {
 </script>
 
 <template>
-  <div class="border-2 border-orange-200/30 rounded-xl p-8">
+  <div class="border-2 border-primary/30 rounded-xl p-8">
     <TabGroup
       v-if="loggedIn"
       :default-index="selectedTab"
@@ -91,7 +91,7 @@ const hasReleasable = computed(() => {
           <span>{{ label }}</span>
           <span
             v-if="label === 'Release' && hasReleasable"
-            class="inline-flex items-center rounded-md bg-orange-400/30 px-1.5 py-0.5 text-xs font-medium text-primary -translate-y-2 -translate-x-1 absolute"
+            class="inline-flex items-center rounded-md bg-primary/30 px-1.5 py-0.5 text-xs font-medium text-primary -translate-y-2 -translate-x-1 absolute"
           >
             {{ rewardsEssential?.hasReleasePoolOrderCount }}
           </span>

@@ -273,7 +273,7 @@ async function onConfirm() {
           <Switch
             v-model="providesBtc"
             :class="[
-              providesBtc ? 'bg-primary' : 'bg-orange-200/10',
+              providesBtc ? 'bg-primary' : 'bg-primary/10',
               'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ring-offset-zinc-900',
             ]"
           >
@@ -310,7 +310,7 @@ async function onConfirm() {
             :width="400"
             trigger="hover"
             content="You will also provide BTC liquidity to the pool. This will gets you additional rewards."
-            popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10 "
+            popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10 "
           >
             <template #reference>
               <HelpCircleIcon

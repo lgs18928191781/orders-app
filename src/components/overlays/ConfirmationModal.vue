@@ -269,7 +269,7 @@ async function submitOrder() {
     <div class="fixed inset-0 overflow-y-auto text-zinc-300">
       <div class="flex min-h-full items-center justify-center p-4 text-center">
         <DialogPanel
-          class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-orange-200/10 transition-all"
+          class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-primary/10 transition-all"
         >
           <DialogTitle class="text-lg text-zinc-300">
             Confirm Transaction

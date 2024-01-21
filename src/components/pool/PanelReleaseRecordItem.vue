@@ -274,7 +274,7 @@ async function submitReleaseRecord() {
             :width="400"
             trigger="hover"
             content="The rewards obtained from this record will be reduced by a certain percentage unless this asset is released."
-            popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10 "
+            popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10 "
           >
             <template #reference>
               <HelpCircleIcon
