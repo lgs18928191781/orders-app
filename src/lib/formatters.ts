@@ -14,6 +14,12 @@ export function prettyTimestamp(
   return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
 }
 
+export function prettyDate(timestamp: number, isInSeconds = false) {
+  if (isInSeconds) timestamp = timestamp * 1000
+
+  return dayjs(timestamp).format('MM-DD')
+}
+
 export const prettyAddress = (address: string, len = 6) => {
   return `${address.slice(0, len)}...${address.slice(-len)}`
 }

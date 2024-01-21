@@ -3,7 +3,6 @@ import { onMounted, ref } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import * as secp256k1 from 'tiny-secp256k1'
 
-import { DEBUG } from '@/data/constants'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useGeoStore } from '@/stores/geo'
 

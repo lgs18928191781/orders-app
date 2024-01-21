@@ -16,6 +16,7 @@ import { useQuery } from '@tanstack/vue-query'
 
 import { getKLineStats, type KLineInterval } from '@/queries/orders-v2'
 import { useTradingPair } from '@/hooks/use-trading-pair'
+import { prettyDate, prettySymbol } from '@/lib/formatters'
 
 ChartJS.register(
   CategoryScale,
@@ -29,6 +30,9 @@ ChartJS.register(
 
 const interval: Ref<KLineInterval> = ref('1d')
 const limit = ref(30)
+function changeStatsLimit(index: number) {
+  limit.value = index === 0 ? 30 : 90
+}
 
 const { fromSymbol } = useTradingPair()
 const { data: rawStats } = useQuery({
@@ -40,6 +44,7 @@ const { data: rawStats } = useQuery({
       limit: limit.value,
     }),
   placeholderData: [],
+  cacheTime: 1000 * 60 * 60, // 1 hour
 })
 
 const klineStats = computed(() => {
@@ -55,8 +60,7 @@ const klineStats = computed(() => {
     }
 
   return {
-    // labels: 1 to 30
-    labels: [...Array(limit.value).keys()].map((i) => String(i + 1)),
+    labels: rawStats.value.map((stat) => prettyDate(stat.timestamp)),
     datasets: [
       {
         label: 'Price',
@@ -68,8 +72,10 @@ const klineStats = computed(() => {
 
 const klineOptions = ref({
   responsive: true,
-  borderColor: '#8b5cf6',
+  borderColor: '#a78bfa',
+
   pointStyle: false,
+  aspectRatio: 1,
   plugins: {
     legend: {
       display: false,
@@ -80,8 +86,16 @@ const klineOptions = ref({
     },
   },
   scales: {
+    x: {
+      grid: {
+        color: '#27272a',
+      },
+    },
     y: {
       beginAtZero: true,
+      grid: {
+        color: '#27272a',
+      },
     },
   },
 })
@@ -89,16 +103,40 @@ const klineOptions = ref({
 
 <template>
   <div class="">
-    <TabGroup class="py-2" as="div">
-      <TabList class="p-1 bg-black inline-flex rounded-md gap-2">
-        <Tab class="text-zinc-500 px-4 py-1 rounded text-sm"> 30D </Tab>
+    <div class="flex items-center justify-between pb-4">
+      <h3 class="font-bold text-base text-zinc-300">
+        {{ prettySymbol(fromSymbol) }} Prices
+      </h3>
 
-        <Tab class="text-zinc-500 px-4 py-1 rounded text-sm"> ALL </Tab>
-      </TabList>
-    </TabGroup>
+      <TabGroup class="" as="div" @change="changeStatsLimit">
+        <TabList class="p-1 bg-black inline-flex rounded-md gap-2">
+          <Tab as="template" v-slot="{ selected }">
+            <button
+              :class="[
+                ' px-4 py-1 rounded text-sm',
+                selected ? 'bg-zinc-800 text-primary' : 'text-zinc-500',
+              ]"
+            >
+              30D
+            </button>
+          </Tab>
+
+          <Tab as="template" v-slot="{ selected }">
+            <button
+              :class="[
+                ' px-4 py-1 rounded text-sm',
+                selected ? 'bg-zinc-800 text-primary' : 'text-zinc-500',
+              ]"
+            >
+              90D
+            </button>
+          </Tab>
+        </TabList>
+      </TabGroup>
+    </div>
 
     <div
-      class="bg-black rounded-lg aspect-video flex items-center justify-center p-2"
+      class="bg-black rounded-md aspect-square flex items-center justify-center p-2"
     >
       <Line id="my-chart-id" :data="klineStats" :options="klineOptions" />
     </div>

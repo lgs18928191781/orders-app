@@ -471,16 +471,22 @@ export const getKLineStats = async ({
     net: useNetworkStore().network,
     tick,
     interval,
-    limit: String(limit),
   })
+  if (limit) {
+    params.append('limit', String(limit))
+  }
 
-  const res = await ordersApiFetch(`kline?${params}`, {
+  const res = await ordersV2Fetch(`kline?${params}`, {
     headers: {
       'X-Signature': signature,
       'X-Public-Key': publicKey,
     },
   })
     .then(({ list }) => list)
+    .then((list) => {
+      // sorted by timestamp
+      return list.sort((a: any, b: any) => a.timestamp - b.timestamp)
+    })
     .catch(() => {
       return []
     })
