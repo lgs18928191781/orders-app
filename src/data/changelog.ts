@@ -1,5 +1,11 @@
 const changelog = [
   {
+    version: '2.1.0',
+    emoji: '☄️',
+    date: '2024-1-21',
+    changes: ['Release full functionality of Orderbook V2.', 'Fix some bugs.'],
+  },
+  {
     version: '2.0.1',
     emoji: '🌈',
     date: '2024-1-17',
