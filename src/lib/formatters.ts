@@ -51,7 +51,16 @@ export const prettyBalance = (
   return new Decimal(balance).toFixed()
 }
 
-export const prettyBtcDisplay = (balance: number | string | Decimal) => {
+export const prettyBtcDisplay = (
+  balance: number | string | Decimal,
+  cutDecimals = false
+) => {
+  if (cutDecimals) {
+    const _ = new Decimal(balance).dividedBy(1e8)
+
+    // no decimals
+    return `${_.toFixed(0)} BTC`
+  }
   return `${prettyBalance(balance)} BTC`
 }
 

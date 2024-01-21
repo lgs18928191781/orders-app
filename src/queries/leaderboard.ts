@@ -31,6 +31,24 @@ async function eventFetch(
   return jsoned.data
 }
 
+export const getActivityAssetTicks = async (): Promise<
+  {
+    endTime: number
+    startTime: number
+    tick: string
+  }[]
+> => {
+  const params = new URLSearchParams({
+    net: 'livenet',
+  })
+
+  const ticks = await eventFetch(`ranking/tick?${params}`).then(
+    (res) => res?.results ?? []
+  )
+
+  return ticks
+}
+
 export const getOneLeaderboardStats = async ({
   tick,
 }: {
@@ -40,6 +58,14 @@ export const getOneLeaderboardStats = async ({
   addressTotalAmount: number
   orderCount: number
   totalAmount: number
+  eventStartTime: number
+  eventEndTime: number
+  tickCurrentLevel: number
+  tickNextLevel: number
+  tickCurrentLevelLimitAmount: number
+  tickNextLevelLimitAmount: number
+  tickCurrentLevelRewardAmount: number
+  tickNextLevelRewardAmount: number
 }> => {
   const address = useConnectionStore().getAddress
   const params = new URLSearchParams({
