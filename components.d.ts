@@ -10,6 +10,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AddLiquiditySide: typeof import('./src/components/swap/pools/AddLiquiditySide.vue')['default']
+    AddressMenu: typeof import('./src/components/header/AddressMenu.vue')['default']
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
     AssetSelect: typeof import('./src/components/AssetSelect.vue')['default']
     Building: typeof import('./src/components/overlays/Building.vue')['default']

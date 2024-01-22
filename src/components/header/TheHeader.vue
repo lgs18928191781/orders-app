@@ -1,23 +1,21 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useQueryClient } from '@tanstack/vue-query'
+import { MenuIcon } from 'lucide-vue-next'
 
-import { prettyAddress } from '@/lib/formatters'
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
 import whitelist from '@/lib/whitelist'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { isUnsupportedAddress } from '@/lib/helpers'
 
 import WalletMissingModal from './WalletMissingModal.vue'
 import AssetsDisplay from './AssetsDisplay.vue'
 import NetworkState from './NetworkState.vue'
 import Notifications from './Notifications.vue'
 import TheNavbar from './TheNavbar.vue'
-import unisatIcon from '@/assets/unisat-icon.png?url'
-import okxIcon from '@/assets/okx-icon.png?url'
-import { isUnsupportedAddress } from '@/lib/helpers'
-import metaletIcon from '@/assets/metalet-icon.png?url'
+import AddressMenu from '@/components/header/AddressMenu.vue'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
@@ -65,7 +63,6 @@ const okxAccountsChangedHandler = (accounts: string[] | null) => {
     },
   })
 }
-
 const metaletAccountsChangedHandler = () => {
   if (useConnectionStore().last.wallet !== 'metalet') return
 
@@ -125,40 +122,6 @@ onBeforeUnmount(() => {
     metaletAccountsChangedHandler
   )
 })
-
-// connect / address related
-const { data: address } = useQuery({
-  queryKey: ['address', { network: networkStore.network }],
-  queryFn: async () =>
-    connectionStore.sync().then((connection) => connection?.address),
-  retry: 0,
-  enabled: computed(() => connectionStore.connected),
-})
-
-const walletIcon = computed(() => {
-  const connection = connectionStore.last
-
-  if (!connection) return null
-
-  switch (connection.wallet) {
-    case 'unisat':
-      return unisatIcon
-    case 'okx':
-      return okxIcon
-    case 'metalet':
-      return metaletIcon
-    default:
-      return
-  }
-})
-
-function copyAddress() {
-  // copy address value to clipboard
-  const address = connectionStore.getAddress
-  if (!address) return
-  navigator.clipboard.writeText(address)
-  ElMessage.success('Address copied to clipboard')
-}
 </script>
 
 <template>
@@ -185,33 +148,8 @@ function copyAddress() {
             <div
               class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
             >
-              <div
-                class="flex gap-2 pr-3 cursor-pointer"
-                @click="copyAddress"
-                title="copy address"
-              >
-                <img
-                  class="h-5"
-                  :src="walletIcon"
-                  alt="Unisat"
-                  v-if="walletIcon"
-                />
-                <span class="text-sm text-primary">
-                  {{ address ? prettyAddress(address, 4) : '-' }}
-                </span>
-              </div>
-              =======
-              <button
-                class="h-10 rounded-lg border-2 border-orange-300 px-4 transition hover:text-orange-950 hover:bg-orange-300"
-                @click="openConnectionModal"
-                v-if="!connectionStore.connected"
-              >
-                Connect Wallet
-              </button>
-              >>>>>>> feature/metalet-integration
-
+              <AddressMenu />
               <AssetsDisplay />
-
               <NetworkState />
             </div>
 

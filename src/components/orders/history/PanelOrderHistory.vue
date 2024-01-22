@@ -127,9 +127,9 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
           </div>
 
           <a
-            v-if="order.orderStateStr === 'done'"
+            v-if="order.orderStateStr === 'done' && order.dealTx"
             :title="`View on Mempool explorer`"
-            :href="`https://mempool.space/tx/${order.orderId}`"
+            :href="`https://mempool.space/tx/${order.dealTx}`"
             target="_blank"
             rel="noopener noreferrer"
           >

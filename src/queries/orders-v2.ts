@@ -140,6 +140,7 @@ export const getMyOpenOrders = async ({ address }: { address: string }) => {
 
 type OrderHistory = Order & {
   orderStateStr: 'open' | 'done' | 'canceled'
+  dealTx?: string
 }
 export const getMyOrderHistory = async ({ address }: { address: string }) => {
   const { publicKey, signature } = await sign()

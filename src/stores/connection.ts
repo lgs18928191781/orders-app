@@ -133,9 +133,9 @@ export const useConnectionStore = defineStore('connection', {
         connection.status = 'disconnected'
         connection.wallet = wallet
         this.last = connection
-
-        return this.last
       }
+
+      return this.last
     },
 
     async sync() {
