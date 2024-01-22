@@ -80,21 +80,25 @@ const klineOptions = ref({
     legend: {
       display: false,
     },
-    title: {
-      display: false,
-      text: 'K Line Chart',
-    },
   },
   scales: {
     x: {
       grid: {
         color: '#27272a',
       },
+      title: {
+        display: true,
+        text: 'Date',
+      },
     },
     y: {
       beginAtZero: true,
       grid: {
         color: '#27272a',
+      },
+      title: {
+        display: true,
+        text: 'Price (satoshi)',
       },
     },
   },
