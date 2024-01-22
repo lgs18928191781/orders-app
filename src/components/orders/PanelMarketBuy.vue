@@ -209,7 +209,9 @@ const cannotTakeOrderReason = computed(() => {
             />
           </button> -->
 
-          <div class="text-zinc-300">{{ feebStore.get + ' sat/vB' }}</div>
+          <div class="text-zinc-300">
+            {{ feebStore.get ? feebStore.get + ' sat/vB' : '-' }}
+          </div>
         </div>
       </div>
 
