@@ -83,7 +83,7 @@ const currentLevelProgress = computed(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
+  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
     <h1 class="text-2xl font-semibold text-center mb-6 text-zinc-100">
       Leaderboard
     </h1>
@@ -113,7 +113,7 @@ const currentLevelProgress = computed(() => {
 
       <div class="space-y-4" v-if="stats">
         <div class="grid grid-cols-6">
-          <div class="text-zinc-300">Activity at</div>
+          <div class="text-zinc-300 text-sm">Activity at</div>
           <div class="col-span-5" v-if="stats.eventStartTime">
             {{ prettyTimestamp(stats.eventStartTime) }} -
             {{ prettyTimestamp(stats.eventEndTime) }}
@@ -122,7 +122,7 @@ const currentLevelProgress = computed(() => {
         </div>
 
         <div class="grid grid-cols-6 gap-4">
-          <div class="text-zinc-300">Current Lvl</div>
+          <div class="text-zinc-300 text-sm">Current Lv.</div>
           <div class="col-span-2 flex gap-4 items-center">
             <span class="text-orange-300">{{ stats.tickCurrentLevel }}</span>
 
@@ -143,18 +143,18 @@ const currentLevelProgress = computed(() => {
               </div>
             </div>
           </div>
-          <div class="text-zinc-300">Current Reward</div>
+          <div class="text-zinc-300 text-sm">Current Lv. Reward</div>
           <div class="col-span-2 text-orange-300">
             {{ stats.tickCurrentLevelRewardAmount + ' $RDEX' }}
           </div>
         </div>
 
         <div class="grid grid-cols-6 gap-4">
-          <div class="text-zinc-300">Next Lvl</div>
+          <div class="text-zinc-300 text-sm">Next Lv.</div>
           <div class="col-span-2 text-orange-300">
             {{ stats.tickNextLevel }}
           </div>
-          <div class="text-zinc-300">Next Reward</div>
+          <div class="text-zinc-300 text-sm">Next Lv. Reward</div>
           <div class="col-span-2 text-orange-300">
             {{ stats.tickNextLevelRewardAmount + ' $RDEX' }}
           </div>
