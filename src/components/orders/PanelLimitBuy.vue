@@ -4,6 +4,7 @@ import { TabPanel } from '@headlessui/vue'
 import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
+import { get } from '@vueuse/core'
 
 import { prettyBalance } from '@/lib/formatters'
 import { sleep, unit, useBtcUnit } from '@/lib/helpers'
@@ -11,7 +12,7 @@ import { buildBidOffer } from '@/lib/builders/orders-v2'
 import { getMarketPrice } from '@/queries/orders-api'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
-import { IS_DEV } from '@/data/constants'
+import { BID_TX_SIZE, IS_DEV } from '@/data/constants'
 import { useTradingPair } from '@/hooks/use-trading-pair'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
@@ -87,6 +88,20 @@ async function buildOrder() {
   openModal(buildRes)
   return
 }
+
+const buyFees = computed(() => {
+  if (!feebStore.get) return 0
+  if (!totalExchangePrice.value) return 0
+
+  return feebStore.get * BID_TX_SIZE
+})
+const prettyBuyFees = computed(() => {
+  if (!buyFees.value) return '0'
+
+  const feeInBtc = buyFees.value
+
+  return `≈ ${prettyBalance(feeInBtc, get(useBtcUnit))} ${get(unit)}`
+})
 
 const { data: marketPrice } = useQuery({
   queryKey: [
@@ -215,6 +230,38 @@ const cannotPlaceOrderReason = computed(() => {
             v-if="isShowingFiat && fiatRate && totalExchangePrice"
           >
             {{ getFiatPriceDisplay(totalExchangePrice, fiatRate) }}
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="flex items-center justify-between text-sm"
+        :class="[isShowingFiat && buyFees ? 'mt-4' : 'mt-2']"
+      >
+        <span class="text-zinc-500">Gas Plan</span>
+        <div class="flex gap-2">
+          <!-- <button class="hover:scale-125" @click="">
+            <ArrowRightLeftIcon
+              class="w-4 h-4 text-zinc-500 hover:text-primary"
+            />
+          </button> -->
+
+          <div class="text-zinc-300">{{ feebStore.get + ' sat/vB' }}</div>
+        </div>
+      </div>
+
+      <div
+        class="flex items-center justify-between text-sm"
+        :class="[isShowingFiat && buyFees ? 'mt-4' : 'mt-2']"
+      >
+        <span class="text-zinc-500">Gas</span>
+        <div class="">
+          <div class="text-zinc-300">{{ prettyBuyFees }}</div>
+          <div
+            class="text-sm text-zinc-500 text-right"
+            v-if="isShowingFiat && fiatRate && buyFees"
+          >
+            {{ getFiatPriceDisplay(buyFees, fiatRate) }}
           </div>
         </div>
       </div>

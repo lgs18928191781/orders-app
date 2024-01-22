@@ -19,6 +19,7 @@ import { useSelectOrder } from '@/hooks/use-select-order'
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 
 import btcIcon from '@/assets/btc.svg?url'
+import { ArrowRightLeftIcon } from 'lucide-vue-next'
 
 const connectionStore = useConnectionStore()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
@@ -193,6 +194,22 @@ const cannotTakeOrderReason = computed(() => {
           >
             {{ getFiatPriceDisplay(totalPrice.value, fiatRate) }}
           </div>
+        </div>
+      </div>
+
+      <div
+        class="flex items-center justify-between text-sm"
+        :class="[isShowingFiat && buyFees ? 'mt-4' : 'mt-2']"
+      >
+        <span class="text-zinc-500">Gas Plan</span>
+        <div class="flex gap-2">
+          <!-- <button class="hover:scale-125" @click="">
+            <ArrowRightLeftIcon
+              class="w-4 h-4 text-zinc-500 hover:text-primary"
+            />
+          </button> -->
+
+          <div class="text-zinc-300">{{ feebStore.get + ' sat/vB' }}</div>
         </div>
       </div>
 

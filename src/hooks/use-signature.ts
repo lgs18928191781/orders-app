@@ -3,7 +3,7 @@ import { useCredentialsStore } from '@/stores/credentials'
 import { createGlobalState } from '@vueuse/core'
 
 export const useSignature = createGlobalState(() => {
-  const signing: Record<string, string> = {}
+  const signing: string[] = []
 
   async function sign() {
     console.log('signing~~')

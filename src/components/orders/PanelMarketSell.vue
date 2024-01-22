@@ -218,6 +218,22 @@ const cannotTakeOrderReason = computed(() => {
         class="flex items-center justify-between text-sm"
         :class="[isShowingFiat && sellFees ? 'mt-4' : 'mt-2']"
       >
+        <span class="text-zinc-500">Gas Plan</span>
+        <div class="flex gap-2">
+          <!-- <button class="hover:scale-125" @click="">
+            <ArrowRightLeftIcon
+              class="w-4 h-4 text-zinc-500 hover:text-primary"
+            />
+          </button> -->
+
+          <div class="text-zinc-300">{{ feebStore.get + ' sat/vB' }}</div>
+        </div>
+      </div>
+
+      <div
+        class="flex items-center justify-between text-sm"
+        :class="[isShowingFiat && sellFees ? 'mt-4' : 'mt-2']"
+      >
         <span class="text-zinc-500">Gas</span>
         <div class="">
           <div class="text-zinc-300">{{ prettySellFees }}</div>

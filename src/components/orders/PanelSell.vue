@@ -18,9 +18,9 @@ watch(
   (order) => {
     if (order) {
       if (order.orderType === 1) {
-        modeTab.value = 1
-      } else {
         modeTab.value = 0
+      } else {
+        modeTab.value = 1
       }
     }
   },
