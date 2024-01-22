@@ -467,7 +467,6 @@ export const getKLineStats = async ({
     timestamp: number
   }[]
 > => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     net: useNetworkStore().network,
     tick,
@@ -477,12 +476,7 @@ export const getKLineStats = async ({
     params.append('limit', String(limit))
   }
 
-  const res = await ordersV2Fetch(`kline?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
-  })
+  const res = await ordersV2Fetch(`kline?${params}`, {})
     .then(({ list }) => list)
     .then((list) => {
       // sorted by timestamp
