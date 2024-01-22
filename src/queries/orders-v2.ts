@@ -221,6 +221,7 @@ export const getMarketTrades = async ({ tick = 'rdex' }: { tick: string }) => {
     sortKey: 'timestamp',
     sortType: '-1',
     tick,
+    limit: '20',
   })
   const orders: Order[] = await ordersV2Fetch(`orders?${params}`, {
     headers: {
