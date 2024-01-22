@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { TabPanel } from '@headlessui/vue'
 import { useQuery } from '@tanstack/vue-query'
-import { CalendarSearchIcon, Loader2Icon } from 'lucide-vue-next'
+import { CalendarSearchIcon, Loader2Icon, PlugZapIcon } from 'lucide-vue-next'
 
 import {
   prettyBtcDisplay,
@@ -25,6 +26,7 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
       address: connectionStore.getAddress,
     }),
   placeholderData: [],
+  enabled: computed(() => connectionStore.connected),
 })
 </script>
 
@@ -45,8 +47,16 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
 
     <!-- table body -->
     <div
+      class="grow flex flex-col gap-2 items-center justify-center text-zinc-500 text-base"
+      v-if="!connectionStore.connected"
+    >
+      <PlugZapIcon class="h-10 w-10 text-zinc-500" />
+      Connect to a wallet to see your open orders.
+    </div>
+
+    <div
       class="grow flex items-center justify-center text-zinc-500 text-sm"
-      v-if="isFetchingOrderHistory"
+      v-else-if="isFetchingOrderHistory"
     >
       <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
     </div>

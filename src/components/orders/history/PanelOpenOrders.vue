@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { TabPanel } from '@headlessui/vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
@@ -9,6 +9,7 @@ import {
   XIcon,
   CalendarSearchIcon,
   Loader2Icon,
+  PlugZapIcon,
 } from 'lucide-vue-next'
 
 import {
@@ -36,6 +37,7 @@ const { data: openOrders, isFetching: isFetchingOpenOrders } = useQuery({
       address: connectionStore.getAddress,
     }),
   placeholderData: [],
+  enabled: computed(() => connectionStore.connected),
 })
 watch(openOrders, (val) => {
   if (!val) {
@@ -82,8 +84,16 @@ const { mutate } = useMutation({
 
     <!-- table body -->
     <div
+      class="grow flex flex-col gap-2 items-center justify-center text-zinc-500 text-base"
+      v-if="!connectionStore.connected"
+    >
+      <PlugZapIcon class="h-10 w-10 text-zinc-500" />
+      Connect to a wallet to see your open orders.
+    </div>
+
+    <div
       class="grow flex items-center justify-center text-zinc-500 text-sm"
-      v-if="isFetchingOpenOrders"
+      v-else-if="isFetchingOpenOrders"
     >
       <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
     </div>

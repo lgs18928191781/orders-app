@@ -1,20 +1,41 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels } from '@headlessui/vue'
 
 import { prettySymbol } from '@/lib/formatters'
 import { useTradingPair } from '@/hooks/use-trading-pair'
+import { useConnectionStore } from '@/stores/connection'
 
 import PanelOpenOrders from '@/components/orders/history/PanelOpenOrders.vue'
 import PanelOrderHistory from '@/components/orders/history/PanelOrderHistory.vue'
 import PanelMarketTrades from '@/components/orders/history/PanelMarketTrades.vue'
 
+const connectionStore = useConnectionStore()
+
 const openOrdersCount = ref(0)
 const { fromSymbol } = useTradingPair()
+
+const selectedTab = ref(0)
+function changeTab(index: number) {
+  selectedTab.value = index
+}
+
+onMounted(() => {
+  if (!connectionStore.connected) {
+    changeTab(2)
+  } else {
+    changeTab(0)
+  }
+})
 </script>
 
 <template>
-  <TabGroup as="div" class="rounded-lg grow flex flex-col primary-panel">
+  <TabGroup
+    as="div"
+    class="rounded-lg grow flex flex-col primary-panel"
+    :selected-index="selectedTab"
+    @change="changeTab"
+  >
     <TabList class="p-3 rounded-t-lg bg-zinc-800 space-x-4 font-bold">
       <Tab as="template" v-slot="{ selected }">
         <button

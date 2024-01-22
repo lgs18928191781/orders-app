@@ -55,7 +55,6 @@ export const getOrders = async ({
 }) => {
   const orderType = type === 'ask' ? 1 : 2
   const sortType = sort === 'asc' ? 1 : -1
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     net: network,
@@ -65,12 +64,7 @@ export const getOrders = async ({
     sortType: String(sortType),
     tick,
   })
-  const orders: Order[] = await ordersV2Fetch(`orders?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
-  })
+  const orders: Order[] = await ordersV2Fetch(`orders?${params}`, {})
     .then(({ results }) => results)
     .then((orders) => {
       // if orders is empty, return empty array

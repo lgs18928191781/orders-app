@@ -2,6 +2,7 @@ import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
 
 export default async function sign() {
+  console.log('signing~~')
   const connection = useConnectionStore().last
   if (!connection.address || connection.status === 'disconnected') {
     throw new Error('Please connect to a wallet first.')
