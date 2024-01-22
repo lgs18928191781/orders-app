@@ -30,13 +30,12 @@ const { data: fiatRate } = useFiatRateQuery()
 
 const ordersCount = defineModel('openOrdersCount')
 
-const { data: openOrders, isFetching: isFetchingOpenOrders } = useQuery({
+const { data: openOrders, isLoading } = useQuery({
   queryKey: ['myOpenOrders', { network: networkStore.network }],
   queryFn: () =>
     getMyOpenOrders({
       address: connectionStore.getAddress,
     }),
-  placeholderData: [],
   enabled: computed(() => connectionStore.connected),
 })
 watch(openOrders, (val) => {
@@ -93,7 +92,7 @@ const { mutate } = useMutation({
 
     <div
       class="grow flex items-center justify-center text-zinc-500 text-sm"
-      v-else-if="isFetchingOpenOrders"
+      v-else-if="isLoading"
     >
       <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
     </div>

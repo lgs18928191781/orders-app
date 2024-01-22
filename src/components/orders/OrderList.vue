@@ -23,7 +23,7 @@ const { data: fiatRate } = useFiatRateQuery()
 const {
   data: askOrders,
   isFetched: isFetchedAskOrders,
-  isFetching: isFetchingAskOrders,
+  isLoading: isLoadingAskOrders,
 } = useQuery({
   queryKey: [
     'askOrders',
@@ -36,9 +36,8 @@ const {
       sort: 'desc',
       tick: selectedPair.value.fromSymbol,
     }),
-  placeholderData: [],
 })
-const { data: bidOrders, isFetching: isFetchingBidOrders } = useQuery({
+const { data: bidOrders, isLoading: isLoadingBidOrders } = useQuery({
   queryKey: [
     'bidOrders',
     { network: networkStore.network, tick: selectedPair.value.fromSymbol },
@@ -50,7 +49,6 @@ const { data: bidOrders, isFetching: isFetchingBidOrders } = useQuery({
       sort: 'desc',
       tick: selectedPair.value.fromSymbol,
     }),
-  placeholderData: [],
 })
 // watch ask orders data
 // when it finish loaded, scroll to the bottom
@@ -127,7 +125,7 @@ const { data: marketPrice } = useQuery({
       >
         <div
           class="flex h-full w-full items-center justify-center"
-          v-if="isFetchingAskOrders"
+          v-if="isLoadingAskOrders"
         >
           <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
         </div>
@@ -147,7 +145,7 @@ const { data: marketPrice } = useQuery({
         </div>
         <div
           class="flex h-full w-full items-center justify-center"
-          v-if="!isFetchingAskOrders && (!askOrders || !askOrders.length)"
+          v-if="!isLoadingAskOrders && (!askOrders || !askOrders.length)"
         >
           <span class="text-zinc-500">No ask orders</span>
         </div>
@@ -181,7 +179,7 @@ const { data: marketPrice } = useQuery({
       <div class="nicer-scrollbar flex-auto h-1 overflow-y-scroll pr-1">
         <div
           class="flex h-full items-center justify-center"
-          v-if="isFetchingBidOrders"
+          v-if="isLoadingBidOrders"
         >
           <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
         </div>
@@ -202,7 +200,7 @@ const { data: marketPrice } = useQuery({
 
         <div
           class="flex h-full items-center justify-center"
-          v-if="!isFetchingBidOrders && (!bidOrders || !bidOrders.length)"
+          v-if="!isLoadingBidOrders && (!bidOrders || !bidOrders.length)"
         >
           <span class="text-zinc-500">No bid orders</span>
         </div>

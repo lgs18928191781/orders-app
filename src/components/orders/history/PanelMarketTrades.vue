@@ -16,10 +16,9 @@ const { fromSymbol } = useTradingPair()
 const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
 
-const { data: marketTrades, isFetching } = useQuery({
+const { data: marketTrades, isLoading } = useQuery({
   queryKey: ['marketTrades', { tick: fromSymbol }],
   queryFn: () => getMarketTrades({ tick: fromSymbol.value }),
-  placeholderData: [],
 })
 </script>
 
@@ -40,7 +39,7 @@ const { data: marketTrades, isFetching } = useQuery({
     <!-- table body -->
     <div
       class="grow flex items-center justify-center text-zinc-500 text-sm"
-      v-if="isFetching"
+      v-if="isLoading"
     >
       <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
     </div>

@@ -20,13 +20,12 @@ const connectionStore = useConnectionStore()
 const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
 
-const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
+const { data: orderHistory, isLoading } = useQuery({
   queryKey: ['myOrderHistory', { network: networkStore.network }],
   queryFn: () =>
     getMyOrderHistory({
       address: connectionStore.getAddress,
     }),
-  placeholderData: [],
   enabled: computed(() => connectionStore.connected),
 })
 </script>
@@ -57,7 +56,7 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
 
     <div
       class="grow flex items-center justify-center text-zinc-500 text-sm"
-      v-else-if="isFetchingOrderHistory"
+      v-else-if="isLoading"
     >
       <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
     </div>
