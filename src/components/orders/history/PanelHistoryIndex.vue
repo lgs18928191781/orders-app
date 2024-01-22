@@ -2,11 +2,15 @@
 import { ref } from 'vue'
 import { TabGroup, TabList, Tab, TabPanels } from '@headlessui/vue'
 
+import { prettySymbol } from '@/lib/formatters'
+import { useTradingPair } from '@/hooks/use-trading-pair'
+
 import PanelOpenOrders from '@/components/orders/history/PanelOpenOrders.vue'
 import PanelOrderHistory from '@/components/orders/history/PanelOrderHistory.vue'
 import PanelMarketTrades from '@/components/orders/history/PanelMarketTrades.vue'
 
 const openOrdersCount = ref(0)
+const { fromSymbol } = useTradingPair()
 </script>
 
 <template>
@@ -42,7 +46,7 @@ const openOrdersCount = ref(0)
             'font-bold py-1 px-2 outline-none',
           ]"
         >
-          Market Trades
+          Market Trades({{ prettySymbol(fromSymbol) }})
         </button>
       </Tab>
     </TabList>
