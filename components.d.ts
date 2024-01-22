@@ -26,6 +26,7 @@ declare module '@vue/runtime-core' {
     List: typeof import('./src/components/orders/List.vue')['default']
     Loading: typeof import('./src/components/overlays/Loading.vue')['default']
     Loading2: typeof import('./src/components/overlays/Loading2.vue')['default']
+    MainTabs: typeof import('./src/components/orders/mobile/MainTabs.vue')['default']
     NavbarMenu: typeof import('./src/components/header/NavbarMenu.vue')['default']
     NetworkState: typeof import('./src/components/header/NetworkState.vue')['default']
     NotAvailable: typeof import('./src/components/overlays/NotAvailable.vue')['default']
@@ -69,6 +70,10 @@ declare module '@vue/runtime-core' {
     ToastProvider: typeof import('./src/components/ui/toast/ToastProvider.vue')['default']
     ToastTitle: typeof import('./src/components/ui/toast/ToastTitle.vue')['default']
     ToastViewport: typeof import('./src/components/ui/toast/ToastViewport.vue')['default']
+    Tooltip: typeof import('./src/components/ui/tooltip/Tooltip.vue')['default']
+    TooltipContent: typeof import('./src/components/ui/tooltip/TooltipContent.vue')['default']
+    TooltipProvider: typeof import('./src/components/ui/tooltip/TooltipProvider.vue')['default']
+    TooltipTrigger: typeof import('./src/components/ui/tooltip/TooltipTrigger.vue')['default']
     WalletMissingModal: typeof import('./src/components/header/WalletMissingModal.vue')['default']
   }
 }
