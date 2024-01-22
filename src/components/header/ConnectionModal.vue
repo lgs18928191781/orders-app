@@ -150,7 +150,17 @@ async function connectToMetalet() {
                 <!-- footer -->
                 <div class="mt-16 text-xs text-zinc-500 space-y-1">
                   <p>By connecting wallet,</p>
-                  <p>you agree to Orders.Exchange's Terms of Service.</p>
+                  <p class="flex gap-2">
+                    you agree to Orders.Exchange's
+                    <a
+                      href="https://orders-exchange.gitbook.io/orders/risks-and-disclaimer/risks-and-disclaimer"
+                      target="_blank"
+                      class="underline hover:text-primary"
+                    >
+                      Terms of Service
+                    </a>
+                    .
+                  </p>
                 </div>
               </div>
             </DialogPanel>
