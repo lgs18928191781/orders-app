@@ -51,11 +51,6 @@ function onDisconnect() {
     <div class="flex items-center">
       <MenuButton class="outline-none flex items-center gap-0.5">
         <img class="h-8 lg:h-9 cursor-pointer" :src="logo" alt="Logo" />
-        <span
-          class="hidden lg:inline-flex items-center rounded-md bg-black px-2 py-0.5 text-xs font-medium text-orange-100"
-        >
-          Beta
-        </span>
       </MenuButton>
     </div>
 
@@ -161,7 +156,7 @@ function onDisconnect() {
           <MenuItem :disabled="true">
             <div class="flex items-center p-4 justify-between font-normal">
               <span class="text-zinc-500">Version</span>
-              <span>{{ VERSION }} (Beta)</span>
+              <span>{{ VERSION }}</span>
             </div>
           </MenuItem>
         </div>

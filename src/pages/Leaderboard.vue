@@ -144,18 +144,18 @@ const currentLevelProgress = computed(() => {
             </div>
           </div>
           <div class="text-zinc-300 text-sm">Current Lv. Reward</div>
-          <div class="col-span-2 text-orange-300">
+          <div class="col-span-2 text-primary">
             {{ stats.tickCurrentLevelRewardAmount + ' $RDEX' }}
           </div>
         </div>
 
         <div class="grid grid-cols-6 gap-4">
           <div class="text-zinc-300 text-sm">Next Lv.</div>
-          <div class="col-span-2 text-orange-300">
+          <div class="col-span-2 text-primary">
             {{ stats.tickNextLevel }}
           </div>
           <div class="text-zinc-300 text-sm">Next Lv. Reward</div>
-          <div class="col-span-2 text-orange-300">
+          <div class="col-span-2 text-primary">
             {{ stats.tickNextLevelRewardAmount + ' $RDEX' }}
           </div>
         </div>
