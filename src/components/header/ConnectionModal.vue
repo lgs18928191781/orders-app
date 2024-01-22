@@ -7,14 +7,14 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { ref } from 'vue'
-
 import { ElMessage } from 'element-plus'
+
+import { useConnectionStore } from '@/stores/connection'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
+
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
-import { useConnectionStore } from '@/stores/connection'
-import { useConnectionModal } from '@/hooks/use-connection-modal'
-import { IS_DEV } from '@/data/constants'
 
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
