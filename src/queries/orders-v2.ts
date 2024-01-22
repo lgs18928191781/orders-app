@@ -213,7 +213,6 @@ export const getMyOrderHistory = async ({ address }: { address: string }) => {
 
 export const getMarketTrades = async ({ tick = 'rdex' }: { tick: string }) => {
   const network = useNetworkStore().network
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     net: network,
@@ -223,12 +222,7 @@ export const getMarketTrades = async ({ tick = 'rdex' }: { tick: string }) => {
     tick,
     limit: '20',
   })
-  const orders: Order[] = await ordersV2Fetch(`orders?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
-  })
+  const orders: Order[] = await ordersV2Fetch(`orders?${params}`, {})
     .then(({ results }) => results)
     .then((orders) => {
       // if orders is empty, return empty array

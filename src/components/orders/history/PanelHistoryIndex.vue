@@ -25,7 +25,7 @@ const { fromSymbol } = useTradingPair()
             'font-bold py-1 px-2 outline-none',
           ]"
         >
-          <span>Open Orders</span>
+          <span>My Open Orders</span>
           <span v-if="openOrdersCount > 0">({{ openOrdersCount }})</span>
         </button>
       </Tab>
@@ -36,7 +36,7 @@ const { fromSymbol } = useTradingPair()
             'font-bold py-1 px-2 outline-none',
           ]"
         >
-          Order History
+          My Order History
         </button>
       </Tab>
       <Tab as="template" v-slot="{ selected }">
