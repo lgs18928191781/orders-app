@@ -135,8 +135,7 @@ async function connectToMetalet() {
                   <div class="relative">
                     <button
                       class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 enabled:hover:shadow-md enabled:hover:shadow-primary/30 enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 disabled:opacity-30"
-                      @click="closeConnectionModal"
-                      :disabled="!IS_DEV"
+                      @click="connectToMetalet"
                     >
                       <img
                         class="h-12 rounded"
@@ -145,11 +144,6 @@ async function connectToMetalet() {
                       />
                       <span class="">Metalet</span>
                     </button>
-                    <span
-                      class="absolute top-0 right-0 text-xs text-red-400 bg-red-400/30 rounded-md font-medium px-1.5 py-0.5 translate-x-4 -translate-y-2 rotate-3"
-                    >
-                      Coming Soon!
-                    </span>
                   </div>
                 </div>
 
