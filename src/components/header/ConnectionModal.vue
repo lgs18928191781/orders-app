@@ -8,12 +8,13 @@ import {
 } from '@headlessui/vue'
 import { ref } from 'vue'
 
+import { ElMessage } from 'element-plus'
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
 import { useConnectionStore } from '@/stores/connection'
-import { IS_DEV } from '@/data/constants'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { IS_DEV } from '@/data/constants'
 
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
@@ -41,6 +42,23 @@ async function connectToOkx() {
 
   const connection = await connectionStore.connect('okx')
   if (connection.status === 'connected') {
+    closeConnectionModal()
+  }
+}
+
+async function connectToMetalet() {
+  if (!window.metaidwallet) {
+    setMissingWallet('metalet')
+    return
+  }
+
+  const connection = await connectionStore.connect('metalet').catch((err) => {
+    ElMessage.warning({
+      message: err.message,
+      type: 'warning',
+    })
+  })
+  if (connection?.status === 'connected') {
     closeConnectionModal()
   }
 }

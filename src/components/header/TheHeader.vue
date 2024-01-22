@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import { prettyAddress, prettyOneSideAddress } from '@/lib/formatters'
+import { prettyAddress } from '@/lib/formatters'
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
 import whitelist from '@/lib/whitelist'
@@ -17,7 +17,7 @@ import TheNavbar from './TheNavbar.vue'
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
 import { isUnsupportedAddress } from '@/lib/helpers'
-import { MenuIcon } from 'lucide-vue-next'
+import metaletIcon from '@/assets/metalet-icon.png?url'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
@@ -66,6 +66,18 @@ const okxAccountsChangedHandler = (accounts: string[] | null) => {
   })
 }
 
+const metaletAccountsChangedHandler = () => {
+  if (useConnectionStore().last.wallet !== 'metalet') return
+
+  ElMessage.warning({
+    message: 'Metalet account changed. Refreshing page...',
+    type: 'warning',
+    onClose: () => {
+      window.location.reload()
+    },
+  })
+}
+
 onMounted(async () => {
   if (window.unisat) {
     const unisat = window.unisat
@@ -99,13 +111,18 @@ onMounted(async () => {
   if (window.okxwallet) {
     window.okxwallet.bitcoin.on('accountsChanged', okxAccountsChangedHandler)
   }
+
+  if (window.metaidwallet) {
+    window.metaidwallet.on('accountsChanged', metaletAccountsChangedHandler)
+  }
 })
 onBeforeUnmount(() => {
   // remove event listener
   window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
-  window.okxwallet.bitcoin?.removeListener(
+  window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
+  window.metaidwallet?.removeListener(
     'accountsChanged',
-    okxAccountsChangedHandler
+    metaletAccountsChangedHandler
   )
 })
 
@@ -123,7 +140,16 @@ const walletIcon = computed(() => {
 
   if (!connection) return null
 
-  return connection.wallet === 'unisat' ? unisatIcon : okxIcon
+  switch (connection.wallet) {
+    case 'unisat':
+      return unisatIcon
+    case 'okx':
+      return okxIcon
+    case 'metalet':
+      return metaletIcon
+    default:
+      return
+  }
 })
 
 function copyAddress() {
@@ -174,6 +200,15 @@ function copyAddress() {
                   {{ address ? prettyAddress(address, 4) : '-' }}
                 </span>
               </div>
+              =======
+              <button
+                class="h-10 rounded-lg border-2 border-orange-300 px-4 transition hover:text-orange-950 hover:bg-orange-300"
+                @click="openConnectionModal"
+                v-if="!connectionStore.connected"
+              >
+                Connect Wallet
+              </button>
+              >>>>>>> feature/metalet-integration
 
               <AssetsDisplay />
 

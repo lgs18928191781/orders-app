@@ -29,6 +29,11 @@ function goToMissingWallet() {
       'https://chromewebstore.google.com/detail/mcohilncbfahbmgdjkbpemcciiolgcge',
       '_blank'
     )
+  } else if (missingWallet.value === 'metalet') {
+    window.open(
+      'https://chromewebstore.google.com/detail/metalet/lbjapbcmmceacocpimbpbidpgmlmoaao',
+      '_blank'
+    )
   }
 }
 </script>

@@ -9,6 +9,32 @@ import { login } from '@/queries/orders-api'
 import { ElMessage } from 'element-plus'
 import { IS_DEV } from '@/data/constants'
 
+function getWalletAdapter(wallet: Wallet) {
+  switch (wallet) {
+    case 'unisat':
+      return unisatAdapter
+    case 'okx':
+      return okxAdapter
+    case 'metalet':
+      return metaletAdapter
+    default:
+      throw new Error(`Unsupported wallet: ${wallet}`)
+  }
+}
+
+function getWalletProvider(wallet: Wallet) {
+  switch (wallet) {
+    case 'unisat':
+      return window.unisat
+    case 'okx':
+      return window.unisat
+    case 'metalet':
+      return window.metaidwallet
+    default:
+      throw new Error(`Unsupported wallet: ${wallet}`)
+  }
+}
+
 export type Wallet = 'unisat' | 'okx' | 'metalet'
 export type WalletConnection = {
   wallet: Wallet
@@ -16,6 +42,7 @@ export type WalletConnection = {
   address: string
   pubKey: string
 }
+
 export const useConnectionStore = defineStore('connection', {
   state: () => {
     return {
@@ -47,8 +74,7 @@ export const useConnectionStore = defineStore('connection', {
     getPubKey: (state) => state.last.pubKey,
     provider: (state) => {
       if (!state.last) return null
-
-      return state.last.wallet === 'unisat' ? window.unisat : window.okxwallet
+      return getWalletProvider(state.last.wallet)
     },
     adapter: (state) => {
       if (!state.last) throw new Error('No connection')
@@ -68,7 +94,8 @@ export const useConnectionStore = defineStore('connection', {
         signPsbt: (psbt: string, options?: any) => Promise<string>
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
-      } = state.last.wallet === 'unisat' ? unisatAdapter : okxAdapter
+        signMessage: (message: string) => Promise<string>
+      } = getWalletAdapter(state.last.wallet)
 
       return adapter
     },
@@ -80,28 +107,27 @@ export const useConnectionStore = defineStore('connection', {
         ? (JSON.parse(JSON.stringify(this.last)) as WalletConnection)
         : {
             wallet,
-            status: 'connected',
+            status: 'disconnected',
             address: '',
             pubKey: '',
           }
 
+      const connectRes = await getWalletAdapter(wallet).connect()
+
       try {
-        const connectRes =
-          wallet === 'unisat'
-            ? await unisatAdapter.connect()
-            : await okxAdapter.connect()
+        if (connectRes) {
+          connection.address = connectRes.address
+          connection.pubKey = connectRes.pubKey
 
-        connection.address = connectRes.address
-        connection.pubKey = connectRes.pubKey
+          connection.status = 'connected'
+          connection.wallet = wallet
 
-        connection.status = 'connected'
-        connection.wallet = wallet
+          this.last = connection
 
-        this.last = connection
+          await login()
 
-        await login()
-
-        return this.last
+          return this.last
+        }
       } catch (e: any) {
         ElMessage.error(e.message)
         connection.status = 'disconnected'
@@ -116,16 +142,9 @@ export const useConnectionStore = defineStore('connection', {
       // get address again from wallet
       if (!this.connected) return
 
-      const address =
-        this.last.wallet === 'unisat'
-          ? await unisatAdapter.getAddress()
-          : await okxAdapter.getAddress()
-
-      const pubKey = await this.adapter.getPubKey()
-
       this.last.status = 'connected'
-      this.last.address = address
-      this.last.pubKey = pubKey
+      this.last.address = await this.adapter.getAddress()
+      this.last.pubKey = await this.adapter.getPubKey()
 
       await login()
 
