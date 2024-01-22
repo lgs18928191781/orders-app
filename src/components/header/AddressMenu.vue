@@ -187,7 +187,9 @@ function onDisconnect() {
         {{ address ? prettyAddress(address, 4) : '-' }}
       </span>
 
-      <MenuIcon class="h-5 text-zinc-300 group-hover:text-primary" />
+      <MenuIcon
+        class="h-5 text-zinc-300 group-hover:text-primary group-hover:scale-110"
+      />
     </MenuButton>
 
     <transition

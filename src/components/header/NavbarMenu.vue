@@ -126,23 +126,23 @@ function onDisconnect() {
             </router-link>
           </MenuItem>
 
-          <MenuItem>
+          <!-- <MenuItem>
             <button
               class="p-4 block hover:text-primary transition w-full text-left"
               @click="clearCache"
             >
               Clear Account Cache
             </button>
-          </MenuItem>
+          </MenuItem> -->
 
-          <MenuItem v-if="connectionStore.has">
+          <!-- <MenuItem v-if="connectionStore.has">
             <button
               class="p-4 block hover:text-primary transition w-full text-left"
               @click="onDisconnect"
             >
               Disconnect
             </button>
-          </MenuItem>
+          </MenuItem> -->
 
           <MenuItem>
             <router-link
