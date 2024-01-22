@@ -12,6 +12,7 @@ import { useTradingPair } from '@/hooks/use-trading-pair'
 import { useFiat } from '@/hooks/use-fiat'
 
 import OrderItem from './OrderItem.vue'
+import { Loader2Icon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const { select } = useSelectOrder()
@@ -19,7 +20,11 @@ const { selectedPair } = useTradingPair()
 const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
 
-const { data: askOrders, isFetched: isFetchedAskOrders } = useQuery({
+const {
+  data: askOrders,
+  isFetched: isFetchedAskOrders,
+  isFetching: isFetchingAskOrders,
+} = useQuery({
   queryKey: [
     'askOrders',
     { network: networkStore.network, tick: selectedPair.value.fromSymbol },
@@ -33,7 +38,7 @@ const { data: askOrders, isFetched: isFetchedAskOrders } = useQuery({
     }),
   placeholderData: [],
 })
-const { data: bidOrders } = useQuery({
+const { data: bidOrders, isFetching: isFetchingBidOrders } = useQuery({
   queryKey: [
     'bidOrders',
     { network: networkStore.network, tick: selectedPair.value.fromSymbol },
@@ -120,24 +125,29 @@ const { data: marketPrice } = useQuery({
         class="nicer-scrollbar flex-auto h-1 overflow-y-scroll pr-1"
         id="askOrders"
       >
-        <div class="w-full">
-          <div
-            v-if="askOrders && askOrders.length"
-            id="askOrdersList"
-            class="space-y-1"
-          >
-            <OrderItem
-              v-for="order in rearrangedAskOrders"
-              :key="order.orderId"
-              :order="order"
-              :order-type="'ask'"
-              @click="select(order)"
-            />
-          </div>
+        <div
+          class="flex h-full w-full items-center justify-center"
+          v-if="isFetchingAskOrders"
+        >
+          <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+        </div>
+
+        <div
+          v-else-if="askOrders && askOrders.length"
+          id="askOrdersList"
+          class="space-y-1"
+        >
+          <OrderItem
+            v-for="order in rearrangedAskOrders"
+            :key="order.orderId"
+            :order="order"
+            :order-type="'ask'"
+            @click="select(order)"
+          />
         </div>
         <div
           class="flex h-full w-full items-center justify-center"
-          v-if="!askOrders || !askOrders.length"
+          v-if="!isFetchingAskOrders && (!askOrders || !askOrders.length)"
         >
           <span class="text-zinc-500">No ask orders</span>
         </div>
@@ -169,25 +179,30 @@ const { data: marketPrice } = useQuery({
       </div>
 
       <div class="nicer-scrollbar flex-auto h-1 overflow-y-scroll pr-1">
-        <div class="w-full">
-          <div
-            id="bidOrdersList"
-            v-if="bidOrders && bidOrders.length"
-            class="space-y-1"
-          >
-            <OrderItem
-              v-for="order in bidOrders"
-              :key="order.orderId"
-              :order="order"
-              :order-type="'bid'"
-              @click="select(order)"
-            />
-          </div>
+        <div
+          class="flex h-full items-center justify-center"
+          v-if="isFetchingBidOrders"
+        >
+          <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+        </div>
+
+        <div
+          id="bidOrdersList"
+          v-if="bidOrders && bidOrders.length"
+          class="space-y-1"
+        >
+          <OrderItem
+            v-for="order in bidOrders"
+            :key="order.orderId"
+            :order="order"
+            :order-type="'bid'"
+            @click="select(order)"
+          />
         </div>
 
         <div
           class="flex h-full items-center justify-center"
-          v-if="!bidOrders || !bidOrders.length"
+          v-if="!isFetchingBidOrders && (!bidOrders || !bidOrders.length)"
         >
           <span class="text-zinc-500">No bid orders</span>
         </div>
