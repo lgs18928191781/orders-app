@@ -53,7 +53,9 @@ onMounted(() => {
       <Tab as="template" v-slot="{ selected }">
         <button
           :class="[
-            selected ? 'text-primary underline' : 'text-zinc-300',
+            selected
+              ? 'text-primary underline underline-offset-4'
+              : 'text-zinc-300',
             'font-bold py-1 px-2 outline-none',
           ]"
         >
@@ -63,7 +65,9 @@ onMounted(() => {
       <Tab as="template" v-slot="{ selected }">
         <button
           :class="[
-            selected ? 'text-primary underline' : 'text-zinc-300',
+            selected
+              ? 'text-primary underline underline-offset-4'
+              : 'text-zinc-300',
             'font-bold py-1 px-2 outline-none',
           ]"
         >
