@@ -3,7 +3,6 @@ import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
 
 export default async function sign() {
-  console.log('signing~~')
   const connectionStore = useConnectionStore()
   const connection = connectionStore.last
   if (!connection.address || connection.status === 'disconnected') {
