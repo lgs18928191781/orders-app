@@ -17,6 +17,7 @@ import { useTradingPair } from '@/hooks/use-trading-pair'
 import { useSelectOrder } from '@/hooks/use-select-order'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useFiat } from '@/hooks/use-fiat'
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 
 import btcIcon from '@/assets/btc.svg?url'
 
@@ -25,6 +26,7 @@ const { openBuilding, closeBuilding } = useBuildingOverlay()
 const feebStore = useFeebStore()
 const { highlight } = useAreaHighlight()
 const { selectedPair } = useTradingPair()
+const { openModal } = useConfirmationModal()
 const { selectedBidOrder } = useSelectOrder()
 const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
@@ -85,7 +87,6 @@ async function buildOrder() {
     }).catch(async (err) => {
       await sleep(500)
       ElMessage.error(err.message)
-      builtInfo.value = undefined
       if (IS_DEV) throw err
     })
 
@@ -96,7 +97,6 @@ async function buildOrder() {
     }
   } catch (error: any) {
     ElMessage.error(error.message)
-    builtInfo.value = undefined
 
     if (IS_DEV) throw error
   } finally {
@@ -105,11 +105,9 @@ async function buildOrder() {
 
   if (!buildRes) return
   console.log({ buildRes })
-  builtInfo.value = buildRes
+  openModal(buildRes)
   return
 }
-
-const builtInfo = ref()
 
 const canTakeOrder = computed(() => {
   return connectionStore.connected && selectedBidOrder.value

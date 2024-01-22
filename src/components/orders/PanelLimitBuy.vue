@@ -76,7 +76,6 @@ async function buildOrder() {
   } catch (error: any) {
     await sleep(500)
     ElMessage.error(error.message)
-    builtInfo.value = undefined
 
     if (IS_DEV) throw error
   } finally {
@@ -88,8 +87,6 @@ async function buildOrder() {
   openModal(buildRes)
   return
 }
-
-const builtInfo = ref()
 
 const { data: marketPrice } = useQuery({
   queryKey: [

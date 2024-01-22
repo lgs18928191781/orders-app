@@ -13,6 +13,7 @@ import { getMyOrderHistory } from '@/queries/orders-v2'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useFiat } from '@/hooks/use-fiat'
+import { ExternalLinkIcon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -118,10 +119,24 @@ const { data: orderHistory, isFetching: isFetchingOrderHistory } = useQuery({
         </div>
 
         <div
-          class="col-span-1 text-right capitalize"
+          class="col-span-1 text-right capitalize flex justify-end items-center gap-2"
           :class="[order.orderStateStr === 'canceled' && 'text-zinc-500']"
         >
-          {{ order.orderStateStr }}
+          <div class="">
+            {{ order.orderStateStr }}
+          </div>
+
+          <a
+            v-if="order.orderStateStr === 'done'"
+            :title="`View on Mempool explorer`"
+            :href="`https://mempool.space/tx/${order.orderId}`"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLinkIcon
+              class="h-4 w-4 inline-block text-zinc-300 hover:text-primary"
+            />
+          </a>
         </div>
       </div>
     </div>
