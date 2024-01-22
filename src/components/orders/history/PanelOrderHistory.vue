@@ -51,7 +51,7 @@ const { data: orderHistory, isLoading } = useQuery({
       v-if="!connectionStore.connected"
     >
       <PlugZapIcon class="h-10 w-10 text-zinc-500" />
-      Connect to a wallet to see your open orders.
+      Connect to a wallet to see your order history.
     </div>
 
     <div
@@ -66,7 +66,7 @@ const { data: orderHistory, isLoading } = useQuery({
       v-else-if="orderHistory && orderHistory.length === 0"
     >
       <CalendarSearchIcon class="h-10 w-10 text-zinc-500" />
-      <div class="">You have no open orders.</div>
+      <div class="">You have no order history.</div>
     </div>
 
     <div
