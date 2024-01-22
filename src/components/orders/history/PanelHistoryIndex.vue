@@ -32,7 +32,7 @@ onMounted(() => {
 <template>
   <TabGroup
     as="div"
-    class="rounded-lg grow flex flex-col primary-panel"
+    class="rounded-lg grow flex flex-col primary-panel min-h-[40vh]"
     :selected-index="selectedTab"
     @change="changeTab"
   >

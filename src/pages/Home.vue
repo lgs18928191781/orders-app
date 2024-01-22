@@ -3,7 +3,7 @@ import OrderIndex from '@/components/orders/OrderIndex.vue'
 </script>
 
 <template>
-  <div class="w-svw grow flex flex-col">
+  <div class="grow flex flex-col">
     <!-- <MobileIndex class="flex lg:hidden" /> -->
     <OrderIndex />
   </div>
