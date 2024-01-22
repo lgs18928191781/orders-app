@@ -7,21 +7,24 @@ import PanelMarketBuy from '@/components/orders/PanelMarketBuy.vue'
 import PanelLimitBuy from '@/components/orders/PanelLimitBuy.vue'
 import { ref, watch } from 'vue'
 
-const { selectedOrderType } = useSelectOrder()
+const { selectedOrder } = useSelectOrder()
 
 const modeTab = ref(0)
 function changeModeTab(index: number) {
   modeTab.value = index
 }
 watch(
-  () => selectedOrderType.value,
-  (value) => {
-    if (value === 'ask') {
-      modeTab.value = 1
-    } else {
-      modeTab.value = 0
+  () => selectedOrder.value,
+  (order) => {
+    if (order) {
+      if (order.orderType === 1) {
+        modeTab.value = 1
+      } else {
+        modeTab.value = 0
+      }
     }
-  }
+  },
+  { immediate: true }
 )
 </script>
 
