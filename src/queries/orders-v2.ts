@@ -452,6 +452,7 @@ export const getKLineStats = async ({
     close: string
     high: string
     low: string
+    avg: string
     volume: number
     timestamp: number
   }[]

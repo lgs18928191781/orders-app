@@ -64,7 +64,7 @@ const klineStats = computed(() => {
     datasets: [
       {
         label: 'Price',
-        data: rawStats.value.map((stat) => Number(stat.close)),
+        data: rawStats.value.map((stat) => Number(stat.avg)),
       },
     ],
   }
