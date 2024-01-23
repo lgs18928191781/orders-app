@@ -84,7 +84,9 @@ const selectedEvent = computed(() => {
               active && 'bg-black',
             ]"
           >
-            <div class="text-base text-zinc-500">{{ index + 1 }}.</div>
+            <div class="text-base text-zinc-500">
+              {{ eventsSorted.length - index }}.
+            </div>
 
             <div class="text-base font-bold">
               {{ event.title }}
