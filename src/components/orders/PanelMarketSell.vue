@@ -199,7 +199,6 @@ const cannotTakeOrderReason = computed(() => {
       </div>
     </div>
 
-    <!-- sell -->
     <div class="mt-8">
       <div class="flex items-center justify-between text-sm">
         <span class="text-zinc-500">Total</span>

@@ -19,7 +19,6 @@ import { useSelectOrder } from '@/hooks/use-select-order'
 import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 
 import btcIcon from '@/assets/btc.svg?url'
-import { ArrowRightLeftIcon } from 'lucide-vue-next'
 
 const connectionStore = useConnectionStore()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
