@@ -31,15 +31,15 @@ const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
 
 // price related
-const price = ref(0)
-const updatePrice = (usePrice: number) => {
+const price = ref(0) // always in satoshis
+const updatePrice = (usePrice: number, inBtc = false) => {
   if (typeof usePrice === 'string') {
     usePrice = Number(usePrice)
   }
   if (isNaN(usePrice)) {
     usePrice = 0
   }
-  if (useBtcUnit.value) {
+  if (inBtc) {
     usePrice = new Decimal(usePrice).times(1e8).toNumber()
   }
   price.value = usePrice
@@ -52,8 +52,7 @@ watch(
   (selectedBidOrder) => {
     if (!selectedBidOrder) return
 
-    const priceInBtc = selectedBidOrder.price.dividedBy(1e8).toNumber()
-    updatePrice(priceInBtc)
+    updatePrice(selectedBidOrder.price.toNumber())
   },
   { immediate: true }
 )
@@ -158,7 +157,7 @@ const cannotPlaceOrderReason = computed(() => {
                     ? new Decimal(price).dividedBy(1e8).toDP().toFixed()
                     : price
                 "
-                @input="(event: any) => updatePrice(event.target.value)"
+                @input="(event: any) => updatePrice(event.target.value, useBtcUnit.value)"
               />
               <span
                 class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
