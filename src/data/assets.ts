@@ -20,6 +20,7 @@ const assets = [
     id: 1,
     symbol: 'btc',
     icon: btcLogo,
+    decimal: 8,
   },
   {
     id: 2,

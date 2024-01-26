@@ -10,6 +10,7 @@ import { prettyBalance } from '@/lib/formatters'
 import { getBrc20s } from '@/queries/orders-api'
 
 import AssetSelect from '@/components/AssetSelect.vue'
+import Decimal from 'decimal.js'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -22,7 +23,57 @@ defineProps({
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
+
 const amount = defineModel('amount', { type: Number })
+const normalizedAmount = computed(() => {
+  if (!amount.value) {
+    return ''
+  }
+
+  const dividedBy = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
+  return new Decimal(amount.value).dividedBy(dividedBy).toDP().toFixed()
+})
+
+const amountTextSize = computed(() => {
+  if (!amount.value) {
+    return 'text-4xl'
+  }
+
+  if (normalizedAmount.value.length > 16) {
+    return 'text-xs'
+  }
+
+  if (normalizedAmount.value.length > 12) {
+    return 'text-lg'
+  }
+
+  if (normalizedAmount.value.length > 10) {
+    return 'text-xl'
+  }
+
+  if (normalizedAmount.value.length > 8) {
+    return 'text-2xl'
+  }
+
+  if (normalizedAmount.value.length > 6) {
+    return 'text-3xl'
+  }
+
+  return 'text-4xl'
+})
+
+const updateAmount = (updatingAmount: number) => {
+  if (typeof updatingAmount === 'string') {
+    updatingAmount = Number(updatingAmount)
+  }
+  if (isNaN(updatingAmount)) {
+    updatingAmount = 0
+  }
+  const times = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
+  updatingAmount = new Decimal(updatingAmount).times(times).toNumber()
+  amount.value = updatingAmount
+}
+
 const emit = defineEmits([
   'hasEnough',
   'notEnough',
@@ -180,17 +231,20 @@ watch(
     <div class="text-zinc-400">You {{ side }}</div>
 
     <!-- main control -->
-    <div class="flex items-center space-x-2 justify-between">
+    <div class="flex items-center space-x-2 justify-between h-16">
       <input
-        class="bg-transparent text-4xl quiet-input flex-1 w-12 p-0 leading-loose"
-        :class="
+        class="bg-transparent quiet-input flex-1 w-12 p-0 leading-loose"
+        :class="[
           hasEnough
             ? 'text-zinc-100 caret-primary'
-            : 'text-red-500 caret-red-500'
-        "
+            : 'text-red-500 caret-red-500',
+          // if too long, make it smaller
+          amountTextSize,
+        ]"
         placeholder="0"
         type="number"
-        v-model.number="amount"
+        :value="normalizedAmount"
+        @input="(event: any) => updateAmount(event.target.value)"
       />
 
       <AssetSelect

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDownIcon, CheckIcon } from 'lucide-vue-next'
-import { computed, defineModel } from 'vue'
+import { computed, defineModel, withDefaults } from 'vue'
 import {
   Listbox,
   ListboxButton,
@@ -11,7 +11,12 @@ import {
 import assets from '@/data/assets'
 import { prettySymbol } from '@/lib/formatters'
 
-defineProps(['useAssets'])
+defineProps({
+  useAssets: {
+    default: assets,
+  },
+})
+
 const assetSymbol = defineModel('assetSymbol', { required: true, type: String })
 const selectedAsset = computed(() => {
   const selected = assets.find(
@@ -61,13 +66,13 @@ const selectedAsset = computed(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute right-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800 border border-primary/10 shadow shadow-primary/30"
+        class="absolute right-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[25vh] nicer-scrollbar w-48 divide-y divide-zinc-800 border border-primary/10 shadow shadow-primary/30"
       >
         <ListboxOption
           v-slot="{ active, selected }"
           v-for="asset in useAssets"
-          :key="asset.tick"
-          :value="asset.tick"
+          :key="asset.symbol"
+          :value="asset.symbol"
         >
           <button
             :class="[
@@ -75,10 +80,10 @@ const selectedAsset = computed(() => {
               active && 'bg-black',
             ]"
           >
-            <img :src="asset.info.icon" class="h-6 rounded-full" />
+            <img :src="asset.icon" class="h-6 rounded-full" />
 
             <div class="text-base font-bold">
-              {{ prettySymbol(asset.tick) }}
+              {{ prettySymbol(asset.symbol) }}
             </div>
 
             <CheckIcon

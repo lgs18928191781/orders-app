@@ -30,7 +30,7 @@ const activityAssetsInfo = computed(() => {
 
     return {
       ...tick,
-      info: asset,
+      ...asset,
     }
   })
 })
