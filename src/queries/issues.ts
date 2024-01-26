@@ -1,4 +1,4 @@
-import { ordersApiFetch, ordersV2Fetch } from '@/lib/fetch'
+import { ordersV2Fetch } from '@/lib/fetch'
 import sign from '@/lib/sign'
 
 export type Issue = {
@@ -56,23 +56,24 @@ export type IssueDetail = {
   tick: string
 }
 export const getIssueDetail = async ({
-  address,
-  tick,
   orderId,
+  networkFeeRate,
 }: {
-  address: string
-  tick: string
   orderId: string
-}): Promise<IssueDetail> => {
+  networkFeeRate: string
+}): Promise<{
+  psbtRaw: string
+}> => {
   const { publicKey, signature } = await sign()
 
-  return ordersApiFetch(`pool/err/order/release`, {
-    method: 'POST',
-    body: JSON.stringify({
-      address,
-      tick,
-      poolOrderid: orderId,
-    }),
+  const params = new URLSearchParams({
+    orderId: orderId,
+    net: 'livenet',
+    networkFeeRate,
+  })
+
+  return ordersV2Fetch(`bid/recover/info?${params}`, {
+    method: 'GET',
     headers: {
       'X-Signature': signature,
       'X-Public-Key': publicKey,
@@ -85,17 +86,21 @@ export const getIssueDetail = async ({
 export const submitRecover = async ({
   orderId,
   psbtRaw,
+  networkFeeRate,
 }: {
   orderId: string
   psbtRaw: string
+  networkFeeRate: string
 }): Promise<IssueDetail> => {
   const { publicKey, signature } = await sign()
 
-  return ordersApiFetch(`pool/err/order/release/commit`, {
+  return ordersV2Fetch(`bid/recover`, {
     method: 'POST',
     body: JSON.stringify({
-      poolOrderid: orderId,
+      net: 'livenet',
+      orderId,
       psbtRaw,
+      networkFeeRate: Number(networkFeeRate),
     }),
     headers: {
       'X-Signature': signature,
