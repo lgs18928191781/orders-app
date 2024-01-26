@@ -68,7 +68,7 @@ const hasReleasable = computed(() => {
 </script>
 
 <template>
-  <div class="border-2 border-orange-200/30 rounded-xl p-8">
+  <div class="border-2 border-primary/30 rounded-xl p-8">
     <TabGroup
       v-if="loggedIn"
       :default-index="selectedTab"
@@ -83,7 +83,7 @@ const hasReleasable = computed(() => {
           :class="[
             'px-4 py-1 outline-none border-b-2 font-bold',
             selectedIndex === index
-              ? 'border-orange-300 text-zinc-100'
+              ? 'border-primary text-zinc-100'
               : 'border-transparent text-zinc-500',
           ]"
           v-for="(label, index) in tabLabels"
@@ -91,7 +91,7 @@ const hasReleasable = computed(() => {
           <span>{{ label }}</span>
           <span
             v-if="label === 'Release' && hasReleasable"
-            class="inline-flex items-center rounded-md bg-orange-400/30 px-1.5 py-0.5 text-xs font-medium text-orange-400 -translate-y-2 -translate-x-1 absolute"
+            class="inline-flex items-center rounded-md bg-primary/30 px-1.5 py-0.5 text-xs font-medium text-primary -translate-y-2 -translate-x-1 absolute"
           >
             {{ rewardsEssential?.hasReleasePoolOrderCount }}
           </span>
@@ -134,7 +134,7 @@ const hasReleasable = computed(() => {
       </p>
 
       <button
-        class="py-2 rounded-lg border-2 border-orange-300 px-4 transition hover:border-orange-400 hover:bg-orange-300"
+        class="py-2 rounded-lg border-2 border-primary px-4 transition hover:border-primary hover:bg-primary"
         @click="connectWallet"
       >
         Connect Wallet

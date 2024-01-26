@@ -1,16 +1,16 @@
 <script lang="ts" setup>
-import { computed, inject, ref, toRaw } from 'vue'
+import { computed, ref } from 'vue'
 import {
   Dialog,
   DialogPanel,
   DialogTitle,
   DialogDescription,
 } from '@headlessui/vue'
-import { Loader, ArrowDownIcon } from 'lucide-vue-next'
+import { ArrowDownIcon } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
 
 import { prettyBtcDisplay, prettyCoinDisplay } from '@/lib/formatters'
-import { pushAskOrder, pushBuyTake } from '@/queries/orders-api'
+import { pushAskOrder } from '@/queries/orders-api'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
@@ -19,40 +19,19 @@ import {
   SIGHASH_ALL,
   IS_DEV,
   BUY_PAY_INPUT_INDEX,
-  SIGHASH_ALL_ANYONECANPAY,
 } from '@/data/constants'
-import { defaultPair, selectedPairKey } from '@/data/trading-pairs'
 import assets from '@/data/assets'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
-import { validatePsbt } from '@/lib/btc-helpers'
 import { fillInternalKey } from '@/lib/build-helpers'
 import { postBidOrder, postBuyTake, postSellTake } from '@/queries/orders-v2'
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
+const { isOpen, closeModal, transactionInfo } = useConfirmationModal()
 
 const confirmButtonRef = ref<HTMLElement | null>(null)
 const cancelButtonRef = ref<HTMLElement | null>(null)
-
-// modal control
-const props = defineProps([
-  'isOpen',
-  'isBuilding',
-  'builtInfo',
-  'isLimitExchangeMode',
-  'buildProcessTip',
-])
-const emit = defineEmits([
-  'update:isOpen',
-  'update:isBuilding',
-  'update:builtInfo',
-  'update:isLimitExchangeMode',
-])
-function clearBuiltInfo() {
-  emit('update:builtInfo', undefined)
-}
-
-const selectedPair = inject(selectedPairKey, defaultPair)
 
 const adapter = connectionStore.adapter
 const { data: balance } = useExcludedBalanceQuery(
@@ -68,21 +47,19 @@ function getIconFromSymbol(symbol: string) {
 }
 
 function discardOrder() {
-  emit('update:isOpen', false)
-  clearBuiltInfo()
+  closeModal()
 }
 
 async function submitBidOrder() {
   const btcjs = useBtcJsStore().get!
-  const builtInfo = toRaw(props.builtInfo)
 
   try {
-    const bidGrant = builtInfo.order
+    const bidGrant = transactionInfo.value.order
     let payTxRaw
-    if (builtInfo.secondaryOrder) {
+    if (transactionInfo.value.secondaryOrder) {
       // 1. sign secondary order which is used to create the actual utxo to pay for the bid grant order
       const payPsbtSigned = await adapter.signPsbt(
-        builtInfo.secondaryOrder.toHex()
+        transactionInfo.value.secondaryOrder.toHex()
       )
       const payPsbt = btcjs.Psbt.fromHex(payPsbtSigned)
       // extract tx from signed payPsbt
@@ -122,9 +99,9 @@ async function submitBidOrder() {
       mergeTxRaw: payTxRaw,
       network: networkStore.ordersNetwork,
       address: connectionStore.getAddress,
-      tick: selectedPair.fromSymbol,
-      total: builtInfo.total,
-      coinAmount: builtInfo.toValue,
+      tick: transactionInfo.value.toSymbol,
+      total: transactionInfo.value.total,
+      coinAmount: transactionInfo.value.toValue,
     })
     console.log('bid order push result', pushRes)
   } catch (err: any) {
@@ -140,19 +117,15 @@ async function submitBidOrder() {
     } else {
       ElMessage.error(err.message)
     }
-    emit('update:isOpen', false)
-    clearBuiltInfo()
-    emit('update:isLimitExchangeMode', false)
+    closeModal()
     return
   }
 
   // Show success message
-  emit('update:isOpen', false)
-  clearBuiltInfo()
-  emit('update:isLimitExchangeMode', false)
+  closeModal()
 
   ElMessage({
-    message: `${builtInfo.type} order completed!`,
+    message: `bid order completed!`,
     type: 'success',
     onClose: () => {
       // reload
@@ -165,10 +138,10 @@ async function submitBidOrder() {
 
 async function submitOrder() {
   const btcjs = useBtcJsStore().get!
-  const builtInfo = toRaw(props.builtInfo)
+  const orderType = transactionInfo.value.type
 
   // if type if bid, we handle it differently
-  if (builtInfo.type === 'bid') {
+  if (transactionInfo.value.type === 'bid') {
     return submitBidOrder()
   }
 
@@ -178,13 +151,13 @@ async function submitOrder() {
     let inputsCount: number
     let toSignInputs: any[]
     // 2. push
-    switch (builtInfo!.type) {
+    switch (transactionInfo.value.type) {
       case 'buy':
       case 'free claim':
         // toSignInputs gathering:
         // index-2 input is brc
         // then add every other inputs after index-5
-        inputsCount = builtInfo.order.data.inputs.length
+        inputsCount = transactionInfo.value.order.data.inputs.length
         toSignInputs = []
         for (let i = BUY_PAY_INPUT_INDEX; i < inputsCount; i++) {
           toSignInputs.push({
@@ -194,7 +167,7 @@ async function submitOrder() {
           })
         }
         console.log({ toSignInputs })
-        signed = await adapter.signPsbt(builtInfo.order.toHex(), {
+        signed = await adapter.signPsbt(transactionInfo.value.order.toHex(), {
           autoFinalized: false,
           toSignInputs,
         })
@@ -202,17 +175,17 @@ async function submitOrder() {
         pushRes = await postBuyTake({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,
-          orderId: builtInfo.orderId,
+          orderId: transactionInfo.value.orderId,
         })
         break
       case 'sell':
         // sign
-        const before = builtInfo.order.toHex()
+        const before = transactionInfo.value.order.toHex()
 
         // toSignInputs gathering:
         // index-2 input is brc
         // then add every other inputs after index-5
-        inputsCount = builtInfo.order.data.inputs.length
+        inputsCount = transactionInfo.value.order.data.inputs.length
         toSignInputs = [
           {
             index: 2,
@@ -229,7 +202,7 @@ async function submitOrder() {
         }
         console.log({ toSignInputs })
 
-        signed = await adapter.signPsbt(builtInfo.order.toHex(), {
+        signed = await adapter.signPsbt(transactionInfo.value.order.toHex(), {
           autoFinalized: false,
           toSignInputs,
         })
@@ -238,21 +211,21 @@ async function submitOrder() {
         const afterPsbt = useBtcJsStore().get!.Psbt.fromHex(after)
 
         pushRes = await postSellTake({
-          orderId: builtInfo.orderId,
+          orderId: transactionInfo.value.orderId,
           psbtRaw: signed,
-          networkFee: builtInfo.networkFee,
-          networkFeeRate: builtInfo.networkFeeRate,
+          networkFee: transactionInfo.value.networkFee,
+          networkFeeRate: transactionInfo.value.networkFeeRate,
         })
         break
       case 'ask':
-        signed = await adapter.signPsbt(builtInfo.order.toHex())
+        signed = await adapter.signPsbt(transactionInfo.value.order.toHex())
 
         pushRes = await pushAskOrder({
           psbtRaw: signed,
           network: networkStore.ordersNetwork,
           address: connectionStore.getAddress,
-          tick: selectedPair.fromSymbol,
-          amount: builtInfo.amount,
+          tick: transactionInfo.value.fromSymbol,
+          amount: transactionInfo.value.amount,
         })
         break
     }
@@ -269,19 +242,15 @@ async function submitOrder() {
     if (IS_DEV) {
       throw err
     }
-    emit('update:isOpen', false)
-    clearBuiltInfo()
-    emit('update:isLimitExchangeMode', false)
+    closeModal()
     return
   }
 
   // Show success message
-  emit('update:isOpen', false)
-  clearBuiltInfo()
-  emit('update:isLimitExchangeMode', false)
+  closeModal()
 
   ElMessage({
-    message: `${builtInfo.type} order completed!`,
+    message: `${orderType} order completed!`,
     type: 'success',
     onClose: () => {
       // reload
@@ -294,49 +263,37 @@ async function submitOrder() {
 </script>
 
 <template>
-  <Dialog
-    :open="isOpen"
-    @close="$emit('update:isOpen', false)"
-    :initial-focus="cancelButtonRef"
-  >
+  <Dialog :open="isOpen" :initial-focus="cancelButtonRef">
     <div class="fixed inset-0 bg-black/50 backdrop-blur"></div>
 
     <div class="fixed inset-0 overflow-y-auto text-zinc-300">
       <div class="flex min-h-full items-center justify-center p-4 text-center">
         <DialogPanel
-          class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-orange-200/10 transition-all"
+          class="w-full max-w-lg transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-primary/10 transition-all"
         >
           <DialogTitle class="text-lg text-zinc-300">
             Confirm Transaction
           </DialogTitle>
 
           <DialogDescription as="div" class="mt-8 text-sm">
-            <div
-              class="mt-4 flex items-center justify-center gap-2 text-zinc-300"
-              v-if="isBuilding"
-            >
-              <Loader class="h-4 w-4 animate-spin-slow" />
-              <span>{{ buildProcessTip }}</span>
-            </div>
-
-            <div class="" v-else-if="builtInfo">
+            <div class="" v-if="transactionInfo">
               <div class="grid grid-cols-2 items-center">
                 <div class="flex items-center gap-4">
                   <span class="text-zinc-500">Order Type</span>
-                  <span class="font-bold uppercase text-orange-300">
-                    {{ builtInfo.type }}
+                  <span class="font-bold uppercase text-primary">
+                    {{ transactionInfo.typeForDisplay ?? transactionInfo.type }}
                   </span>
                 </div>
 
                 <div class="space-y-2">
                   <div class="flex items-center gap-4">
                     <img
-                      :src="getIconFromSymbol(builtInfo.fromSymbol)"
+                      :src="getIconFromSymbol(transactionInfo.fromSymbol)"
                       alt=""
                       class="h-8 w-8 rounded-full"
                     />
                     <span
-                      v-if="builtInfo.isFree"
+                      v-if="transactionInfo.isFree"
                       class="font-bold text-green-500"
                     >
                       0
@@ -344,8 +301,8 @@ async function submitOrder() {
                     <span v-else>
                       {{
                         prettyCoinDisplay(
-                          builtInfo.fromValue,
-                          builtInfo.fromSymbol
+                          transactionInfo.fromValue,
+                          transactionInfo.fromSymbol
                         )
                       }}
                     </span>
@@ -357,13 +314,16 @@ async function submitOrder() {
 
                   <div class="flex items-center gap-4">
                     <img
-                      :src="getIconFromSymbol(builtInfo.toSymbol)"
+                      :src="getIconFromSymbol(transactionInfo.toSymbol)"
                       alt=""
                       class="h-8 w-8 rounded-full"
                     />
                     <span>
                       {{
-                        prettyCoinDisplay(builtInfo.toValue, builtInfo.toSymbol)
+                        prettyCoinDisplay(
+                          transactionInfo.toValue,
+                          transactionInfo.toSymbol
+                        )
                       }}
                     </span>
                   </div>
@@ -375,10 +335,10 @@ async function submitOrder() {
                 <div class="col-span-1 text-right">
                   <div
                     class="flex items-center justify-end gap-2"
-                    v-if="builtInfo.isFree"
+                    v-if="transactionInfo.isFree"
                   >
                     <!-- <span class="text-zinc-500 line-through">
-                        {{ prettyBtcDisplay(builtInfo.totalPrice) }}
+                        {{ prettyBtcDisplay(transactionInfo.totalPrice) }}
                       </span> -->
                     <span
                       class="rounded bg-green-700/30 px-1 py-0.5 text-xs font-bold text-green-500"
@@ -386,24 +346,26 @@ async function submitOrder() {
                     >
                   </div>
                   <span v-else>
-                    {{ prettyBtcDisplay(builtInfo.totalPrice) }}
+                    {{ prettyBtcDisplay(transactionInfo.totalPrice) }}
                   </span>
                 </div>
 
                 <div class="text-left text-zinc-500">Gas</div>
                 <div class="col-span-1 text-right">
-                  {{ prettyBtcDisplay(builtInfo.networkFee) }}
+                  {{ prettyBtcDisplay(transactionInfo.networkFee) }}
                 </div>
 
                 <div class="text-left text-zinc-500">Service Fee</div>
                 <div class="col-span-1 text-right">
                   <div
                     class="flex items-center justify-end gap-2"
-                    v-if="builtInfo.isFree || builtInfo.serviceFee === 0"
+                    v-if="
+                      transactionInfo.isFree || transactionInfo.serviceFee === 0
+                    "
                   >
                     <span
                       class="text-zinc-500 line-through"
-                      v-if="builtInfo.isFree"
+                      v-if="transactionInfo.isFree"
                     >
                       {{ prettyBtcDisplay(2000) }}
                     </span>
@@ -413,11 +375,11 @@ async function submitOrder() {
                     >
                   </div>
                   <span v-else>
-                    {{ prettyBtcDisplay(builtInfo.serviceFee) }}
+                    {{ prettyBtcDisplay(transactionInfo.serviceFee) }}
                   </span>
                 </div>
 
-                <template v-if="builtInfo.isFree">
+                <template v-if="transactionInfo.isFree">
                   <div class="text-left text-zinc-500">Inscribe Fee</div>
                   <div class="col-span-1 text-right">
                     {{ prettyBtcDisplay(4000) }}
@@ -430,7 +392,7 @@ async function submitOrder() {
 
                 <div class="text-left text-zinc-300">You Will Spend</div>
                 <div class="col-span-1 text-right">
-                  {{ prettyBtcDisplay(builtInfo.totalSpent) }}
+                  {{ prettyBtcDisplay(transactionInfo.totalSpent) }}
                 </div>
 
                 <div class="text-left text-zinc-300">Available Balance</div>
@@ -453,7 +415,7 @@ async function submitOrder() {
               @click="submitOrder"
               class="w-24 rounded border border-zinc-500 py-2"
               ref="confirmButtonRef"
-              v-if="builtInfo"
+              v-if="transactionInfo"
             >
               Confirm
             </button>

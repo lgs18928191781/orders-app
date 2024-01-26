@@ -19,7 +19,7 @@ const { record } = defineProps<{
     <div class="items-center flex justify-between mt-4">
       <div class="">
         <div class="flex items-center gap-2">
-          <span class="text-orange-300">
+          <span class="text-primary">
             {{ `${record.rewardCoinAmount} ${record.tick.toUpperCase()}` }}
           </span>
 
@@ -35,7 +35,7 @@ const { record } = defineProps<{
             class="flex items-center gap-2 hover:cursor-pointer"
             @click="toTx(record.sendId)"
           >
-            <span class="hover:text-orange-300 underline">
+            <span class="hover:text-primary underline">
               {{ prettyTxid(record.sendId, 4) }}
             </span>
 

@@ -5,14 +5,11 @@ import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import {
-  getIssueDetail,
-  submitRecover,
-  type Issue,
-} from '@/queries/orders/issues'
-import { prettyTimestamp } from '@/lib/formatters'
-import { buildRecoverPsbt } from '@/lib/builders/pool'
-import { DEBUG, SIGHASH_SINGLE_ANYONECANPAY } from '@/data/constants'
+import { getIssueDetail, submitRecover, type Issue } from '@/queries/issues'
+import { prettyBtcDisplay, prettyTimestamp } from '@/lib/formatters'
+import { DEBUG } from '@/data/constants'
+import { useFeebStore } from '@/stores/feeb'
+import { raise } from '@/lib/helpers'
 
 import BuildingOverlay from '@/components/overlays/Loading.vue'
 
@@ -47,49 +44,22 @@ const building = ref(false)
 async function onRecover() {
   building.value = true
   try {
+    const feeb = useFeebStore().get ?? raise('Select a gas plan first.')
+    const networkFeeRate = String(feeb)
     // get brc psbt
     const issueDetail = await getIssueDetail({
-      address: connectionStore.getAddress,
       orderId: props.issue.orderId,
-      tick: props.issue.tick,
+      networkFeeRate,
     })
 
-    const releasePsbt = await buildRecoverPsbt({
-      ordinalMsPsbtRaw: issueDetail.coinPsbtRaw,
-      ordinalRecoverPsbtRaw: issueDetail.coinTransferPsbtRaw,
-    })
-
-    type ToSignInput = {
-      index: number
-      address: string
-      sighashTypes: number[]
-    }
-    const toSignInputs: ToSignInput[] = [
-      {
-        index: 0,
-        address: connectionStore.getAddress,
-        sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
-      },
-      {
-        index: 1,
-        address: connectionStore.getAddress,
-        sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
-      },
-      {
-        index: 2,
-        address: connectionStore.getAddress,
-        sighashTypes: [SIGHASH_SINGLE_ANYONECANPAY],
-      },
-    ]
-
-    const signed = await connectionStore.adapter.signPsbt(releasePsbt.toHex(), {
-      autoFinalized: true,
-      toSignInputs,
-    })
+    // const releasePsbt = await buildRecoverPsbt({
+    //   psbtRaw: issueDetail.psbtRaw,
+    // })
 
     mutateRecover({
       orderId: props.issue.orderId,
-      psbtRaw: signed,
+      psbtRaw: issueDetail.psbtRaw,
+      networkFeeRate,
     })
   } catch (e: any) {
     if (DEBUG) {
@@ -115,9 +85,8 @@ async function onRecover() {
 
     <div class="mt-4 flex items-center justify-between">
       <div class="space-2">
-        <div class="flex gap-1 text-orange-300">
-          <div>{{ issue.coinAmount }}</div>
-          <div>${{ issue.tick.toUpperCase() }}</div>
+        <div class="flex gap-1 text-primary">
+          <div>{{ prettyBtcDisplay(issue.amount) }}</div>
         </div>
 
         <div class="text-sm text-zinc-300">
@@ -127,7 +96,7 @@ async function onRecover() {
 
       <div class="">
         <button
-          class="text-orange-300 border border-orange-300/30 px-4 py-1 rounded-md shadow-md shadow-orange-300/10 hover:shadow-orange-300/30 hover:bg-orange-300 hover:text-orange-950 transition-all duration-200"
+          class="text-primary border border-primary/30 px-4 py-1 rounded-md shadow-md shadow-primary/10 hover:shadow-primary/30 hover:bg-primary hover:text-orange-950 transition-all duration-200"
           @click="onRecover"
         >
           Recover
@@ -136,10 +105,10 @@ async function onRecover() {
     </div>
 
     <div class="flex mt-4 text-xs gap-8">
-      <div class="text-zinc-500">Issue Description:</div>
+      <div class="text-zinc-500">Issue Description</div>
       <ul class="list-disc space-y-1">
         <li class="">Sell transactions failed</li>
-        <li>BRC20 asset stucked in multi-sig address</li>
+        <li>BTC asset stuck in multi-sig address</li>
       </ul>
     </div>
   </div>

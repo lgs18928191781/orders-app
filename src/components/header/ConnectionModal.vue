@@ -7,13 +7,14 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
+
+import { useConnectionStore } from '@/stores/connection'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
 
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
-import { useConnectionStore } from '@/stores/connection'
-import { IS_DEV } from '@/data/constants'
-import { useConnectionModal } from '@/hooks/use-connection-modal'
 
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
@@ -41,6 +42,23 @@ async function connectToOkx() {
 
   const connection = await connectionStore.connect('okx')
   if (connection.status === 'connected') {
+    closeConnectionModal()
+  }
+}
+
+async function connectToMetalet() {
+  if (!window.metaidwallet) {
+    setMissingWallet('metalet')
+    return
+  }
+
+  const connection = await connectionStore.connect('metalet').catch((err) => {
+    ElMessage.warning({
+      message: err.message,
+      type: 'warning',
+    })
+  })
+  if (connection?.status === 'connected') {
     closeConnectionModal()
   }
 }
@@ -94,7 +112,7 @@ async function connectToOkx() {
                 <!-- wallet buttons -->
                 <div class="grid grid-cols-3 gap-4 mt-8 text-base">
                   <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-orange-300/30 hover:border-orange-300/30 hover:bg-orange-300 hover:text-orange-950"
+                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
                     ref="firstButtonRef"
                     @click="connectToOkx"
                   >
@@ -103,7 +121,7 @@ async function connectToOkx() {
                   </button>
 
                   <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-orange-300/30 hover:border-orange-300/30 hover:bg-orange-300 hover:text-orange-950"
+                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
                     @click="connectToUnisat"
                   >
                     <img
@@ -116,9 +134,8 @@ async function connectToOkx() {
 
                   <div class="relative">
                     <button
-                      class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 enabled:hover:shadow-md enabled:hover:shadow-orange-300/30 enabled:hover:border-orange-300/30 enabled:hover:bg-orange-300 enabled:hover:text-orange-950 disabled:opacity-30"
-                      @click="closeConnectionModal"
-                      :disabled="!IS_DEV"
+                      class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 enabled:hover:shadow-md enabled:hover:shadow-primary/30 enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 disabled:opacity-30"
+                      @click="connectToMetalet"
                     >
                       <img
                         class="h-12 rounded"
@@ -127,18 +144,23 @@ async function connectToOkx() {
                       />
                       <span class="">Metalet</span>
                     </button>
-                    <span
-                      class="absolute top-0 right-0 text-xs text-red-400 bg-red-400/30 rounded-md font-medium px-1.5 py-0.5 translate-x-4 -translate-y-2 rotate-3"
-                    >
-                      Coming Soon!
-                    </span>
                   </div>
                 </div>
 
                 <!-- footer -->
                 <div class="mt-16 text-xs text-zinc-500 space-y-1">
                   <p>By connecting wallet,</p>
-                  <p>you agree to Orders.Exchange's Terms of Service.</p>
+                  <p class="flex gap-2">
+                    you agree to Orders.Exchange's
+                    <a
+                      href="https://orders-exchange.gitbook.io/orders/risks-and-disclaimer/risks-and-disclaimer"
+                      target="_blank"
+                      class="underline hover:text-primary"
+                    >
+                      Terms of Service
+                    </a>
+                    .
+                  </p>
                 </div>
               </div>
             </DialogPanel>

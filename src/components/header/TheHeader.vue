@@ -1,22 +1,21 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useQueryClient } from '@tanstack/vue-query'
+import { MenuIcon } from 'lucide-vue-next'
 
-import { prettyAddress } from '@/lib/formatters'
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
 import whitelist from '@/lib/whitelist'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { isUnsupportedAddress } from '@/lib/helpers'
 
 import WalletMissingModal from './WalletMissingModal.vue'
 import AssetsDisplay from './AssetsDisplay.vue'
 import NetworkState from './NetworkState.vue'
 import Notifications from './Notifications.vue'
 import TheNavbar from './TheNavbar.vue'
-import unisatIcon from '@/assets/unisat-icon.png?url'
-import okxIcon from '@/assets/okx-icon.png?url'
-import { isUnsupportedAddress } from '@/lib/helpers'
+import AddressMenu from '@/components/header/AddressMenu.vue'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
@@ -64,6 +63,17 @@ const okxAccountsChangedHandler = (accounts: string[] | null) => {
     },
   })
 }
+const metaletAccountsChangedHandler = () => {
+  if (useConnectionStore().last.wallet !== 'metalet') return
+
+  ElMessage.warning({
+    message: 'Metalet account changed. Refreshing page...',
+    type: 'warning',
+    onClose: () => {
+      window.location.reload()
+    },
+  })
+}
 
 onMounted(async () => {
   if (window.unisat) {
@@ -98,112 +108,58 @@ onMounted(async () => {
   if (window.okxwallet) {
     window.okxwallet.bitcoin.on('accountsChanged', okxAccountsChangedHandler)
   }
+
+  if (window.metaidwallet) {
+    window.metaidwallet.on('accountsChanged', metaletAccountsChangedHandler)
+  }
 })
 onBeforeUnmount(() => {
   // remove event listener
   window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
-  window.okxwallet.bitcoin?.removeListener(
+  window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
+  window.metaidwallet?.removeListener(
     'accountsChanged',
-    okxAccountsChangedHandler
+    metaletAccountsChangedHandler
   )
 })
-
-// connect / address related
-const { data: address } = useQuery({
-  queryKey: ['address', { network: networkStore.network }],
-  queryFn: async () =>
-    connectionStore.sync().then((connection) => connection?.address),
-  retry: 0,
-  enabled: computed(() => connectionStore.connected),
-})
-
-async function switchNetwork() {
-  if (!window.unisat) {
-    ElMessage.warning('Please install the Unisat wallet extension first.')
-    return
-  }
-
-  const network = networkStore.network === 'testnet' ? 'livenet' : 'testnet'
-  const switchRes = await window.unisat.switchNetwork(network)
-  if (switchRes) {
-    networkStore.set(network)
-  }
-
-  // reload page
-  window.location.reload()
-}
-
-const walletIcon = computed(() => {
-  const connection = connectionStore.last
-
-  if (!connection) return null
-
-  return connection.wallet === 'unisat' ? unisatIcon : okxIcon
-})
-
-function copyAddress() {
-  // copy address value to clipboard
-  const address = connectionStore.getAddress
-  if (!address) return
-  navigator.clipboard.writeText(address)
-  ElMessage.success('Address copied to clipboard')
-}
 </script>
 
 <template>
   <ConnectionModal />
   <WalletMissingModal />
 
-  <header class="flex items-center justify-between px-6 py-4 select-none">
-    <TheNavbar />
+  <header
+    class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
+  >
+    <div class="max-w-9xl flex items-center justify-between mx-auto px-3">
+      <TheNavbar />
 
-    <div class="flex gap-2">
-      <div class="hidden lg:block">
-        <!-- <el-tooltip
-          effect="light"
-          placement="bottom"
-          :content="`Click to switch to ${
-            networkStore.network === 'testnet' ? 'livenet' : 'testnet'
-          } `"
+      <div class="flex gap-2">
+        <button
+          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
+          @click="openConnectionModal"
+          v-if="!connectionStore.connected"
         >
-          <button
-            class="h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition hover:text-orange-300"
-            @click="switchNetwork"
-          >
-            {{ networkStore.network }}
-          </button>
-        </el-tooltip> -->
-      </div>
+          Connect Wallet
+        </button>
 
-      <button
-        class="h-10 rounded-lg border-2 border-orange-300 px-4 transition hover:text-orange-950 hover:bg-orange-300"
-        @click="openConnectionModal"
-        v-if="!connectionStore.connected"
-      >
-        Connect Wallet
-      </button>
+        <template v-else>
+          <div class="items-center gap-2 hidden lg:flex">
+            <div
+              class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
+            >
+              <AddressMenu />
+              <AssetsDisplay />
+              <NetworkState />
+            </div>
 
-      <div v-else class="flex items-center gap-2">
-        <div
-          class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
-        >
-          <div
-            class="lg:flex gap-2 pr-3 hidden cursor-pointer"
-            @click="copyAddress"
-            title="copy address"
-          >
-            <img class="h-5" :src="walletIcon" alt="Unisat" v-if="walletIcon" />
-            <span class="text-sm text-orange-300">
-              {{ address ? prettyAddress(address, 4) : '-' }}
-            </span>
+            <Notifications />
           </div>
 
-          <AssetsDisplay />
-
-          <NetworkState />
-        </div>
-
-        <Notifications />
+          <button class="lg:hidden">
+            <MenuIcon class="h-6 w-6" />
+          </button>
+        </template>
       </div>
     </div>
   </header>

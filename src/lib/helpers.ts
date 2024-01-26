@@ -47,9 +47,6 @@ export const unit = computedEager(() => {
   const useBtcUnit = useStorage('use-btc-unit', true)
   return useBtcUnit.value ? 'BTC' : 'sat'
 })
-export const showFiat = computedEager(() => {
-  return useStorage('show-fiat-price', true)
-})
 
 export type BidTxSpec = {
   inputs: {

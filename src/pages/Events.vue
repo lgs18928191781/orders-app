@@ -100,7 +100,7 @@ async function onClaimReward() {
     </h1>
 
     <section
-      class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-orange-300/30 border border-orange-300/20"
+      class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-primary/30 border border-primary/20"
     >
       <div class="flex gap-8 items-center">
         <span class="text-lg text-zinc-300">Choose Event</span>
@@ -126,12 +126,12 @@ async function onClaimReward() {
       </div>
 
       <!-- a border -->
-      <div class="col-span-3 border-b border-orange-300/20 pt-4 mb-4"></div>
+      <div class="col-span-3 border-b border-primary/20 pt-4 mb-4"></div>
 
       <div class="">
         <h3 class="text-sm font-medium leading-6 text-zinc-300">My Rewards</h3>
         <div class="mt-2 flex items-center gap-4 text-lg" v-if="eventStats">
-          <div class="flex items-baseline gap- text-orange-300">
+          <div class="flex items-baseline gap- text-primary">
             <span class="font-bold text-3xl">
               {{ isFetchingEventStats ? '-' : eventStats.total }}
             </span>
@@ -143,7 +143,7 @@ async function onClaimReward() {
 
           <!-- claim button -->
           <button
-            class="rounded bg-orange-300 text-orange-950 px-4 py-1 shadow-md shadow-orange-300/20 text-sm hover:shadow-orange-300/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
+            class="rounded bg-primary text-orange-950 px-4 py-1 shadow-md shadow-primary/20 text-sm hover:shadow-primary/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
             @click="onClaimReward"
             :disabled="!eventStats || eventStats.total === 0"
             v-if="eventStats && eventStats.total > 0"

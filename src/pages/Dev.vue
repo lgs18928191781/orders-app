@@ -11,7 +11,7 @@ const btcJsStore = useBtcJsStore()
 
 const { select } = useSelectOrder()
 function addRandom() {
-  select('random')
+  // select('random')
 }
 
 onMounted(async () => {

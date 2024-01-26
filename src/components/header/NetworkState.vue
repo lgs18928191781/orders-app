@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Ref, computed, ref, watch } from 'vue'
 import { get, useStorage } from '@vueuse/core'
+import Decimal from 'decimal.js'
 import {
   Popover,
   PopoverButton,
@@ -12,28 +13,28 @@ import {
   PopoverOverlay,
 } from '@headlessui/vue'
 import { useQuery } from '@tanstack/vue-query'
-import { CarIcon, CheckIcon, Loader2Icon } from 'lucide-vue-next'
+import {
+  CarIcon,
+  CheckIcon,
+  Loader2Icon,
+  BikeIcon,
+  RocketIcon,
+  BusIcon,
+  SailboatIcon,
+  PlaneIcon,
+} from 'lucide-vue-next'
 
 import { useNetworkStore } from '@/stores/network'
 import { useFeebStore } from '@/stores/feeb'
 import { FeebPlan, getFeebPlans } from '@/queries/orders-api'
-import { calcFiatPrice, sleep, unit, useBtcUnit } from '@/lib/helpers'
+import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance } from '@/lib/formatters'
-import { getFiatRate } from '@/queries/orders-api'
-import {
-  BID_TX_SIZE,
-  BUY_TX_SIZE,
-  RELEASE_TX_SIZE,
-  SELL_TX_SIZE,
-  SEND_TX_SIZE,
-} from '@/data/constants'
+import { BID_TX_SIZE, BUY_TX_SIZE, SELL_TX_SIZE } from '@/data/constants'
 import { getRewardClaimFees } from '@/queries/pool'
-import Decimal from 'decimal.js'
-import { BikeIcon } from 'lucide-vue-next'
-import { RocketIcon } from 'lucide-vue-next'
-import { BusIcon } from 'lucide-vue-next'
-import { SailboatIcon } from 'lucide-vue-next'
-import { PlaneIcon } from 'lucide-vue-next'
+import { useFiat } from '@/hooks/use-fiat'
+
+const { useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 // custom feeb plan
 const customFeeb = useStorage('customFeeb', 2)
@@ -88,29 +89,6 @@ const takeActions = [
   },
 ]
 
-const poolActions = [
-  {
-    title: 'Add BRC Liquidity',
-    size: 0,
-  },
-  {
-    title: 'Add 2-Way Liquidity',
-    size: SEND_TX_SIZE,
-  },
-  {
-    title: 'Remove Liquidity',
-    size: 0,
-  },
-  {
-    title: 'Release',
-    size: RELEASE_TX_SIZE,
-  },
-  {
-    title: 'Claim Reward',
-    size: 0,
-  },
-]
-
 // fetch claim fees dynamically
 const claimFee = ref(0)
 async function getClaimFee() {
@@ -142,12 +120,12 @@ function getPoolActionsPriceDisplay(
       prettyBalance(claimFee.value, get(useBtcUnit)) + ' ' + unit.value
 
     const fiatPriceDisplay = fiatRate.value
-      ? calcFiatPrice(claimFee.value, get(fiatRate))
+      ? getFiatPriceDisplay(claimFee.value, get(fiatRate))
       : ''
 
     return {
       inCrypto: prefix + btcPriceDisplay,
-      inFiat: fiatPriceDisplay ? '$' + fiatPriceDisplay : '$0',
+      inFiat: fiatPriceDisplay ?? '$0',
     }
   }
 
@@ -162,7 +140,7 @@ function getPoolActionsPriceDisplay(
 
   const fiatPriceDisplay =
     fiatRate.value && actionSize > 0
-      ? calcFiatPrice(
+      ? getFiatPriceDisplay(
           actionSize * selectedFeebPlan.value.feeRate,
           get(fiatRate)
         )
@@ -170,7 +148,7 @@ function getPoolActionsPriceDisplay(
 
   return {
     inCrypto: prefix + btcPriceDisplay,
-    inFiat: fiatPriceDisplay ? '$' + fiatPriceDisplay : '$0',
+    inFiat: fiatPriceDisplay ?? '$0',
   }
 }
 
@@ -218,7 +196,7 @@ watch(
 const traffic = computed(() => {
   if (!feebPlans.value) return '-'
 
-  const avgFeeRate = feebPlans.value[1].feeRate
+  const avgFeeRate = feebPlans.value[2].feeRate
 
   if (avgFeeRate < 20) return 'Low'
   if (avgFeeRate < 50) return 'Normal'
@@ -282,12 +260,6 @@ function onSwitchShow(open: boolean) {
     }, 500)
   }
 }
-
-// fiat price
-const { data: fiatRate } = useQuery({
-  queryKey: ['fiatRate', { coin: 'btc' }],
-  queryFn: getFiatRate,
-})
 </script>
 
 <template>
@@ -313,7 +285,7 @@ const { data: fiatRate } = useQuery({
         <Loader2Icon class="text-zinc-500 h-4 w-4 mx-auto animate-spin" />
       </span>
 
-      <span class="text-orange-300 text-left min-w-[60px]" v-else>
+      <span class="text-primary text-left min-w-[60px]" v-else>
         {{
           selectedFeebPlan
             ? `${selectedFeebPlan.title} ${selectedFeebPlan.feeRate}`
@@ -322,7 +294,7 @@ const { data: fiatRate } = useQuery({
       </span>
     </PopoverButton>
 
-    <PopoverOverlay class="fixed inset-0 z-50 bg-black/50" />
+    <PopoverOverlay class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
 
     <transition
       enter-active-class="transition ease-out duration-100"
@@ -333,7 +305,7 @@ const { data: fiatRate } = useQuery({
       leave-to-class="transform opacity-0 scale-95"
     >
       <PopoverPanel
-        class="absolute z-50 right-0 mt-4 w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none px-4 shadow-orange-300/20"
+        class="absolute z-50 right-0 mt-4 w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none px-4 shadow-primary/20"
       >
         <div class="divide-y-2 divide-zinc-700">
           <div class="py-4">
@@ -406,11 +378,9 @@ const { data: fiatRate } = useQuery({
                       <div
                         :class="[
                           active
-                            ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-orange-300'
+                            ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-primary'
                             : '',
-                          checked
-                            ? 'bg-orange-300/75 text-white '
-                            : 'bg-black ',
+                          checked ? 'bg-primary/75 text-white ' : 'bg-black ',
                         ]"
                         class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
                       >
@@ -497,7 +467,7 @@ const { data: fiatRate } = useQuery({
                     v-for="action in makeActions"
                     :key="action.title"
                   >
-                    <div class="text-orange-300">
+                    <div class="text-primary">
                       {{ action.title }}
                     </div>
 
@@ -519,7 +489,7 @@ const { data: fiatRate } = useQuery({
                     v-for="action in takeActions"
                     :key="action.title"
                   >
-                    <div class="text-orange-300">
+                    <div class="text-primary">
                       {{ action.title }}
                     </div>
 
@@ -533,40 +503,6 @@ const { data: fiatRate } = useQuery({
                     </div>
                   </div>
                 </div>
-
-                <!-- <h3 class="text-zinc-500 mt-8">Pool Actions</h3> -->
-                <!-- <div class="mt-3 divide divide-y-2 divide-zinc-700">
-                  <div
-                    class="flex items-center justify-between py-1.5"
-                    v-for="action in poolActions"
-                    :key="action.title"
-                  >
-                    <div class="text-orange-300">
-                      {{ action.title }}
-                    </div>
-
-                    <div class="text-right flex gap-4">
-                      <div class="font-bold">
-                        {{
-                          getPoolActionsPriceDisplay(
-                            action.size,
-                            '>=',
-                            action.title === 'Claim Reward'
-                          ).inCrypto
-                        }}
-                        <div class="pl-2 text-zinc-500 text-xs">
-                          {{
-                            getPoolActionsPriceDisplay(
-                              action.size,
-                              '>=',
-                              action.title === 'Claim Reward'
-                            ).inFiat
-                          }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div> -->
               </div>
             </div>
           </div>
@@ -579,9 +515,5 @@ const { data: fiatRate } = useQuery({
 <style scoped>
 .item-label {
   @apply text-zinc-300 shrink-0;
-}
-
-.item-value {
-  @apply text-right text-zinc-300;
 }
 </style>

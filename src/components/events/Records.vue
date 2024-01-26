@@ -49,7 +49,7 @@ const { data: claimHistory } = useQuery({
       <Tab as="template" v-slot="{ selected }">
         <button
           class="text-lg font-bold py-1 px-2"
-          :class="[selected ? 'text-orange-300 underline' : 'text-zinc-300']"
+          :class="[selected ? 'text-primary underline' : 'text-zinc-300']"
         >
           Reward History
         </button>
@@ -57,7 +57,7 @@ const { data: claimHistory } = useQuery({
       <Tab as="template" v-slot="{ selected }">
         <button
           class="text-lg font-bold py-1 px-2"
-          :class="[selected ? 'text-orange-300 underline' : 'text-zinc-300']"
+          :class="[selected ? 'text-primary underline' : 'text-zinc-300']"
         >
           Claim History
         </button>

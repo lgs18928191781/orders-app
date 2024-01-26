@@ -56,7 +56,7 @@ const selectedEvent = computed(() => {
         <div class="mr-1" v-if="selectedEvent">
           {{ selectedEvent.title }}
         </div>
-        <div v-else class="text-base pl-2 text-orange-300">Select Event</div>
+        <div v-else class="text-base pl-2 text-primary">Select Event</div>
         <ChevronDownIcon class="h-5 w-5" />
       </button>
     </ListboxButton>
@@ -70,7 +70,7 @@ const selectedEvent = computed(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute left-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar divide-y divide-zinc-800 border border-orange-300/10 shadow shadow-orange-300/30"
+        class="absolute left-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar divide-y divide-zinc-800 border border-primary/10 shadow shadow-primary/30"
       >
         <ListboxOption
           v-slot="{ active, selected }"
@@ -84,7 +84,9 @@ const selectedEvent = computed(() => {
               active && 'bg-black',
             ]"
           >
-            <div class="text-base text-zinc-500">{{ index + 1 }}.</div>
+            <div class="text-base text-zinc-500">
+              {{ eventsSorted.length - index }}.
+            </div>
 
             <div class="text-base font-bold">
               {{ event.title }}
@@ -98,7 +100,7 @@ const selectedEvent = computed(() => {
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-orange-300 ml-auto"
+              class="h-5 w-5 text-primary ml-auto"
               aria-hidden="true"
             />
           </button>

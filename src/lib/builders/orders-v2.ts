@@ -69,6 +69,7 @@ export async function buildBidOffer({
 
   // the value of the input should be the total value plus the fee
   const bidGrantInputValue = total + bidGrantFee
+  console.log('🚀 ~ bidGrantInputValue:', bidGrantInputValue)
 
   // 3.5 Optimization: if we find a utxo with roughly the same value as bidGrantInputValue, we can skip the next step and use it directly
   const excludedUtxos = await getExcludedUtxos()
@@ -114,6 +115,7 @@ export async function buildBidOffer({
     order: bidGrant,
     secondaryOrder: pay,
     type: 'bid',
+    typeForDisplay: 'limit buy',
     feeb,
     networkFee: payFee + bidGrantFee,
     mainFee: bidGrantFee,
@@ -337,4 +339,35 @@ export async function buildClaim() {
     feeSend: rewardSendFee,
     feeInscription: rewardInscriptionFee,
   }
+}
+
+export async function buildRecoverPsbt({ psbtRaw }: { psbtRaw: string }) {
+  const btcjs = useBtcJsStore().get!
+
+  const recover = btcjs.Psbt.fromHex(psbtRaw)
+  console.log({ recover })
+
+  // // Add recover input
+  // recover.addInput(
+  //   fillInternalKey({
+  //     hash: releasePsbt.txInputs[0].hash,
+  //     index: releasePsbt.txInputs[0].index,
+  //     witnessUtxo: releasePsbt.data.inputs[0].witnessUtxo,
+  //     partialSig: releasePsbt.data.inputs[0].partialSig,
+  //     witnessScript: releasePsbt.data.inputs[0].witnessScript,
+  //     sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+  //   })
+  // )
+
+  // // Add recover output
+  // recover.addOutput(releasePsbt.txOutputs[0])
+
+  // // Add change output
+  // await exclusiveChange({
+  //   psbt: recover,
+  //   sighashType: SIGHASH_SINGLE_ANYONECANPAY,
+  //   useSize: RELEASE_TX_SIZE,
+  // })
+
+  return recover
 }

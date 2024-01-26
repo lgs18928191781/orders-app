@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
-import { getIssues } from '@/queries/orders/issues'
+import { getIssues } from '@/queries/issues'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 
@@ -27,16 +27,16 @@ const { data: issues } = useQuery({
 
 <template>
   <div
-    class="mx-auto max-w-3xl bg-zinc-900 rounded-xl shadow-lg shadow-orange-300/10 border-2 border-orange-200/20 hover:shadow-orange-300/20 min-h-[75vh] flex flex-col p-8 mt-8"
+    class="mx-auto min-w-[50vw] bg-zinc-900 rounded-xl shadow-lg shadow-primary/10 border-2 border-primary/20 hover:shadow-primary/20 min-h-[75vh] flex flex-col p-8 mt-8"
   >
-    <div class="border-b border-orange-300/30 pb-4 -mt-2">
+    <div class="border-b border-primary/30 pb-4 -mt-2">
       <h3 class="font-bold text-zinc-300 text-lg">
         Issues
         <span v-if="issues?.length">({{ issues.length }})</span>
       </h3>
     </div>
 
-    <div class="space-y-4 py-4 grow flex flex-col justify-center">
+    <div class="space-y-4 py-4 grow flex flex-col justify-start">
       <div
         class="text-center text-zinc-500 text-base"
         v-if="issues && !issues.length"

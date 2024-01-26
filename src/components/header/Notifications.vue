@@ -51,12 +51,12 @@ function onClearNotifications() {
 </script>
 
 <template>
-  <div class="text-sm text-zinc-300">
+  <div class="hidden lg:block text-sm text-zinc-300">
     <div class="group flex items-center gap-1">
       <Menu as="div" class="relative inline-block text-left">
         <div>
           <MenuButton
-            class="h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition-all hover:text-orange-300 relative duration-200 group"
+            class="h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition-all hover:text-primary relative duration-200 group"
           >
             <div class="w-full h-full flex items-center">
               <BellRingIcon class="h-5 group-hover:animate-wiggle-once" />
@@ -102,7 +102,7 @@ function onClearNotifications() {
                   </span>
 
                   <span
-                    class="text-orange-300 bg-orange-500/10 rounded px-2 py-0.5 text-xs"
+                    class="text-primary bg-orange-500/10 rounded px-2 py-0.5 text-xs"
                   >
                     {{ notification.notificationCount }}
                   </span>

@@ -134,6 +134,7 @@ export async function buildAskLimit({
   return {
     order: ask,
     type: 'ask',
+    typeForDisplay: 'limit sell',
     value: ordinalValue,
     amount,
     totalPrice: 0,

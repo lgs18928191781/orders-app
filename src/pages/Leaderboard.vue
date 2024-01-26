@@ -11,9 +11,9 @@ import {
 } from '@/queries/leaderboard'
 import { useConnectionStore } from '@/stores/connection'
 import assets from '@/data/assets'
+import { prettyBtcDisplay, prettyTimestamp } from '@/lib/formatters'
 
 import AssetSelect from '@/components/AssetSelect.vue'
-import { prettyBtcDisplay, prettyTimestamp } from '@/lib/formatters'
 
 const connectionStore = useConnectionStore()
 
@@ -65,7 +65,7 @@ const trophyColor = (index: number) => {
       return 'text-yellow-600'
 
     default:
-      return 'text-zinc-400'
+      return 'text-zinc-100'
   }
 }
 
@@ -83,13 +83,13 @@ const currentLevelProgress = computed(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
+  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
     <h1 class="text-2xl font-semibold text-center mb-6 text-zinc-100">
       Leaderboard
     </h1>
 
     <section
-      class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-orange-300/30 border border-orange-300/20"
+      class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-primary/30 border border-primary/20"
     >
       <div class="flex gap-8 items-center">
         <span class="text-lg text-zinc-300">Tick</span>
@@ -109,11 +109,11 @@ const currentLevelProgress = computed(() => {
       </div>
 
       <!-- a border -->
-      <div class="col-span-3 border-b border-orange-300/20 pt-4 mb-4"></div>
+      <div class="col-span-3 border-b border-primary/20 pt-4 mb-4"></div>
 
       <div class="space-y-4" v-if="stats">
         <div class="grid grid-cols-6">
-          <div class="text-zinc-300">Activity at</div>
+          <div class="text-zinc-300 text-sm">Event Duration</div>
           <div class="col-span-5" v-if="stats.eventStartTime">
             {{ prettyTimestamp(stats.eventStartTime) }} -
             {{ prettyTimestamp(stats.eventEndTime) }}
@@ -121,11 +121,23 @@ const currentLevelProgress = computed(() => {
           <div class="col-span-5" v-else>-</div>
         </div>
 
-        <div class="grid grid-cols-6 gap-4">
-          <div class="text-zinc-300">Current Lvl</div>
-          <div class="col-span-2 flex gap-4 items-center">
-            <span class="text-orange-300">{{ stats.tickCurrentLevel }}</span>
+        <div class="grid grid-cols-4 gap-4">
+          <div class="text-zinc-300 text-sm">Trading Volume</div>
+          <div class="col-span-1 flex gap-4 items-center">
+            <span class="text-primary">{{
+              prettyBtcDisplay(stats.totalAmount)
+            }}</span>
+          </div>
+          <div class="text-zinc-300 text-sm">Current Reward Pool</div>
+          <div class="col-span-1 text-primary">
+            {{ stats.tickCurrentLevelRewardAmount + ' $RDEX' }}
+          </div>
+        </div>
 
+        <div class="grid grid-cols-4 gap-4">
+          <div class="text-zinc-300 text-sm">Progress Goal</div>
+
+          <div class="col-span-1 flex gap-4 items-center">
             <div class="">
               <!-- progress bar -->
               <div
@@ -143,26 +155,16 @@ const currentLevelProgress = computed(() => {
               </div>
             </div>
           </div>
-          <div class="text-zinc-300">Current Reward</div>
-          <div class="col-span-2 text-orange-300">
-            {{ stats.tickCurrentLevelRewardAmount + ' $RDEX' }}
-          </div>
-        </div>
 
-        <div class="grid grid-cols-6 gap-4">
-          <div class="text-zinc-300">Next Lvl</div>
-          <div class="col-span-2 text-orange-300">
-            {{ stats.tickNextLevel }}
-          </div>
-          <div class="text-zinc-300">Next Reward</div>
-          <div class="col-span-2 text-orange-300">
+          <div class="text-zinc-300 text-sm">Reward Pool for Next Goal</div>
+          <div class="col-span-1 text-primary">
             {{ stats.tickNextLevelRewardAmount + ' $RDEX' }}
           </div>
         </div>
       </div>
 
       <!-- divider -->
-      <div class="col-span-3 border-b border-orange-300/20 pt-8 mb-8"></div>
+      <div class="col-span-3 border-b border-primary/20 pt-8 mb-8"></div>
 
       <div class="grid grid-cols-2 gap-x-4 gap-y-8" v-if="stats">
         <div>
@@ -236,11 +238,13 @@ const currentLevelProgress = computed(() => {
 
                 <span class="text-zinc-100" v-else>{{ index + 1 }}</span>
               </td>
-              <td class="p-4 align-middle text-center">
+              <td
+                :class="['p-4 align-middle text-center', , trophyColor(index)]"
+              >
                 {{ row.address }}
               </td>
               <td
-                class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-center"
+                :class="['p-4 align-middle text-center', , trophyColor(index)]"
               >
                 {{ prettyBtcDisplay(row.totalValue) }}
               </td>

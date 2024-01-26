@@ -20,9 +20,11 @@ function isLinkActive(keyword: string) {
   <ConnectionModal />
   <WalletMissingModal />
 
-  <div class="relative max-w-md mt-16 mx-auto rounded-3xl">
+  <div
+    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-125 xl:scale-150 origin-top w-96"
+  >
     <div
-      class="border border-orange-300/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900"
+      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900"
     >
       <!-- header -->
       <div class="px-3 flex gap-4 border-b border-zinc-800 pb-2">
@@ -48,10 +50,10 @@ function isLinkActive(keyword: string) {
         <!-- sub nav -->
         <div class="flex items-center gap-1 text-sm">
           <router-link
-            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
+            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary"
             :class="
               isLinkActive('swap-pools-add')
-                ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
+                ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
                 : 'text-zinc-300'
             "
             :to="`/swap-pools/${pairStr}/add`"
@@ -60,10 +62,10 @@ function isLinkActive(keyword: string) {
           </router-link>
 
           <router-link
-            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-orange-300"
+            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary"
             :class="
               isLinkActive('swap-pools-remove')
-                ? 'text-orange-300 underline underline-offset-4 hover:underline-offset-2'
+                ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
                 : 'text-zinc-300'
             "
             :to="`/swap-pools/${pairStr}/remove`"

@@ -199,7 +199,7 @@ async function onConfirm() {
 
         <div class="relative col-span-5">
           <ListboxButton
-            class="relative w-full rounded-md bg-zinc-800 py-2 pl-3 pr-10 text-left text-zinc-300 shadow-sm ring-1 ring-inset ring-zinc-700 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm sm:leading-6"
+            class="relative w-full rounded-md bg-zinc-800 py-2 pl-3 pr-10 text-left text-zinc-300 shadow-sm ring-1 ring-inset ring-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary sm:text-sm sm:leading-6"
           >
             <span class="block truncate">
               {{ selected ? selected.amount : '-' }}
@@ -240,7 +240,7 @@ async function onConfirm() {
               >
                 <li
                   :class="[
-                    active ? 'bg-orange-300 text-orange-950' : 'text-zinc-300',
+                    active ? 'bg-primary text-orange-950' : 'text-zinc-300',
                     'relative  select-none py-2 pl-3 pr-9',
                   ]"
                 >
@@ -255,7 +255,7 @@ async function onConfirm() {
                   <span
                     v-if="selected"
                     :class="[
-                      active ? 'text-white' : 'text-orange-400',
+                      active ? 'text-white' : 'text-primary',
                       'absolute inset-y-0 right-0 flex items-center pr-4',
                     ]"
                   >
@@ -273,8 +273,8 @@ async function onConfirm() {
           <Switch
             v-model="providesBtc"
             :class="[
-              providesBtc ? 'bg-orange-300' : 'bg-orange-200/10',
-              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 ring-offset-zinc-900',
+              providesBtc ? 'bg-primary' : 'bg-primary/10',
+              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ring-offset-zinc-900',
             ]"
           >
             <span class="sr-only">Also Provide BTC Liquidity</span>
@@ -310,7 +310,7 @@ async function onConfirm() {
             :width="400"
             trigger="hover"
             content="You will also provide BTC liquidity to the pool. This will gets you additional rewards."
-            popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10 "
+            popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10 "
           >
             <template #reference>
               <HelpCircleIcon
@@ -343,7 +343,7 @@ async function onConfirm() {
               <Listbox as="div" v-model="selectedMultiplier">
                 <div class="relative w-20">
                   <ListboxButton
-                    class="relative w-full pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-zinc-950 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm sm:leading-6 inline-flex items-center rounded px-2 text-xs text-zinc-400 bg-black py-1.5 font-bold"
+                    class="relative w-full pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-zinc-950 focus:outline-none focus:ring-2 focus:ring-primary sm:text-sm sm:leading-6 inline-flex items-center rounded px-2 text-xs text-zinc-400 bg-black py-1.5 font-bold"
                   >
                     <span class="block truncate">{{ selectedMultiplier }}</span>
                     <span
@@ -374,7 +374,7 @@ async function onConfirm() {
                         <li
                           :class="[
                             active
-                              ? 'bg-orange-300 text-orange-950'
+                              ? 'bg-primary text-orange-950'
                               : 'text-zinc-300',
                             'relative select-none py-2 pl-3 pr-9',
                           ]"
@@ -391,7 +391,7 @@ async function onConfirm() {
                           <span
                             v-if="selected"
                             :class="[
-                              active ? 'text-white' : 'text-orange-400',
+                              active ? 'text-white' : 'text-primary',
                               'absolute inset-y-0 right-0 flex items-center pr-2',
                             ]"
                           >
@@ -428,7 +428,7 @@ async function onConfirm() {
               >
                 <template #reference>
                   <span
-                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-orange-300 transition"
+                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-primary transition"
                   >
                     Market Price
                   </span>
@@ -444,7 +444,7 @@ async function onConfirm() {
               >
                 <template #reference>
                   <span
-                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-orange-300 transition"
+                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-primary transition"
                   >
                     Quantity
                   </span>
@@ -462,7 +462,7 @@ async function onConfirm() {
               >
                 <template #reference>
                   <span
-                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-orange-300 transition"
+                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-primary transition"
                   >
                     Multiplier
                   </span>
@@ -471,7 +471,7 @@ async function onConfirm() {
             </div>
           </div>
 
-          <p class="text-sm mt-4 mb-8 text-orange-300">
+          <p class="text-sm mt-4 mb-8 text-primary">
             Friendly reminder: In the continuously rising market conditions, we
             strongly recommend choosing higher leverage to ensure the
             effectiveness of liquidity. Of course, once liquidity is utilized,
@@ -482,7 +482,7 @@ async function onConfirm() {
 
       <div class="flex justify-center grow items-end">
         <button
-          class="mx-auto bg-orange-300 w-full py-3 text-orange-950 rounded-md disabled:cursor-not-allowed disabled:opacity-30"
+          class="mx-auto bg-primary w-full py-3 text-orange-950 rounded-md disabled:cursor-not-allowed disabled:opacity-30"
           @click.prevent="submitAdd"
           :disabled="!selected"
         >

@@ -228,3 +228,7 @@ export const pushPsbt = async (psbt: string): Promise<string> => {
       return res[0][randomId]
     })
 }
+
+export const signMessage = async (message: string): Promise<string> => {
+  return ''
+}

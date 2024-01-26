@@ -3,7 +3,6 @@ import { onMounted, ref, computed, reactive } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import * as secp256k1 from 'tiny-secp256k1'
 
-import { DEBUG } from '@/data/constants'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useGeoStore } from '@/stores/geo'
 
@@ -134,7 +133,7 @@ queryClient.setDefaultOptions({
 <template>
   <Toaster />
   <BuildingOverlay />
-  <NotAvailableOverlay v-if="isMobile && !DEBUG" />
+  <NotAvailableOverlay v-if="false" />
 
   <template v-else>
     <TheHeader v-if="geoStore.pass" />

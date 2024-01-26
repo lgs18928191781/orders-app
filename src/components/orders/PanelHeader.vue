@@ -1,30 +1,70 @@
 <script lang="ts" setup>
-import { useConnectionStore } from '@/stores/connection'
+import { useQuery } from '@tanstack/vue-query'
+
+import { useTradingPair } from '@/hooks/use-trading-pair'
+import { useNetworkStore } from '@/stores/network'
+import { getMarketPrice } from '@/queries/orders-api'
+import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { unit, useBtcUnit } from '@/lib/helpers'
+import { SHOWING_TRADE_STATS } from '@/data/constants'
 
 import PairSelect from './PairSelect.vue'
 
 defineProps(['isLimitExchangeMode'])
 defineEmits(['update:isLimitExchangeMode'])
 
-const connectionStore = useConnectionStore()
+const networkStore = useNetworkStore()
+const { fromSymbol } = useTradingPair()
+
+const { data: marketPrice } = useQuery({
+  queryKey: [
+    'marketPrice',
+    { network: networkStore.network, tick: fromSymbol.value },
+  ],
+  queryFn: () => getMarketPrice({ tick: fromSymbol.value }),
+})
 </script>
 
 <template>
   <div
-    class="flex items-center justify-between border-b border-orange-200/40 px-4 py-2"
+    class="px-4 py-2 bg-zinc-800 flex flex-col lg:flex-row gap-4 rounded-t-md"
   >
-    <!-- pair select -->
-    <div class="col-span-2 flex items-center justify-center gap-2">
-      <PairSelect />
-    </div>
+    <div class="grid grid-cols-2 lg:flex items-center justify-start gap-4">
+      <!-- pair select -->
+      <PairSelect class="col-span-1" />
 
-    <!-- limit exchange button -->
-    <div class="col-span-2 flex justify-end">
+      <div class="text-sm lg:text-base lg:flex lg:gap-2" v-if="marketPrice">
+        <div class="text-zinc-300">
+          {{ `1 ${prettySymbol(fromSymbol)} =` }}
+        </div>
+        <div :class="['text-green-500']">
+          {{
+            marketPrice
+              ? prettyBalance(marketPrice, useBtcUnit) + ' ' + unit
+              : '-'
+          }}
+        </div>
+      </div>
+    </div>
+    <div
+      class="grid grid-cols-2 text-xs lg:grid-cols-4 items-center gap-2"
+      v-if="SHOWING_TRADE_STATS"
+    >
+      <div class="">24h High</div>
+      <div class="">24h Low</div>
+      <div class="">24h Volume 1</div>
+      <div class="">24h Volume 2</div>
+    </div>
+  </div>
+  <!-- pair select -->
+
+  <!-- limit exchange button -->
+  <!-- <div class="col-span-2 flex justify-end">
       <button
-        class="col-span-2 rounded-md border px-4 py-2 text-sm transition hover:border-orange-300 hover:bg-orange-300 hover:text-white"
+        class="col-span-2 rounded-md border px-4 py-2 text-sm transition hover:border-primary hover:bg-primary hover:text-white"
         :class="
           isLimitExchangeMode
-            ? 'border-orange-300 bg-orange-300 text-orange-950'
+            ? 'border-primary bg-primary text-orange-950'
             : 'border-zinc-300 text-zinc-300'
         "
         @click="$emit('update:isLimitExchangeMode', !isLimitExchangeMode)"
@@ -32,6 +72,5 @@ const connectionStore = useConnectionStore()
       >
         Create Order
       </button>
-    </div>
-  </div>
+    </div> -->
 </template>

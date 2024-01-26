@@ -25,7 +25,7 @@
 
 * {
   transition-duration: 100ms;
-  @apply outline-orange-300;
+  @apply outline-primary;
 }
 
 .quiet-input {
@@ -49,5 +49,9 @@ input[type='number'] {
 }
 
 input:focus {
-  @apply !border-orange-300 !ring-orange-300;
+  @apply !border-primary !ring-primary;
+}
+
+.primary-panel {
+  @apply bg-zinc-900 rounded-md;
 }

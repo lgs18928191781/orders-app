@@ -130,9 +130,9 @@ async function onClaimReward() {
       <!-- releasable alert -->
       <div
         v-if="hasReleasable"
-        class="text-sm bg-orange-400/10 rounded py-2 px-4 -mx-4 mb-4 flex items-center justify-between gap-4"
+        class="text-sm bg-primary/10 rounded py-2 px-4 -mx-4 mb-4 flex items-center justify-between gap-4"
       >
-        <div class="text-orange-300 text-xs">
+        <div class="text-primary text-xs">
           <p>
             Your liquidity reward has been generated. Please release promptly to
             claim.
@@ -144,7 +144,7 @@ async function onClaimReward() {
         </div>
 
         <button
-          class="bg-orange-300 text-orange-950 rounded py-1 px-4"
+          class="bg-primary text-orange-950 rounded py-1 px-4"
           @click="$emit('goRelease')"
         >
           Release
@@ -159,7 +159,7 @@ async function onClaimReward() {
           :width="400"
           trigger="hover"
           content="You can earn records by providing liquidity to the pool, which will be compensated in RDEX tokens. When you choose to claim your records, you simultaneously release your locked liquidity."
-          popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10 "
+          popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10 "
         >
           <template #reference>
             <HelpCircleIcon class="h-4 w-4 text-zinc-400" aria-hidden="true" />
@@ -169,7 +169,7 @@ async function onClaimReward() {
 
       <!-- total -->
       <div class="mt-2 flex items-center gap-4">
-        <div class="flex items-baseline gap- text-orange-300">
+        <div class="flex items-baseline gap- text-primary">
           <span class="font-bold text-lg">
             {{ isLoadingRewardsEssential ? '-' : rewardsEssential?.total }}
           </span>
@@ -181,7 +181,7 @@ async function onClaimReward() {
 
         <!-- claim button -->
         <button
-          class="rounded bg-orange-300 text-orange-950 px-4 py-1 shadow-md shadow-orange-300/20 text-sm hover:shadow-orange-300/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
+          class="rounded bg-primary text-orange-950 px-4 py-1 shadow-md shadow-primary/20 text-sm hover:shadow-primary/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
           @click="onClaimReward"
           :disabled="!rewardsEssential || rewardsEssential.total === 0"
           v-if="rewardsEssential && rewardsEssential.total > 0"

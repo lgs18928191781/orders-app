@@ -85,13 +85,10 @@ async function submitRemove() {
 
         <div class="relative col-span-5 mt-4">
           <ListboxButton
-            class="relative w-full rounded-md bg-zinc-800 py-2 pl-3 pr-10 text-left text-zinc-300 shadow-sm ring-1 ring-inset ring-zinc-700 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm sm:leading-6"
+            class="relative w-full rounded-md bg-zinc-800 py-2 pl-3 pr-10 text-left text-zinc-300 shadow-sm ring-1 ring-inset ring-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary sm:text-sm sm:leading-6"
           >
             <div v-if="selectedRecord" class="flex items-center gap-4">
-              <span
-                class="text-orange-300"
-                v-if="selectedRecord.poolType === 1"
-              >
+              <span class="text-primary" v-if="selectedRecord.poolType === 1">
                 {{
                   `${
                     selectedRecord.coinAmount
@@ -99,7 +96,7 @@ async function submitRemove() {
                 }}
               </span>
               <span
-                class="text-orange-300"
+                class="text-primary"
                 v-else-if="selectedRecord.poolType === 3"
               >
                 {{
@@ -151,7 +148,7 @@ async function submitRemove() {
               >
                 <li
                   :class="[
-                    active ? 'bg-orange-300 text-orange-950' : 'text-zinc-300',
+                    active ? 'bg-primary text-orange-950' : 'text-zinc-300',
                     'relative select-none py-2 pl-3 pr-9 flex gap-4 group cursor-pointer items-center',
                   ]"
                 >
@@ -165,13 +162,13 @@ async function submitRemove() {
                     ]"
                   >
                     <span
-                      :class="active ? 'text-orange-950' : 'text-orange-300'"
+                      :class="active ? 'text-orange-950' : 'text-primary'"
                       v-if="record.poolType === 1"
                     >
                       {{ `${record.coinAmount} ${record.tick.toUpperCase()}` }}
                     </span>
                     <span
-                      :class="active ? 'text-orange-950' : 'text-orange-300'"
+                      :class="active ? 'text-orange-950' : 'text-primary'"
                       v-else-if="record.poolType === 3"
                     >
                       {{
@@ -191,7 +188,7 @@ async function submitRemove() {
                   <span
                     v-if="selected"
                     :class="[
-                      active ? 'text-white' : 'text-orange-400',
+                      active ? 'text-white' : 'text-primary',
                       'absolute inset-y-0 right-0 flex items-center pr-2',
                     ]"
                   >
@@ -206,7 +203,7 @@ async function submitRemove() {
 
       <div class="flex justify-center">
         <button
-          class="mx-auto bg-orange-300 w-full py-3 text-orange-950 rounded-md disabled:cursor-not-allowed disabled:opacity-30"
+          class="mx-auto bg-primary w-full py-3 text-orange-950 rounded-md disabled:cursor-not-allowed disabled:opacity-30"
           :disabled="!selectedRecord"
           @click.prevent="submitRemove"
         >

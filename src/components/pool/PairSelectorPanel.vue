@@ -97,7 +97,7 @@ const infoMap = computed(() => {
 </script>
 
 <template>
-  <div class="border-2 border-orange-200/30 rounded-xl p-8">
+  <div class="border-2 border-primary/30 rounded-xl p-8">
     <PoolPairSelect />
 
     <!-- liquidity pair info -->

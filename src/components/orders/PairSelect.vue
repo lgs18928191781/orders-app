@@ -6,27 +6,11 @@ import {
   ListboxOptions,
 } from '@headlessui/vue'
 import { ChevronRightIcon, CheckIcon } from 'lucide-vue-next'
-import { inject } from 'vue'
-import { useRouter } from 'vue-router'
 
-import tradingPairs, {
-  defaultPoolPair,
-  selectedPairKey,
-} from '@/data/trading-pairs'
+import tradingPairs from '@/data/trading-pairs'
+import { useTradingPair } from '@/hooks/use-trading-pair'
 
-const router = useRouter()
-
-const selectedPair = inject(selectedPairKey, defaultPoolPair)
-
-const choosePair = (pairId: number) => {
-  const pair = tradingPairs.find((pair) => pair.id === pairId)
-  if (pair) {
-    const pairSymbol = `${pair.fromSymbol}-${pair.toSymbol}`
-    router.push({
-      path: `/orders/${pairSymbol}`,
-    })
-  }
-}
+const { selectPair, selectedPair } = useTradingPair()
 </script>
 
 <template>
@@ -34,11 +18,11 @@ const choosePair = (pairId: number) => {
     as="div"
     class="relative inline-block text-left"
     :model-value="selectedPair.id"
-    @update:model-value="choosePair"
+    @update:model-value="selectPair"
   >
     <div>
       <ListboxButton
-        class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-orange-300 shadow-sm hover:bg-opacity-80 transition-all"
+        class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-primary shadow-sm hover:bg-opacity-80 transition-all"
         v-slot="{ open }"
       >
         <div class="flex">
@@ -91,7 +75,7 @@ const choosePair = (pairId: number) => {
               <span
                 :class="[
                   'font-bold ml-2 uppercase',
-                  selected && 'text-orange-300',
+                  selected && 'text-primary',
                 ]"
               >
                 ${{ pair.fromSymbol }}-{{ pair.toSymbol }}
@@ -106,7 +90,7 @@ const choosePair = (pairId: number) => {
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-orange-300 ml-4"
+              class="h-5 w-5 text-primary ml-4"
               aria-hidden="true"
             />
           </button>

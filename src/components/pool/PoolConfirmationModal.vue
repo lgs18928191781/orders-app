@@ -176,7 +176,7 @@ async function submitOrder() {
       <div class="flex min-h-full items-center justify-center p-4 text-center">
         <DialogPanel
           :class="[
-            'w-full transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-orange-200/10 transition-all',
+            'w-full transform overflow-hidden rounded-2xl bg-zinc-800 p-6 align-middle shadow-lg shadow-primary/10 transition-all',
             builtBtcInfo ? 'max-w-3xl' : 'max-w-lg',
           ]"
         >
@@ -194,7 +194,7 @@ async function submitOrder() {
             <div class="" v-else-if="builtInfo">
               <div class="flex items-center gap-4">
                 <span class="text-zinc-500">Order Type</span>
-                <span class="font-bold uppercase text-orange-300">
+                <span class="font-bold uppercase text-primary">
                   {{
                     builtBtcInfo
                       ? 'bidirectional ' + builtInfo.type
@@ -216,7 +216,7 @@ async function submitOrder() {
                     class="flex items-center gap-2 mb-4 justify-center"
                     v-if="builtBtcInfo"
                   >
-                    <h3 class="text-center text-orange-300">
+                    <h3 class="text-center text-primary">
                       ${{ builtInfo.fromSymbol.toUpperCase() + ' Liquidity' }}
                     </h3>
                     <el-popover
@@ -224,11 +224,11 @@ async function submitOrder() {
                       :width="400"
                       trigger="hover"
                       content="You provide BRC20 liquidity to the pool by signing a PSBT."
-                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10"
+                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10"
                     >
                       <template #reference>
                         <HelpCircleIcon
-                          class="h-4 w-4 text-zinc-400 hover:!text-orange-300"
+                          class="h-4 w-4 text-zinc-400 hover:!text-primary"
                           aria-hidden="true"
                         />
                       </template>
@@ -286,7 +286,7 @@ async function submitOrder() {
                 <!-- btc to brc side -->
                 <div class="space-y-2 pl-4" v-if="builtBtcInfo">
                   <div class="flex items-center gap-2 mb-4 justify-center">
-                    <h3 class="text-center text-orange-300">
+                    <h3 class="text-center text-primary">
                       {{ 'BTC Liquidity' }}
                     </h3>
                     <el-popover
@@ -294,11 +294,11 @@ async function submitOrder() {
                       :width="400"
                       trigger="hover"
                       content="You provide BTC liquidity to the pool by offering a PSBT which spends the BTC UTXO. Once the liquidity is used, the BTC will send back to your address automatically."
-                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-orange-400/10"
+                      popper-class="!bg-zinc-800 !text-zinc-300 !shadow-lg !shadow-primary/10"
                     >
                       <template #reference>
                         <HelpCircleIcon
-                          class="h-4 w-4 text-zinc-400 hover:!text-orange-300"
+                          class="h-4 w-4 text-zinc-400 hover:!text-primary"
                           aria-hidden="true"
                         />
                       </template>

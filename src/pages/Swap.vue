@@ -309,9 +309,11 @@ watch(
   <ConnectionModal />
   <WalletMissingModal />
 
-  <div class="relative mx-auto mt-16 max-w-md rounded-3xl">
+  <div
+    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-125 xl:scale-150 origin-top w-96"
+  >
     <div
-      class="space-y-3 rounded-3xl border border-orange-300/30 bg-zinc-900 p-2 pt-3 shadow-md"
+      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
     >
       <!-- header -->
       <div class="flex gap-4 px-3">
@@ -345,21 +347,22 @@ watch(
 
         <!-- flip -->
         <div class="h-0 relative flex justify-center">
-          <div class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl">
-            <div class="group transition-all">
-              <ArrowDownIcon
-                class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
-              />
-              <button
-                class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-orange-300/80"
-                :class="{
-                  'rotate-180': fromSymbol === 'btc',
-                }"
-                @click="flipAsset"
-              >
-                <ArrowUpDownIcon class="h-6 w-6 text-orange-300" />
-              </button>
-            </div>
+          <div
+            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-125 duration-150"
+          >
+            <ArrowDownIcon
+              class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
+            />
+
+            <button
+              class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
+              :class="{
+                'rotate-180': fromSymbol === 'btc',
+              }"
+              @click="flipAsset"
+            >
+              <ArrowUpDownIcon class="h-4 w-4 text-primary" />
+            </button>
           </div>
         </div>
 
@@ -465,7 +468,7 @@ watch(
 
 <style scoped>
 .main-btn {
-  @apply block w-full rounded-2xl bg-orange-300/20 py-3 text-xl font-medium text-orange-300 hover:bg-orange-300/30;
+  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
 }
 
 .main-btn.disabled {

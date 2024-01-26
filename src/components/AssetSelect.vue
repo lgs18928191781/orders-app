@@ -47,7 +47,7 @@ const selectedAsset = computed(() => {
         <div class="mr-1" v-if="selectedAsset">
           {{ prettySymbol(selectedAsset.symbol) }}
         </div>
-        <div v-else class="text-base pl-2 text-orange-300">Select token</div>
+        <div v-else class="text-base pl-2 text-primary">Select token</div>
         <ChevronDownIcon class="h-5 w-5" />
       </button>
     </ListboxButton>
@@ -61,7 +61,7 @@ const selectedAsset = computed(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute left-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800 border border-orange-300/10 shadow shadow-orange-300/30"
+        class="absolute right-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-48 divide-y divide-zinc-800 border border-primary/10 shadow shadow-primary/30"
       >
         <ListboxOption
           v-slot="{ active, selected }"
@@ -83,7 +83,7 @@ const selectedAsset = computed(() => {
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-orange-300 ml-auto"
+              class="h-5 w-5 text-primary ml-auto"
               aria-hidden="true"
             />
           </button>

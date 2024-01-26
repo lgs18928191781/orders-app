@@ -140,7 +140,7 @@ const { data: myBrc20s } = useQuery({
                   active && 'bg-zinc-950',
                 ]"
               >
-                <div class="text-orange-300">BTC</div>
+                <div class="text-primary">BTC</div>
                 <div class="flex items-center mt-2 justify-between">
                   <div class="text-xs text-zinc-500">Available Balance</div>
                   <div class="text-xs">
@@ -172,7 +172,7 @@ const { data: myBrc20s } = useQuery({
                   <DisclosureButton
                     class="py-2 text-xs mt-2 underline inline-flex items-center gap-1"
                   >
-                    <HelpCircleIcon class="h-4 w-4 text-orange-300" />
+                    <HelpCircleIcon class="h-4 w-4 text-primary" />
                     Why can I only use part of my BTC?
                   </DisclosureButton>
                   <transition
@@ -196,7 +196,7 @@ const { data: myBrc20s } = useQuery({
                       <p class="mt-1">
                         2. Those that are placed in orders (bid / liquidity).
                       </p>
-                      <p class="mt-1 text-orange-300">
+                      <p class="mt-1 text-primary">
                         Plus, currently we only select part of your BTC UTXOs to
                         spend in each transaction to minimize the transaction
                         fee.
@@ -220,7 +220,7 @@ const { data: myBrc20s } = useQuery({
                   active && 'bg-zinc-950',
                 ]"
               >
-                <div class="text-orange-300 uppercase">${{ brc20.token }}</div>
+                <div class="text-primary uppercase">${{ brc20.token }}</div>
                 <div class="mt-2 space-y-1 text-xs">
                   <div class="flex items-center justify-between gap-1">
                     <span class="text-zinc-500">Available</span>
