@@ -53,5 +53,5 @@ input:focus {
 }
 
 .primary-panel {
-  @apply bg-zinc-900 rounded-lg;
+  @apply bg-zinc-900 rounded-md;
 }

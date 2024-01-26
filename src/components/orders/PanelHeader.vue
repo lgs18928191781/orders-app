@@ -27,7 +27,7 @@ const { data: marketPrice } = useQuery({
 
 <template>
   <div
-    class="px-4 py-2 bg-zinc-800 flex flex-col lg:flex-row gap-4 rounded-t-lg"
+    class="px-4 py-2 bg-zinc-800 flex flex-col lg:flex-row gap-4 rounded-t-md"
   >
     <div class="grid grid-cols-2 lg:flex items-center justify-start gap-4">
       <!-- pair select -->

@@ -36,7 +36,7 @@ onMounted(() => {
     :selected-index="selectedTab"
     @change="changeTab"
   >
-    <TabList class="p-3 rounded-t-lg bg-zinc-800 space-x-4 font-bold">
+    <TabList class="p-3 rounded-t-md bg-zinc-800 space-x-4 font-bold">
       <Tab as="template" v-slot="{ selected }">
         <button
           :class="[

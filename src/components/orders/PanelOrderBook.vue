@@ -20,7 +20,7 @@ watch(isShowingFiat, () => {
 <template>
   <div class="primary-panel flex flex-col">
     <div
-      class="p-4 bg-zinc-800 flex items-center lg:flex-row gap-4 rounded-t-lg justify-between"
+      class="p-4 bg-zinc-800 flex items-center lg:flex-row gap-4 rounded-t-md justify-between"
     >
       <div class="font-bold">Order Book</div>
 
