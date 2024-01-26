@@ -1,17 +1,17 @@
 export const events = [
   {
     id: 1,
-    title: 'V1 Liquidity Mining',
+    title: 'P-LP Mining',
     symbol: '2',
   },
   {
     id: 2,
-    title: 'V1 $RDEX LP Mining',
+    title: '$RDEX P-LP Mining',
     symbol: '12',
   },
   {
     id: 3,
-    title: 'V2 Trade Mining',
+    title: 'New User Trading',
     symbol: '21',
     latest: true,
   },

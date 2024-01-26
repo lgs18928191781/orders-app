@@ -113,7 +113,7 @@ const currentLevelProgress = computed(() => {
 
       <div class="space-y-4" v-if="stats">
         <div class="grid grid-cols-6">
-          <div class="text-zinc-300 text-sm">Activity at</div>
+          <div class="text-zinc-300 text-sm">Event Duration</div>
           <div class="col-span-5" v-if="stats.eventStartTime">
             {{ prettyTimestamp(stats.eventStartTime) }} -
             {{ prettyTimestamp(stats.eventEndTime) }}
@@ -121,11 +121,23 @@ const currentLevelProgress = computed(() => {
           <div class="col-span-5" v-else>-</div>
         </div>
 
-        <div class="grid grid-cols-6 gap-4">
-          <div class="text-zinc-300 text-sm">Current Lv.</div>
-          <div class="col-span-2 flex gap-4 items-center">
-            <span class="text-primary">{{ stats.tickCurrentLevel }}</span>
+        <div class="grid grid-cols-4 gap-4">
+          <div class="text-zinc-300 text-sm">Trading Volume</div>
+          <div class="col-span-1 flex gap-4 items-center">
+            <span class="text-primary">{{
+              prettyBtcDisplay(stats.totalAmount)
+            }}</span>
+          </div>
+          <div class="text-zinc-300 text-sm">Current Reward Pool</div>
+          <div class="col-span-1 text-primary">
+            {{ stats.tickCurrentLevelRewardAmount + ' $RDEX' }}
+          </div>
+        </div>
 
+        <div class="grid grid-cols-4 gap-4">
+          <div class="text-zinc-300 text-sm">Progress Goal</div>
+
+          <div class="col-span-1 flex gap-4 items-center">
             <div class="">
               <!-- progress bar -->
               <div
@@ -143,19 +155,9 @@ const currentLevelProgress = computed(() => {
               </div>
             </div>
           </div>
-          <div class="text-zinc-300 text-sm">Current Lv. Reward</div>
-          <div class="col-span-2 text-primary">
-            {{ stats.tickCurrentLevelRewardAmount + ' $RDEX' }}
-          </div>
-        </div>
 
-        <div class="grid grid-cols-6 gap-4">
-          <div class="text-zinc-300 text-sm">Next Lv.</div>
-          <div class="col-span-2 text-primary">
-            {{ stats.tickNextLevel }}
-          </div>
-          <div class="text-zinc-300 text-sm">Next Lv. Reward</div>
-          <div class="col-span-2 text-primary">
+          <div class="text-zinc-300 text-sm">Reward Pool for Next Goal</div>
+          <div class="col-span-1 text-primary">
             {{ stats.tickNextLevelRewardAmount + ' $RDEX' }}
           </div>
         </div>
