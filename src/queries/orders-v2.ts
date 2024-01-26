@@ -1,9 +1,9 @@
+import Decimal from 'decimal.js'
+
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import sign from '@/lib/sign'
-import { ordersApiFetch, ordersV2Fetch } from '@/lib/fetch'
-import Decimal from 'decimal.js'
-import { sleep } from '@/lib/helpers'
+import { ordersV2Fetch } from '@/lib/fetch'
 
 export const getPlatformPublicKey = async (): Promise<{
   platformPublicKey: string
@@ -36,6 +36,11 @@ export type Order = {
   orderType: number
   orderTypeStr: 'ask' | 'bid'
   orderTypeStrInDisplay: 'buy' | 'sell'
+  orderTypeStrInDisplay2:
+    | 'limit buy'
+    | 'limit sell'
+    | 'market buy'
+    | 'market sell'
   price: Decimal
   freeState?: 1 | 0
   sellerAddress: string
@@ -175,6 +180,20 @@ export const getMyOrderHistory = async ({ address }: { address: string }) => {
         order.price = new Decimal(order.amount / order.coinAmount)
         order.orderTypeStr = order.orderType === 1 ? 'ask' : 'bid'
         order.orderTypeStrInDisplay = order.orderType === 1 ? 'sell' : 'buy'
+        if (order.orderType === 1) {
+          if (order.sellerAddress === address) {
+            order.orderTypeStrInDisplay2 = 'limit sell'
+          } else {
+            order.orderTypeStrInDisplay2 = 'market buy'
+          }
+        } else {
+          if (order.buyerAddress === address) {
+            order.orderTypeStrInDisplay2 = 'limit buy'
+          } else {
+            order.orderTypeStrInDisplay2 = 'market sell'
+          }
+        }
+
         switch (order.orderState) {
           case 1:
             order.orderStateStr = 'open'

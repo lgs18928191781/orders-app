@@ -37,8 +37,8 @@ const { data: orderHistory, isLoading } = useQuery({
       class="grid grid-cols-12 gap-2 text-zinc-500 border-b border-zinc-700 pb-4"
     >
       <div class="col-span-2">Order Time</div>
-      <div class="col-span-2">Pair</div>
-      <div class="col-span-1">Side</div>
+      <div class="col-span-1">Pair</div>
+      <div class="col-span-2">Type</div>
       <div class="col-span-2">Price</div>
       <div class="col-span-2">Amount</div>
       <div class="col-span-2">Total</div>
@@ -82,19 +82,19 @@ const { data: orderHistory, isLoading } = useQuery({
           {{ prettyTimestamp(order.timestamp, false, true) }}
         </div>
 
-        <div class="col-span-2">
+        <div class="col-span-1">
           {{ `${prettySymbol(order.tick)}/BTC` }}
         </div>
 
         <div
-          class="col-span-1 capitalize"
+          class="col-span-2 capitalize"
           :class="[
-            order.orderTypeStrInDisplay === 'buy'
+            order.orderTypeStrInDisplay2.includes('buy')
               ? 'text-green-500'
               : 'text-red-500',
           ]"
         >
-          {{ order.orderTypeStrInDisplay }}
+          {{ order.orderTypeStrInDisplay2 }}
         </div>
 
         <div class="col-span-2">

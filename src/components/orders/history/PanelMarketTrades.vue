@@ -30,7 +30,7 @@ const { data: marketTrades, isLoading } = useQuery({
     >
       <div class="col-span-2">Order Time</div>
       <div class="col-span-2">Pair</div>
-      <div class="col-span-1">Side</div>
+      <div class="col-span-1">Type</div>
       <div class="col-span-2">Price</div>
       <div class="col-span-2">Amount</div>
       <div class="col-span-3 text-right">Total</div>
