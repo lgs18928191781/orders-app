@@ -24,7 +24,7 @@ const links: {
   // },
   {
     name: 'Swap',
-    path: '/swap',
+    path: '/swap/',
     version: 0,
   },
   {
@@ -54,7 +54,7 @@ function isLinkActive(path: string) {
       return route.path.startsWith('/events')
     case '/leaderboard':
       return route.path.startsWith('/leaderboard')
-    case '/swap':
+    case '/swap/':
       return route.path.startsWith('/swap') || route.path.startsWith('/add')
 
     default:

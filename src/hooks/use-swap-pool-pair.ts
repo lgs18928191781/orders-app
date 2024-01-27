@@ -13,15 +13,20 @@ export function useSwapPoolPair() {
   })
 
   const pairStr = useRouteParams('pair') as Ref<string>
-  const fromSymbol = computed(() => pairStr.value.split('-')[0])
-  const toSymbol = computed(() => pairStr.value.split('-')[1])
+
+  if (!pairStr.value) {
+    pairStr.value = `${swapPairs[0].token1Symbol}-${swapPairs[0].token2Symbol}`
+  }
+
+  const token1Symbol = computed(() => pairStr.value.split('-')[0])
+  const token2Symbol = computed(() => pairStr.value.split('-')[1])
 
   const selected = swapPairs.find(
     (a) =>
-      (a.token1Symbol.toUpperCase() === fromSymbol.value.toUpperCase() &&
-        a.token2Symbol.toUpperCase() === toSymbol.value.toUpperCase()) ||
-      (a.token2Symbol.toUpperCase() === fromSymbol.value.toUpperCase() &&
-        a.token1Symbol.toUpperCase() === toSymbol.value.toUpperCase())
+      (a.token1Symbol.toUpperCase() === token1Symbol.value.toUpperCase() &&
+        a.token2Symbol.toUpperCase() === token2Symbol.value.toUpperCase()) ||
+      (a.token2Symbol.toUpperCase() === token1Symbol.value.toUpperCase() &&
+        a.token1Symbol.toUpperCase() === token2Symbol.value.toUpperCase())
   )
   if (selected) {
     selectedPairId.value = selected.id
@@ -34,9 +39,17 @@ export function useSwapPoolPair() {
     const pair = swapPairs.find((pair) => pair.id === id)
     if (pair) {
       const pairSymbol = `${pair.token1Symbol}-${pair.token2Symbol}`
-      router.push({
-        path: `/swap-pools/${pairSymbol}/add`,
-      })
+      const route = router.currentRoute.value
+      let nextRoutePath
+      if (route.name === 'swap-pools-remove') {
+        nextRoutePath = `/swap-pools/${pairSymbol}/remove`
+      } else if (route.name === 'swap-pools-add') {
+        nextRoutePath = `/swap-pools/${pairSymbol}/add`
+      } else {
+        nextRoutePath = `/swap/${pairSymbol}`
+      }
+
+      router.push(nextRoutePath)
     }
   }
 
@@ -45,9 +58,7 @@ export function useSwapPoolPair() {
     selectedPairId,
     selectedPair,
     selectPair,
-    fromSymbol,
-    toSymbol,
-    // fromIcon,
-    // toIcon,
+    token1Symbol,
+    token2Symbol,
   }
 }

@@ -36,7 +36,7 @@ const routes = [
       },
     ],
   },
-  { path: '/swap', component: Swap },
+  { path: '/swap/:pair?', component: Swap, name: 'swap' },
   { path: '/whitelist', component: Whitelist },
   { path: '/events', component: Events },
   { path: '/leaderboard', component: Leaderboard },

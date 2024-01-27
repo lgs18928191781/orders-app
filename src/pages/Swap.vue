@@ -1,23 +1,27 @@
 <script lang="ts" setup>
-import { ref, watch, type Ref, computed, toRaw } from 'vue'
+import { ref, watch, type Ref, computed } from 'vue'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import {
   ArrowDownIcon,
   ChevronDownIcon,
   ArrowUpDownIcon,
 } from 'lucide-vue-next'
+import Decimal from 'decimal.js'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
 import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
 import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
-
 import { formatSat, formatTok } from '@/lib/utils'
 import SwapAlgo from '@/lib/swapAlgo'
-import Decimal from 'decimal.js'
-import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import { SWAP_READY } from '@/data/constants'
+import { previewSwap } from '@/queries/swap'
+import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
+import SwapSide from '@/components/swap/SwapSide.vue'
+
 const { openConnectionModal } = useConnectionModal()
 
 enum swapOp {
@@ -25,36 +29,51 @@ enum swapOp {
   receive = 'receive',
 }
 
-const fromSymbol = ref('RDEX')
-const toSymbol = ref('btc')
-// amount
-const fromAmount = ref()
-const toAmount = ref()
+// symbol & amount
+const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const token1Amount = ref<string>('0')
+const token2Amount = ref<string>('0')
+
+// source & from
+const source = ref<'pay' | 'receive'>('pay')
+const from = ref<'token1' | 'token2'>('token1')
+
+// watch for changes to source and corresponding amount
+// if changed, calculate the other amount
+watch(source, async (newSource) => {
+  console.log('source', source)
+
+  if (newSource === 'pay') {
+    const preview = await previewSwap({
+      token1: token1Symbol.value.toLowerCase(),
+      token2: token2Symbol.value.toLowerCase(),
+      token1Amount: newToken1Amount,
+    })
+  }
+
+  const preview = await previewSwap({
+    token1: token1Symbol.value.toLowerCase(),
+    token2: token2Symbol.value.toLowerCase(),
+    token1Amount: newToken1Amount,
+  })
+
+  token2Amount.value = preview.token2Amount
+  // if source is pay, calculate receive
+  // if (source === 'pay') {
+  //   calcTokenSwap({ target: { value: fromAmount } }, swapOp.pay)
+  // } else {
+  //   calcTokenSwap({ target: { value: toAmount } }, swapOp.receive)
+  // }
+})
 
 const swapCalc = new SwapAlgo(
   new Decimal(176259823276).toNumber(),
   new Decimal(1996988856407348).toNumber(),
   new Decimal(128338790502).toNumber()
 )
-// watch for changes to both symbols
-// the rule is when one changes from brc to btc, the other changes from btc to brc
-watch(fromSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && toSymbol.value === 'btc') {
-    toSymbol.value = ''
-  } else if (newSymbol !== 'btc' && toSymbol.value !== 'btc') {
-    toSymbol.value = 'btc'
-  }
-})
-watch(toSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && fromSymbol.value === 'btc') {
-    fromSymbol.value = ''
-  } else if (newSymbol !== 'btc' && fromSymbol.value !== 'btc') {
-    fromSymbol.value = 'btc'
-  }
-})
 
 const tokenRateCalc = computed(() => {
-  if (fromSymbol.value === 'btc') {
+  if (token1Symbol.value === 'btc') {
     const token1RemoveAmount = formatSat(1, 8)
     const { token2AddAmount } = swapCalc.swapToken2ToToken1ByToken1(
       token1RemoveAmount,
@@ -75,14 +94,14 @@ const tokenRateCalc = computed(() => {
 
 const calcTokenSwap = (e: Event, op: swapOp) => {
   if (op == swapOp.pay) {
-    if (fromSymbol.value === 'btc') {
+    if (token1Symbol.value === 'btc') {
       const token2AddAmount = formatSat(e.target?.value, 8)
       const { token1RemoveAmount } = swapCalc.swapToken2ToToken1(
         token2AddAmount,
         swapCalc.token1SwapAmount,
         swapCalc.token2SwapAmount
       )
-      toAmount.value = formatTok(token1RemoveAmount, 8, 8)
+      token2Amount.value = formatTok(token1RemoveAmount, 8, 8)
     } else {
       const token1AddAmount = formatSat(e.target?.value, 8)
       const { token2RemoveAmount } = swapCalc.swapToken1ToToken2(
@@ -90,17 +109,17 @@ const calcTokenSwap = (e: Event, op: swapOp) => {
         swapCalc.token1SwapAmount,
         swapCalc.token2SwapAmount
       )
-      toAmount.value = formatTok(token2RemoveAmount, 8, 8)
+      token2Amount.value = formatTok(token2RemoveAmount, 8, 8)
     }
   } else {
-    if (fromSymbol.value === 'btc') {
+    if (token1Symbol.value === 'btc') {
       const token1RemoveAmount = formatSat(e.target?.value, 8)
       const { token2AddAmount } = swapCalc.swapToken2ToToken1ByToken1(
         token1RemoveAmount,
         swapCalc.token1SwapAmount,
         swapCalc.token2SwapAmount
       )
-      fromAmount.value = formatTok(token2AddAmount, 8, 8)
+      token1Amount.value = formatTok(token2AddAmount, 8, 8)
     } else {
       const token2RemoveAmount = formatSat(e.target?.value, 8)
       const { token1AddAmount } = swapCalc.swapToken1ToToken2ByToken2(
@@ -108,7 +127,7 @@ const calcTokenSwap = (e: Event, op: swapOp) => {
         swapCalc.token1SwapAmount,
         swapCalc.token2SwapAmount
       )
-      fromAmount.value = formatTok(token1AddAmount, 8, 8)
+      token1Amount.value = formatTok(token1AddAmount, 8, 8)
     }
   }
 }
@@ -124,15 +143,10 @@ function accept(open, close) {
 
 // flip
 const flipAsset = () => {
-  const from = fromSymbol.value
-  const to = toSymbol.value
-  fromSymbol.value = to
-  toSymbol.value = from
+  from.value = from.value === 'token1' ? 'token2' : 'token1'
 
-  const fromAmt = fromAmount.value
-  const toAmt = toAmount.value
-  fromAmount.value = toAmt
-  toAmount.value = fromAmt
+  // reset source
+  source.value = 'pay'
 }
 
 const tokenImspact = computed(() => {
@@ -141,9 +155,9 @@ const tokenImspact = computed(() => {
     swapToken2Amount: swapCalc.token2SwapAmount,
   }
 
-  const originAddAmount = fromAmount.value || 0
-  const aimAddAmount = toAmount.value || 0
-  const dirForward = fromSymbol.value == 'btc' ? true : false
+  const originAddAmount = token1Amount.value || 0
+  const aimAddAmount = token2Amount.value || 0
+  const dirForward = token1Symbol.value == 'btc' ? true : false
   const { slip1, slip2 } = swapCalc.tokenPriceImpact(
     originAddAmount,
     aimAddAmount,
@@ -151,7 +165,7 @@ const tokenImspact = computed(() => {
     dirForward
   )
 
-  console.log('token1Impact, token2Impact', slip1, slip2)
+  // console.log('token1Impact, token2Impact', slip1, slip2)
   return {
     slip1: Math.abs(+slip1) >= 100 ? 100 : slip1,
     slip2: Math.abs(+slip2) >= 100 ? 100 : slip2,
@@ -237,7 +251,7 @@ watch(
 )
 
 watch(
-  () => [fromSymbol.value, toSymbol.value],
+  () => [token1Symbol.value, token2Symbol.value],
   ([from, to]) => {
     if (from && to) {
       conditions.value = conditions.value.map((c) => {
@@ -331,25 +345,39 @@ watch(
         >
           Pools
         </router-link>
+
+        <SwapPairSelect class="ml-auto" />
       </div>
 
       <!-- body -->
       <div class="space-y-0.5 text-sm">
         <SwapSide
           side="pay"
-          v-model:symbol="fromSymbol"
-          v-model:amount="fromAmount"
+          v-if="from === 'token1'"
+          v-model:symbol="token1Symbol"
+          v-model:amount="token1Amount"
           @has-enough="hasEnough = true"
           @not-enough="hasEnough = false"
           @amount-entered="hasAmount = true"
           @amount-cleared="hasAmount = false"
-          @keyup="calcTokenSwap($event, swapOp.pay)"
+          @became-source="source = 'pay'"
+        />
+        <SwapSide
+          side="pay"
+          v-else
+          v-model:symbol="token2Symbol"
+          v-model:amount="token2Amount"
+          @has-enough="hasEnough = true"
+          @not-enough="hasEnough = false"
+          @amount-entered="hasAmount = true"
+          @amount-cleared="hasAmount = false"
+          @became-source="source = 'pay'"
         />
 
         <!-- flip -->
         <div class="h-0 relative flex justify-center">
           <div
-            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-125 duration-150"
+            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-110 duration-150"
           >
             <ArrowDownIcon
               class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
@@ -358,7 +386,7 @@ watch(
             <button
               class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
               :class="{
-                'rotate-180': fromSymbol === 'btc',
+                'rotate-180': token1Symbol === 'btc',
               }"
               @click="flipAsset"
             >
@@ -369,9 +397,17 @@ watch(
 
         <SwapSide
           side="receive"
-          v-model:symbol="toSymbol"
-          v-model:amount="toAmount"
-          @keyup="calcTokenSwap($event, swapOp.receive)"
+          v-if="from === 'token1'"
+          v-model:symbol="token2Symbol"
+          v-model:amount="token2Amount"
+          @became-source="source = 'receive'"
+        />
+        <SwapSide
+          side="receive"
+          v-else
+          v-model:symbol="token1Symbol"
+          v-model:amount="token1Amount"
+          @became-source="source = 'receive'"
         />
       </div>
 
@@ -384,10 +420,10 @@ watch(
         >
           <div class="flex items-center">
             <span class="mr-1">1</span
-            ><span class="mr-1">{{ toSymbol.toUpperCase() }}</span>
+            ><span class="mr-1">{{ token2Symbol.toUpperCase() }}</span>
             <span class="mr-1"
               ><span class="mr-1">≈</span>{{ tokenRateCalc }}</span
-            ><span class="mr-1">{{ fromSymbol.toUpperCase() }}</span>
+            ><span class="mr-1">{{ token1Symbol.toUpperCase() }}</span>
           </div>
           <ChevronDownIcon
             class="h-6 w-6"
@@ -432,12 +468,12 @@ watch(
 
         <div>
           <span class="mr-5"
-            >${{ fromSymbol.toUpperCase() }}:<span class="text-red-500"
+            >${{ token1Symbol.toUpperCase() }}:<span class="text-red-500"
               >{{ tokenImspact.slip1 }}%</span
             ></span
           >
           <span
-            >{{ toSymbol.toUpperCase() }}:<span class="text-green-500"
+            >{{ token2Symbol.toUpperCase() }}:<span class="text-green-500"
               >{{ tokenImspact.slip2 }}%</span
             >
           </span>

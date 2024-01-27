@@ -21,7 +21,7 @@ const swapCalc = new SwapAlgo(
 )
 import { SWAP_READY } from '@/data/constants'
 
-const { fromSymbol, toSymbol } = useSwapPoolPair()
+const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
 
 // amount
@@ -131,7 +131,7 @@ watch(
 )
 
 watch(
-  () => [fromSymbol.value, toSymbol.value],
+  () => [token1Symbol.value, token2Symbol.value],
   ([from, to]) => {
     if (from && to) {
       conditions.value = conditions.value.map((c) => {
@@ -203,7 +203,7 @@ watch(
 <template>
   <div class="my-8 space-y-0.5 text-sm">
     <AddLiquiditySide
-      v-model:symbol="fromSymbol"
+      v-model:symbol="token1Symbol"
       v-model:amount="fromAmount"
       @has-enough="hasEnough = true"
       @not-enough="hasEnough = false"
@@ -218,7 +218,7 @@ watch(
     </div>
 
     <AddLiquiditySide
-      v-model:symbol="toSymbol"
+      v-model:symbol="token2Symbol"
       v-model:amount="toAmount"
       @keyup="calcAddLp($event, AddOp.token2ToToken1)"
     />

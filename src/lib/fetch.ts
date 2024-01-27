@@ -100,6 +100,26 @@ export async function ordersApiFetch(
   return jsoned.data
 }
 
+export async function swapApiFetch(
+  url: string,
+  options?: { headers?: HeadersInit } & RequestInit
+) {
+  const swapApiUrl = `http://localhost:3000/api/${url}`
+  if (!options)
+    options = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+
+  if (options.headers && 'Content-Type' in options.headers) {
+  } else {
+    options.headers = { ...options.headers, 'Content-Type': 'application/json' }
+  }
+
+  return await fetchWrapper(swapApiUrl, options)
+}
+
 export async function originalFetch(url: string, options?: RequestInit) {
   const response = await fetch(url, options)
   if (!response.ok) {

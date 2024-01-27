@@ -6,14 +6,16 @@ import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { prettyBalance } from '@/lib/formatters'
+import { prettyBalance, prettySymbol } from '@/lib/formatters'
 import { getBrc20s } from '@/queries/orders-api'
 
 import AssetSelect from '@/components/AssetSelect.vue'
 import Decimal from 'decimal.js'
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
+const { selectedPair } = useSwapPoolPair()
 
 defineProps({
   side: {
@@ -23,8 +25,20 @@ defineProps({
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
+const icon = computed(() => {
+  if (!selectedPair.value) {
+    return null
+  }
 
-const amount = defineModel('amount', { type: Number })
+  if (symbol.value === selectedPair.value.token1Symbol) {
+    return selectedPair.value.token1Icon
+  }
+
+  return selectedPair.value.token2Icon
+})
+
+// amount
+const amount = defineModel('amount', { type: String })
 const normalizedAmount = computed(() => {
   if (!amount.value) {
     return ''
@@ -33,6 +47,20 @@ const normalizedAmount = computed(() => {
   const dividedBy = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
   return new Decimal(amount.value).dividedBy(dividedBy).toDP().toFixed()
 })
+const updateAmount = (updatingAmount: number) => {
+  if (typeof updatingAmount === 'string') {
+    updatingAmount = Number(updatingAmount)
+  }
+  if (isNaN(updatingAmount)) {
+    updatingAmount = 0
+  }
+
+  const times = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
+  amount.value = new Decimal(updatingAmount).times(times).toFixed()
+
+  // this side is now the source
+  emit('becameSource')
+}
 
 const amountTextSize = computed(() => {
   if (!amount.value) {
@@ -62,24 +90,13 @@ const amountTextSize = computed(() => {
   return 'text-4xl'
 })
 
-const updateAmount = (updatingAmount: number) => {
-  if (typeof updatingAmount === 'string') {
-    updatingAmount = Number(updatingAmount)
-  }
-  if (isNaN(updatingAmount)) {
-    updatingAmount = 0
-  }
-  const times = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
-  updatingAmount = new Decimal(updatingAmount).times(times).toNumber()
-  amount.value = updatingAmount
-}
-
 const emit = defineEmits([
   'hasEnough',
   'notEnough',
   'amountEntered',
   'amountCleared',
   'update:symbol',
+  'becameSource',
 ])
 
 // fiat price
@@ -175,20 +192,23 @@ const useTotalBalance = () => {
     )
 
     if (!brc20) {
-      amount.value = 0
+      amount.value = '0'
       return
     }
 
-    amount.value = Number(brc20.balance)
+    amount.value = String(brc20.balance)
     return
   }
 
   if (!btcBalance.value) {
-    amount.value = 0
+    amount.value = '0'
     return
   }
 
-  amount.value = btcBalance.value
+  amount.value = String(btcBalance.value)
+
+  // this side is now the source
+  emit('becameSource')
 }
 
 const hasEnough = computed(() => {
@@ -196,7 +216,7 @@ const hasEnough = computed(() => {
     return true
   }
 
-  return amount.value <= balance.value
+  return new Decimal(amount.value).lte(new Decimal(balance.value))
 })
 
 // watch for change of hasEnough; emit event
@@ -247,10 +267,16 @@ watch(
         @input="(event: any) => updateAmount(event.target.value)"
       />
 
-      <AssetSelect
-        :asset-symbol="symbol"
-        @update:asset-symbol="$emit('update:symbol', $event)"
-      />
+      <div
+        :class="[
+          'rounded-full p-1 px-4 text-xl flex items-center gap-1 bg-zinc-900',
+        ]"
+      >
+        <img :src="icon" class="w-6 h-6 rounded-full" v-if="icon" />
+        <div class="mr-1">
+          {{ prettySymbol(symbol) }}
+        </div>
+      </div>
     </div>
 
     <!-- data footer -->

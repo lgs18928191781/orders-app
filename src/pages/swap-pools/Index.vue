@@ -6,7 +6,7 @@ import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
 import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
-import SwapPoolPairSelect from '@/components/swap/pools/SwapPoolPairSelect.vue'
+import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
 
 const { pairStr } = useSwapPoolPair()
 
@@ -41,12 +41,12 @@ function isLinkActive(keyword: string) {
         >
           Pools
         </router-link>
+
+        <SwapPairSelect class="ml-auto" />
       </div>
 
       <!-- pair control -->
       <div class="flex justify-between items-center mt-4">
-        <SwapPoolPairSelect />
-
         <!-- sub nav -->
         <div class="flex items-center gap-1 text-sm">
           <router-link

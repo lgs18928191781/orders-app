@@ -41,7 +41,7 @@ const swapPairs = [
 }[]
 
 if (IS_DEV) {
-  swapPairs.push({
+  swapPairs.unshift({
     id: 15,
     exactName: 'ORXC',
     token1Symbol: 'btc',
