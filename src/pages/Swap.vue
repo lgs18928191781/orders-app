@@ -13,8 +13,10 @@ import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
 import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
 import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
-import SwapSide from '@/components/swap/SwapSide.vue'
+import SwapSideWithInput from '@/components/swap/SwapSideWithInput.vue'
 import SwapPriceDisclosure from '@/components/swap/SwapPriceDisclosure.vue'
+import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
+import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -65,6 +67,13 @@ watch(swapType, async (newSwapType) => {
   console.log('source', newSwapType)
 
   if (!sourceAmount.value) return
+
+  // if is flipping to x1 or 2x, clear every amounts and return (since arbitrary brc as input is not supported)
+  if (flipped.value) {
+    token1Amount.value = undefined
+    token2Amount.value = undefined
+    return
+  }
 
   // calculating
   if (newSwapType.indexOf('x') === 0) {
@@ -194,6 +203,7 @@ const flipAsset = () => {
   // flip characters of type
   swapType.value = swapType.value.split('').reverse().join('') as SwapType
 }
+flipAsset()
 
 // unmet conditions for swap
 // if any of these conditions are not met, the swap button is disabled
@@ -378,7 +388,7 @@ watch(
 
       <!-- body -->
       <div class="text-sm">
-        <SwapSide
+        <SwapSideBrc
           side="pay"
           v-if="flipped"
           v-model:symbol="token2Symbol"
@@ -390,7 +400,7 @@ watch(
           @amount-cleared="hasAmount = false"
           @became-source="swapType = '2x'"
         />
-        <SwapSide
+        <SwapSideWithInput
           side="pay"
           v-else
           v-model:symbol="token1Symbol"
@@ -424,7 +434,7 @@ watch(
           </div>
         </div>
 
-        <SwapSide
+        <SwapSideBtc
           side="receive"
           v-if="flipped"
           v-model:symbol="token1Symbol"
@@ -432,7 +442,7 @@ watch(
           :calculating="calculatingReceive"
           @became-source="swapType = 'x1'"
         />
-        <SwapSide
+        <SwapSideWithInput
           side="receive"
           v-else
           v-model:symbol="token2Symbol"

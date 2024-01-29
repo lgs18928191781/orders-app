@@ -2,6 +2,7 @@
 import { computed, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
+import { Loader2Icon } from 'lucide-vue-next'
 
 import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
@@ -10,7 +11,6 @@ import { useNetworkStore } from '@/stores/network'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
 import { getBrc20s } from '@/queries/orders-api'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { Loader2Icon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
