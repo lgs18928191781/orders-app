@@ -53,7 +53,7 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-black shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-56 divide-y divide-zinc-900 shadow-primary/10"
+        class="absolute right-0 z-50 mt-2 origin-top-right rounded-md bg-black shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-56 divide-y divide-zinc-900 shadow-primary/10"
       >
         <ListboxOption
           v-slot="{ active, selected }"

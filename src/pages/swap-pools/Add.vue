@@ -9,6 +9,7 @@ import Decimal from 'decimal.js'
 import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { formatSat, formatTok } from '@/lib/utils'
+
 enum AddOp {
   token1ToToken2 = 1,
   token2ToToken1 = 2,
@@ -19,7 +20,6 @@ const swapCalc = new SwapAlgo(
   new Decimal(1996988856407348).toNumber(),
   new Decimal(128338790502).toNumber()
 )
-import { SWAP_READY } from '@/data/constants'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -224,24 +224,18 @@ watch(
     />
   </div>
 
-  <template v-if="SWAP_READY">
-    <!-- disabled button -->
-    <button
-      :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-      v-if="unmet"
-      :disabled="!unmet.handler"
-      @click="!!unmet.handler && unmet.handler()"
-    >
-      {{ unmet.message || '' }}
-    </button>
-
-    <!-- confirm button -->
-    <button class="main-btn" v-else>Swap</button>
-  </template>
-
-  <button class="disabled main-btn" v-else :disabled="true" @click="">
-    Coming Soon!
+  <!-- disabled button -->
+  <button
+    :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+    v-if="unmet"
+    :disabled="!unmet.handler"
+    @click="!!unmet.handler && unmet.handler()"
+  >
+    {{ unmet.message || '' }}
   </button>
+
+  <!-- confirm button -->
+  <button class="main-btn" v-else>Swap</button>
 </template>
 
 <style scoped>

@@ -1,43 +1,40 @@
 import { swapApiFetch } from '@/lib/fetch'
 import { useConnectionStore } from '@/stores/connection'
 
+export type SwapType = '1x' | 'x2' | '2x' | 'x1'
+
 export const previewSwap = async ({
   token1,
   token2,
-  token1Amount,
-  token2Amount,
+  swapType,
+  sourceAmount,
 }: {
   token1: string
   token2: string
-  token1Amount?: string
-  token2Amount?: string
+  swapType: SwapType
+  sourceAmount: string
 }): Promise<{
   gas: string
   priceImpact: string
   ratio: string
   serviceFee: string
-  token1Amount: string
-  token2Amount: string
+  sourceAmount: string
+  targetAmount: string
 }> => {
-  if (!token1Amount && !token2Amount) {
-    throw new Error('token1Amount or token2Amount must be provided')
-  }
-
   const address = useConnectionStore().getAddress
 
   const body = {
     address,
     token1,
     token2,
-    token1Amount,
-    token2Amount,
+    swapType,
+    sourceAmount,
   }
 
   const res = await swapApiFetch('preview/swap', {
     method: 'POST',
     body: JSON.stringify(body),
   })
-
-  console.log('previewSwap', res)
+  console.log({ preview: res })
   return res
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
+import Decimal from 'decimal.js'
 
 import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
@@ -8,20 +9,22 @@ import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
 import { getBrc20s } from '@/queries/orders-api'
-
-import AssetSelect from '@/components/AssetSelect.vue'
-import Decimal from 'decimal.js'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { Loader2Icon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
 const { selectedPair } = useSwapPoolPair()
 
-defineProps({
+const props = defineProps({
   side: {
     type: String,
     required: true,
     validator: (side: string) => ['pay', 'receive'].includes(side),
+  },
+  calculating: {
+    type: Boolean,
+    default: false,
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
@@ -107,6 +110,7 @@ const { data: btcFiatRate } = useQuery({
 const { data: brcFiatRates } = useQuery({
   queryKey: ['brcFiatRate'],
   queryFn: getBrcFiatRate,
+  enabled: computed(() => false),
 })
 
 const fiatPrice = computed(() => {
@@ -216,6 +220,10 @@ const hasEnough = computed(() => {
     return true
   }
 
+  if (props.side === 'receive') {
+    return true
+  }
+
   return new Decimal(amount.value).lte(new Decimal(balance.value))
 })
 
@@ -266,6 +274,8 @@ watch(
         :value="normalizedAmount"
         @input="(event: any) => updateAmount(event.target.value)"
       />
+
+      <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />
 
       <div
         :class="[

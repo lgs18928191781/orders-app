@@ -1,6 +1,15 @@
 async function fetchWrapper(url: string, options?: RequestInit): Promise<any> {
   const response = await fetch(url, options)
   if (!response.ok) {
+    if (response.status === 422) {
+      const jsoned = await response.json()
+
+      throw new Error({
+        code: 422,
+        message: jsoned.message,
+      })
+      throw new Error('Unauthorized')
+    }
     throw new Error(
       `Failed to fetch ${url}: ${response.status} ${response.statusText}`
     )
@@ -117,7 +126,21 @@ export async function swapApiFetch(
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
   }
 
-  return await fetchWrapper(swapApiUrl, options)
+  const jsoned:
+    | {
+        status: 'ok'
+        data: any
+      }
+    | {
+        status: 'error'
+        message: string
+      } = await fetchWrapper(swapApiUrl, options)
+
+  if (jsoned.status === 'error') {
+    throw new Error(jsoned.message)
+  }
+
+  return jsoned.data
 }
 
 export async function originalFetch(url: string, options?: RequestInit) {

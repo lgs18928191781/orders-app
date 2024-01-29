@@ -1,26 +1,22 @@
 <script lang="ts" setup>
 import { ref, watch, type Ref, computed } from 'vue'
-import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
-import {
-  ArrowDownIcon,
-  ChevronDownIcon,
-  ArrowUpDownIcon,
-} from 'lucide-vue-next'
+import { ArrowDownIcon, ArrowUpDownIcon, Loader2Icon } from 'lucide-vue-next'
 import Decimal from 'decimal.js'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { formatSat, formatTok } from '@/lib/utils'
+import SwapAlgo from '@/lib/swapAlgo'
+import { SwapType, previewSwap } from '@/queries/swap'
+import { ERRORS } from '@/data/errors'
 
 import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
 import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
-import { formatSat, formatTok } from '@/lib/utils'
-import SwapAlgo from '@/lib/swapAlgo'
-import { SWAP_READY } from '@/data/constants'
-import { previewSwap } from '@/queries/swap'
 import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
 import SwapSide from '@/components/swap/SwapSide.vue'
+import SwapPriceDisclosure from '@/components/swap/SwapPriceDisclosure.vue'
 
 const { openConnectionModal } = useConnectionModal()
 
@@ -31,40 +27,166 @@ enum swapOp {
 
 // symbol & amount
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
-const token1Amount = ref<string>('0')
-const token2Amount = ref<string>('0')
+const token1Amount = ref<string>()
+const token2Amount = ref<string>()
 
-// source & from
-const source = ref<'pay' | 'receive'>('pay')
-const from = ref<'token1' | 'token2'>('token1')
+const calculatingPay = ref(false)
+const calculatingReceive = ref(false)
+const calculating = computed(
+  () => calculatingPay.value || calculatingReceive.value
+)
 
-// watch for changes to source and corresponding amount
+// swap & flip related
+const swapType = ref<SwapType>('1x')
+const flipped = computed(() => ['2x', 'x1'].includes(swapType.value))
+const paySymbol = computed(() => {
+  if (flipped.value) {
+    return token2Symbol.value
+  } else {
+    return token1Symbol.value
+  }
+})
+const receiveSymbol = computed(() => {
+  if (flipped.value) {
+    return token1Symbol.value
+  } else {
+    return token2Symbol.value
+  }
+})
+const sourceAmount = computed(() => {
+  if (swapType.value.includes('1')) {
+    return token1Amount.value
+  } else {
+    return token2Amount.value
+  }
+})
+
+// watch for swapType
 // if changed, calculate the other amount
-watch(source, async (newSource) => {
-  console.log('source', source)
+watch(swapType, async (newSwapType) => {
+  console.log('flipping')
+  console.log('source', newSwapType)
 
-  if (newSource === 'pay') {
-    const preview = await previewSwap({
-      token1: token1Symbol.value.toLowerCase(),
-      token2: token2Symbol.value.toLowerCase(),
-      token1Amount: newToken1Amount,
-    })
+  if (!sourceAmount.value) return
+
+  // calculating
+  if (newSwapType.indexOf('x') === 0) {
+    calculatingPay.value = true
+  } else {
+    calculatingReceive.value = true
   }
 
-  const preview = await previewSwap({
+  previewSwap({
     token1: token1Symbol.value.toLowerCase(),
     token2: token2Symbol.value.toLowerCase(),
-    token1Amount: newToken1Amount,
+    swapType: newSwapType,
+    sourceAmount,
   })
+    .then((preview) => {
+      console.log({ preview })
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'insufficient-liquidity') {
+          c.met = true
+        }
+        return c
+      })
 
-  token2Amount.value = preview.token2Amount
-  // if source is pay, calculate receive
-  // if (source === 'pay') {
-  //   calcTokenSwap({ target: { value: fromAmount } }, swapOp.pay)
-  // } else {
-  //   calcTokenSwap({ target: { value: toAmount } }, swapOp.receive)
-  // }
+      if (newSwapType.includes('1')) {
+        token2Amount.value = preview.targetAmount
+      } else {
+        token1Amount.value = preview.targetAmount
+      }
+    })
+    .catch((e) => {
+      if (e.message === ERRORS.INSUFFICIENT_LIQUIDITY) {
+        console.log('here')
+
+        if (newSwapType.includes('1')) {
+          token2Amount.value = undefined
+        } else {
+          token1Amount.value = undefined
+        }
+
+        conditions.value = conditions.value.map((c) => {
+          if (c.condition === 'insufficient-liquidity') {
+            c.met = false
+          }
+          return c
+        })
+      }
+    })
+    .finally(() => {
+      calculatingPay.value = false
+      calculatingReceive.value = false
+    })
 })
+
+// watch for sourceAmount
+watch(
+  [token1Amount, token2Amount],
+  async (
+    [newToken1Amount, newToken2Amount],
+    [oldToken1Amount, oldToken2Amount]
+  ) => {
+    const sourceChanging = swapType.value.includes('1')
+      ? newToken1Amount !== oldToken1Amount
+      : newToken2Amount !== oldToken2Amount
+    console.log('🚀 ~ sourceChanging:', sourceChanging)
+    console.log({ swapType: swapType.value })
+    if (!sourceChanging) return
+
+    if (!sourceAmount.value) return
+
+    // calculating
+    if (swapType.value.indexOf('x') === 0) {
+      calculatingPay.value = true
+    } else {
+      calculatingReceive.value = true
+    }
+
+    previewSwap({
+      token1: token1Symbol.value.toLowerCase(),
+      token2: token2Symbol.value.toLowerCase(),
+      swapType: swapType.value,
+      sourceAmount,
+    })
+      .then((preview) => {
+        console.log({ preview })
+        conditions.value = conditions.value.map((c) => {
+          if (c.condition === 'insufficient-liquidity') {
+            c.met = true
+          }
+          return c
+        })
+
+        if (swapType.value.includes('1')) {
+          token2Amount.value = preview.targetAmount
+        } else {
+          token1Amount.value = preview.targetAmount
+        }
+      })
+      .catch((e) => {
+        if (e.message === ERRORS.INSUFFICIENT_LIQUIDITY) {
+          if (swapType.value.includes('1')) {
+            token2Amount.value = undefined
+          } else {
+            token1Amount.value = undefined
+          }
+
+          conditions.value = conditions.value.map((c) => {
+            if (c.condition === 'insufficient-liquidity') {
+              c.met = false
+            }
+            return c
+          })
+        }
+      })
+      .finally(() => {
+        calculatingPay.value = false
+        calculatingReceive.value = false
+      })
+  }
+)
 
 const swapCalc = new SwapAlgo(
   new Decimal(176259823276).toNumber(),
@@ -92,64 +214,13 @@ const tokenRateCalc = computed(() => {
   }
 })
 
-const calcTokenSwap = (e: Event, op: swapOp) => {
-  if (op == swapOp.pay) {
-    if (token1Symbol.value === 'btc') {
-      const token2AddAmount = formatSat(e.target?.value, 8)
-      const { token1RemoveAmount } = swapCalc.swapToken2ToToken1(
-        token2AddAmount,
-        swapCalc.token1SwapAmount,
-        swapCalc.token2SwapAmount
-      )
-      token2Amount.value = formatTok(token1RemoveAmount, 8, 8)
-    } else {
-      const token1AddAmount = formatSat(e.target?.value, 8)
-      const { token2RemoveAmount } = swapCalc.swapToken1ToToken2(
-        token1AddAmount,
-        swapCalc.token1SwapAmount,
-        swapCalc.token2SwapAmount
-      )
-      token2Amount.value = formatTok(token2RemoveAmount, 8, 8)
-    }
-  } else {
-    if (token1Symbol.value === 'btc') {
-      const token1RemoveAmount = formatSat(e.target?.value, 8)
-      const { token2AddAmount } = swapCalc.swapToken2ToToken1ByToken1(
-        token1RemoveAmount,
-        swapCalc.token1SwapAmount,
-        swapCalc.token2SwapAmount
-      )
-      token1Amount.value = formatTok(token2AddAmount, 8, 8)
-    } else {
-      const token2RemoveAmount = formatSat(e.target?.value, 8)
-      const { token1AddAmount } = swapCalc.swapToken1ToToken2ByToken2(
-        token2RemoveAmount,
-        swapCalc.token1SwapAmount,
-        swapCalc.token2SwapAmount
-      )
-      token1Amount.value = formatTok(token1AddAmount, 8, 8)
-    }
-  }
-}
-
-function accept(open, close) {
-  console.log(open)
-  if (open) {
-    close()
-  } else {
-    open = true
-  }
-}
-
 // flip
 const flipAsset = () => {
-  from.value = from.value === 'token1' ? 'token2' : 'token1'
-
-  // reset source
-  source.value = 'pay'
+  // flip characters of type
+  swapType.value = swapType.value.split('').reverse().join('') as SwapType
 }
 
-const tokenImspact = computed(() => {
+const tokenImpact = computed(() => {
   const pairData = {
     swapToken1Amount: swapCalc.token1SwapAmount,
     swapToken2Amount: swapCalc.token2SwapAmount,
@@ -199,15 +270,21 @@ const conditions: Ref<
     met: false,
   },
   {
+    condition: 'insufficient-liquidity',
+    message: 'Insufficient liquidity',
+    priority: 3,
+    met: true,
+  },
+  {
     condition: 'enter-amount',
     message: 'Enter an amount',
-    priority: 3,
+    priority: 4,
     met: false,
   },
   {
     condition: 'insufficient-balance',
     message: 'Insufficient balance',
-    priority: 4,
+    priority: 5,
     met: false,
   },
 ])
@@ -350,32 +427,34 @@ watch(
       </div>
 
       <!-- body -->
-      <div class="space-y-0.5 text-sm">
+      <div class="text-sm">
         <SwapSide
           side="pay"
-          v-if="from === 'token1'"
-          v-model:symbol="token1Symbol"
-          v-model:amount="token1Amount"
+          v-if="flipped"
+          v-model:symbol="token2Symbol"
+          v-model:amount="token2Amount"
+          :calculating="calculatingPay"
           @has-enough="hasEnough = true"
           @not-enough="hasEnough = false"
           @amount-entered="hasAmount = true"
           @amount-cleared="hasAmount = false"
-          @became-source="source = 'pay'"
+          @became-source="swapType = '2x'"
         />
         <SwapSide
           side="pay"
           v-else
-          v-model:symbol="token2Symbol"
-          v-model:amount="token2Amount"
+          v-model:symbol="token1Symbol"
+          v-model:amount="token1Amount"
+          :calculating="calculatingPay"
           @has-enough="hasEnough = true"
           @not-enough="hasEnough = false"
           @amount-entered="hasAmount = true"
           @amount-cleared="hasAmount = false"
-          @became-source="source = 'pay'"
+          @became-source="swapType = '1x'"
         />
 
         <!-- flip -->
-        <div class="h-0 relative flex justify-center">
+        <div class="h-0 relative flex justify-center z-30 my-0.5">
           <div
             class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-110 duration-150"
           >
@@ -386,7 +465,7 @@ watch(
             <button
               class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
               :class="{
-                'rotate-180': token1Symbol === 'btc',
+                'rotate-180': flipped,
               }"
               @click="flipAsset"
             >
@@ -397,70 +476,32 @@ watch(
 
         <SwapSide
           side="receive"
-          v-if="from === 'token1'"
-          v-model:symbol="token2Symbol"
-          v-model:amount="token2Amount"
-          @became-source="source = 'receive'"
+          v-if="flipped"
+          v-model:symbol="token1Symbol"
+          v-model:amount="token1Amount"
+          :calculating="calculatingReceive"
+          @became-source="swapType = 'x1'"
         />
         <SwapSide
           side="receive"
           v-else
-          v-model:symbol="token1Symbol"
-          v-model:amount="token1Amount"
-          @became-source="source = 'receive'"
+          v-model:symbol="token2Symbol"
+          v-model:amount="token2Amount"
+          :calculating="calculatingReceive"
+          @became-source="swapType = 'x2'"
+        />
+
+        <SwapPriceDisclosure
+          :pay-symbol="paySymbol"
+          :receive-symbol="receiveSymbol"
+          v-show="sourceAmount"
         />
       </div>
-
-      <Popover
-        v-slot="{ open, close }"
-        class="rounded-2xl border border-zinc-700 p-3"
-      >
-        <PopoverButton
-          class="flex w-full items-center justify-between text-sm focus:outline-none"
-        >
-          <div class="flex items-center">
-            <span class="mr-1">1</span
-            ><span class="mr-1">{{ token2Symbol.toUpperCase() }}</span>
-            <span class="mr-1"
-              ><span class="mr-1">≈</span>{{ tokenRateCalc }}</span
-            ><span class="mr-1">{{ token1Symbol.toUpperCase() }}</span>
-          </div>
-          <ChevronDownIcon
-            class="h-6 w-6"
-            :class="{ 'rotate-180 transform': open }"
-          />
-        </PopoverButton>
-        <div v-if="open">
-          <transition
-            enter-active-class="transition duration-200 ease-out"
-            enter-from-class="translate-y-1 opacity-0 "
-            enter-to-class="translate-y-0 opacity-100 "
-            leave-active-class="transition duration-150 ease-in"
-            leave-from-class="translate-y-0 opacity-100 "
-            leave-to-class="translate-y-1 opacity-0 "
-          >
-            <PopoverPanel class="text-sm" static>
-              <div class="mt-2 grid grid-cols-1">
-                <div class="mt-1 flex w-full items-center justify-between">
-                  <span>Exchange rate impact:</span>
-                  <span>{{ tokenImspact.slip2 }}%</span>
-                </div>
-                <div class="mt-3 flex w-full items-center justify-between">
-                  <span>Swap fee:</span>
-                  <span></span>
-                </div>
-              </div>
-
-              <img src="" alt="" />
-            </PopoverPanel>
-          </transition>
-        </div>
-      </Popover>
 
       <!--price impact-->
       <div
         v-if="
-          Math.abs(+tokenImspact.slip1) > 1 || Math.abs(+tokenImspact.slip2) > 1
+          Math.abs(+tokenImpact.slip1) > 1 || Math.abs(+tokenImpact.slip2) > 1
         "
         class="flex items-center justify-between rounded-2xl border border-orange-300/30 p-3 text-sm"
       >
@@ -469,35 +510,37 @@ watch(
         <div>
           <span class="mr-5"
             >${{ token1Symbol.toUpperCase() }}:<span class="text-red-500"
-              >{{ tokenImspact.slip1 }}%</span
+              >{{ tokenImpact.slip1 }}%</span
             ></span
           >
           <span
             >{{ token2Symbol.toUpperCase() }}:<span class="text-green-500"
-              >{{ tokenImspact.slip2 }}%</span
+              >{{ tokenImpact.slip2 }}%</span
             >
           </span>
         </div>
       </div>
 
-      <template v-if="SWAP_READY">
-        <!-- disabled button -->
-        <button
-          :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-          v-if="unmet"
-          :disabled="!unmet.handler"
-          @click="!!unmet.handler && unmet.handler()"
-        >
-          {{ unmet.message || '' }}
-        </button>
-
-        <!-- confirm button -->
-        <button class="main-btn" v-else-if="SWAP_READY">Swap</button>
-      </template>
-
-      <button class="disabled main-btn" v-else :disabled="true" @click="">
-        Coming Soon!
+      <!-- disabled buttons: calculating or have unmets  -->
+      <button
+        :class="['disabled', 'main-btn']"
+        v-if="calculating"
+        :disabled="true"
+      >
+        <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
       </button>
+
+      <button
+        :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+        v-else-if="unmet"
+        :disabled="!unmet.handler"
+        @click="!!unmet.handler && unmet.handler()"
+      >
+        {{ unmet.message || '' }}
+      </button>
+
+      <!-- confirm button -->
+      <button class="main-btn" v-else>Swap</button>
     </div>
 
     <!-- background blur -->
