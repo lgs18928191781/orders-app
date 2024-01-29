@@ -9,6 +9,10 @@ import { ChevronRightIcon, CheckIcon } from 'lucide-vue-next'
 
 import tradingPairs from '@/data/trading-pairs'
 import { useTradingPair } from '@/hooks/use-trading-pair'
+const sortedTradingPairs = tradingPairs.sort((a, b) => {
+  // sorted by id
+  return a.id > b.id ? 1 : -1
+})
 
 const { selectPair, selectedPair } = useTradingPair()
 </script>
@@ -56,7 +60,7 @@ const { selectPair, selectedPair } = useTradingPair()
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="pair in tradingPairs"
+          v-for="pair in sortedTradingPairs"
           :key="pair.id"
           :value="pair.id"
         >

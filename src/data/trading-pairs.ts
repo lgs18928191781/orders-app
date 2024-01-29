@@ -12,6 +12,7 @@ import btcsLogo from '@/assets/btcs.jpg?url'
 import ibtcLogo from '@/assets/ibtc.jpg?url'
 import biliLogo from '@/assets/bili.jpg?url'
 import ratsLogo from '@/assets/rats.jpg?url'
+import eorbLogo from '@/assets/eorb.jpg?url'
 
 import { useRoute } from 'vue-router'
 import { InjectionKey } from 'vue'
@@ -136,6 +137,15 @@ const tradingPairs = [
     toSymbol: 'btc',
     fromIcon: saycLogo,
     toIcon: btcLogo,
+  },
+  {
+    id: 1.1,
+    fromSymbol: 'eorb',
+    exactName: 'eorb',
+    toSymbol: 'btc',
+    fromIcon: eorbLogo,
+    toIcon: btcLogo,
+    isNew: true,
   },
 ] as {
   id: number
