@@ -6,8 +6,6 @@ import Decimal from 'decimal.js'
 import { useConnectionStore } from '@/stores/connection'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { formatSat, formatTok } from '@/lib/utils'
-import SwapAlgo from '@/lib/swapAlgo'
 import { SwapType, previewSwap } from '@/queries/swap'
 import { ERRORS } from '@/data/errors'
 
@@ -19,16 +17,15 @@ import SwapSide from '@/components/swap/SwapSide.vue'
 import SwapPriceDisclosure from '@/components/swap/SwapPriceDisclosure.vue'
 
 const { openConnectionModal } = useConnectionModal()
-
-enum swapOp {
-  pay = 'pay',
-  receive = 'receive',
-}
+const connectionStore = useConnectionStore()
 
 // symbol & amount
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const token1Amount = ref<string>()
 const token2Amount = ref<string>()
+
+const ratio = ref<Decimal>(new Decimal(0))
+const poolRatio = ref<Decimal>(new Decimal(0))
 
 const calculatingPay = ref(false)
 const calculatingReceive = ref(false)
@@ -80,16 +77,18 @@ watch(swapType, async (newSwapType) => {
     token1: token1Symbol.value.toLowerCase(),
     token2: token2Symbol.value.toLowerCase(),
     swapType: newSwapType,
-    sourceAmount,
+    sourceAmount: sourceAmount.value,
   })
     .then((preview) => {
-      console.log({ preview })
       conditions.value = conditions.value.map((c) => {
         if (c.condition === 'insufficient-liquidity') {
           c.met = true
         }
         return c
       })
+
+      ratio.value = new Decimal(preview.ratio)
+      poolRatio.value = new Decimal(preview.poolRatio)
 
       if (newSwapType.includes('1')) {
         token2Amount.value = preview.targetAmount
@@ -148,16 +147,18 @@ watch(
       token1: token1Symbol.value.toLowerCase(),
       token2: token2Symbol.value.toLowerCase(),
       swapType: swapType.value,
-      sourceAmount,
+      sourceAmount: sourceAmount.value,
     })
       .then((preview) => {
-        console.log({ preview })
         conditions.value = conditions.value.map((c) => {
           if (c.condition === 'insufficient-liquidity') {
             c.met = true
           }
           return c
         })
+
+        ratio.value = new Decimal(preview.ratio)
+        poolRatio.value = new Decimal(preview.poolRatio)
 
         if (swapType.value.includes('1')) {
           token2Amount.value = preview.targetAmount
@@ -188,62 +189,11 @@ watch(
   }
 )
 
-const swapCalc = new SwapAlgo(
-  new Decimal(176259823276).toNumber(),
-  new Decimal(1996988856407348).toNumber(),
-  new Decimal(128338790502).toNumber()
-)
-
-const tokenRateCalc = computed(() => {
-  if (token1Symbol.value === 'btc') {
-    const token1RemoveAmount = formatSat(1, 8)
-    const { token2AddAmount } = swapCalc.swapToken2ToToken1ByToken1(
-      token1RemoveAmount,
-      swapCalc.token1SwapAmount,
-      swapCalc.token2SwapAmount
-    )
-    return formatTok(token2AddAmount, 8, 8)
-  } else {
-    const token2RemoveAmount = formatSat(1, 8)
-    const { token1AddAmount } = swapCalc.swapToken1ToToken2ByToken2(
-      token2RemoveAmount,
-      swapCalc.token1SwapAmount,
-      swapCalc.token2SwapAmount
-    )
-    return formatTok(token1AddAmount, 8, 8)
-  }
-})
-
 // flip
 const flipAsset = () => {
   // flip characters of type
   swapType.value = swapType.value.split('').reverse().join('') as SwapType
 }
-
-const tokenImpact = computed(() => {
-  const pairData = {
-    swapToken1Amount: swapCalc.token1SwapAmount,
-    swapToken2Amount: swapCalc.token2SwapAmount,
-  }
-
-  const originAddAmount = token1Amount.value || 0
-  const aimAddAmount = token2Amount.value || 0
-  const dirForward = token1Symbol.value == 'btc' ? true : false
-  const { slip1, slip2 } = swapCalc.tokenPriceImpact(
-    originAddAmount,
-    aimAddAmount,
-    pairData,
-    dirForward
-  )
-
-  // console.log('token1Impact, token2Impact', slip1, slip2)
-  return {
-    slip1: Math.abs(+slip1) >= 100 ? 100 : slip1,
-    slip2: Math.abs(+slip2) >= 100 ? 100 : slip2,
-  }
-})
-
-const connectionStore = useConnectionStore()
 
 // unmet conditions for swap
 // if any of these conditions are not met, the swap button is disabled
@@ -495,11 +445,14 @@ watch(
           :pay-symbol="paySymbol"
           :receive-symbol="receiveSymbol"
           v-show="sourceAmount"
+          :ratio="ratio"
+          :pool-ratio="poolRatio"
+          :calculating="calculating"
         />
       </div>
 
       <!--price impact-->
-      <div
+      <!-- <div
         v-if="
           Math.abs(+tokenImpact.slip1) > 1 || Math.abs(+tokenImpact.slip2) > 1
         "
@@ -519,7 +472,7 @@ watch(
             >
           </span>
         </div>
-      </div>
+      </div> -->
 
       <!-- disabled buttons: calculating or have unmets  -->
       <button

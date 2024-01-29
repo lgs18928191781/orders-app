@@ -135,7 +135,7 @@ const fiatPrice = computed(() => {
 })
 
 // balance
-const { data: btcBalance } = useQuery({
+const { data: btcBalance, isLoading: isLoadingBtcBalance } = useQuery({
   queryKey: [
     'balance',
     { network: networkStore.network, address: connectionStore.getAddress },
@@ -264,7 +264,11 @@ watch(
         class="bg-transparent quiet-input flex-1 w-12 p-0 leading-loose"
         :class="[
           hasEnough
-            ? 'text-zinc-100 caret-primary'
+            ? calculating
+              ? 'text-zinc-500'
+              : 'text-zinc-100 caret-primary'
+            : calculating
+            ? 'text-red-900/50 caret-red-900/50'
             : 'text-red-500 caret-red-500',
           // if too long, make it smaller
           amountTextSize,

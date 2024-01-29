@@ -15,8 +15,8 @@ export const previewSwap = async ({
   sourceAmount: string
 }): Promise<{
   gas: string
-  priceImpact: string
   ratio: string
+  poolRatio: string
   serviceFee: string
   sourceAmount: string
   targetAmount: string
