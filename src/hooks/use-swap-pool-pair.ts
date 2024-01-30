@@ -2,26 +2,29 @@ import { type Ref, computed, ref } from 'vue'
 import { useRouteParams } from '@vueuse/router'
 import { useRouter } from 'vue-router'
 
-import swapPairs from '@/data/swap-pairs'
+import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
+import { useNetworkStore } from '@/stores/network'
 
 export function useSwapPoolPair() {
+  const network = useNetworkStore().network
+  const usingSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
   const router = useRouter()
 
-  const selectedPairId = ref(swapPairs[0].id)
+  const selectedPairId = ref(usingSwapPairs[0].id)
   const selectedPair = computed(() => {
-    return swapPairs.find((a) => a.id === selectedPairId.value)
+    return usingSwapPairs.find((a) => a.id === selectedPairId.value)
   })
 
   const pairStr = useRouteParams('pair') as Ref<string>
 
   if (!pairStr.value) {
-    pairStr.value = `${swapPairs[0].token1Symbol}-${swapPairs[0].token2Symbol}`
+    pairStr.value = `${usingSwapPairs[0].token1Symbol}-${usingSwapPairs[0].token2Symbol}`
   }
 
   const token1Symbol = computed(() => pairStr.value.split('-')[0])
   const token2Symbol = computed(() => pairStr.value.split('-')[1])
 
-  const selected = swapPairs.find(
+  const selected = usingSwapPairs.find(
     (a) =>
       (a.token1Symbol.toUpperCase() === token1Symbol.value.toUpperCase() &&
         a.token2Symbol.toUpperCase() === token2Symbol.value.toUpperCase()) ||
@@ -36,7 +39,7 @@ export function useSwapPoolPair() {
     selectedPairId.value = id
 
     // redirect
-    const pair = swapPairs.find((pair) => pair.id === id)
+    const pair = usingSwapPairs.find((pair) => pair.id === id)
     if (pair) {
       const pairSymbol = `${pair.token1Symbol}-${pair.token2Symbol}`
       const route = router.currentRoute.value

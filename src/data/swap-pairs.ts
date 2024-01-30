@@ -51,4 +51,15 @@ if (IS_DEV) {
   })
 }
 
+export const testnetSwapPairs = [
+  {
+    id: 1,
+    exactName: 'okok',
+    token1Symbol: 'btc',
+    token2Symbol: 'okok',
+    token1Icon: btcLogo,
+    token2Icon: rdexLogo,
+  },
+]
+
 export default swapPairs

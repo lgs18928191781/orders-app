@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
-import { Loader2Icon } from 'lucide-vue-next'
+import gsap from 'gsap'
+import { CheckCircleIcon } from 'lucide-vue-next'
 
-import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
-import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
+import {
+  Brc20Transferable,
+  getBrcFiatRate,
+  getFiatRate,
+  getOneBrc20,
+} from '@/queries/orders-api'
+import { calcFiatPrice } from '@/lib/helpers'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { prettyBalance, prettySymbol } from '@/lib/formatters'
-import { getBrc20s } from '@/queries/orders-api'
+import { prettyInscriptionId, prettySymbol } from '@/lib/formatters'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { PackagePlusIcon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { selectedPair } = useSwapPoolPair()
+const { selectedPair, token2Symbol } = useSwapPoolPair()
 
 const props = defineProps({
   side: {
@@ -38,59 +44,6 @@ const icon = computed(() => {
   }
 
   return selectedPair.value.token2Icon
-})
-
-// amount
-const amount = defineModel('amount', { type: String })
-const normalizedAmount = computed(() => {
-  if (!amount.value) {
-    return ''
-  }
-
-  const dividedBy = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
-  return new Decimal(amount.value).dividedBy(dividedBy).toDP().toFixed()
-})
-const updateAmount = (updatingAmount: number) => {
-  if (typeof updatingAmount === 'string') {
-    updatingAmount = Number(updatingAmount)
-  }
-  if (isNaN(updatingAmount)) {
-    updatingAmount = 0
-  }
-
-  const times = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
-  amount.value = new Decimal(updatingAmount).times(times).toFixed()
-
-  // this side is now the source
-  emit('becameSource')
-}
-
-const amountTextSize = computed(() => {
-  if (!amount.value) {
-    return 'text-4xl'
-  }
-
-  if (normalizedAmount.value.length > 16) {
-    return 'text-xs'
-  }
-
-  if (normalizedAmount.value.length > 12) {
-    return 'text-lg'
-  }
-
-  if (normalizedAmount.value.length > 10) {
-    return 'text-xl'
-  }
-
-  if (normalizedAmount.value.length > 8) {
-    return 'text-2xl'
-  }
-
-  if (normalizedAmount.value.length > 6) {
-    return 'text-3xl'
-  }
-
-  return 'text-4xl'
 })
 
 const emit = defineEmits([
@@ -134,163 +87,143 @@ const fiatPrice = computed(() => {
   return calcFiatPrice(amount.value, rate)
 })
 
-// balance
-const { data: btcBalance, isLoading: isLoadingBtcBalance } = useQuery({
+const { data: myOneBrc20 } = useQuery({
   queryKey: [
-    'balance',
-    { network: networkStore.network, address: connectionStore.getAddress },
-  ],
-  queryFn: () => connectionStore.adapter.getBalance(),
-  enabled: computed(() => connectionStore.connected),
-})
-const { data: myBrc20s } = useQuery({
-  queryKey: [
-    'myBrc20s',
+    'myOneBrc20',
     {
       address: connectionStore.getAddress,
       network: networkStore.network,
+      tick: token2Symbol,
     },
   ],
-  queryFn: () => getBrc20s({ address: connectionStore.getAddress }),
+  queryFn: () =>
+    getOneBrc20({
+      address: connectionStore.getAddress,
+      tick: token2Symbol.value,
+    }),
   enabled: computed(() => connectionStore.connected),
 })
-const balance = computed(() => {
-  if (symbol.value !== 'btc') {
-    // find symbol's balance
-    const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
-    )
 
-    if (!brc20) {
-      return 0
-    }
-
-    return Number(brc20.balance)
+// amount
+const amount = defineModel('amount', { type: String })
+const selecteds = ref<Brc20Transferable[]>([])
+const toggleSelect = (transferable: Brc20Transferable) => {
+  if (isSelected(transferable)) {
+    selecteds.value = selecteds.value.filter((t) => t !== transferable)
+  } else {
+    selecteds.value.push(transferable)
   }
-
-  if (!btcBalance.value) {
-    return 0
-  }
-
-  return btcBalance.value
-})
-
-const balanceDisplay = computed(() => {
-  if (balance.value === 0) {
-    return '0'
-  }
-
-  if (symbol.value === 'btc') {
-    return `${prettyBalance(balance.value, useBtcUnit.value)} ${unit.value}`
-  }
-
-  return `${balance.value} ${symbol.value.toUpperCase()}`
-})
-
-// use total balance
-const useTotalBalance = () => {
-  if (symbol.value !== 'btc') {
-    // find symbol's balance
-    const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
-    )
-
-    if (!brc20) {
-      amount.value = '0'
-      return
-    }
-
-    amount.value = String(brc20.balance)
-    return
-  }
-
-  if (!btcBalance.value) {
-    amount.value = '0'
-    return
-  }
-
-  amount.value = String(btcBalance.value)
-
-  // this side is now the source
-  emit('becameSource')
+}
+function isSelected(transferable: Brc20Transferable) {
+  return selecteds.value.includes(transferable)
 }
 
-const hasEnough = computed(() => {
-  if (!amount.value) {
-    return true
-  }
-
-  if (props.side === 'receive') {
-    return true
-  }
-
-  return new Decimal(amount.value).lte(new Decimal(balance.value))
-})
-
-// watch for change of hasEnough; emit event
 watch(
-  () => hasEnough.value,
-  (hasEnough) => {
-    if (hasEnough) {
-      emit('hasEnough')
-    } else {
-      emit('notEnough')
-    }
-  }
-)
+  selecteds,
+  (newSelecteds) => {
+    // update amount when selecteds changed
+    amount.value = newSelecteds
+      .reduce((prev, curr) => {
+        return prev.add(new Decimal(curr.amount))
+      }, new Decimal(0))
+      .toFixed(0)
 
-// watch for change of amount; emit event
-watch(
-  () => amount.value,
-  (amount) => {
-    if (amount) {
+    // if has selecteds, emit hasAmount; else emit amountCleared
+    if (newSelecteds.length > 0) {
       emit('amountEntered')
     } else {
       emit('amountCleared')
     }
-  }
+  },
+  { deep: true }
 )
+
+const tweenedAmount = reactive({
+  number: 0,
+})
+watch(amount, (n) => {
+  gsap.to(tweenedAmount, { duration: 0.2, number: Number(n) || 0 })
+})
+
+async function goInscribe() {
+  const adapter = connectionStore.adapter
+  if (!selectedPair.value) return
+
+  await adapter?.inscribe(selectedPair.value.exactName)
+}
 </script>
 
 <template>
   <div
     class="px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
   >
-    <div class="text-zinc-400">You {{ side }}</div>
+    <div class="flex items-center gap-2">
+      <div class="text-zinc-400 mr-auto">You {{ side }}</div>
 
-    <!-- main control -->
-    <div class="flex items-center space-x-2 justify-between h-16">
-      <input
-        class="bg-transparent quiet-input flex-1 w-12 p-0 leading-loose"
-        :class="[
-          hasEnough
-            ? calculating
-              ? 'text-zinc-500'
-              : 'text-zinc-100 caret-primary'
-            : calculating
-            ? 'text-red-900/50 caret-red-900/50'
-            : 'text-red-500 caret-red-500',
-          // if too long, make it smaller
-          amountTextSize,
-        ]"
-        placeholder="0"
-        type="number"
-        :value="normalizedAmount"
-        @input="(event: any) => updateAmount(event.target.value)"
-      />
-
-      <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />
-
+      <div class="text-zinc-100 text-lg">
+        {{ tweenedAmount.number.toFixed(0) }}
+      </div>
       <div
         :class="[
-          'rounded-full p-1 px-4 text-xl flex items-center gap-1 bg-zinc-900',
+          'rounded-full p-1 px-4 text-base flex items-center gap-1 bg-zinc-900',
         ]"
       >
-        <img :src="icon" class="w-6 h-6 rounded-full" v-if="icon" />
+        <img :src="icon" class="w-5 h-5 rounded-full" v-if="icon" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>
       </div>
+    </div>
+
+    <!-- main control -->
+    <div v-if="myOneBrc20?.transferBalanceList.length === 0">
+      <div class="text-sm text-zinc-400 my-4">
+        No transferable {{ prettySymbol(symbol) }}
+      </div>
+
+      <!-- inscribe button -->
+      <button
+        @click="goInscribe"
+        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center border-zinc-700 text-xs text-zinc-300 hover:bg-primary/5 hover:text-primary"
+      >
+        <PackagePlusIcon class="w-4 h-4" />
+        <span>Inscribe</span>
+      </button>
+    </div>
+
+    <div class="grid items-center grid-cols-3 gap-2 my-4" v-else>
+      <button
+        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center"
+        :class="[
+          isSelected(transferable)
+            ? 'bg-black border-primary/60 text-primary'
+            : 'bg-zinc-800 border-zinc-700 text-zinc-300',
+        ]"
+        v-for="transferable in myOneBrc20?.transferBalanceList"
+        :key="transferable.inscriptionId"
+        @click="toggleSelect(transferable)"
+      >
+        <div class="text-sm self-center">
+          {{ transferable.amount }}
+        </div>
+        <div class="text-xs text-zinc-400 bg-zinc-700 rounded-sm px-1">
+          {{ prettyInscriptionId(transferable.inscriptionId) }}
+        </div>
+
+        <CheckCircleIcon
+          class="absolute right-0 top-0 w-5 h-5 text-primary translate-x-[33%] translate-y-[-33%] bg-black/80 rounded-full p-0.5 rotate-12"
+          v-if="isSelected(transferable)"
+        ></CheckCircleIcon>
+      </button>
+
+      <!-- inscribe button -->
+      <button
+        @click="goInscribe"
+        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center border-zinc-700 text-xs text-zinc-300 hover:bg-primary/5 hover:text-primary"
+      >
+        <PackagePlusIcon class="w-4 h-4" />
+        <span>Inscribe</span>
+      </button>
     </div>
 
     <!-- data footer -->
@@ -306,11 +239,17 @@ watch(
 
       <!-- balance -->
       <div
-        class="text-sm text-zinc-400 cursor-pointer"
-        v-show="!!symbol"
-        @click="useTotalBalance"
+        class="text-xs text-zinc-400 flex gap-1"
+        v-if="!!symbol && !!myOneBrc20"
       >
-        Balance: {{ balanceDisplay }}
+        <div>Balance:</div>
+        <div class="text-primary">
+          {{ myOneBrc20.transferBalance || 0 }}
+        </div>
+        <div class="">+</div>
+        <div class="">
+          {{ myOneBrc20.availableBalance || 0 }}
+        </div>
       </div>
     </div>
   </div>

@@ -44,7 +44,7 @@ const icon = computed(() => {
 const amount = defineModel('amount', { type: String })
 const normalizedAmount = computed(() => {
   if (!amount.value) {
-    return ''
+    return '0'
   }
 
   const dividedBy = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
@@ -151,7 +151,11 @@ const { data: myBrc20s } = useQuery({
       network: networkStore.network,
     },
   ],
-  queryFn: () => getBrc20s({ address: connectionStore.getAddress }),
+  queryFn: () =>
+    getBrc20s({
+      address: connectionStore.getAddress,
+      network: networkStore.network,
+    }),
   enabled: computed(() => connectionStore.connected),
 })
 const balance = computed(() => {
@@ -260,33 +264,25 @@ watch(
 
     <!-- main control -->
     <div class="flex items-center space-x-2 justify-between h-16">
-      <input
-        class="bg-transparent quiet-input flex-1 w-12 p-0 leading-loose"
+      <div
+        class="bg-transparent flex-1 w-12 p-0 leading-loose"
         :class="[
-          hasEnough
-            ? calculating
-              ? 'text-zinc-500'
-              : 'text-zinc-100 caret-primary'
-            : calculating
-            ? 'text-red-900/50 caret-red-900/50'
-            : 'text-red-500 caret-red-500',
+          calculating ? 'text-zinc-500' : 'text-zinc-100',
           // if too long, make it smaller
           amountTextSize,
         ]"
-        placeholder="0"
-        type="number"
-        :value="normalizedAmount"
-        @input="(event: any) => updateAmount(event.target.value)"
-      />
+      >
+        {{ normalizedAmount }}
+      </div>
 
       <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />
 
       <div
         :class="[
-          'rounded-full p-1 px-4 text-xl flex items-center gap-1 bg-zinc-900',
+          'rounded-full p-1 px-4 text-base flex items-center gap-1 bg-zinc-900',
         ]"
       >
-        <img :src="icon" class="w-6 h-6 rounded-full" v-if="icon" />
+        <img :src="icon" class="w-5 h-5 rounded-full" v-if="icon" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>

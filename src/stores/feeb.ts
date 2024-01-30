@@ -1,3 +1,4 @@
+import { useNetworkStore } from '@/stores/network'
 import { defineStore } from 'pinia'
 
 export const useFeebStore = defineStore('feeb', {
@@ -8,7 +9,13 @@ export const useFeebStore = defineStore('feeb', {
   },
 
   getters: {
-    get: (state) => state.feeb,
+    get: (state) => {
+      // if testnet, return 1
+      const networkStore = useNetworkStore()
+      if (networkStore.network === 'testnet') return 1
+
+      return state.feeb
+    },
   },
 
   actions: {

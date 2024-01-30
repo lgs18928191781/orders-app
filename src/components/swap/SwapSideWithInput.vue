@@ -151,7 +151,11 @@ const { data: myBrc20s } = useQuery({
       network: networkStore.network,
     },
   ],
-  queryFn: () => getBrc20s({ address: connectionStore.getAddress }),
+  queryFn: () =>
+    getBrc20s({
+      address: connectionStore.getAddress,
+      network: networkStore.network,
+    }),
   enabled: computed(() => connectionStore.connected),
 })
 const balance = computed(() => {

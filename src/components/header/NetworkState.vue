@@ -267,6 +267,7 @@ function onSwitchShow(open: boolean) {
     <PopoverButton
       class="px-3 outline-none text-xs flex items-center gap-2 hover:scale-105"
       @click="onSwitchShow(open)"
+      v-if="networkStore.network === 'livenet'"
     >
       <span class="">Network</span>
       <span class="relative flex h-2 w-2">
@@ -293,6 +294,14 @@ function onSwitchShow(open: boolean) {
         }}
       </span>
     </PopoverButton>
+
+    <div
+      class="px-3 outline-none text-xs flex items-center gap-2 hover:scale-105"
+      v-else
+    >
+      Testnet Gas
+      <span class="text-primary">{{ feebStore.get }}</span>
+    </div>
 
     <PopoverOverlay class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
 

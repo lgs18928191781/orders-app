@@ -79,6 +79,7 @@ const { data: btcBalance } = useQuery({
   queryFn: () => connectionStore.adapter.getBalance(),
   enabled: computed(() => connectionStore.connected),
 })
+console.log('network', networkStore.network)
 const { data: myBrc20s } = useQuery({
   queryKey: [
     'myBrc20s',
@@ -87,7 +88,11 @@ const { data: myBrc20s } = useQuery({
       network: networkStore.network,
     },
   ],
-  queryFn: () => getBrc20s({ address: connectionStore.getAddress }),
+  queryFn: () =>
+    getBrc20s({
+      address: connectionStore.getAddress,
+      network: networkStore.network,
+    }),
   enabled: computed(() => connectionStore.connected),
 })
 const balance = computed(() => {

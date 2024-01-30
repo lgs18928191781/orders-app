@@ -139,11 +139,16 @@ watch(
     const sourceChanging = swapType.value.includes('1')
       ? newToken1Amount !== oldToken1Amount
       : newToken2Amount !== oldToken2Amount
-    console.log('🚀 ~ sourceChanging:', sourceChanging)
     console.log({ swapType: swapType.value })
     if (!sourceChanging) return
 
     if (!sourceAmount.value) return
+
+    if (Number(sourceAmount.value) === 0) {
+      token1Amount.value = undefined
+      token2Amount.value = undefined
+      return
+    }
 
     // calculating
     if (swapType.value.indexOf('x') === 0) {
@@ -201,7 +206,24 @@ watch(
 // flip
 const flipAsset = () => {
   // flip characters of type
-  swapType.value = swapType.value.split('').reverse().join('') as SwapType
+  switch (swapType.value) {
+    case '1x':
+      swapType.value = '2x'
+      break
+    case '2x':
+      swapType.value = '1x'
+      break
+    case 'x1':
+      swapType.value = '1x'
+      break
+    case 'x2':
+      swapType.value = '2x'
+      break
+  }
+
+  // clear amounts
+  token1Amount.value = undefined
+  token2Amount.value = undefined
 }
 flipAsset()
 
@@ -454,7 +476,7 @@ watch(
         <SwapPriceDisclosure
           :pay-symbol="paySymbol"
           :receive-symbol="receiveSymbol"
-          v-show="sourceAmount"
+          v-show="!!Number(sourceAmount)"
           :ratio="ratio"
           :pool-ratio="poolRatio"
           :calculating="calculating"

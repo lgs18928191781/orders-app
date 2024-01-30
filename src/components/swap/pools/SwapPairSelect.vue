@@ -7,9 +7,13 @@ import {
   ListboxOptions,
 } from '@headlessui/vue'
 
-import swapPairs from '@/data/swap-pairs'
+import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { prettySymbol } from '@/lib/formatters'
+import { useNetworkStore } from '@/stores/network'
+
+const network = useNetworkStore().network
+const usingSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
 
 const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
 </script>
@@ -57,7 +61,7 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="pair in swapPairs"
+          v-for="pair in usingSwapPairs"
           :key="pair.id"
           :value="pair.id"
         >

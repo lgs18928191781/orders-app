@@ -77,3 +77,7 @@ export const prettySymbol = (symbol: string) => {
 
   return '$' + symbol.toUpperCase()
 }
+
+export const prettyInscriptionId = (id: string) => {
+  return `#${id.slice(0, 8)}`
+}

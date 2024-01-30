@@ -524,7 +524,10 @@ export const getOneBrc20 = async ({
   tick: string
   address: string
 }) => {
-  let brc20: Brc20 = await ordersApiFetch(`address/${address}/${tick}`)
+  const network = useNetworkStore().network
+  let brc20: Brc20 = await ordersApiFetch(
+    `address/${address}/${tick}?net=${network}`
+  )
 
   // map inscriptionId into : notation
   if (brc20) {
@@ -563,11 +566,12 @@ export type Brx20Brief = {
 export const getBrc20s = async ({
   address,
   tick,
+  network,
 }: {
   address: string
   tick?: string
+  network: 'livenet' | 'testnet'
 }) => {
-  const network = 'livenet'
   let path = `address/${address}/balance/info?net=${network}`
   if (tick) path += `&tick=${tick}`
 
