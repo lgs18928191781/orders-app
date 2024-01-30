@@ -72,6 +72,7 @@ declare module '@vue/runtime-core' {
     StandbyClaimRecords: typeof import('./src/components/pool/StandbyClaimRecords.vue')['default']
     StandbyExplainModal: typeof import('./src/components/pool/StandbyExplainModal.vue')['default']
     SwapBlur: typeof import('./src/components/swap/SwapBlur.vue')['default']
+    SwapDataArea: typeof import('./src/components/swap/SwapDataArea.vue')['default']
     SwapExpandControl: typeof import('./src/components/swap/SwapExpandControl.vue')['default']
     SwapPairSelect: typeof import('./src/components/swap/pools/SwapPairSelect.vue')['default']
     SwapPoolPairSelect: typeof import('./src/components/swap/pools/SwapPoolPairSelect.vue')['default']

@@ -2,7 +2,7 @@
 import { ChevronsLeftIcon } from 'lucide-vue-next'
 
 import { useExpandSwap } from '@/hooks/use-expand-swap'
-const { toggleExpand } = useExpandSwap()
+const { isExpand, toggleExpand } = useExpandSwap()
 </script>
 
 <template>
@@ -11,7 +11,10 @@ const { toggleExpand } = useExpandSwap()
     @click="toggleExpand"
   >
     <ChevronsLeftIcon
-      class="h-5 w-5 text-zinc-700 mt-16 group-hover:-translate-x-1 group-hover:text-primary/80"
+      class="h-5 w-5 text-zinc-700 mt-16 group-hover:-translate-x-1 group-hover:text-primary/80 transition-all duration-300"
+      :class="{
+        'rotate-180': isExpand,
+      }"
     />
   </button>
 </template>

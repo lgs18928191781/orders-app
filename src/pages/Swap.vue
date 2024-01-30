@@ -19,6 +19,7 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
 import { useExpandSwap } from '@/hooks/use-expand-swap'
+import SwapDataArea from '@/components/swap/SwapDataArea.vue'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -387,7 +388,7 @@ watch(
   <WalletMissingModal />
 
   <div class="grow flex items-center justify-center gap-16">
-    <div class="border border-red-300" v-show="isExpand">Pool Data</div>
+    <SwapDataArea v-show="isExpand" />
     <div
       class="relative max-w-md rounded-3xl lg:scale-125 xl:scale-150 w-96 z-10"
       :class="[isExpand ? 'origin-left' : 'origin-center']"
