@@ -3,20 +3,19 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import gsap from 'gsap'
-import { CheckCircleIcon, Loader2Icon } from 'lucide-vue-next'
+import { CheckCircleIcon, Loader2Icon, PackagePlusIcon } from 'lucide-vue-next'
 
 import {
-  Brc20Transferable,
+  type Brc20Transferable,
   getBrcFiatRate,
   getFiatRate,
-  getOneBrc20,
 } from '@/queries/orders-api'
 import { calcFiatPrice } from '@/lib/helpers'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { prettyInscriptionId, prettySymbol } from '@/lib/formatters'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { PackagePlusIcon } from 'lucide-vue-next'
+import { getOneBrc20Query } from '@/queries/orders-api.query'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -87,22 +86,16 @@ const fiatPrice = computed(() => {
   return calcFiatPrice(amount.value, rate)
 })
 
-const { data: myOneBrc20, isLoading } = useQuery({
-  queryKey: [
-    'myOneBrc20',
+const { data: myOneBrc20, isLoading } = useQuery(
+  getOneBrc20Query(
     {
       address: connectionStore.getAddress,
       network: networkStore.network,
       tick: token2Symbol,
     },
-  ],
-  queryFn: () =>
-    getOneBrc20({
-      address: connectionStore.getAddress,
-      tick: token2Symbol.value,
-    }),
-  enabled: computed(() => connectionStore.connected),
-})
+    computed(() => connectionStore.connected)
+  )
+)
 
 // amount
 const amount = defineModel('amount', { type: String })

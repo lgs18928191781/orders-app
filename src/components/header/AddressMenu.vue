@@ -110,7 +110,7 @@ async function switchNetwork() {
       leave-to-class="transform opacity-0 scale-95"
     >
       <MenuItems
-        class="absolute right-0 z-10 mt-4 flex w-screen max-w-min origin-top-right"
+        class="absolute right-0 z-50 mt-4 flex w-screen max-w-min origin-top-right"
       >
         <div
           class="w-56 shrink rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg ring-1 ring-zinc-900/5 overflow-hidden divide-y divide-zinc-700 shadow-primary/20"

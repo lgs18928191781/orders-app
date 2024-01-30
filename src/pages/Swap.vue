@@ -401,15 +401,9 @@ async function doSwap() {
     openConnectionModal()
     return
   }
-
-  if (!hasEnough.value) {
-    return
-  }
-
-  if (!hasAmount.value) {
-    return
-  }
-
+  if (!hasEnough.value) return
+  if (!hasAmount.value) return
+  if (!sourceAmount.value) return
   if (unmet.value) {
     if (unmet.value.handler) {
       unmet.value.handler()
@@ -418,10 +412,10 @@ async function doSwap() {
   }
 
   // go for it!
-  await mutateSwap({
+  mutateSwap({
     token1: token1Symbol.value.toLowerCase(),
     token2: token2Symbol.value.toLowerCase(),
-    swapType: swapType.value,
+    type: swapType.value,
     sourceAmount: sourceAmount.value,
   })
 }
