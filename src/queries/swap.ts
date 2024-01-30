@@ -38,3 +38,39 @@ export const previewSwap = async ({
   console.log({ preview: res })
   return res
 }
+
+export const postSwap = async ({
+  token1,
+  token2,
+  type,
+  sourceAmount,
+}: {
+  token1: string
+  token2: string
+  type: SwapType
+  sourceAmount: string
+}): Promise<{
+  gas: string
+  ratio: string
+  poolRatio: string
+  serviceFee: string
+  sourceAmount: string
+  targetAmount: string
+}> => {
+  const address = useConnectionStore().getAddress
+
+  const body = {
+    address,
+    token1,
+    token2,
+    type,
+    sourceAmount,
+  }
+
+  const res = await swapApiFetch('tasks', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  console.log({ res })
+  return res
+}

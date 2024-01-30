@@ -5,7 +5,7 @@ import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 import sign from '@/lib/sign'
 import fetchWrapper, { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
-import { raise } from '@/lib/helpers'
+import { raise, sleep } from '@/lib/helpers'
 
 export const login = async () => {
   const { publicKey, signature } = await sign()
@@ -551,6 +551,14 @@ export const getOneBrc20 = async ({
         amount,
       }
     })
+
+    // copy 10 times
+    // const copied = [...brc20.transferBalanceList]
+    // for (let i = 0; i < 10; i++) {
+    //   copied.push(...brc20.transferBalanceList)
+    // }
+
+    // brc20.transferBalanceList = copied
   }
 
   return brc20 || {}

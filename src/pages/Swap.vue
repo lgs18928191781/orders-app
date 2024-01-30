@@ -6,7 +6,8 @@ import Decimal from 'decimal.js'
 import { useConnectionStore } from '@/stores/connection'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { SwapType, previewSwap } from '@/queries/swap'
+import { useExpandSwap } from '@/hooks/use-expand-swap'
+import { SwapType, postSwap, previewSwap } from '@/queries/swap'
 import { ERRORS } from '@/data/errors'
 
 import SwapBlur from '@/components/swap/SwapBlur.vue'
@@ -18,8 +19,9 @@ import SwapPriceDisclosure from '@/components/swap/SwapPriceDisclosure.vue'
 import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
-import { useExpandSwap } from '@/hooks/use-expand-swap'
 import SwapDataArea from '@/components/swap/SwapDataArea.vue'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { ElMessage } from 'element-plus'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -381,17 +383,59 @@ watch(
   },
   { immediate: true }
 )
+
+const queryClient = useQueryClient()
+const { mutate: mutateSwap } = useMutation({
+  mutationFn: postSwap,
+  onSuccess: () => {
+    ElMessage.success('Swap success')
+    queryClient.invalidateQueries()
+  },
+  onError: (err: any) => {
+    ElMessage.error(err.message)
+  },
+})
+async function doSwap() {
+  // all kinds of checks
+  if (!connectionStore.connected) {
+    openConnectionModal()
+    return
+  }
+
+  if (!hasEnough.value) {
+    return
+  }
+
+  if (!hasAmount.value) {
+    return
+  }
+
+  if (unmet.value) {
+    if (unmet.value.handler) {
+      unmet.value.handler()
+    }
+    return
+  }
+
+  // go for it!
+  await mutateSwap({
+    token1: token1Symbol.value.toLowerCase(),
+    token2: token2Symbol.value.toLowerCase(),
+    swapType: swapType.value,
+    sourceAmount: sourceAmount.value,
+  })
+}
 </script>
 
 <template>
   <ConnectionModal />
   <WalletMissingModal />
 
-  <div class="grow flex items-center justify-center gap-16">
+  <div class="grow flex items-start justify-center gap-16 pt-16">
     <SwapDataArea v-show="isExpand" />
     <div
-      class="relative max-w-md rounded-3xl lg:scale-125 xl:scale-150 w-96 z-10"
-      :class="[isExpand ? 'origin-left' : 'origin-center']"
+      class="relative max-w-md rounded-3xl lg:scale-125 w-96 z-10"
+      :class="[isExpand ? 'origin-top-left' : 'origin-top']"
     >
       <div
         class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
@@ -532,7 +576,7 @@ watch(
         </button>
 
         <!-- confirm button -->
-        <button class="main-btn" v-else>Swap</button>
+        <button class="main-btn" v-else @click="doSwap">Swap</button>
       </div>
 
       <!-- background blur -->

@@ -16,7 +16,7 @@ const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
 const { selectedPair } = useSwapPoolPair()
 
-const props = defineProps({
+defineProps({
   side: {
     type: String,
     required: true,
@@ -50,20 +50,6 @@ const normalizedAmount = computed(() => {
   const dividedBy = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
   return new Decimal(amount.value).dividedBy(dividedBy).toDP().toFixed()
 })
-const updateAmount = (updatingAmount: number) => {
-  if (typeof updatingAmount === 'string') {
-    updatingAmount = Number(updatingAmount)
-  }
-  if (isNaN(updatingAmount)) {
-    updatingAmount = 0
-  }
-
-  const times = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
-  amount.value = new Decimal(updatingAmount).times(times).toFixed()
-
-  // this side is now the source
-  emit('becameSource')
-}
 
 const amountTextSize = computed(() => {
   if (!amount.value) {
@@ -93,14 +79,7 @@ const amountTextSize = computed(() => {
   return 'text-4xl'
 })
 
-const emit = defineEmits([
-  'hasEnough',
-  'notEnough',
-  'amountEntered',
-  'amountCleared',
-  'update:symbol',
-  'becameSource',
-])
+const emit = defineEmits(['update:symbol'])
 
 // fiat price
 const { data: btcFiatRate } = useQuery({
@@ -190,70 +169,6 @@ const balanceDisplay = computed(() => {
 
   return `${balance.value} ${symbol.value.toUpperCase()}`
 })
-
-// use total balance
-const useTotalBalance = () => {
-  if (symbol.value !== 'btc') {
-    // find symbol's balance
-    const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
-    )
-
-    if (!brc20) {
-      amount.value = '0'
-      return
-    }
-
-    amount.value = String(brc20.balance)
-    return
-  }
-
-  if (!btcBalance.value) {
-    amount.value = '0'
-    return
-  }
-
-  amount.value = String(btcBalance.value)
-
-  // this side is now the source
-  emit('becameSource')
-}
-
-const hasEnough = computed(() => {
-  if (!amount.value) {
-    return true
-  }
-
-  if (props.side === 'receive') {
-    return true
-  }
-
-  return new Decimal(amount.value).lte(new Decimal(balance.value))
-})
-
-// watch for change of hasEnough; emit event
-watch(
-  () => hasEnough.value,
-  (hasEnough) => {
-    if (hasEnough) {
-      emit('hasEnough')
-    } else {
-      emit('notEnough')
-    }
-  }
-)
-
-// watch for change of amount; emit event
-watch(
-  () => amount.value,
-  (amount) => {
-    if (amount) {
-      emit('amountEntered')
-    } else {
-      emit('amountCleared')
-    }
-  }
-)
 </script>
 
 <template>
@@ -301,26 +216,9 @@ watch(
       <div class="w-1" v-else></div>
 
       <!-- balance -->
-      <div
-        class="text-sm text-zinc-400 cursor-pointer"
-        v-show="!!symbol"
-        @click="useTotalBalance"
-      >
+      <div class="text-sm text-zinc-400" v-show="!!symbol">
         Balance: {{ balanceDisplay }}
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  /* display: none; <- Crashes Chrome on hover */
-  -webkit-appearance: none;
-  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
-}
-
-input[type='number'] {
-  -moz-appearance: textfield; /* Firefox */
-}
-</style>

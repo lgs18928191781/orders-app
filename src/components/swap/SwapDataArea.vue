@@ -3,5 +3,3 @@
 <template>
   <div class="text-zinc-500">Pool Data</div>
 </template>
-
-<style scoped></style>

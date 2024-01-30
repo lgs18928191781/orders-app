@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import gsap from 'gsap'
-import { CheckCircleIcon } from 'lucide-vue-next'
+import { CheckCircleIcon, Loader2Icon } from 'lucide-vue-next'
 
 import {
   Brc20Transferable,
@@ -87,7 +87,7 @@ const fiatPrice = computed(() => {
   return calcFiatPrice(amount.value, rate)
 })
 
-const { data: myOneBrc20 } = useQuery({
+const { data: myOneBrc20, isLoading } = useQuery({
   queryKey: [
     'myOneBrc20',
     {
@@ -176,7 +176,11 @@ async function goInscribe() {
     </div>
 
     <!-- main control -->
-    <div v-if="myOneBrc20?.transferBalanceList.length === 0" class="my-4">
+    <div v-if="isLoading" class="flex justify-center py-8">
+      <Loader2Icon class="animate-spin w-6 h-6 text-zinc-500" />
+    </div>
+
+    <div v-else-if="myOneBrc20?.transferBalanceList.length === 0" class="my-4">
       <div class="text-xs text-zinc-400 mb-2">
         No transferable {{ prettySymbol(symbol) }}.
       </div>
@@ -192,7 +196,10 @@ async function goInscribe() {
       </button>
     </div>
 
-    <div class="grid items-center grid-cols-3 gap-2 my-4" v-else>
+    <div
+      class="grid items-center grid-cols-3 gap-2 mb-4 max-h-[20vh] overflow-auto nicer-scrollbar pr-2 -mr-2 pt-2 mt-2"
+      v-else
+    >
       <button
         class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center"
         :class="[
@@ -212,7 +219,7 @@ async function goInscribe() {
         </div>
 
         <CheckCircleIcon
-          class="absolute right-0 top-0 w-5 h-5 text-primary translate-x-[33%] translate-y-[-33%] bg-black/80 rounded-full p-0.5 rotate-12"
+          class="absolute right-0 top-0 w-5 h-5 text-primary/80 translate-x-[33%] translate-y-[-33%] bg-black/80 rounded-full p-0.5 rotate-12"
           v-if="isSelected(transferable)"
         ></CheckCircleIcon>
       </button>
