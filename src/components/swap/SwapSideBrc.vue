@@ -176,15 +176,16 @@ async function goInscribe() {
     </div>
 
     <!-- main control -->
-    <div v-if="myOneBrc20?.transferBalanceList.length === 0">
-      <div class="text-sm text-zinc-400 my-4">
-        No transferable {{ prettySymbol(symbol) }}
+    <div v-if="myOneBrc20?.transferBalanceList.length === 0" class="my-4">
+      <div class="text-xs text-zinc-400 mb-2">
+        No transferable {{ prettySymbol(symbol) }}.
       </div>
 
       <!-- inscribe button -->
       <button
         @click="goInscribe"
         class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center border-zinc-700 text-xs text-zinc-300 hover:bg-primary/5 hover:text-primary"
+        v-if="myOneBrc20 && new Decimal(myOneBrc20.availableBalance || 0).gt(0)"
       >
         <PackagePlusIcon class="w-4 h-4" />
         <span>Inscribe</span>
@@ -220,6 +221,7 @@ async function goInscribe() {
       <button
         @click="goInscribe"
         class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center border-zinc-700 text-xs text-zinc-300 hover:bg-primary/5 hover:text-primary"
+        v-if="myOneBrc20 && new Decimal(myOneBrc20.availableBalance || 0).gt(0)"
       >
         <PackagePlusIcon class="w-4 h-4" />
         <span>Inscribe</span>
