@@ -3,7 +3,12 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import gsap from 'gsap'
-import { CheckCircleIcon, Loader2Icon, PackagePlusIcon } from 'lucide-vue-next'
+import {
+  CheckCircleIcon,
+  Loader2Icon,
+  PackagePlusIcon,
+  CircleIcon,
+} from 'lucide-vue-next'
 
 import {
   type Brc20Transferable,
@@ -194,7 +199,7 @@ async function goInscribe() {
       v-else
     >
       <button
-        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center"
+        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center group"
         :class="[
           isSelected(transferable)
             ? 'bg-black border-primary/60 text-primary'
@@ -215,6 +220,11 @@ async function goInscribe() {
           class="absolute right-0 top-0 w-5 h-5 text-primary/80 translate-x-[33%] translate-y-[-33%] bg-black/80 rounded-full p-0.5 rotate-12"
           v-if="isSelected(transferable)"
         ></CheckCircleIcon>
+
+        <CircleIcon
+          class="absolute right-0 top-0 w-5 h-5 text-zinc-700 translate-x-[33%] translate-y-[-33%] bg-zinc-800 rounded-full p-0.5 rotate-12 group-hover:text-primary/60"
+          v-else
+        ></CircleIcon>
       </button>
 
       <!-- inscribe button -->
