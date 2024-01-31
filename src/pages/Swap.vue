@@ -9,7 +9,13 @@ import { useConnectionStore } from '@/stores/connection'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useExpandSwap } from '@/hooks/use-expand-swap'
-import { SwapType, build2xSwap, postSwap, previewSwap } from '@/queries/swap'
+import {
+  SwapType,
+  build2xSwap,
+  postSwap,
+  previewSwap,
+  build1xSwap,
+} from '@/queries/swap'
 import { ERRORS } from '@/data/errors'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
@@ -23,7 +29,6 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
 import SwapDataArea from '@/components/swap/SwapDataArea.vue'
-import { sleep } from '@/lib/helpers'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -233,8 +238,10 @@ const flipAsset = () => {
   // clear amounts
   token1Amount.value = undefined
   token2Amount.value = undefined
+
+  // clear token2InscriptionIds
+  token2InscriptionIds.value = []
 }
-flipAsset()
 
 // unmet conditions for swap
 // if any of these conditions are not met, the swap button is disabled
@@ -398,8 +405,16 @@ const { mutate: mutatePostSwap } = useMutation({
   onError: (err: any) => ElMessage.error(err.message),
   onSettled: () => closeBuilding(),
 })
+const buildSwapFn = computed(() => {
+  switch (swapType.value) {
+    case '1x':
+      return build1xSwap
+    case '2x':
+      return build2xSwap
+  }
+})
 const { mutate: mutateBuildSwap } = useMutation({
-  mutationFn: build2xSwap,
+  mutationFn: buildSwapFn.value,
   onSuccess: async ({ rawPsbt, buildId }) => {
     const signed = await connectionStore.adapter.signPsbt(rawPsbt)
     console.log({ signed })
@@ -411,7 +426,10 @@ const { mutate: mutateBuildSwap } = useMutation({
       buildId,
     })
   },
-  onError: (err: any) => ElMessage.error(err.message),
+  onError: (err: any) => {
+    closeBuilding()
+    ElMessage.error(err.message)
+  },
 })
 async function doSwap() {
   openBuilding()
@@ -434,7 +452,6 @@ async function doSwap() {
   mutateBuildSwap({
     token1: token1Symbol.value.toLowerCase(),
     token2: token2Symbol.value.toLowerCase(),
-    type: swapType.value,
     sourceAmount: sourceAmount.value,
     inscriptionIds: token2InscriptionIds.value,
   })
