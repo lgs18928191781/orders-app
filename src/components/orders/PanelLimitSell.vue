@@ -390,7 +390,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
         @click="buildOrder"
         :disabled="!canPlaceOrder"
       >
-        {{ cannotPlaceOrderReason || 'Place Limit Buy Order' }}
+        {{ cannotPlaceOrderReason || 'Place Limit Sell Order' }}
       </button>
     </div>
   </TabPanel>
