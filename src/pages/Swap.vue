@@ -2,6 +2,8 @@
 import { ref, watch, type Ref, computed } from 'vue'
 import { ArrowDownIcon, ArrowUpDownIcon, Loader2Icon } from 'lucide-vue-next'
 import Decimal from 'decimal.js'
+import { ElMessage } from 'element-plus'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
@@ -9,6 +11,7 @@ import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useExpandSwap } from '@/hooks/use-expand-swap'
 import { SwapType, postSwap, previewSwap } from '@/queries/swap'
 import { ERRORS } from '@/data/errors'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
@@ -20,12 +23,12 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
 import SwapDataArea from '@/components/swap/SwapDataArea.vue'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { ElMessage } from 'element-plus'
+import { sleep } from '@/lib/helpers'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
 const { isExpand } = useExpandSwap()
+const { openBuilding, closeBuilding } = useBuildingOverlay()
 
 // symbol & amount
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
@@ -391,11 +394,11 @@ const { mutate: mutateSwap } = useMutation({
     ElMessage.success('Swap success')
     queryClient.invalidateQueries()
   },
-  onError: (err: any) => {
-    ElMessage.error(err.message)
-  },
+  onError: (err: any) => ElMessage.error(err.message),
+  onSettled: () => closeBuilding(),
 })
 async function doSwap() {
+  openBuilding()
   // all kinds of checks
   if (!connectionStore.connected) {
     openConnectionModal()
@@ -412,12 +415,13 @@ async function doSwap() {
   }
 
   // go for it!
-  mutateSwap({
+  const mutateRes = mutateSwap({
     token1: token1Symbol.value.toLowerCase(),
     token2: token2Symbol.value.toLowerCase(),
     type: swapType.value,
     sourceAmount: sourceAmount.value,
   })
+  console.log({ mutateRes })
 }
 </script>
 
