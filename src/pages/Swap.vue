@@ -9,7 +9,7 @@ import { useConnectionStore } from '@/stores/connection'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useExpandSwap } from '@/hooks/use-expand-swap'
-import { SwapType, postSwap, previewSwap } from '@/queries/swap'
+import { SwapType, build2xSwap, postSwap, previewSwap } from '@/queries/swap'
 import { ERRORS } from '@/data/errors'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
@@ -34,6 +34,7 @@ const { openBuilding, closeBuilding } = useBuildingOverlay()
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const token1Amount = ref<string>()
 const token2Amount = ref<string>()
+const token2InscriptionIds = ref<string[]>([])
 
 const ratio = ref<Decimal>(new Decimal(0))
 const poolRatio = ref<Decimal>(new Decimal(0))
@@ -148,7 +149,6 @@ watch(
     const sourceChanging = swapType.value.includes('1')
       ? newToken1Amount !== oldToken1Amount
       : newToken2Amount !== oldToken2Amount
-    console.log({ swapType: swapType.value })
     if (!sourceChanging) return
 
     if (!sourceAmount.value) return
@@ -387,15 +387,31 @@ watch(
   { immediate: true }
 )
 
+// mutations
 const queryClient = useQueryClient()
-const { mutate: mutateSwap } = useMutation({
+const { mutate: mutatePostSwap } = useMutation({
   mutationFn: postSwap,
-  onSuccess: () => {
+  onSuccess: async () => {
     ElMessage.success('Swap success')
     queryClient.invalidateQueries()
   },
   onError: (err: any) => ElMessage.error(err.message),
   onSettled: () => closeBuilding(),
+})
+const { mutate: mutateBuildSwap } = useMutation({
+  mutationFn: build2xSwap,
+  onSuccess: async ({ rawPsbt, buildId }) => {
+    const signed = await connectionStore.adapter.signPsbt(rawPsbt)
+    console.log({ signed })
+    if (!signed) return
+    if (!sourceAmount.value) return
+
+    mutatePostSwap({
+      rawPsbt: signed,
+      buildId,
+    })
+  },
+  onError: (err: any) => ElMessage.error(err.message),
 })
 async function doSwap() {
   openBuilding()
@@ -415,13 +431,13 @@ async function doSwap() {
   }
 
   // go for it!
-  const mutateRes = mutateSwap({
+  mutateBuildSwap({
     token1: token1Symbol.value.toLowerCase(),
     token2: token2Symbol.value.toLowerCase(),
     type: swapType.value,
     sourceAmount: sourceAmount.value,
+    inscriptionIds: token2InscriptionIds.value,
   })
-  console.log({ mutateRes })
 }
 </script>
 
@@ -464,6 +480,7 @@ async function doSwap() {
             v-if="flipped"
             v-model:symbol="token2Symbol"
             v-model:amount="token2Amount"
+            v-model:inscription-ids="token2InscriptionIds"
             :calculating="calculatingPay"
             @has-enough="hasEnough = true"
             @not-enough="hasEnough = false"

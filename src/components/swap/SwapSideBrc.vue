@@ -38,6 +38,10 @@ const props = defineProps({
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
+const inscriptionIds = defineModel('inscriptionIds', {
+  required: true,
+  type: Array as () => string[],
+})
 const icon = computed(() => {
   if (!selectedPair.value) {
     return null
@@ -119,12 +123,13 @@ function isSelected(transferable: Brc20Transferable) {
 watch(
   selecteds,
   (newSelecteds) => {
-    // update amount when selecteds changed
+    // update amount and inscriptionIds when selecteds changed
     amount.value = newSelecteds
       .reduce((prev, curr) => {
         return prev.add(new Decimal(curr.amount))
       }, new Decimal(0))
       .toFixed(0)
+    inscriptionIds.value = newSelecteds.map((t) => t.inscriptionId)
 
     // if has selecteds, emit hasAmount; else emit amountCleared
     if (newSelecteds.length > 0) {

@@ -310,7 +310,7 @@ watch(
 
       <!-- balance -->
       <div
-        class="text-sm text-zinc-400 cursor-pointer"
+        class="text-xs text-zinc-400 cursor-pointer"
         v-show="!!symbol"
         @click="useTotalBalance"
       >

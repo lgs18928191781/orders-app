@@ -216,7 +216,7 @@ const balanceDisplay = computed(() => {
       <div class="w-1" v-else></div>
 
       <!-- balance -->
-      <div class="text-sm text-zinc-400" v-show="!!symbol">
+      <div class="text-xs text-zinc-400" v-show="!!symbol">
         Balance: {{ balanceDisplay }}
       </div>
     </div>

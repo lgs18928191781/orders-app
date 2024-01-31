@@ -35,20 +35,51 @@ export const previewSwap = async ({
     method: 'POST',
     body: JSON.stringify(body),
   })
-  console.log({ preview: res })
   return res
 }
 
-export const postSwap = async ({
+export const build2xSwap = async ({
   token1,
   token2,
   type,
   sourceAmount,
+  inscriptionIds,
 }: {
   token1: string
   token2: string
   type: SwapType
   sourceAmount: string
+  inscriptionIds: string[]
+}): Promise<{
+  rawPsbt: string
+  buildId: string
+}> => {
+  const address = useConnectionStore().getAddress
+  const pubkey = useConnectionStore().getPubKey
+
+  const body = {
+    address,
+    pubkey,
+    token1,
+    token2,
+    type,
+    sourceAmount,
+    inscriptionIds,
+  }
+
+  const res = await swapApiFetch('build/2x', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return res
+}
+
+export const postSwap = async ({
+  buildId,
+  rawPsbt,
+}: {
+  buildId: string
+  rawPsbt: string
 }): Promise<{
   gas: string
   ratio: string
@@ -57,15 +88,7 @@ export const postSwap = async ({
   sourceAmount: string
   targetAmount: string
 }> => {
-  const address = useConnectionStore().getAddress
-
-  const body = {
-    address,
-    token1,
-    token2,
-    type,
-    sourceAmount,
-  }
+  const body = { buildId, rawPsbt }
 
   const res = await swapApiFetch('tasks', {
     method: 'POST',

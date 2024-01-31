@@ -7,7 +7,7 @@ const { isExpand, toggleExpand } = useExpandSwap()
 
 <template>
   <button
-    class="absolute top-0 left-0 flex justify-center mb-2 -translate-x-[60%] px-2 h-full -z-10 pr-8 rounded-l-3xl transition-all group hover:bg-gradient-to-r from-primary/[0.02] to-primary/[0.2]"
+    class="absolute top-0 left-0 flex justify-center mb-2 -translate-x-[60%] px-2 h-full -z-10 pr-8 rounded-l-3xl transition-all group hover:bg-gradient-to-r from-primary/[0.01] to-primary/[0.2]"
     @click="toggleExpand"
   >
     <ChevronsLeftIcon
