@@ -213,7 +213,8 @@ const useTotalBalance = () => {
     return
   }
 
-  amount.value = String(btcBalance.value)
+  // TODO: Use 95% of balance temporarily
+  amount.value = new Decimal(btcBalance.value).times(0.95).toFixed(0)
 
   // this side is now the source
   emit('becameSource')

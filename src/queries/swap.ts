@@ -49,6 +49,7 @@ export const build1xSwap = async ({
 }): Promise<{
   rawPsbt: string
   buildId: string
+  type: '1x'
 }> => {
   const address = useConnectionStore().getAddress
   const pubkey = useConnectionStore().getPubKey
@@ -81,6 +82,7 @@ export const build2xSwap = async ({
 }): Promise<{
   rawPsbt: string
   buildId: string
+  type: '2x'
 }> => {
   const address = useConnectionStore().getAddress
   const pubkey = useConnectionStore().getPubKey

@@ -29,11 +29,18 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
 import SwapDataArea from '@/components/swap/SwapDataArea.vue'
+import { useBtcJsStore } from '@/stores/btcjs'
+import { exclusiveChange } from '@/lib/build-helpers'
+import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import { useNetworkStore } from '@/stores/network'
+import { raiseIf, raiseUnless } from '@/lib/helpers'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
 const { isExpand } = useExpandSwap()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
+const btcjsStore = useBtcJsStore()
+const networkStore = useNetworkStore()
 
 // symbol & amount
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
@@ -402,7 +409,10 @@ const { mutate: mutatePostSwap } = useMutation({
     ElMessage.success('Swap success')
     queryClient.invalidateQueries()
   },
-  onError: (err: any) => ElMessage.error(err.message),
+  onError: (err: any) => {
+    ElMessage.error(err.message)
+    if (IS_DEV) throw err
+  },
   onSettled: () => closeBuilding(),
 })
 const buildSwapFn = computed(() => {
@@ -413,22 +423,59 @@ const buildSwapFn = computed(() => {
       return build2xSwap
   }
 })
+const afterBuildSwap = async ({
+  rawPsbt,
+  buildId,
+  type,
+}: {
+  rawPsbt: string
+  buildId: string
+  type: SwapType
+}) => {
+  switch (type) {
+    case '1x':
+      // continue building and add change to the psbt
+      const btcjs = btcjsStore.get!
+      const psbt1x = btcjs.Psbt.fromHex(rawPsbt, {
+        network: networkStore.typedNetwork,
+      })
+      const { psbt, feeb } = await exclusiveChange({
+        psbt: psbt1x,
+        maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+        sighashType: SIGHASH_ALL,
+      })
+      if (!psbt) throw new Error('Failed to add change')
+
+      console.log({ psbt, feeb })
+      const signed1x = await connectionStore.adapter.signPsbt(psbt.toHex())
+      if (!signed1x) return
+      if (!sourceAmount.value) return
+
+      mutatePostSwap({
+        rawPsbt: signed1x,
+        buildId,
+      })
+      break
+
+    case '2x':
+      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt)
+      if (!signed2x) return
+      if (!sourceAmount.value) return
+
+      mutatePostSwap({
+        rawPsbt: signed2x,
+        buildId,
+      })
+      break
+  }
+}
 const { mutate: mutateBuildSwap } = useMutation({
   mutationFn: buildSwapFn.value,
-  onSuccess: async ({ rawPsbt, buildId }) => {
-    const signed = await connectionStore.adapter.signPsbt(rawPsbt)
-    console.log({ signed })
-    if (!signed) return
-    if (!sourceAmount.value) return
-
-    mutatePostSwap({
-      rawPsbt: signed,
-      buildId,
-    })
-  },
+  onSuccess: afterBuildSwap,
   onError: (err: any) => {
     closeBuilding()
     ElMessage.error(err.message)
+    if (IS_DEV) throw err
   },
 })
 async function doSwap() {
