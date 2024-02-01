@@ -11,6 +11,8 @@ import { useNetworkStore } from '@/stores/network'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
 import { getBrc20s } from '@/queries/orders-api'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { XIcon } from 'lucide-vue-next'
+import { EraserIcon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -284,6 +286,10 @@ watch(
         @input="(event: any) => updateAmount(event.target.value)"
       />
 
+      <button v-if="side === 'pay' && amount" @click="updateAmount(0)">
+        <EraserIcon class="w-4 h-4 text-zinc-700 hover:text-zinc-300" />
+      </button>
+
       <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />
 
       <div
@@ -310,11 +316,16 @@ watch(
       <div class="w-1" v-else></div>
 
       <!-- balance -->
-      <div
-        class="text-xs text-zinc-400 cursor-pointer"
+      <button
+        class="text-xs text-zinc-400 hover:underline hover:text-primary"
+        v-if="side === 'pay'"
         v-show="!!symbol"
         @click="useTotalBalance"
       >
+        Balance: {{ balanceDisplay }}
+      </button>
+
+      <div class="text-xs text-zinc-400" v-else v-show="!!symbol">
         Balance: {{ balanceDisplay }}
       </div>
     </div>

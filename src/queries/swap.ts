@@ -69,6 +69,37 @@ export const build1xSwap = async ({
   return res
 }
 
+export const buildX2Swap = async ({
+  token1,
+  token2,
+  sourceAmount,
+}: {
+  token1: string
+  token2: string
+  sourceAmount: string
+}): Promise<{
+  rawPsbt: string
+  buildId: string
+  type: 'x2'
+}> => {
+  const address = useConnectionStore().getAddress
+  const pubkey = useConnectionStore().getPubKey
+
+  const body = {
+    address,
+    pubkey,
+    token1,
+    token2,
+    sourceAmount,
+  }
+
+  const res = await swapApiFetch('build/x2', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return res
+}
+
 export const build2xSwap = async ({
   token1,
   token2,

@@ -15,6 +15,7 @@ import {
   postSwap,
   previewSwap,
   build1xSwap,
+  buildX2Swap,
 } from '@/queries/swap'
 import { ERRORS } from '@/data/errors'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
@@ -421,6 +422,8 @@ const buildSwapFn = computed(() => {
       return build1xSwap
     case '2x':
       return build2xSwap
+    case 'x2':
+      return buildX2Swap
   }
 })
 const afterBuildSwap = async ({
@@ -432,27 +435,48 @@ const afterBuildSwap = async ({
   buildId: string
   type: SwapType
 }) => {
+  const btcjs = btcjsStore.get!
   switch (type) {
     case '1x':
       // continue building and add change to the psbt
-      const btcjs = btcjsStore.get!
       const psbt1x = btcjs.Psbt.fromHex(rawPsbt, {
         network: networkStore.typedNetwork,
       })
-      const { psbt, feeb } = await exclusiveChange({
+      const { psbt: psbt1xFinished } = await exclusiveChange({
         psbt: psbt1x,
         maxUtxosCount: USE_UTXO_COUNT_LIMIT,
         sighashType: SIGHASH_ALL,
       })
-      if (!psbt) throw new Error('Failed to add change')
+      if (!psbt1xFinished) throw new Error('Failed to add change')
 
-      console.log({ psbt, feeb })
-      const signed1x = await connectionStore.adapter.signPsbt(psbt.toHex())
+      const signed1x = await connectionStore.adapter.signPsbt(psbt1xFinished.toHex())
       if (!signed1x) return
       if (!sourceAmount.value) return
 
       mutatePostSwap({
         rawPsbt: signed1x,
+        buildId,
+      })
+      break
+
+    case 'x2':
+      // continue building and add change to the psbt
+      const psbtX2 = btcjs.Psbt.fromHex(rawPsbt, {
+        network: networkStore.typedNetwork,
+      })
+      const { psbt: psbtX2Finished  } = await exclusiveChange({
+        psbt: psbtX2,
+        maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+        sighashType: SIGHASH_ALL,
+      })
+      if (!psbtX2Finished) throw new Error('Failed to add change')
+
+      const signedX2 = await connectionStore.adapter.signPsbt(psbtX2Finished.toHex())
+      if (!signedX2) return
+      if (!sourceAmount.value) return
+
+      mutatePostSwap({
+        rawPsbt: signedX2,
         buildId,
       })
       break
@@ -470,7 +494,7 @@ const afterBuildSwap = async ({
   }
 }
 const { mutate: mutateBuildSwap } = useMutation({
-  mutationFn: buildSwapFn.value,
+  mutationFn: buildSwapFn,
   onSuccess: afterBuildSwap,
   onError: (err: any) => {
     closeBuilding()
