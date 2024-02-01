@@ -36,7 +36,7 @@ function isLinkActive(keyword: string) {
         </router-link>
 
         <router-link
-          to="/swap-pools/btc-rdex/add"
+          to="/swap-pools"
           class="flex items-center space-x-1 text-zinc-200"
         >
           Pools

@@ -1,32 +1,63 @@
 <script lang="ts" setup>
 import { ref, watch, type Ref, computed } from 'vue'
 import { PlusIcon } from 'lucide-vue-next'
+import Decimal from 'decimal.js'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import SwapAlgo from '@/lib/swapAlgo'
-import Decimal from 'decimal.js'
-import AddLiquiditySide from '@/components/swap/pools/AddLiquiditySide.vue'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
-import { formatSat, formatTok } from '@/lib/utils'
 
-enum AddOp {
-  token1ToToken2 = 1,
-  token2ToToken1 = 2,
-}
+import { previewAdd } from '@/queries/swap'
 
-const swapCalc = new SwapAlgo(
-  new Decimal(176259823276).toNumber(),
-  new Decimal(1996988856407348).toNumber(),
-  new Decimal(128338790502).toNumber()
-)
+import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
+import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
+import AddPricesAndShares from '@/components/swap/pools/AddPricesAndShares.vue'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
 
 // amount
-const fromAmount = ref()
-const toAmount = ref()
+const token1Amount = ref<string>()
+const token2Amount = ref<string>()
+const calculatingToken1 = ref(false)
+const token2InscriptionIds = ref<string[]>([])
+const ratio = ref(new Decimal(0))
+const addEquity = ref(new Decimal(0))
+const poolEquity = ref(new Decimal(0))
+
+// watch for token2Amount （always sourcing from token2Amount）
+watch(token2Amount, async (newAmount) => {
+  if (!newAmount) return
+
+  if (Number(newAmount) === 0) {
+    token1Amount.value = undefined
+    token2Amount.value = undefined
+    return
+  }
+
+  calculatingToken1.value = true
+
+  previewAdd({
+    token1: token1Symbol.value.toLowerCase(),
+    token2: token2Symbol.value.toLowerCase(),
+    source: 'token2',
+    sourceAmount: newAmount,
+  }).then((preview) => {
+    conditions.value = conditions.value.map((c) => {
+      if (c.condition === 'insufficient-liquidity') {
+        c.met = true
+      }
+      return c
+    })
+
+    ratio.value = new Decimal(preview.ratio)
+    addEquity.value = new Decimal(preview.addEquity)
+    poolEquity.value = new Decimal(preview.poolEquity)
+
+    token1Amount.value = preview.targetAmount
+    calculatingToken1.value = false
+  })
+})
 
 // connection
 const connectionStore = useConnectionStore()
@@ -57,7 +88,7 @@ const conditions: Ref<
   },
   {
     condition: 'enter-amount',
-    message: 'Enter an amount',
+    message: 'Select some BRC20',
     priority: 3,
     met: false,
   },
@@ -68,28 +99,6 @@ const conditions: Ref<
     met: false,
   },
 ])
-
-const calcAddLp = (e: Event, op: AddOp) => {
-  if (op == AddOp.token1ToToken2) {
-    const token1AddAmount = formatSat(e.target?.value, 8)
-    const { lpMinted, token2AddAmount } = swapCalc.countLpAddAmount(
-      token1AddAmount,
-      swapCalc.token1SwapAmount,
-      swapCalc.token2SwapAmount,
-      swapCalc.swapLpAmount
-    )
-    toAmount.value = formatTok(token2AddAmount, 8, 8)
-  } else {
-    const token2AddAmount = formatSat(e.target?.value, 8)
-    const { lpMinted, token1AddAmount } = swapCalc.countLpAddAmountWithToken2(
-      token2AddAmount,
-      swapCalc.token1SwapAmount,
-      swapCalc.token2SwapAmount,
-      swapCalc.swapLpAmount
-    )
-    fromAmount.value = formatTok(token1AddAmount, 8, 8)
-  }
-}
 
 const hasUnmet = computed(() => {
   return conditions.value.some((c) => !c.met)
@@ -198,18 +207,27 @@ watch(
   },
   { immediate: true }
 )
+
+function onAmountCleared() {
+  token2InscriptionIds.value = []
+  ratio.value = new Decimal(0)
+  addEquity.value = new Decimal(0)
+  poolEquity.value = new Decimal(0)
+  hasAmount.value = false
+}
 </script>
 
 <template>
   <div class="my-8 space-y-0.5 text-sm">
-    <AddLiquiditySide
-      v-model:symbol="token1Symbol"
-      v-model:amount="fromAmount"
+    <!-- brc first -->
+    <SwapSideBrc
+      v-model:symbol="token2Symbol"
+      v-model:amount="token2Amount"
+      v-model:inscription-ids="token2InscriptionIds"
       @has-enough="hasEnough = true"
       @not-enough="hasEnough = false"
       @amount-entered="hasAmount = true"
-      @amount-cleared="hasAmount = false"
-      @keyup="calcAddLp($event, AddOp.token1ToToken2)"
+      @amount-cleared="onAmountCleared"
     />
 
     <!-- plus icon -->
@@ -217,12 +235,22 @@ watch(
       <PlusIcon class="mx-auto h-5 w-5 text-zinc-500" />
     </div>
 
-    <AddLiquiditySide
-      v-model:symbol="token2Symbol"
-      v-model:amount="toAmount"
-      @keyup="calcAddLp($event, AddOp.token2ToToken1)"
+    <SwapSideBtc
+      v-model:symbol="token1Symbol"
+      v-model:amount="token1Amount"
+      :calculating="calculatingToken1"
     />
   </div>
+
+  <AddPricesAndShares
+    class="my-8"
+    v-if="ratio.gt(0) && poolEquity.gt(0)"
+    :token-1-symbol="token1Symbol"
+    :token-2-symbol="token2Symbol"
+    :ratio="ratio"
+    :add-equity="addEquity"
+    :pool-equity="poolEquity"
+  />
 
   <!-- disabled button -->
   <button
@@ -235,7 +263,7 @@ watch(
   </button>
 
   <!-- confirm button -->
-  <button class="main-btn" v-else>Swap</button>
+  <button class="main-btn" v-else>Add Liquidity</button>
 </template>
 
 <style scoped>

@@ -557,7 +557,7 @@ async function doSwap() {
           </router-link>
 
           <router-link
-            to="/swap-pools/btc-rdex/add"
+            to="/swap-pools"
             class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
           >
             Pools
@@ -574,7 +574,6 @@ async function doSwap() {
             v-model:symbol="token2Symbol"
             v-model:amount="token2Amount"
             v-model:inscription-ids="token2InscriptionIds"
-            :calculating="calculatingPay"
             @has-enough="hasEnough = true"
             @not-enough="hasEnough = false"
             @amount-entered="hasAmount = true"

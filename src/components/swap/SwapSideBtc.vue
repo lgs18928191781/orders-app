@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import { Loader2Icon } from 'lucide-vue-next'
 
-import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
-import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { prettyBalance, prettySymbol } from '@/lib/formatters'
-import { getBrc20s } from '@/queries/orders-api'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+
+import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
+import { getBrc20s } from '@/queries/orders-api'
+import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
+import { prettyBalance, prettySymbol } from '@/lib/formatters'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -19,7 +20,7 @@ const { selectedPair } = useSwapPoolPair()
 defineProps({
   side: {
     type: String,
-    required: true,
+    required: false,
     validator: (side: string) => ['pay', 'receive'].includes(side),
   },
   calculating: {
@@ -175,7 +176,7 @@ const balanceDisplay = computed(() => {
   <div
     class="px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
   >
-    <div class="text-zinc-400">You {{ side }}</div>
+    <div class="text-zinc-400" v-if="!!side">You {{ side }}</div>
 
     <!-- main control -->
     <div class="flex items-center space-x-2 justify-between h-16">

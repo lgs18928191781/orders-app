@@ -10,17 +10,18 @@ import {
   CircleIcon,
 } from 'lucide-vue-next'
 
+import { useConnectionStore } from '@/stores/connection'
+import { useNetworkStore } from '@/stores/network'
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+
 import {
   type Brc20Transferable,
   getBrcFiatRate,
   getFiatRate,
 } from '@/queries/orders-api'
-import { calcFiatPrice } from '@/lib/helpers'
-import { useConnectionStore } from '@/stores/connection'
-import { useNetworkStore } from '@/stores/network'
-import { prettyInscriptionId, prettySymbol } from '@/lib/formatters'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { getOneBrc20Query } from '@/queries/orders-api.query'
+import { calcFiatPrice } from '@/lib/helpers'
+import { prettyInscriptionId, prettySymbol } from '@/lib/formatters'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -29,12 +30,8 @@ const { selectedPair, token2Symbol } = useSwapPoolPair()
 const props = defineProps({
   side: {
     type: String,
-    required: true,
+    required: false,
     validator: (side: string) => ['pay', 'receive'].includes(side),
-  },
-  calculating: {
-    type: Boolean,
-    default: false,
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
@@ -42,17 +39,7 @@ const inscriptionIds = defineModel('inscriptionIds', {
   required: true,
   type: Array as () => string[],
 })
-const icon = computed(() => {
-  if (!selectedPair.value) {
-    return null
-  }
-
-  if (symbol.value === selectedPair.value.token1Symbol) {
-    return selectedPair.value.token1Icon
-  }
-
-  return selectedPair.value.token2Icon
-})
+const icon = computed(() => selectedPair.value?.token2Icon)
 
 const emit = defineEmits([
   'hasEnough',
@@ -116,6 +103,15 @@ const toggleSelect = (transferable: Brc20Transferable) => {
     selecteds.value.push(transferable)
   }
 }
+const toggleSelectAll = () => {
+  if (!myOneBrc20.value?.transferBalanceList) return
+
+  if (selecteds.value.length === myOneBrc20.value?.transferBalanceList.length) {
+    selecteds.value = []
+  } else {
+    selecteds.value = myOneBrc20.value?.transferBalanceList || []
+  }
+}
 function isSelected(transferable: Brc20Transferable) {
   return selecteds.value.includes(transferable)
 }
@@ -161,9 +157,9 @@ async function goInscribe() {
     class="px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
   >
     <div class="flex items-center gap-2">
-      <div class="text-zinc-400 mr-auto">You {{ side }}</div>
+      <div class="text-zinc-400" v-if="side">You {{ side }}</div>
 
-      <div class="text-zinc-100 text-lg">
+      <div class="text-zinc-100 text-lg ml-auto">
         {{ tweenedAmount.number.toFixed(0) }}
       </div>
       <div
@@ -178,7 +174,6 @@ async function goInscribe() {
       </div>
     </div>
 
-    <!-- main control -->
     <div v-if="isLoading" class="flex justify-center py-8">
       <Loader2Icon class="animate-spin w-6 h-6 text-zinc-500" />
     </div>
@@ -203,6 +198,20 @@ async function goInscribe() {
       class="grid items-center grid-cols-3 gap-2 mb-4 max-h-[20vh] overflow-auto nicer-scrollbar pr-2 -mr-2 pt-2 mt-2"
       v-else
     >
+      <div
+        v-if="
+          myOneBrc20?.transferBalanceList &&
+          myOneBrc20?.transferBalanceList.length > 3
+        "
+        class="col-span-3"
+      >
+        <button
+          class="text-xs text-zinc-300 hover:text-primary hover:underline"
+          @click="toggleSelectAll"
+        >
+          Select all
+        </button>
+      </div>
       <button
         class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center group"
         :class="[

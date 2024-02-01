@@ -9,7 +9,12 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AddLiquidityBrc: typeof import('./src/components/swap/pools/AddLiquidityBrc.vue')['default']
+    AddLiquidityBtc: typeof import('./src/components/swap/pools/AddLiquidityBtc.vue')['default']
     AddLiquiditySide: typeof import('./src/components/swap/pools/AddLiquiditySide.vue')['default']
+    AddLiquiditySideBrc: typeof import('./src/components/swap/pools/AddLiquiditySideBrc.vue')['default']
+    AddLiquiditySideBtc: typeof import('./src/components/swap/pools/AddLiquiditySideBtc.vue')['default']
+    AddPricesAndShares: typeof import('./src/components/swap/pools/AddPricesAndShares.vue')['default']
     AddressMenu: typeof import('./src/components/header/AddressMenu.vue')['default']
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
     AssetSelect: typeof import('./src/components/AssetSelect.vue')['default']
@@ -17,6 +22,7 @@ declare module '@vue/runtime-core' {
     ClaimRecordItem: typeof import('./src/components/events/ClaimRecordItem.vue')['default']
     ConfirmationModal: typeof import('./src/components/overlays/ConfirmationModal.vue')['default']
     ConnectionModal: typeof import('./src/components/header/ConnectionModal.vue')['default']
+    copy: typeof import('./src/components/swap/pools/AddLiquiditySide copy.vue')['default']
     ElPopover: typeof import('element-plus/es')['ElPopover']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     EventClaimRecords: typeof import('./src/components/pool/EventClaimRecords.vue')['default']

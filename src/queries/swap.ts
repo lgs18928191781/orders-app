@@ -38,6 +38,42 @@ export const previewSwap = async ({
   return res
 }
 
+export const previewAdd = async ({
+  token1,
+  token2,
+  source,
+  sourceAmount,
+}: {
+  token1: string
+  token2: string
+  source: 'token1' | 'token2'
+  sourceAmount: string
+}): Promise<{
+  gas: string
+  ratio: string
+  serviceFee: string
+  sourceAmount: string
+  targetAmount: string
+  addEquity: string
+  poolEquity: string
+}> => {
+  const address = useConnectionStore().getAddress
+
+  const body = {
+    address,
+    token1,
+    token2,
+    source,
+    sourceAmount,
+  }
+
+  const res = await swapApiFetch('preview/add', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return res
+}
+
 export const build1xSwap = async ({
   token1,
   token2,
