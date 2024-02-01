@@ -6,9 +6,14 @@ import { ElMessage } from 'element-plus'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 import { useConnectionStore } from '@/stores/connection'
+import { useNetworkStore } from '@/stores/network'
+import { useBtcJsStore } from '@/stores/btcjs'
+
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useExpandSwap } from '@/hooks/use-expand-swap'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+
 import {
   SwapType,
   build2xSwap,
@@ -17,8 +22,9 @@ import {
   build1xSwap,
   buildX2Swap,
 } from '@/queries/swap'
+import { exclusiveChange } from '@/lib/build-helpers'
 import { ERRORS } from '@/data/errors'
-import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 
 import SwapBlur from '@/components/swap/SwapBlur.vue'
 import ConnectionModal from '@/components/header/ConnectionModal.vue'
@@ -30,11 +36,6 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
 import SwapDataArea from '@/components/swap/SwapDataArea.vue'
-import { useBtcJsStore } from '@/stores/btcjs'
-import { exclusiveChange } from '@/lib/build-helpers'
-import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
-import { useNetworkStore } from '@/stores/network'
-import { raiseIf, raiseUnless } from '@/lib/helpers'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -449,7 +450,9 @@ const afterBuildSwap = async ({
       })
       if (!psbt1xFinished) throw new Error('Failed to add change')
 
-      const signed1x = await connectionStore.adapter.signPsbt(psbt1xFinished.toHex())
+      const signed1x = await connectionStore.adapter.signPsbt(
+        psbt1xFinished.toHex()
+      )
       if (!signed1x) return
       if (!sourceAmount.value) return
 
@@ -464,14 +467,16 @@ const afterBuildSwap = async ({
       const psbtX2 = btcjs.Psbt.fromHex(rawPsbt, {
         network: networkStore.typedNetwork,
       })
-      const { psbt: psbtX2Finished  } = await exclusiveChange({
+      const { psbt: psbtX2Finished } = await exclusiveChange({
         psbt: psbtX2,
         maxUtxosCount: USE_UTXO_COUNT_LIMIT,
         sighashType: SIGHASH_ALL,
       })
       if (!psbtX2Finished) throw new Error('Failed to add change')
 
-      const signedX2 = await connectionStore.adapter.signPsbt(psbtX2Finished.toHex())
+      const signedX2 = await connectionStore.adapter.signPsbt(
+        psbtX2Finished.toHex()
+      )
       if (!signedX2) return
       if (!sourceAmount.value) return
 
