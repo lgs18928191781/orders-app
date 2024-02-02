@@ -50,7 +50,7 @@ function isLinkActive(keyword: string) {
         <!-- sub nav -->
         <div class="flex items-center gap-1 text-sm">
           <router-link
-            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary"
+            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary w-16 text-center"
             :class="
               isLinkActive('swap-pools-add')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
@@ -62,7 +62,7 @@ function isLinkActive(keyword: string) {
           </router-link>
 
           <router-link
-            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary"
+            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary w-16 text-center"
             :class="
               isLinkActive('swap-pools-remove')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
