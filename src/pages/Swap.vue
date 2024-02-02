@@ -541,7 +541,7 @@ async function doSwap() {
   <div class="grow flex items-start justify-center gap-16 pt-16">
     <SwapDataArea v-show="isExpand" />
     <div
-      class="relative max-w-md rounded-3xl lg:scale-125 w-96 z-10"
+      class="relative max-w-md rounded-3xl lg:scale-110 w-96 z-10"
       :class="[isExpand ? 'origin-top-left' : 'origin-top']"
     >
       <div

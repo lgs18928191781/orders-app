@@ -153,9 +153,7 @@ async function goInscribe() {
 </script>
 
 <template>
-  <div
-    class="px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
-  >
+  <div class="swap-sub-control-panel">
     <div class="flex items-center gap-2">
       <div class="text-zinc-400" v-if="side">You {{ side }}</div>
 
@@ -186,7 +184,7 @@ async function goInscribe() {
       <!-- inscribe button -->
       <button
         @click="goInscribe"
-        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center border-zinc-700 text-xs text-zinc-300 hover:bg-primary/5 hover:text-primary"
+        class="cute-button p-2 rounded-md flex flex-col gap-0.5 items-center relative h-16 justify-center text-xs text-zinc-300"
         v-if="myOneBrc20 && new Decimal(myOneBrc20.availableBalance || 0).gt(0)"
       >
         <PackagePlusIcon class="w-4 h-4" />

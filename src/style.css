@@ -55,3 +55,15 @@ input:focus {
 .primary-panel {
   @apply bg-zinc-900 rounded-md;
 }
+
+.swap-sub-control-panel {
+  @apply px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700;
+}
+
+.swap-sub-static-panel {
+  @apply bg-zinc-800 rounded-2xl border border-zinc-700;
+}
+
+.cute-button {
+  @apply border border-zinc-700 hover:border-primary/60 hover:bg-primary/5 hover:text-primary;
+}

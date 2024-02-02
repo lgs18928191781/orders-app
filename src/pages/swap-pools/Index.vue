@@ -21,7 +21,7 @@ function isLinkActive(keyword: string) {
   <WalletMissingModal />
 
   <div
-    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-125 origin-top w-96"
+    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-110 origin-top w-96"
   >
     <div
       class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900"

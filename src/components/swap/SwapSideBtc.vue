@@ -173,9 +173,7 @@ const balanceDisplay = computed(() => {
 </script>
 
 <template>
-  <div
-    class="px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700"
-  >
+  <div class="swap-sub-control-panel">
     <div class="text-zinc-400" v-if="!!side">You {{ side }}</div>
 
     <!-- main control -->

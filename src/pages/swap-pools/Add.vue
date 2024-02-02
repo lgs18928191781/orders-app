@@ -2,12 +2,19 @@
 import { ref, watch, type Ref, computed } from 'vue'
 import { PlusIcon } from 'lucide-vue-next'
 import Decimal from 'decimal.js'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { useBtcJsStore } from '@/stores/btcjs'
+import { useNetworkStore } from '@/stores/network'
 
-import { previewAdd } from '@/queries/swap'
+import { buildAdd, postAdd, previewAdd } from '@/queries/swap'
+import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import { exclusiveChange } from '@/lib/build-helpers'
 
 import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
@@ -15,6 +22,9 @@ import AddPricesAndShares from '@/components/swap/pools/AddPricesAndShares.vue'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
+const { openBuilding, closeBuilding } = useBuildingOverlay()
+const btcjsStore = useBtcJsStore()
+const networkStore = useNetworkStore()
 
 // amount
 const token1Amount = ref<string>()
@@ -215,10 +225,91 @@ function onAmountCleared() {
   poolEquity.value = new Decimal(0)
   hasAmount.value = false
 }
+
+// mutations
+const queryClient = useQueryClient()
+const { mutate: mutatePostAdd } = useMutation({
+  mutationFn: postAdd,
+  onSuccess: async () => {
+    ElMessage.success('Add liquidity success')
+    queryClient.invalidateQueries()
+  },
+  onError: (err: any) => {
+    ElMessage.error(err.message)
+    if (IS_DEV) throw err
+  },
+  onSettled: () => closeBuilding(),
+})
+const afterBuildAdd = async ({
+  rawPsbt,
+  buildId,
+}: {
+  rawPsbt: string
+  buildId: string
+}) => {
+  const btcjs = btcjsStore.get!
+  // continue building and add change to the psbt
+  const psbtAdd = btcjs.Psbt.fromHex(rawPsbt, {
+    network: networkStore.typedNetwork,
+  })
+  const { psbt: psbtAddFinished } = await exclusiveChange({
+    psbt: psbtAdd,
+    maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+    sighashType: SIGHASH_ALL,
+  })
+  if (!psbtAddFinished) throw new Error('Failed to add change')
+
+  const signedAdd = await connectionStore.adapter.signPsbt(
+    psbtAddFinished.toHex()
+  )
+  if (!signedAdd) return
+
+  mutatePostAdd({
+    rawPsbt: signedAdd,
+    buildId,
+  })
+}
+
+const { mutate: mutateBuildAdd } = useMutation({
+  mutationFn: buildAdd,
+  onSuccess: afterBuildAdd,
+  onError: (err: any) => {
+    closeBuilding()
+    ElMessage.error(err.message)
+    if (IS_DEV) throw err
+  },
+})
+
+async function doAddLiquidity() {
+  openBuilding()
+  // all kinds of checks
+  if (!connectionStore.connected) {
+    openConnectionModal()
+    return
+  }
+  if (!hasEnough.value) return
+  if (!hasAmount.value) return
+  if (!token2Amount.value) return
+  if (unmet.value) {
+    if (unmet.value.handler) {
+      unmet.value.handler()
+    }
+    return
+  }
+
+  // go for it!
+  mutateBuildAdd({
+    token1: token1Symbol.value.toLowerCase(),
+    token2: token2Symbol.value.toLowerCase(),
+    source: 'token2',
+    sourceAmount: token2Amount.value,
+    inscriptionIds: token2InscriptionIds.value,
+  })
+}
 </script>
 
 <template>
-  <div class="my-8 space-y-0.5 text-sm">
+  <div class="my-4 space-y-0.5 text-sm">
     <!-- brc first -->
     <SwapSideBrc
       v-model:symbol="token2Symbol"
@@ -243,7 +334,7 @@ function onAmountCleared() {
   </div>
 
   <AddPricesAndShares
-    class="my-8"
+    class="my-4"
     v-if="ratio.gt(0) && poolEquity.gt(0)"
     :token-1-symbol="token1Symbol"
     :token-2-symbol="token2Symbol"
@@ -263,7 +354,7 @@ function onAmountCleared() {
   </button>
 
   <!-- confirm button -->
-  <button class="main-btn" v-else>Add Liquidity</button>
+  <button class="main-btn" v-else @click="doAddLiquidity">Add Liquidity</button>
 </template>
 
 <style scoped>

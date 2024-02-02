@@ -27,7 +27,7 @@ const equityShare = computed(() => {
 </script>
 
 <template>
-  <div class="bg-zinc-800 rounded-2xl border border-zinc-700">
+  <div class="swap-sub-static-panel">
     <h3 class="text-sm text-zinc-300 p-4">Prices and pool share</h3>
 
     <div
