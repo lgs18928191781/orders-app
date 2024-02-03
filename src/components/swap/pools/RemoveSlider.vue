@@ -12,7 +12,7 @@ const removePercentage = defineModel<number[]>('removePercentage', {
   <div class="swap-sub-control-panel flex flex-col gap-4">
     <h3>Remove amount</h3>
 
-    <div class="text-6xl leading-loose">{{ removePercentage[0] }}%</div>
+    <div class="text-6xl leading-normal">{{ removePercentage[0] }}%</div>
 
     <Slider v-model="removePercentage" :max="100" :step="1" />
 

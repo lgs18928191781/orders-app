@@ -28,7 +28,7 @@ const equityShare = computed(() => {
 
 <template>
   <div class="swap-sub-static-panel">
-    <h3 class="text-sm text-zinc-300 p-4">Prices and pool share</h3>
+    <h3 class="text-sm text-zinc-300 pb-4">Prices and pool share</h3>
 
     <div
       class="border border-zinc-700 rounded-2xl p-4 grid grid-cols-3 text-xs gap-4 -m-px"
@@ -39,9 +39,7 @@ const equityShare = computed(() => {
         </div>
 
         <div class="text-zinc-500">
-          {{
-            `${prettySymbol(token2Symbol)} per ${prettySymbol(token1Symbol)}`
-          }}
+          {{ `${prettySymbol(token2Symbol)} / ${prettySymbol(token1Symbol)}` }}
         </div>
       </div>
 
@@ -51,9 +49,7 @@ const equityShare = computed(() => {
         </div>
 
         <div class="text-zinc-500">
-          {{
-            `${prettySymbol(token1Symbol)} per ${prettySymbol(token2Symbol)}`
-          }}
+          {{ `${prettySymbol(token1Symbol)} / ${prettySymbol(token2Symbol)}` }}
         </div>
       </div>
 

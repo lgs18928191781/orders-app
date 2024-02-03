@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import { Loader2Icon } from 'lucide-vue-next'
@@ -12,6 +12,7 @@ import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
 import { getBrc20s } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import gsap from 'gsap'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -45,11 +46,17 @@ const icon = computed(() => {
 const amount = defineModel('amount', { type: String })
 const normalizedAmount = computed(() => {
   if (!amount.value) {
-    return '0'
+    return 0
   }
 
   const dividedBy = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
-  return new Decimal(amount.value).dividedBy(dividedBy).toDP().toFixed()
+  return new Decimal(amount.value).dividedBy(dividedBy).toDP(0).toNumber()
+})
+const tweenedAmount = reactive({
+  number: 0,
+})
+watch(amount, (n) => {
+  gsap.to(tweenedAmount, { duration: 0.2, number: Number(n) || 0 })
 })
 
 const amountTextSize = computed(() => {
@@ -57,23 +64,23 @@ const amountTextSize = computed(() => {
     return 'text-4xl'
   }
 
-  if (normalizedAmount.value.length > 16) {
+  if (String(normalizedAmount.value).length > 16) {
     return 'text-xs'
   }
 
-  if (normalizedAmount.value.length > 12) {
+  if (String(normalizedAmount.value).length > 12) {
     return 'text-lg'
   }
 
-  if (normalizedAmount.value.length > 10) {
+  if (String(normalizedAmount.value).length > 10) {
     return 'text-xl'
   }
 
-  if (normalizedAmount.value.length > 8) {
+  if (String(normalizedAmount.value).length > 8) {
     return 'text-2xl'
   }
 
-  if (normalizedAmount.value.length > 6) {
+  if (String(normalizedAmount.value).length > 6) {
     return 'text-3xl'
   }
 
@@ -186,7 +193,7 @@ const balanceDisplay = computed(() => {
           amountTextSize,
         ]"
       >
-        {{ normalizedAmount }}
+        {{ tweenedAmount.number }}
       </div>
 
       <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />

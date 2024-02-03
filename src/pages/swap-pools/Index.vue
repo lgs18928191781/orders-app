@@ -21,7 +21,7 @@ function isLinkActive(keyword: string) {
   <WalletMissingModal />
 
   <div
-    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-110 origin-top w-96"
+    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-110 origin-top w-112"
   >
     <div
       class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900"
@@ -50,7 +50,7 @@ function isLinkActive(keyword: string) {
         <!-- sub nav -->
         <div class="flex items-center gap-1 text-sm">
           <router-link
-            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary w-16 text-center"
+            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary px-4"
             :class="
               isLinkActive('swap-pools-add')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
@@ -62,7 +62,7 @@ function isLinkActive(keyword: string) {
           </router-link>
 
           <router-link
-            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary w-16 text-center"
+            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary px-4"
             :class="
               isLinkActive('swap-pools-remove')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'

@@ -28,7 +28,9 @@ const emitsAsProps = useEmitAsProps(emits)
     <SliderTrack
       class="relative h-2 w-full grow overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700"
     >
-      <SliderRange class="absolute h-full bg-zinc-900 dark:bg-primary" />
+      <SliderRange
+        class="absolute h-full bg-zinc-900 dark:bg-primary rounded-full"
+      />
     </SliderTrack>
     <SliderThumb
       class="block h-5 w-5 rounded-full border-2 border-zinc-900 bg-white ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-50 dark:bg-primary dark:ring-offset-primary dark:focus-visible:ring-zinc-300"

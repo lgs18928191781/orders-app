@@ -10,9 +10,9 @@ export const useFeebStore = defineStore('feeb', {
 
   getters: {
     get: (state) => {
-      // if testnet, return 1
+      // if testnet, return 2; (1 will cause some wield problems on testnet)
       const networkStore = useNetworkStore()
-      if (networkStore.network === 'testnet') return 1
+      if (networkStore.network === 'testnet') return 2
 
       return state.feeb
     },
