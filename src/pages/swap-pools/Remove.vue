@@ -1,20 +1,29 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-
-import RemoveSlider from '@/components/swap/pools/RemoveSlider.vue'
+import { Ref, computed, ref, watch } from 'vue'
 import { ArrowDownIcon } from 'lucide-vue-next'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { prettySymbol } from '@/lib/formatters'
-import { previewRemove } from '@/queries/swap'
-import { useConnectionStore } from '@/stores/connection'
-import { useNetworkStore } from '@/stores/network'
-import { getPoolStatusQuery } from '@/queries/swap.query'
-import { useQuery } from '@tanstack/vue-query'
+import { refDebounced } from '@vueuse/core'
+import { useMutation, useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 
-const { token1Symbol, token2Symbol, selectedPair } = useSwapPoolPair()
-const token1Icon = computed(() => selectedPair.value?.token1Icon)
-const token2Icon = computed(() => selectedPair.value?.token2Icon)
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useConnectionStore } from '@/stores/connection'
+import { useNetworkStore } from '@/stores/network'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
+
+import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
+
+import RemovePreview from '@/components/swap/pools/RemovePreview.vue'
+import RemovePoolPosition from '@/components/swap/pools/RemovePoolPosition.vue'
+import RemoveSlider from '@/components/swap/pools/RemoveSlider.vue'
+import MainBtn from '@/components/MainBtn.vue'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { ElMessage } from 'element-plus'
+import { IS_DEV } from '@/data/constants'
+import { buildRemove } from '@/queries/swap'
+
+const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { openConnectionModal } = useConnectionModal()
+const { openBuilding, closeBuilding } = useBuildingOverlay()
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const address = connectionStore.getAddress
@@ -44,124 +53,198 @@ const poolShare = computed(() => {
 })
 
 const removePercentage = ref([0])
-const token1Amount = ref<string>('0')
-const token2Amount = ref<string>('0')
-watch(
-  removePercentage,
-  async (newPercentageContainer) => {
-    const newPercentage = newPercentageContainer[0]
-    if (Number(newPercentage) === 0) {
-      token1Amount.value = '0'
-      token2Amount.value = '0'
-    }
+const debouncedPercentage = refDebounced(removePercentage, 300)
 
-    previewRemove({
-      token1: token1Symbol.value.toLowerCase(),
-      token2: token2Symbol.value.toLowerCase(),
-      removeEquity: String(newPercentage),
-      // }).then((preview) => {
-      //   conditions.value = conditions.value.map((c) => {
-      //     if (c.condition === 'insufficient-liquidity') {
-      //       c.met = true
-      //     }
-      //     return c
-      //   })
+const removeEquity = computed(() => {
+  if (!poolStatus.value) return '0'
 
-      //   ratio.value = new Decimal(preview.ratio)
-      //   addEquity.value = new Decimal(preview.addEquity)
-      //   poolEquity.value = new Decimal(preview.poolEquity)
+  return new Decimal(debouncedPercentage.value[0])
+    .div(100)
+    .mul(poolStatus.value.addressEquity || 0)
+    .toFixed(4)
+})
 
-      //   token1Amount.value = preview.targetAmount
-      //   calculatingToken1.value = false
-    })
+const { data: preview, isFetching: isFetchingPreview } = useQuery(
+  getPreviewRemoveQuery(
+    {
+      token1: token1Symbol,
+      token2: token2Symbol,
+      removeEquity,
+      address,
+      network,
+    },
+    computed(() => !!address)
+  )
+)
+const token1Amount = computed(() => {
+  if (!preview.value) return new Decimal('0')
+
+  return new Decimal(preview.value.token1Amount)
+})
+const token2Amount = computed(() => {
+  if (!preview.value) return new Decimal('0')
+
+  return new Decimal(preview.value.token2Amount)
+})
+
+// unmet conditions for swap
+// if any of these conditions are not met, the swap button is disabled
+const conditions: Ref<
+  {
+    condition: string
+    message: string
+    priority: number
+    met: boolean
+    handler?: Function
+  }[]
+> = ref([
+  {
+    condition: 'not-connected',
+    message: 'Connect wallet',
+    priority: 1,
+    met: false,
+    handler: openConnectionModal,
   },
   {
-    immediate: true,
-    deep: true,
+    condition: 'enter-amount',
+    message: 'Select amount',
+    priority: 3,
+    met: false,
+  },
+])
+
+const hasUnmet = computed(() => {
+  return conditions.value.some((c) => !c.met)
+})
+const unmet = computed(() => {
+  // use highest priority unmet condition
+  if (!hasUnmet.value) {
+    return null
   }
+
+  const unmets = conditions.value.filter((c) => !c.met)
+
+  return unmets.reduce((prev, curr) => {
+    return prev.priority < curr.priority ? prev : curr
+  }, unmets[0])
+})
+
+// try to met conditions
+watch(
+  () => connectionStore.connected,
+  (connected) => {
+    if (connected) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'not-connected') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'not-connected') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
 )
+
+// fourth watcher: hasAmount
+const hasAmount = computed(() => {
+  return debouncedPercentage.value[0] > 0
+})
+watch(
+  () => hasAmount.value,
+  (hasAmount) => {
+    if (hasAmount) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'enter-amount') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'enter-amount') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
+
+const { mutate: mutateBuildRemove } = useMutation({
+  mutationFn: buildRemove,
+  onSuccess: () => {},
+  onError: (err: any) => {
+    closeBuilding()
+    ElMessage.error(err.message)
+    if (IS_DEV) throw err
+  },
+})
+
+async function doRemoveLiquidity() {
+  openBuilding()
+  // all kinds of checks
+  if (!connectionStore.connected) {
+    openConnectionModal()
+    return
+  }
+  if (!hasAmount.value) return
+  if (unmet.value) {
+    if (unmet.value.handler) {
+      unmet.value.handler()
+    }
+    return
+  }
+
+  // go for it!
+  mutateBuildRemove({
+    token1: token1Symbol.value.toLowerCase(),
+    token2: token2Symbol.value.toLowerCase(),
+    removeEquity: removeEquity.value,
+  })
+}
 </script>
 
 <template>
-  <div class="my-4 flex flex-col gap-3">
+  <div class="mt-4 flex flex-col gap-3">
     <RemoveSlider v-model:remove-percentage="removePercentage" />
 
     <div class="flex justify-center">
       <ArrowDownIcon class="w-4 h-4 text-zinc-500" />
     </div>
 
-    <div class="swap-sub-static-panel text-2xl space-y-4 text-zinc-300">
-      <div class="flex justify-between items-center gap-4">
-        <div class="">{{ token1Amount }}</div>
+    <RemovePreview
+      :preview="preview"
+      :is-fetching-preview="isFetchingPreview"
+      :token-1-amount="token1Amount"
+      :token-2-amount="token2Amount"
+    />
 
-        <div class="flex items-center gap-2">
-          <img
-            :src="token1Icon"
-            class="w-6 h-6 rounded-full"
-            v-if="token1Icon"
-          />
-          <div class="">{{ prettySymbol(token1Symbol) }}</div>
-        </div>
-      </div>
+    <!-- disabled button -->
+    <MainBtn
+      :class="[!!unmet && !unmet.handler && 'disabled']"
+      v-if="unmet"
+      :disabled="!unmet.handler"
+      @click="!!unmet.handler && unmet.handler()"
+    >
+      {{ unmet.message || '' }}
+    </MainBtn>
 
-      <div class="flex justify-between items-center gap-4">
-        <div class="">{{ token2Amount }}</div>
+    <!-- confirm button -->
+    <MainBtn @click="doRemoveLiquidity" v-else>Remove Liquidity</MainBtn>
 
-        <div class="flex items-center gap-2">
-          <img
-            :src="token2Icon"
-            class="w-6 h-6 rounded-full"
-            v-if="token2Icon"
-          />
-          <div class="">{{ prettySymbol(token2Symbol) }}</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="swap-sub-static-panel flex flex-col gap-2" v-if="poolStatus">
-      <h3>Your position</h3>
-
-      <div class="flex items-center text-lg">
-        <img :src="token1Icon" class="w-6 h-6 rounded-full" v-if="token1Icon" />
-        <img
-          :src="token2Icon"
-          class="w-6 h-6 rounded-full -ml-2"
-          v-if="token2Icon"
-        />
-        <div class="ml-2">
-          {{ prettySymbol(token1Symbol) }}/{{ prettySymbol(token2Symbol) }}
-        </div>
-
-        <div class="ml-auto">
-          {{ poolStatus.addressEquity }}
-        </div>
-      </div>
-
-      <div class="flex items-center text-sm">
-        <div class="ml-2">Your pool share:</div>
-
-        <div class="ml-auto">
-          {{ poolShare }}
-        </div>
-      </div>
-
-      <div class="flex items-center text-sm">
-        <div class="ml-2">{{ prettySymbol(token1Symbol) }}:</div>
-
-        <div class="ml-auto">
-          {{ token1Amount }}
-        </div>
-      </div>
-
-      <div class="flex items-center text-sm">
-        <div class="ml-2">{{ prettySymbol(token2Symbol) }}:</div>
-
-        <div class="ml-auto">
-          {{ poolShare }}
-        </div>
-      </div>
-    </div>
+    <RemovePoolPosition
+      v-if="poolStatus"
+      :pool-status="poolStatus"
+      :pool-share="poolShare"
+      class="mt-8"
+    />
   </div>
 </template>
-
-<style scoped></style>

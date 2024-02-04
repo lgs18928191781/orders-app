@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, type Ref, computed } from 'vue'
+import { ref, watch, type Ref, computed, PropType } from 'vue'
 import { PlusIcon } from 'lucide-vue-next'
 import Decimal from 'decimal.js'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
@@ -19,6 +19,7 @@ import { exclusiveChange } from '@/lib/build-helpers'
 import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import AddPricesAndShares from '@/components/swap/pools/AddPricesAndShares.vue'
+import MainBtn from '@/components/MainBtn.vue'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -344,25 +345,15 @@ async function doAddLiquidity() {
   />
 
   <!-- disabled button -->
-  <button
-    :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+  <MainBtn
+    :class="[!!unmet && !unmet.handler && 'disabled']"
     v-if="unmet"
     :disabled="!unmet.handler"
     @click="!!unmet.handler && unmet.handler()"
   >
     {{ unmet.message || '' }}
-  </button>
+  </MainBtn>
 
   <!-- confirm button -->
-  <button class="main-btn" v-else @click="doAddLiquidity">Add Liquidity</button>
+  <MainBtn v-else @click="doAddLiquidity"> Add Liquidity </MainBtn>
 </template>
-
-<style scoped>
-.main-btn {
-  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
-}
-
-.main-btn.disabled {
-  @apply cursor-not-allowed bg-zinc-800 text-zinc-300/50;
-}
-</style>

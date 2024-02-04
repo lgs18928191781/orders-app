@@ -1,4 +1,5 @@
 import { swapApiFetch } from '@/lib/fetch'
+import { sleep } from '@/lib/helpers'
 import { useConnectionStore } from '@/stores/connection'
 import { Network } from '@/stores/network'
 
@@ -101,29 +102,37 @@ export const getPoolStatus = async ({
     `pools/${token1}-${token2}?address=${address}&net=${network}`
   )
 
-  console.log({ pool: res })
   return res
 }
 
 export const previewRemove = async ({
   token1,
   token2,
+  address,
   removeEquity,
 }: {
   token1: string
   token2: string
+  address: string
   removeEquity: string
 }): Promise<{
+  // token1: string
+  // token2: string
+  // token1Pool: number
+  // token2Pool: number
+  // poolEquity: string
+  // addressEquity: string
+  // token1ServiceAddress: string
+  // token2ServiceAddress: string
+  // token1ServicePubkey: string
+  // token2ServicePubkey: string
   gas: string
   ratio: string
   serviceFee: string
-  sourceAmount: string
-  targetAmount: string
+  token1Amount: string
+  token2Amount: string
   removeEquity: string
-  poolEquity: string
 }> => {
-  const address = useConnectionStore().getAddress
-
   const body = {
     address,
     token1,
@@ -136,7 +145,6 @@ export const previewRemove = async ({
     body: JSON.stringify(body),
   })
 
-  console.log({ remove: res })
   return res
 }
 
@@ -170,6 +178,34 @@ export const buildAdd = async ({
   }
 
   const res = await swapApiFetch('build/add', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return res
+}
+
+export const buildRemove = async ({
+  token1,
+  token2,
+  removeEquity,
+}: {
+  token1: string
+  token2: string
+  removeEquity: string
+}): Promise<{
+  rawPsbt: string
+  buildId: string
+}> => {
+  const address = useConnectionStore().getAddress
+
+  const body = {
+    address,
+    token1,
+    token2,
+    removeEquity,
+  }
+
+  const res = await swapApiFetch('build/remove', {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -292,7 +328,6 @@ export const postSwap = async ({
     method: 'POST',
     body: JSON.stringify(body),
   })
-  console.log({ res })
   return res
 }
 
@@ -316,6 +351,5 @@ export const postAdd = async ({
     method: 'POST',
     body: JSON.stringify(body),
   })
-  console.log({ res })
   return res
 }

@@ -36,6 +36,7 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
 import SwapDataArea from '@/components/swap/SwapDataArea.vue'
+import MainBtn from '@/components/MainBtn.vue'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -665,25 +666,21 @@ async function doSwap() {
       </div> -->
 
         <!-- disabled buttons: calculating or have unmets  -->
-        <button
-          :class="['disabled', 'main-btn']"
-          v-if="calculating"
-          :disabled="true"
-        >
+        <MainBtn :class="['disabled']" v-if="calculating" :disabled="true">
           <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
-        </button>
+        </MainBtn>
 
-        <button
-          :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
+        <MainBtn
+          :class="[!!unmet && !unmet.handler && 'disabled']"
           v-else-if="unmet"
           :disabled="!unmet.handler"
           @click="!!unmet.handler && unmet.handler()"
         >
           {{ unmet.message || '' }}
-        </button>
+        </MainBtn>
 
         <!-- confirm button -->
-        <button class="main-btn" v-else @click="doSwap">Swap</button>
+        <MainBtn v-else @click="doSwap">Swap</MainBtn>
       </div>
 
       <!-- background blur -->
@@ -693,13 +690,3 @@ async function doSwap() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.main-btn {
-  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
-}
-
-.main-btn.disabled {
-  @apply cursor-not-allowed bg-zinc-800 text-zinc-300/50;
-}
-</style>

@@ -67,3 +67,11 @@ input:focus {
 .cute-button {
   @apply border border-zinc-700 hover:border-primary/60 hover:bg-primary/5 hover:text-primary;
 }
+
+.swap-main-btn {
+  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
+}
+
+.swap-main-btn.disabled {
+  @apply cursor-not-allowed bg-zinc-800 text-zinc-300/50;
+}
