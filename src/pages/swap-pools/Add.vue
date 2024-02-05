@@ -12,7 +12,7 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useNetworkStore } from '@/stores/network'
 
-import { buildAdd, postAdd, previewAdd } from '@/queries/swap'
+import { buildAdd, postTask, previewAdd } from '@/queries/swap'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { exclusiveChange } from '@/lib/build-helpers'
 
@@ -230,7 +230,7 @@ function onAmountCleared() {
 // mutations
 const queryClient = useQueryClient()
 const { mutate: mutatePostAdd } = useMutation({
-  mutationFn: postAdd,
+  mutationFn: postTask,
   onSuccess: async () => {
     ElMessage.success('Add liquidity success')
     queryClient.invalidateQueries()

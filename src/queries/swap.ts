@@ -308,30 +308,7 @@ export const build2xSwap = async ({
   return res
 }
 
-export const postSwap = async ({
-  buildId,
-  rawPsbt,
-}: {
-  buildId: string
-  rawPsbt: string
-}): Promise<{
-  gas: string
-  ratio: string
-  poolRatio: string
-  serviceFee: string
-  sourceAmount: string
-  targetAmount: string
-}> => {
-  const body = { buildId, rawPsbt }
-
-  const res = await swapApiFetch('tasks', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  })
-  return res
-}
-
-export const postAdd = async ({
+export const postTask = async ({
   buildId,
   rawPsbt,
 }: {

@@ -17,7 +17,7 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import {
   SwapType,
   build2xSwap,
-  postSwap,
+  postTask,
   previewSwap,
   build1xSwap,
   buildX2Swap,
@@ -407,7 +407,7 @@ watch(
 // mutations
 const queryClient = useQueryClient()
 const { mutate: mutatePostSwap } = useMutation({
-  mutationFn: postSwap,
+  mutationFn: postTask,
   onSuccess: async () => {
     ElMessage.success('Swap success')
     queryClient.invalidateQueries()
