@@ -94,7 +94,7 @@ async function onClaimReward() {
 </script>
 
 <template>
-  <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
+  <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <h1 class="text-2xl font-semibold text-left mb-6 text-zinc-100">
       Events & Rewards
     </h1>

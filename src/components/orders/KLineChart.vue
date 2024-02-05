@@ -44,7 +44,7 @@ const { data: rawStats } = useQuery({
       limit: limit.value,
     }),
   placeholderData: [],
-  cacheTime: 1000 * 60 * 60, // 1 hour
+  staleTime: 1000 * 60 * 60, // 1 hour
 })
 
 const klineStats = computed(() => {

@@ -83,7 +83,7 @@ const currentLevelProgress = computed(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
+  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <h1 class="text-2xl font-semibold text-center mb-6 text-zinc-100">
       Leaderboard
     </h1>
@@ -97,7 +97,7 @@ const currentLevelProgress = computed(() => {
         <div class="flex gap-4 items-center">
           <AssetSelect
             :asset-symbol="tick"
-            :use-assets="activityAssetsInfo"
+            :use-assets="(activityAssetsInfo as any)"
             @update:asset-symbol="tick = $event"
           />
 

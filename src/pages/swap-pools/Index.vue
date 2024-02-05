@@ -3,10 +3,8 @@ import { useRoute } from 'vue-router'
 
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
-import SwapBlur from '@/components/swap/SwapBlur.vue'
-import ConnectionModal from '@/components/header/ConnectionModal.vue'
-import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
 import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
+import SwapLayout from '@/components/swap/SwapLayout.vue'
 
 const { pairStr } = useSwapPoolPair()
 
@@ -17,14 +15,9 @@ function isLinkActive(keyword: string) {
 </script>
 
 <template>
-  <ConnectionModal />
-  <WalletMissingModal />
-
-  <div
-    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-110 origin-top w-112"
-  >
+  <SwapLayout>
     <div
-      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900"
+      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 z-10"
     >
       <!-- header -->
       <div class="px-3 flex gap-4 border-b border-zinc-800 pb-2">
@@ -78,10 +71,7 @@ function isLinkActive(keyword: string) {
       <!-- sub pages -->
       <router-view></router-view>
     </div>
-
-    <!-- background blur -->
-    <SwapBlur />
-  </div>
+  </SwapLayout>
 </template>
 
 <style scoped></style>

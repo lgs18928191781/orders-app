@@ -157,7 +157,7 @@ watch(
 
 // fourth watcher: hasAmount
 const hasAmount = computed(() => {
-  return debouncedPercentage.value[0] > 0
+  return debouncedPercentage.value[0] > 0 && token1Amount.value.gt(0)
 })
 watch(
   () => hasAmount.value,

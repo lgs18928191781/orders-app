@@ -53,21 +53,25 @@ watch(token2Amount, async (newAmount) => {
     token2: token2Symbol.value.toLowerCase(),
     source: 'token2',
     sourceAmount: newAmount,
-  }).then((preview) => {
-    conditions.value = conditions.value.map((c) => {
-      if (c.condition === 'insufficient-liquidity') {
-        c.met = true
-      }
-      return c
-    })
-
-    ratio.value = new Decimal(preview.ratio)
-    addEquity.value = new Decimal(preview.addEquity)
-    poolEquity.value = new Decimal(preview.poolEquity)
-
-    token1Amount.value = preview.targetAmount
-    calculatingToken1.value = false
   })
+    .then((preview) => {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'insufficient-liquidity') {
+          c.met = true
+        }
+        return c
+      })
+
+      ratio.value = new Decimal(preview.ratio)
+      addEquity.value = new Decimal(preview.addEquity)
+      poolEquity.value = new Decimal(preview.poolEquity)
+
+      token1Amount.value = preview.targetAmount
+      calculatingToken1.value = false
+    })
+    .catch(() => {
+      ElMessage.error('Failed to calculate')
+    })
 })
 
 // connection

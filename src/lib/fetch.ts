@@ -4,11 +4,7 @@ async function fetchWrapper(url: string, options?: RequestInit): Promise<any> {
     if (response.status === 422) {
       const jsoned = await response.json()
 
-      throw new Error({
-        code: 422,
-        message: jsoned.message,
-      })
-      throw new Error('Unauthorized')
+      throw new Error(jsoned.message)
     }
     throw new Error(
       `Failed to fetch ${url}: ${response.status} ${response.statusText}`

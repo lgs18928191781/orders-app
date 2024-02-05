@@ -11,7 +11,6 @@ import { useBtcJsStore } from '@/stores/btcjs'
 
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { useExpandSwap } from '@/hooks/use-expand-swap'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 import {
@@ -26,21 +25,16 @@ import { exclusiveChange } from '@/lib/build-helpers'
 import { ERRORS } from '@/data/errors'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 
-import SwapBlur from '@/components/swap/SwapBlur.vue'
-import ConnectionModal from '@/components/header/ConnectionModal.vue'
-import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
 import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
 import SwapSideWithInput from '@/components/swap/SwapSideWithInput.vue'
 import SwapPriceDisclosure from '@/components/swap/SwapPriceDisclosure.vue'
 import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
-import SwapExpandControl from '@/components/swap/SwapExpandControl.vue'
-import SwapDataArea from '@/components/swap/SwapDataArea.vue'
 import MainBtn from '@/components/MainBtn.vue'
+import SwapLayout from '@/components/swap/SwapLayout.vue'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
-const { isExpand } = useExpandSwap()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const btcjsStore = useBtcJsStore()
 const networkStore = useNetworkStore()
@@ -536,114 +530,106 @@ async function doSwap() {
 </script>
 
 <template>
-  <ConnectionModal />
-  <WalletMissingModal />
-
-  <div class="grow flex items-start justify-center gap-16 pt-16">
-    <SwapDataArea v-show="isExpand" />
+  <SwapLayout>
     <div
-      class="relative max-w-md rounded-3xl lg:scale-110 w-112 z-10"
-      :class="[isExpand ? 'origin-top-left' : 'origin-top']"
+      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
     >
-      <div
-        class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
-      >
-        <!-- header -->
-        <div class="flex gap-4 px-3">
-          <router-link
-            to="/swap"
-            class="flex items-center space-x-1 text-zinc-200"
+      <!-- header -->
+      <div class="flex gap-4 px-3">
+        <router-link
+          to="/swap"
+          class="flex items-center space-x-1 text-zinc-200"
+        >
+          Swap
+        </router-link>
+
+        <router-link
+          to="/swap-pools"
+          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
+        >
+          Pools
+        </router-link>
+
+        <SwapPairSelect class="ml-auto" />
+      </div>
+
+      <!-- body -->
+      <div class="text-sm">
+        <SwapSideBrc
+          side="pay"
+          v-if="flipped"
+          v-model:symbol="token2Symbol"
+          v-model:amount="token2Amount"
+          v-model:inscription-ids="token2InscriptionIds"
+          @has-enough="hasEnough = true"
+          @not-enough="hasEnough = false"
+          @amount-entered="hasAmount = true"
+          @amount-cleared="hasAmount = false"
+          @became-source="swapType = '2x'"
+        />
+        <SwapSideWithInput
+          side="pay"
+          v-else
+          v-model:symbol="token1Symbol"
+          v-model:amount="token1Amount"
+          :calculating="calculatingPay"
+          @has-enough="hasEnough = true"
+          @not-enough="hasEnough = false"
+          @amount-entered="hasAmount = true"
+          @amount-cleared="hasAmount = false"
+          @became-source="swapType = '1x'"
+        />
+
+        <!-- flip -->
+        <div class="h-0 relative flex justify-center z-30 my-0.5">
+          <div
+            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-110 duration-150"
           >
-            Swap
-          </router-link>
+            <ArrowDownIcon
+              class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
+            />
 
-          <router-link
-            to="/swap-pools"
-            class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
-          >
-            Pools
-          </router-link>
-
-          <SwapPairSelect class="ml-auto" />
-        </div>
-
-        <!-- body -->
-        <div class="text-sm">
-          <SwapSideBrc
-            side="pay"
-            v-if="flipped"
-            v-model:symbol="token2Symbol"
-            v-model:amount="token2Amount"
-            v-model:inscription-ids="token2InscriptionIds"
-            @has-enough="hasEnough = true"
-            @not-enough="hasEnough = false"
-            @amount-entered="hasAmount = true"
-            @amount-cleared="hasAmount = false"
-            @became-source="swapType = '2x'"
-          />
-          <SwapSideWithInput
-            side="pay"
-            v-else
-            v-model:symbol="token1Symbol"
-            v-model:amount="token1Amount"
-            :calculating="calculatingPay"
-            @has-enough="hasEnough = true"
-            @not-enough="hasEnough = false"
-            @amount-entered="hasAmount = true"
-            @amount-cleared="hasAmount = false"
-            @became-source="swapType = '1x'"
-          />
-
-          <!-- flip -->
-          <div class="h-0 relative flex justify-center z-30 my-0.5">
-            <div
-              class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-110 duration-150"
+            <button
+              class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
+              :class="{
+                'rotate-180': flipped,
+              }"
+              @click="flipAsset"
             >
-              <ArrowDownIcon
-                class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
-              />
-
-              <button
-                class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
-                :class="{
-                  'rotate-180': flipped,
-                }"
-                @click="flipAsset"
-              >
-                <ArrowUpDownIcon class="h-4 w-4 text-primary" />
-              </button>
-            </div>
+              <ArrowUpDownIcon class="h-4 w-4 text-primary" />
+            </button>
           </div>
-
-          <SwapSideBtc
-            side="receive"
-            v-if="flipped"
-            v-model:symbol="token1Symbol"
-            v-model:amount="token1Amount"
-            :calculating="calculatingReceive"
-            @became-source="swapType = 'x1'"
-          />
-          <SwapSideWithInput
-            side="receive"
-            v-else
-            v-model:symbol="token2Symbol"
-            v-model:amount="token2Amount"
-            :calculating="calculatingReceive"
-            @became-source="swapType = 'x2'"
-          />
-
-          <SwapPriceDisclosure
-            :pay-symbol="paySymbol"
-            :receive-symbol="receiveSymbol"
-            v-show="!!Number(sourceAmount)"
-            :ratio="ratio"
-            :pool-ratio="poolRatio"
-            :calculating="calculating"
-          />
         </div>
 
-        <!--price impact-->
-        <!-- <div
+        <SwapSideBtc
+          side="receive"
+          v-if="flipped"
+          v-model:symbol="token1Symbol"
+          v-model:amount="token1Amount"
+          :calculating="calculatingReceive"
+          @became-source="swapType = 'x1'"
+        />
+        <SwapSideWithInput
+          side="receive"
+          v-else
+          v-model:symbol="token2Symbol"
+          v-model:amount="token2Amount"
+          :calculating="calculatingReceive"
+          @became-source="swapType = 'x2'"
+        />
+
+        <SwapPriceDisclosure
+          :pay-symbol="paySymbol"
+          :receive-symbol="receiveSymbol"
+          v-show="!!Number(sourceAmount)"
+          :ratio="ratio"
+          :pool-ratio="poolRatio"
+          :calculating="calculating"
+        />
+      </div>
+
+      <!--price impact-->
+      <!-- <div
         v-if="
           Math.abs(+tokenImpact.slip1) > 1 || Math.abs(+tokenImpact.slip2) > 1
         "
@@ -665,28 +651,22 @@ async function doSwap() {
         </div>
       </div> -->
 
-        <!-- disabled buttons: calculating or have unmets  -->
-        <MainBtn :class="['disabled']" v-if="calculating" :disabled="true">
-          <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
-        </MainBtn>
+      <!-- disabled buttons: calculating or have unmets  -->
+      <MainBtn :class="['disabled']" v-if="calculating" :disabled="true">
+        <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
+      </MainBtn>
 
-        <MainBtn
-          :class="[!!unmet && !unmet.handler && 'disabled']"
-          v-else-if="unmet"
-          :disabled="!unmet.handler"
-          @click="!!unmet.handler && unmet.handler()"
-        >
-          {{ unmet.message || '' }}
-        </MainBtn>
+      <MainBtn
+        :class="[!!unmet && !unmet.handler && 'disabled']"
+        v-else-if="unmet"
+        :disabled="!unmet.handler"
+        @click="!!unmet.handler && unmet.handler()"
+      >
+        {{ unmet.message || '' }}
+      </MainBtn>
 
-        <!-- confirm button -->
-        <MainBtn v-else @click="doSwap">Swap</MainBtn>
-      </div>
-
-      <!-- background blur -->
-      <SwapBlur />
-      <!-- expand control -->
-      <SwapExpandControl />
+      <!-- confirm button -->
+      <MainBtn v-else @click="doSwap">Swap</MainBtn>
     </div>
-  </div>
+  </SwapLayout>
 </template>
