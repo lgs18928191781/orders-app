@@ -17,7 +17,7 @@ function isLinkActive(keyword: string) {
 <template>
   <SwapLayout>
     <div
-      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 z-10"
+      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 h-full"
     >
       <!-- header -->
       <div class="px-3 flex gap-4 border-b border-zinc-800 pb-2">

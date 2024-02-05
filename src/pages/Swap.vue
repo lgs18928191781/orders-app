@@ -532,7 +532,7 @@ async function doSwap() {
 <template>
   <SwapLayout>
     <div
-      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
+      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3 h-full"
     >
       <!-- header -->
       <div class="flex gap-4 px-3">

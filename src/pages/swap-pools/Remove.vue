@@ -18,17 +18,14 @@ import RemoveSlider from '@/components/swap/pools/RemoveSlider.vue'
 import MainBtn from '@/components/MainBtn.vue'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { ElMessage } from 'element-plus'
-import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import { IS_DEV } from '@/data/constants'
 import { buildRemove, postTask } from '@/queries/swap'
-import { useBtcJsStore } from '@/stores/btcjs'
-import { exclusiveChange } from '@/lib/build-helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
-const btcjsStore = useBtcJsStore()
 const address = connectionStore.getAddress
 const network = networkStore.network
 
@@ -185,7 +182,7 @@ const queryClient = useQueryClient()
 const { mutate: mutatePostRemove } = useMutation({
   mutationFn: postTask,
   onSuccess: async () => {
-    ElMessage.success('Add liquidity success')
+    ElMessage.success('Remove liquidity success')
     queryClient.invalidateQueries()
   },
   onError: (err: any) => {
