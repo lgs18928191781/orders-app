@@ -5,8 +5,16 @@ import { getPoolStatusQuery } from '@/queries/swap.query'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useQuery } from '@tanstack/vue-query'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOptions,
+  ListboxOption,
+} from '@headlessui/vue'
+import { ChevronRightIcon } from 'lucide-vue-next'
+import { CheckIcon } from 'lucide-vue-next'
 
 const { token1Symbol, token2Symbol, selectedPair, pairStr } = useSwapPoolPair()
 const token1Icon = computed(() => selectedPair.value?.token1Icon)
@@ -37,6 +45,9 @@ function toAdd() {
 function toSwap() {
   router.push(`/swap/${pairStr.value}`)
 }
+
+const transactionTypes = ['all', 'swaps', 'adds', 'removes']
+const selectedTransactionType = ref(transactionTypes[0])
 </script>
 
 <template>
@@ -116,7 +127,7 @@ function toSwap() {
         </button>
 
         <button
-          class="py-3 px-6 rounded-xl bg-primary text-orange-50 bg-opacity-80 hover:bg-opacity-100"
+          class="py-2.5 px-6 rounded-xl bg-transparent border-2 border-primary text-orange-50 bg-opacity-80 hover:bg-opacity-100 border-opacity-60 hover:border-opacity-100 hover:text-primary"
           @click="toSwap"
         >
           Swap
@@ -170,7 +181,7 @@ function toSwap() {
 
         <!-- right stats area -->
         <div class="grid grid-cols-3 grow gap-x-4 gap-y-2 text-sm">
-          <div class="col-span-3 text-primary/50 font-bold text-base">
+          <div class="col-span-3 text-primary/80 font-bold text-base">
             Pool Overview
           </div>
           <div class="">
@@ -197,7 +208,7 @@ function toSwap() {
             </div>
           </div>
 
-          <div class="col-span-3 text-primary/50 font-bold mt-6 text-base">
+          <div class="col-span-3 text-primary/80 font-bold mt-6 text-base">
             Your Position
           </div>
 
@@ -234,10 +245,64 @@ function toSwap() {
 
       <div class="p-8 rounded-3xl bg-zinc-900 mt-4 grid">
         <div class="grid-row">
-          <div class="">All</div>
+          <div class="">
+            <Listbox v-model="selectedTransactionType">
+              <div class="relative mt-1">
+                <ListboxButton
+                  class="relative w-28 rounded-lg bg-zinc-900 py-2 pl-3 pr-8 text-left shadow-md focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-primary/50 sm:text-sm border border-zinc-700"
+                >
+                  <span class="block truncate capitalize">{{
+                    selectedTransactionType
+                  }}</span>
+                  <span
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1"
+                  >
+                    <ChevronRightIcon
+                      class="h-5 w-5 text-zinc-400"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </ListboxButton>
+
+                <transition
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-from-class="opacity-100"
+                  leave-to-class="opacity-0"
+                >
+                  <ListboxOptions
+                    class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-black py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                  >
+                    <ListboxOption
+                      v-slot="{ active, selected }"
+                      v-for="t in transactionTypes"
+                      :key="t"
+                      :value="t"
+                      as="template"
+                    >
+                      <li
+                        :class="[
+                          active ? 'bg-primary/70' : 'bg-black',
+                          'relative select-none py-2 pl-4 pr-10 cursor-pointer capitalize',
+                        ]"
+                      >
+                        {{ t }}
+
+                        <span
+                          v-if="selected"
+                          class="absolute inset-y-0 right-0 flex items-center pr-3 text-primary"
+                        >
+                          <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                        </span>
+                      </li>
+                    </ListboxOption>
+                  </ListboxOptions>
+                </transition>
+              </div>
+            </Listbox>
+          </div>
           <div class="">Total Value</div>
-          <div class="">Token1 Amount</div>
-          <div class="">Token2 Amount</div>
+          <div class="">{{ prettySymbol(token1Symbol) }} Amount</div>
+          <div class="">{{ prettySymbol(token2Symbol) }} Amount</div>
           <div class="">Account</div>
           <div class="">Time</div>
         </div>

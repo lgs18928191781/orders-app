@@ -6,6 +6,7 @@ import { useBtcJsStore } from '@/stores/btcjs'
 // import * as bip39 from 'bip39'
 import BIP32Factory from 'bip32'
 import { useSelectOrder } from '@/hooks/use-select-order'
+import { testnet } from 'bitcoinjs-lib/src/networks'
 
 const btcJsStore = useBtcJsStore()
 
@@ -94,6 +95,15 @@ function decodePsbt() {
   const myHex2 = my2.toHex()
   console.log({ myHex, myHex2, equal: myHex === myHex2 })
 }
+
+function toOutputScript() {
+  const btcjs = btcJsStore.get!
+  const outputScript = btcjs.address.toOutputScript(
+    'tb1p4g232ucvzqr09dkjccj6fzx56ccyptss69hznz5grdj0fwmcc7ysdj6a3s',
+    testnet
+  )
+  console.log({ outputScript: outputScript.toString('hex') })
+}
 </script>
 
 <template>
@@ -110,5 +120,9 @@ function decodePsbt() {
       Add Random String
     </button>
     <p></p>
+
+    <button @click="toOutputScript" class="p-2 rounded border border-zinc-500">
+      to output script
+    </button>
   </div>
 </template>
