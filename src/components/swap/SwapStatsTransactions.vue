@@ -107,7 +107,7 @@ function prettyType(type: '1x' | '2x' | 'x1' | 'x2' | 'add' | 'remove') {
           class="text-zinc-500 text-sm group-hover:text-zinc-300 cursor-pointer"
           @click="selectedTransactionType = 'all'"
         >
-          Only my transactions
+          View my transactions
         </label>
       </div>
     </div>
