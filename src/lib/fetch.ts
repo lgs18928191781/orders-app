@@ -109,7 +109,7 @@ export async function swapApiFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit
 ) {
-  const swapApiUrl = `http://localhost:3000/api/${url}`
+  const swapApiUrl = `${import.meta.env.VITE_SWAP_API_HOST}/api/${url}`
   if (!options)
     options = {
       headers: {
