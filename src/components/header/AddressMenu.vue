@@ -1,18 +1,25 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { ElMessage } from 'element-plus'
 import { useQuery } from '@tanstack/vue-query'
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { MenuIcon } from 'lucide-vue-next'
+import { ElMessage } from 'element-plus'
+import {
+  MenuIcon,
+  CopyIcon,
+  ArrowRightLeftIcon,
+  Trash2Icon,
+  UnplugIcon,
+} from 'lucide-vue-next'
 
-import { prettyAddress } from '@/lib/formatters'
 import { useNetworkStore } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
 
+import { prettyAddress } from '@/lib/formatters'
+
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
 import metaletIcon from '@/assets/metalet-icon.png?url'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -97,7 +104,7 @@ async function switchNetwork() {
       </span>
 
       <MenuIcon
-        class="h-5 text-zinc-300 group-hover:text-primary group-hover:scale-110"
+        class="h-5 text-zinc-300 group-hover:text-primary group-hover:scale-125"
       />
     </MenuButton>
 
@@ -117,10 +124,11 @@ async function switchNetwork() {
         >
           <MenuItem v-slot="{ active }">
             <button
-              class="p-4 block hover:text-primary w-full text-left"
+              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
               @click="copyAddress"
             >
-              Copy Address
+              <CopyIcon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <span>Copy Address</span>
             </button>
           </MenuItem>
 
@@ -129,28 +137,33 @@ async function switchNetwork() {
               Network: {{ networkStore.network }}
             </div>
             <button
-              class="p-4 block hover:text-primary w-full text-left"
+              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
               @click="switchNetwork"
             >
-              Switch Network
+              <ArrowRightLeftIcon
+                class="h-4 w-4 inline-block group-hover:scale-125"
+              />
+              <span>Switch Network</span>
             </button>
           </MenuItem>
 
           <MenuItem>
             <button
-              class="p-4 block hover:text-primary transition w-full text-left"
+              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
               @click="clearCache"
             >
-              Clear Account Cache
+              <Trash2Icon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <span>Clear Account Cache</span>
             </button>
           </MenuItem>
 
           <MenuItem v-if="connectionStore.has">
             <button
-              class="p-4 block hover:text-primary transition w-full text-left"
+              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
               @click="onDisconnect"
             >
-              Disconnect
+              <UnplugIcon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <span>Disconnect</span>
             </button>
           </MenuItem>
         </div>
