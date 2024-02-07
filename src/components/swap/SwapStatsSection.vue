@@ -6,15 +6,21 @@ import { useRouter } from 'vue-router'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
+import { useFiat } from '@/hooks/use-fiat'
 
 import { getPoolStatusQuery } from '@/queries/swap.query'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
 
 import SwapStatsTransactions from '@/components/swap/SwapStatsTransactions.vue'
+import { get } from '@vueuse/core'
+import Decimal from 'decimal.js'
 
 const { token1Symbol, token2Symbol, selectedPair, pairStr } = useSwapPoolPair()
 const token1Icon = computed(() => selectedPair.value?.token1Icon)
 const token2Icon = computed(() => selectedPair.value?.token2Icon)
+
+const { useFiatRateQuery, getFiatPrice, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
@@ -34,6 +40,14 @@ const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
   )
 )
 
+const tvl = computed(() => {
+  if (!poolStatus.value || !fiatRate.value) return '0'
+
+  const token1Pool = poolStatus.value.token1Pool
+  const valueInFiat = getFiatPrice(token1Pool, get(fiatRate))
+  return '≈ $' + new Decimal(valueInFiat).mul(2).toDP(2).toString()
+})
+
 function toAdd() {
   router.push(`/swap-pools/${pairStr.value}/add`)
 }
@@ -46,7 +60,7 @@ function toSwap() {
 <template>
   <div class="grid gap-8" v-if="poolStatus">
     <!-- row 1 -->
-    <div class="flex items-end justify-between gap-48">
+    <div class="flex items-end justify-between">
       <!-- left -->
       <div class="flex flex-col gap-6">
         <!-- title -->
@@ -139,7 +153,7 @@ function toSwap() {
         <div class="p-4 bg-zinc-800/50 rounded-2xl w-72">
           <div class="label">Total Tokens Locked</div>
 
-          <div class="flex items-center text-zinc-300 gap-2 mt-4">
+          <div class="flex items-center text-zinc-300 gap-2 mt-6">
             <img
               :src="token1Icon"
               class="w-6 h-6 rounded-full"
@@ -155,7 +169,7 @@ function toSwap() {
             </div>
           </div>
 
-          <div class="flex items-center text-zinc-300 gap-2 mt-2">
+          <div class="flex items-center text-zinc-300 gap-2 mt-3">
             <img
               :src="token2Icon"
               class="w-6 h-6 rounded-full"
@@ -181,7 +195,7 @@ function toSwap() {
             <div class="label">TVL</div>
 
             <div class="value">
-              {{ '$225.18m' }}
+              {{ tvl }}
             </div>
           </div>
 
@@ -189,7 +203,7 @@ function toSwap() {
             <div class="label">Volume 24h</div>
 
             <div class="value">
-              {{ '$3.42m' }}
+              {{ '-' }}
             </div>
           </div>
 
@@ -197,7 +211,7 @@ function toSwap() {
             <div class="label">24h Fees</div>
 
             <div class="value">
-              {{ '$10.27k' }}
+              {{ '-' }}
             </div>
           </div>
 

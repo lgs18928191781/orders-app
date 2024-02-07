@@ -62,7 +62,7 @@ function onDisconnect() {
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-1"
     >
-      <MenuItems class="absolute left-0 z-10 mt-1 flex w-screen max-w-min">
+      <MenuItems class="absolute left-0 z-50 mt-1 flex w-screen max-w-min">
         <div
           class="w-56 shrink rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg ring-1 ring-zinc-900/5 overflow-hidden divide-y divide-zinc-700 shadow-primary/20"
         >
