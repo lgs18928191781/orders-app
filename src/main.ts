@@ -5,7 +5,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
 import './style.css'
-import routes, { credentialGuard, geoGuard, maintenanceGuard } from '@/routes'
+import routes, { geoGuard, maintenanceGuard } from '@/routes'
 import App from './App.vue'
 
 import { Buffer } from 'buffer'

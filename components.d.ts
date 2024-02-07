@@ -84,6 +84,7 @@ declare module '@vue/runtime-core' {
     SwapSideBtc: typeof import('./src/components/swap/SwapSideBtc.vue')['default']
     SwapSideWithInput: typeof import('./src/components/swap/SwapSideWithInput.vue')['default']
     SwapStatsSection: typeof import('./src/components/swap/SwapStatsSection.vue')['default']
+    SwapStatsTransactions: typeof import('./src/components/swap/SwapStatsTransactions.vue')['default']
     TheHeader: typeof import('./src/components/header/TheHeader.vue')['default']
     TheNavbar: typeof import('./src/components/header/TheNavbar.vue')['default']
     Toast: typeof import('./src/components/ui/toast/Toast.vue')['default']
