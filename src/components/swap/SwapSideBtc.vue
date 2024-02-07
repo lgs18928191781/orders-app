@@ -193,7 +193,7 @@ const balanceDisplay = computed(() => {
           amountTextSize,
         ]"
       >
-        {{ tweenedAmount.number }}
+        {{ new Decimal(tweenedAmount.number).div(1e8).toDP(8).toString() }}
       </div>
 
       <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />

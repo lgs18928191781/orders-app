@@ -15,12 +15,12 @@ const { isExpanded } = useExpandSwap()
   <WalletMissingModal />
 
   <div
-    class="grow flex justify-center gap-12 pt-16 px-8 max-w-10xl mx-auto"
+    class="grow flex justify-center gap-12 pt-8 px-3 max-w-9xl w-full mx-auto"
     :class="[isExpanded ? 'items-start' : 'items-start']"
   >
-    <SwapStatsSection v-show="isExpanded" class="flex-1 mb-16" />
+    <SwapStatsSection v-show="isExpanded" class="flex-1 mb-8" />
 
-    <div :class="['relative  rounded-3xl w-112  z-10 mb-16 max-w-md']">
+    <div :class="['relative rounded-3xl w-112 z-10 mb-8 max-w-md']">
       <slot></slot>
       <!-- background blur -->
       <SwapBlur v-if="!isExpanded" />
