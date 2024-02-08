@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, type Ref, computed } from 'vue'
+import { ref, watch, type Ref, computed, onMounted } from 'vue'
 import { ArrowDownIcon, ArrowUpDownIcon, Loader2Icon } from 'lucide-vue-next'
 import Decimal from 'decimal.js'
 import { ElMessage } from 'element-plus'
@@ -24,6 +24,7 @@ import {
 import { exclusiveChange } from '@/lib/build-helpers'
 import { ERRORS } from '@/data/errors'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import { sleep } from '@/lib/helpers'
 
 import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
 import SwapSideWithInput from '@/components/swap/SwapSideWithInput.vue'
@@ -32,7 +33,6 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import MainBtn from '@/components/MainBtn.vue'
 import SwapLayout from '@/components/swap/SwapLayout.vue'
-import { sleep } from '@/lib/helpers'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()

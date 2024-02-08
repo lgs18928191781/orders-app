@@ -8,6 +8,7 @@ import {
   ArrowRightLeftIcon,
   Trash2Icon,
   UnplugIcon,
+  FuelIcon,
 } from 'lucide-vue-next'
 
 import { useNetworkStore } from '@/stores/network'
@@ -93,14 +94,24 @@ async function switchNetwork() {
   const toNetwork = networkStore.network === 'testnet' ? 'livenet' : 'testnet'
   await window.unisat.switchNetwork(toNetwork)
 }
+
+async function onGetGasFromFaucet() {
+  window.open('https://bitcoinfaucet.uo1.net/send.php', '_blank')
+}
 </script>
 
 <template>
   <Menu as="div" class="relative inline-block">
-    <MenuButton class="flex gap-2 pr-3 group">
+    <MenuButton class="flex gap-2 pr-3 group items-center">
       <img class="h-5" :src="walletIcon" alt="wallet icon" v-if="walletIcon" />
       <span class="text-sm text-primary">
         {{ address ? prettyAddress(address, 4) : '-' }}
+      </span>
+      <span
+        class="text-xs text-red-500 font-bold"
+        v-if="networkStore.network === 'testnet'"
+      >
+        (Testnet)
       </span>
 
       <MenuIcon
@@ -144,6 +155,20 @@ async function switchNetwork() {
                 class="h-4 w-4 inline-block group-hover:scale-125"
               />
               <span>Switch Network</span>
+            </button>
+          </MenuItem>
+
+          <MenuItem
+            v-slot="{ active }"
+            as="div"
+            v-if="networkStore.network === 'testnet'"
+          >
+            <button
+              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
+              @click="onGetGasFromFaucet"
+            >
+              <FuelIcon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <span>Testnet Faucet</span>
             </button>
           </MenuItem>
 

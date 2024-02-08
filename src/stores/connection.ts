@@ -70,7 +70,9 @@ export const useConnectionStore = defineStore('connection', {
 
       return state.last.address
     },
-    isTaproot: (state) => state.last.address.startsWith('bc1p'),
+    isTaproot: (state) =>
+      state.last.address.startsWith('bc1p') ||
+      state.last.address.startsWith('tb1p'),
     getPubKey: (state) => state.last.pubKey,
     provider: (state) => {
       if (!state.last) return null
