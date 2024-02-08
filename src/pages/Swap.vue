@@ -446,7 +446,10 @@ const afterBuildSwap = async ({
       if (!psbt1xFinished) throw new Error('Failed to add change')
 
       const signed1x = await connectionStore.adapter.signPsbt(
-        psbt1xFinished.toHex()
+        psbt1xFinished.toHex(),
+        {
+          autoFinalized: false,
+        }
       )
       if (!signed1x) return
       if (!sourceAmount.value) return
@@ -470,7 +473,10 @@ const afterBuildSwap = async ({
       if (!psbtX2Finished) throw new Error('Failed to add change')
 
       const signedX2 = await connectionStore.adapter.signPsbt(
-        psbtX2Finished.toHex()
+        psbtX2Finished.toHex(),
+        {
+          autoFinalized: false,
+        }
       )
       if (!signedX2) return
       if (!sourceAmount.value) return
@@ -482,7 +488,9 @@ const afterBuildSwap = async ({
       break
 
     case '2x':
-      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt)
+      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt, {
+        autoFinalized: false,
+      })
       if (!signed2x) return
       if (!sourceAmount.value) return
 

@@ -220,7 +220,7 @@ function prettyType(type: '1x' | '2x' | 'x1' | 'x2' | 'add' | 'remove') {
 <style scoped>
 .grid-row {
   @apply grid gap-6 items-center text-2xs text-zinc-300 border-b border-zinc-800 py-2 xl:text-xs 2xl:text-sm xl:py-4;
-  grid-template-columns: 1.5fr repeat(5, 1fr);
+  grid-template-columns: 1.5fr repeat(4, 1fr) 1.5fr;
 }
 .grid-row div {
   @apply text-right;

@@ -283,7 +283,7 @@ watch(
       />
 
       <button v-if="side === 'pay' && amount" @click="updateAmount(0)">
-        <EraserIcon class="w-4 h-4 text-zinc-700 hover:text-zinc-300" />
+        <EraserIcon class="w-4 h-4 text-zinc-500 hover:text-zinc-300" />
       </button>
 
       <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />
