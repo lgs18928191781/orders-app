@@ -20,6 +20,7 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import AddPricesAndShares from '@/components/swap/pools/AddPricesAndShares.vue'
 import MainBtn from '@/components/MainBtn.vue'
+import { sleep } from '@/lib/helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -237,6 +238,7 @@ const { mutate: mutatePostAdd } = useMutation({
   mutationFn: postTask,
   onSuccess: async () => {
     ElMessage.success('Add liquidity success')
+    await sleep(1000)
     queryClient.invalidateQueries()
   },
   onError: (err: any) => {

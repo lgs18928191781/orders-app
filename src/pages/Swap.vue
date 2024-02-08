@@ -32,6 +32,7 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import MainBtn from '@/components/MainBtn.vue'
 import SwapLayout from '@/components/swap/SwapLayout.vue'
+import { sleep } from '@/lib/helpers'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -404,6 +405,8 @@ const { mutate: mutatePostSwap } = useMutation({
   mutationFn: postTask,
   onSuccess: async () => {
     ElMessage.success('Swap success')
+
+    await sleep(1000)
     queryClient.invalidateQueries()
   },
   onError: (err: any) => {

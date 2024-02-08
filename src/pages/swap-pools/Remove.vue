@@ -20,6 +20,7 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { ElMessage } from 'element-plus'
 import { IS_DEV } from '@/data/constants'
 import { buildRemove, postTask } from '@/queries/swap'
+import { sleep } from '@/lib/helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -183,6 +184,7 @@ const { mutate: mutatePostRemove } = useMutation({
   mutationFn: postTask,
   onSuccess: async () => {
     ElMessage.success('Remove liquidity success')
+    await sleep(1000)
     queryClient.invalidateQueries()
   },
   onError: (err: any) => {
