@@ -6,7 +6,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
@@ -15,6 +15,7 @@ import { useConnectionModal } from '@/hooks/use-connection-modal'
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
+import { useRoute } from 'vue-router'
 
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
@@ -62,6 +63,11 @@ async function connectToMetalet() {
     closeConnectionModal()
   }
 }
+
+const route = useRoute()
+const isSwapPage = computed(() => {
+  return route.fullPath.includes('swap')
+})
 </script>
 
 <template>
@@ -115,6 +121,7 @@ async function connectToMetalet() {
                     class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
                     ref="firstButtonRef"
                     @click="connectToOkx"
+                    v-if="!isSwapPage"
                   >
                     <img class="h-12 rounded" :src="OkxIcon" alt="Metamask" />
                     <span class="">OKX</span>
@@ -132,7 +139,7 @@ async function connectToMetalet() {
                     <span class="">Unisat</span>
                   </button>
 
-                  <div class="relative">
+                  <div class="relative" v-if="!isSwapPage">
                     <button
                       class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 enabled:hover:shadow-md enabled:hover:shadow-primary/30 enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 disabled:opacity-30"
                       @click="connectToMetalet"
@@ -149,6 +156,10 @@ async function connectToMetalet() {
 
                 <!-- footer -->
                 <div class="mt-16 text-xs text-zinc-500 space-y-1">
+                  <p v-if="isSwapPage" class="text-primary">
+                    Swap module is currently only supported on Unisat wallet and
+                    Testnet environment.
+                  </p>
                   <p>By connecting wallet,</p>
                   <p class="flex gap-2">
                     you agree to Orders.Exchange's

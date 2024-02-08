@@ -96,7 +96,7 @@ async function switchNetwork() {
 }
 
 async function onGetGasFromFaucet() {
-  window.open('https://bitcoinfaucet.uo1.net/send.php', '_blank')
+  window.open('https://coinfaucet.eu/en/btc-testnet/', '_blank')
 }
 </script>
 
