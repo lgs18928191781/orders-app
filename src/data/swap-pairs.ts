@@ -54,9 +54,9 @@ if (IS_DEV) {
 export const testnetSwapPairs = [
   {
     id: 1,
-    exactName: 'okok',
+    exactName: 'xedr',
     token1Symbol: 'btc',
-    token2Symbol: 'okok',
+    token2Symbol: 'xedr',
     token1Icon: btcLogo,
     token2Icon: rdexLogo,
   },
