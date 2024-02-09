@@ -406,7 +406,7 @@ const { mutate: mutatePostSwap } = useMutation({
   onSuccess: async () => {
     ElMessage.success('Swap success')
 
-    await sleep(1000)
+    await sleep(3000)
     queryClient.invalidateQueries()
   },
   onError: (err: any) => {

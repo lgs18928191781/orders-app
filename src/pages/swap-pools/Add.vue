@@ -238,7 +238,7 @@ const { mutate: mutatePostAdd } = useMutation({
   mutationFn: postTask,
   onSuccess: async () => {
     ElMessage.success('Add liquidity success')
-    await sleep(1000)
+    await sleep(3000)
     queryClient.invalidateQueries()
   },
   onError: (err: any) => {
