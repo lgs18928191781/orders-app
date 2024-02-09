@@ -6,7 +6,7 @@ const changelog = [
     changes: [
       '🧨🧨🧨 Happy Chinese New Year! 🧨🧨🧨',
       'We are now officially in the 3.0 era! 🎉🎉🎉 What a ride!',
-      'Swap module V0 is now enter its testing phase. Users can now swap between BRC20 tokens on BTC Testnet network',
+      'Swap module V0 is now entering its testing phase. Users can now swap between BRC20 tokens on BTC Testnet network',
       'Lots of bug fixes',
     ],
   },
