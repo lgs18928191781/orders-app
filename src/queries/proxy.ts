@@ -6,7 +6,7 @@ export type SimpleUtxo = {
   satoshis: number
   outputIndex: number
   addressType: any
-  confirmed: boolean
+  confirmed?: boolean
 }
 export const getUtxos = async (address: string) => {
   const network = useNetworkStore().network
