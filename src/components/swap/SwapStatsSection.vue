@@ -60,7 +60,7 @@ function toSwap() {
 <template>
   <div class="grid gap-8" v-if="poolStatus">
     <!-- row 1 -->
-    <div class="flex items-end justify-between">
+    <div class="flex items-end justify-between gap-4 text-sm xl:text-base">
       <!-- left -->
       <div class="flex flex-col gap-6">
         <!-- title -->
@@ -87,7 +87,7 @@ function toSwap() {
         <!-- ratio -->
         <div class="space-y-2">
           <div
-            class="flex items-center text-base text-zinc-300 gap-2 bg-zinc-800/80 px-4 py-2 rounded-xl"
+            class="flex items-center text-zinc-300 gap-2 bg-zinc-800/80 px-4 py-2 rounded-xl text-sm xl:text-base"
           >
             <img
               :src="token1Icon"
@@ -105,7 +105,7 @@ function toSwap() {
           </div>
 
           <div
-            class="flex items-center text-base text-zinc-300 gap-2 bg-zinc-800/80 px-4 py-2 rounded-xl"
+            class="flex items-center text-zinc-300 gap-2 bg-zinc-800/80 px-4 py-2 rounded-xl text-sm xl:text-base"
           >
             <img
               :src="token2Icon"
@@ -125,7 +125,7 @@ function toSwap() {
       </div>
 
       <!-- right -->
-      <div class="text-zinc-300 space-x-3">
+      <div class="text-zinc-300 space-x-3 flex justify-end">
         <button
           class="py-3 px-4 bg-zinc-700 rounded-xl hover:text-zinc-400"
           @click="toAdd"
