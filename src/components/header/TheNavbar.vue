@@ -10,6 +10,7 @@ const links: {
   path: string
   version?: number
   new?: boolean
+  testing?: boolean
   disabled?: boolean
 }[] = [
   {
@@ -26,6 +27,7 @@ const links: {
     name: 'Swap',
     path: '/swap/',
     version: 0,
+    // testing: true,
   },
   {
     name: 'Events',
@@ -90,6 +92,12 @@ function isLinkActive(path: string) {
           v-if="link.new"
         >
           New
+        </span>
+        <span
+          class="inline-flex items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400 -translate-y-2 -translate-x-1 absolute"
+          v-if="link.testing"
+        >
+          Test
         </span>
         <span
           class="inline-flex items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400 -translate-y-2 -translate-x-1 absolute"
