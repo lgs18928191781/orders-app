@@ -6,6 +6,7 @@ export type SimpleUtxo = {
   satoshis: number
   outputIndex: number
   addressType: any
+  confirmed: boolean
 }
 export const getUtxos = async (address: string) => {
   const network = useNetworkStore().network
@@ -19,21 +20,27 @@ export const getUtxos = async (address: string) => {
       'Content-Type': 'application/json',
     },
   }).then(({ data: utxos }) => {
-    return utxos.map(
-      (utxo: {
-        confirmed: boolean
-        inscriptions: string
-        satoshi: number
-        txId: string
-        vout: number
-      }) => {
-        return {
-          txId: utxo.txId,
-          satoshis: utxo.satoshi,
-          outputIndex: utxo.vout,
-          addressType: 2,
-        }
-      }
+    return (
+      utxos
+        .map(
+          (utxo: {
+            confirmed: boolean
+            inscriptions: string
+            satoshi: number
+            txId: string
+            vout: number
+          }) => {
+            return {
+              txId: utxo.txId,
+              satoshis: utxo.satoshi,
+              outputIndex: utxo.vout,
+              confirmed: utxo.confirmed,
+              addressType: 2,
+            }
+          }
+        )
+        // filter out unconfirmed utxos
+        .filter((utxo: SimpleUtxo) => utxo.confirmed)
     )
   })
 
