@@ -62,7 +62,7 @@ const impact = computed(() => {
   <Disclosure
     v-slot="{ open }"
     as="div"
-    class="rounded-2xl border border-zinc-800 p-4 mt-2"
+    class="rounded-2xl border border-zinc-700 p-4 mt-2"
   >
     <div class="text-zinc-500" v-if="calculating">Calculating...</div>
     <template v-else>

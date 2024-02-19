@@ -33,6 +33,7 @@ import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
 import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
 import MainBtn from '@/components/MainBtn.vue'
 import SwapLayout from '@/components/swap/SwapLayout.vue'
+import SwapGasStats from '@/components/swap/SwapGasStats.vue'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -638,7 +639,7 @@ async function doSwap() {
           :calculating="calculating"
         />
 
-        <SwapGapStats v-show="!!Number(sourceAmount)" />
+        <SwapGasStats v-show="!!Number(sourceAmount)" />
       </div>
 
       <!--price impact-->

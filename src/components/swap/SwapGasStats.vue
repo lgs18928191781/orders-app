@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import Decimal from 'decimal.js'
 import { computed } from 'vue'
 import { get } from '@vueuse/core'
+import { ArrowDownUpIcon } from 'lucide-vue-next'
 
 import { useFiat } from '@/hooks/use-fiat'
 import { useFeebStore } from '@/stores/feeb'
+import { useNetworkStateModal } from '@/hooks/use-network-state-modal'
 
-import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { prettyBalance } from '@/lib/formatters'
 import { SWAP_TX_SIZE } from '@/data/constants'
 import { unit, useBtcUnit } from '@/lib/helpers'
 
 const feebStore = useFeebStore()
 const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { openModal } = useNetworkStateModal()
 const { data: fiatRate } = useFiatRateQuery()
 
 const swapFees = computed(() => {
@@ -30,8 +32,13 @@ const prettySwapFees = computed(() => {
 
 <template>
   <div class="p-4 flex flex-col gap-2">
-    <div class="flex w-full items-center justify-between">
+    <div class="flex w-full items-center justify-start gap-2">
       <span class="label">Gas Plan</span>
+
+      <button class="ml-auto" @click="openModal">
+        <ArrowDownUpIcon class="h-5 w-5 text-zinc-500 hover:text-primary" />
+      </button>
+
       <div class="value">
         {{ feebStore.get ? feebStore.get + ' sat/vB' : '-' }}
       </div>

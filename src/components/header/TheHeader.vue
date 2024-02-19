@@ -6,16 +6,16 @@ import { MenuIcon } from 'lucide-vue-next'
 
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
-import whitelist from '@/lib/whitelist'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { isUnsupportedAddress } from '@/lib/helpers'
 
 import WalletMissingModal from './WalletMissingModal.vue'
 import AssetsDisplay from './AssetsDisplay.vue'
-import NetworkState from './NetworkState.vue'
 import Notifications from './Notifications.vue'
 import TheNavbar from './TheNavbar.vue'
 import AddressMenu from '@/components/header/AddressMenu.vue'
+import NetworkStateButton from '@/components/header/NetworkStateButton.vue'
+import NetworkStateModal from '@/components/header/NetworkStateModal.vue'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
@@ -127,6 +127,7 @@ onBeforeUnmount(() => {
 <template>
   <ConnectionModal />
   <WalletMissingModal />
+  <NetworkStateModal />
 
   <header
     class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
@@ -150,7 +151,7 @@ onBeforeUnmount(() => {
             >
               <AddressMenu />
               <AssetsDisplay />
-              <NetworkState />
+              <NetworkStateButton />
             </div>
 
             <Notifications />
