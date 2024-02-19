@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { prettySymbol } from '@/lib/formatters'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import Decimal from 'decimal.js'
 import { ChevronDownIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
+
+import { prettySymbol } from '@/lib/formatters'
 
 const props = defineProps({
   paySymbol: {
@@ -61,7 +62,7 @@ const impact = computed(() => {
   <Disclosure
     v-slot="{ open }"
     as="div"
-    class="rounded-2xl border border-zinc-800 p-4 mt-1"
+    class="rounded-2xl border border-zinc-800 p-4 mt-2"
   >
     <div class="text-zinc-500" v-if="calculating">Calculating...</div>
     <template v-else>
@@ -76,7 +77,7 @@ const impact = computed(() => {
           </div>
         </div>
         <ChevronDownIcon
-          class="h-5 w-5 duration-200"
+          class="h-5 w-5 duration-200 text-zinc-500"
           :class="{ 'rotate-180 transform': open }"
         />
       </DisclosureButton>
@@ -91,17 +92,25 @@ const impact = computed(() => {
           leave-to-class="translate-y-1 opacity-0 "
         >
           <DisclosurePanel
-            class="text-xs text-zinc-500 border-t border-zinc-700 pt-4 mt-4"
+            class="text-sm border-t border-zinc-700 pt-4 mt-4 flex flex-col gap-2"
             static
           >
             <div class="flex w-full items-center justify-between">
-              <span>Price impact</span>
-              <span>~{{ impact }}%</span>
+              <span class="label">Price impact</span>
+              <span class="value">~{{ impact }}%</span>
             </div>
-            <!-- <div class="mt-3 flex w-full items-center justify-between">
-                <span>Swap fee:</span>
-                <span></span>
-              </div> -->
+
+            <div class="flex w-full items-center justify-start gap-2">
+              <span class="label">Service fee</span>
+              <span class="ml-auto line-through text-zinc-500 decoration-2">
+                1.5%
+              </span>
+              <span
+                class="rounded bg-green-700/30 px-2 text-xs font-bold text-green-500"
+              >
+                FREE
+              </span>
+            </div>
           </DisclosurePanel>
         </transition>
       </div>
@@ -109,4 +118,12 @@ const impact = computed(() => {
   </Disclosure>
 </template>
 
-<style scoped></style>
+<style scoped>
+.label {
+  @apply text-zinc-500;
+}
+
+.value {
+  @apply text-zinc-300;
+}
+</style>

@@ -637,6 +637,8 @@ async function doSwap() {
           :pool-ratio="poolRatio"
           :calculating="calculating"
         />
+
+        <SwapGapStats v-show="!!Number(sourceAmount)" />
       </div>
 
       <!--price impact-->

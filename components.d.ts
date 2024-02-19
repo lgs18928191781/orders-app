@@ -77,6 +77,7 @@ declare module '@vue/runtime-core' {
     SwapBlur: typeof import('./src/components/swap/SwapBlur.vue')['default']
     SwapDataArea: typeof import('./src/components/swap/SwapDataArea.vue')['default']
     SwapExpandControl: typeof import('./src/components/swap/SwapExpandControl.vue')['default']
+    SwapGapStats: typeof import('./src/components/swap/SwapGapStats.vue')['default']
     SwapLayout: typeof import('./src/components/swap/SwapLayout.vue')['default']
     SwapPairSelect: typeof import('./src/components/swap/pools/SwapPairSelect.vue')['default']
     SwapPriceDisclosure: typeof import('./src/components/swap/SwapPriceDisclosure.vue')['default']

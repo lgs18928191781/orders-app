@@ -267,7 +267,7 @@ function onSwitchShow(open: boolean) {
     <PopoverButton
       class="px-3 outline-none text-xs flex items-center gap-2 hover:scale-105"
       @click="onSwitchShow(open)"
-      v-if="networkStore.network === 'livenet'"
+      v-if="true"
     >
       <span class="">Network</span>
       <span class="relative flex h-2 w-2">
