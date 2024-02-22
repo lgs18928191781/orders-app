@@ -17,6 +17,7 @@ import { buildAdd, postTask, previewAdd } from '@/queries/swap'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { exclusiveChange } from '@/lib/build-helpers'
 import { sleep } from '@/lib/helpers'
+import SwapGasStats from '@/components/swap/SwapGasStats.vue'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -347,6 +348,8 @@ async function doAddLiquidity() {
     :add-equity="addEquity"
     :pool-equity="poolEquity"
   />
+
+  <SwapGasStats v-show="ratio.gt(0) && poolEquity.gt(0)" :task-type="'add'" />
 
   <!-- disabled button -->
   <MainBtn

@@ -6,8 +6,8 @@ import {
   FrownIcon,
   CheckIcon,
   XIcon,
-  HammerIcon,
   PlusIcon,
+  Loader2Icon,
 } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
@@ -144,20 +144,20 @@ function copyFailedReason() {
           class="text-zinc-300"
           v-if="taskStatus !== 'running'"
         >
-          <XIcon class="w-6 h-6 text-zinc-300 hover:text-zinc-500" />
+          <XIcon class="size-6 text-zinc-300 hover:text-zinc-500" />
         </button>
       </div>
 
       <!-- body -->
       <div class="mt-8 flex justify-center flex-col items-center gap-8">
         <template v-if="taskStatus === 'running'">
-          <HammerIcon class="w-16 h-16 animate-bounce text-primary" />
+          <Loader2Icon class="size-24 animate-spin text-zinc-500" />
           <p class="capitalize text-lg">Running...</p>
         </template>
 
         <template v-else-if="taskStatus === 'completed'">
           <CheckIcon
-            class="w-16 h-16 text-zinc-800 bg-green-500 rounded-full p-2"
+            class="size-24 text-zinc-800 bg-green-500 rounded-full p-2"
             :stroke-width="3"
           />
 
@@ -174,7 +174,7 @@ function copyFailedReason() {
         </template>
 
         <template v-else-if="taskStatus === 'failed'">
-          <FrownIcon class="w-16 h-16 text-red-500" />
+          <FrownIcon class="size-24 text-red-500" />
           <div class="self-stretch">
             <p class="capitalize text-lg text-center">Failed</p>
             <div
@@ -210,18 +210,18 @@ function copyFailedReason() {
             <img
               :src="extendedTask.fromIcon"
               :alt="extendedTask.fromToken"
-              class="w-6 h-6"
+              class="size-6"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
             }}</span>
 
-            <ArrowRightIcon class="w-4 h-4 mx-2" />
+            <ArrowRightIcon class="size-4 mx-2" />
 
             <img
               :src="extendedTask.toIcon"
               :alt="extendedTask.toToken"
-              class="w-6 h-6"
+              class="size-6"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -233,7 +233,7 @@ function copyFailedReason() {
               <img
                 :src="extendedTask.fromIcon"
                 :alt="extendedTask.fromToken"
-                class="w-6 h-6"
+                class="size-6"
               />
               <span>{{
                 prettyCoinDisplay(
@@ -242,12 +242,12 @@ function copyFailedReason() {
                 )
               }}</span>
 
-              <PlusIcon class="w-4 h-4 mx-2" />
+              <PlusIcon class="size-4 mx-2" />
 
               <img
                 :src="extendedTask.toIcon"
                 :alt="extendedTask.toToken"
-                class="w-6 h-6"
+                class="size-6"
               />
               <span>{{
                 prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -262,18 +262,18 @@ function copyFailedReason() {
             <img
               :src="extendedTask.fromIcon"
               :alt="extendedTask.fromToken"
-              class="w-6 h-6"
+              class="size-6"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
             }}</span>
 
-            <PlusIcon class="w-4 h-4 mx-2" />
+            <PlusIcon class="size-4 mx-2" />
 
             <img
               :src="extendedTask.toIcon"
               :alt="extendedTask.toToken"
-              class="w-6 h-6"
+              class="size-6"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)

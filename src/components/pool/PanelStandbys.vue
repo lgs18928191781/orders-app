@@ -277,9 +277,7 @@ const isModelOpen = ref(false)
                     title="copy order id"
                     @click="onCopyOrderId(standby.orderId)"
                   >
-                    <CopyIcon
-                      class="w-4 h-4 text-zinc-500 hover:text-primary"
-                    />
+                    <CopyIcon class="size-4 text-zinc-500 hover:text-primary" />
                   </button>
                 </div>
               </td>

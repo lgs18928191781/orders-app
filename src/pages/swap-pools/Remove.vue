@@ -2,7 +2,7 @@
 import { Ref, computed, ref, watch } from 'vue'
 import { ArrowDownIcon } from 'lucide-vue-next'
 import { refDebounced } from '@vueuse/core'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useMutation, useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import { ElMessage } from 'element-plus'
 
@@ -16,7 +16,6 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
 import { buildRemove, postTask } from '@/queries/swap'
 import { IS_DEV } from '@/data/constants'
-import { sleep } from '@/lib/helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -238,7 +237,7 @@ async function doRemoveLiquidity() {
     <RemoveSlider v-model:remove-percentage="removePercentage" />
 
     <div class="flex justify-center">
-      <ArrowDownIcon class="w-4 h-4 text-zinc-500" />
+      <ArrowDownIcon class="size-4 text-zinc-500" />
     </div>
 
     <RemovePreview
@@ -247,6 +246,8 @@ async function doRemoveLiquidity() {
       :token-1-amount="token1Amount"
       :token-2-amount="token2Amount"
     />
+
+    <SwapGasStats v-show="token1Amount.gt(0)" :task-type="'remove'" />
 
     <!-- disabled button -->
     <MainBtn

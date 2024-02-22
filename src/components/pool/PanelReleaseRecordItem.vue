@@ -187,7 +187,7 @@ async function submitReleaseRecord() {
                 {{ prettyTxid(record.dealCoinTx, 4) }}
               </span>
 
-              <ExternalLinkIcon class="inline-block w-4 h-4" />
+              <ExternalLinkIcon class="inline-block size-4" />
             </div>
 
             <div
@@ -204,7 +204,7 @@ async function submitReleaseRecord() {
                 {{ prettyTxid(record.dealTx, 4) }}
               </span>
 
-              <ExternalLinkIcon class="inline-block w-4 h-4" />
+              <ExternalLinkIcon class="inline-block size-4" />
             </div>
           </div>
         </div>

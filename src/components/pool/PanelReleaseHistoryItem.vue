@@ -88,7 +88,7 @@ const status = computed(() => {
               {{ record.releaseTxBlock }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
           <span v-else>-</span>
         </div>
@@ -104,7 +104,7 @@ const status = computed(() => {
               {{ record.dealCoinTxBlock }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
           <span v-else>-</span>
         </div>
@@ -128,7 +128,7 @@ const status = computed(() => {
               {{ prettyTxid(record.releaseTx, 4) }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
         </div>
 

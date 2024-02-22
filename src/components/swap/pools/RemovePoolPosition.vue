@@ -29,13 +29,13 @@ const token2AddressAmount = computed(() => {
 
 <template>
   <div class="swap-sub-static-panel flex flex-col gap-2" v-if="poolStatus">
-    <h3>Your position</h3>
+    <h3 class="text-zinc-300">Your position</h3>
 
     <div class="flex items-center text-lg">
-      <img :src="token1Icon" class="w-6 h-6 rounded-full" v-if="token1Icon" />
+      <img :src="token1Icon" class="size-6 rounded-full" v-if="token1Icon" />
       <img
         :src="token2Icon"
-        class="w-6 h-6 rounded-full -ml-2"
+        class="size-6 rounded-full -ml-2"
         v-if="token2Icon"
       />
       <div class="ml-2">
@@ -59,7 +59,7 @@ const token2AddressAmount = computed(() => {
       <div class="ml-2">{{ prettySymbol(token1Symbol) }}:</div>
 
       <div class="ml-auto">
-        {{ token1AddressAmount.div(1e8) }}
+        {{ poolStatus?.token1AmountUsingBtcUnit || '-' }}
       </div>
     </div>
 
@@ -67,7 +67,7 @@ const token2AddressAmount = computed(() => {
       <div class="ml-2">{{ prettySymbol(token2Symbol) }}:</div>
 
       <div class="ml-auto">
-        {{ token2AddressAmount }}
+        {{ poolStatus?.token2Amount || '-' }}
       </div>
     </div>
   </div>

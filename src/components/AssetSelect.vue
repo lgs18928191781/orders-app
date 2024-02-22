@@ -46,7 +46,7 @@ const selectedAsset = computed(() => {
       >
         <img
           :src="selectedAsset.icon"
-          class="w-6 h-6 rounded-full"
+          class="size-6 rounded-full"
           v-if="selectedAsset"
         />
         <div class="mr-1" v-if="selectedAsset">

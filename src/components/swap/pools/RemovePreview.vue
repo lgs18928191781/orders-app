@@ -21,7 +21,7 @@ const token2Icon = computed(() => selectedPair.value?.token2Icon)
       <div class="" v-else-if="preview">{{ token1Amount.div(1e8) }}</div>
 
       <div class="flex items-center gap-2">
-        <img :src="token1Icon" class="w-6 h-6 rounded-full" v-if="token1Icon" />
+        <img :src="token1Icon" class="size-6 rounded-full" v-if="token1Icon" />
         <div class="">{{ prettySymbol(token1Symbol) }}</div>
       </div>
     </div>
@@ -33,7 +33,7 @@ const token2Icon = computed(() => selectedPair.value?.token2Icon)
       <div class="" v-else-if="preview">{{ token2Amount }}</div>
 
       <div class="flex items-center gap-2">
-        <img :src="token2Icon" class="w-6 h-6 rounded-full" v-if="token2Icon" />
+        <img :src="token2Icon" class="size-6 rounded-full" v-if="token2Icon" />
         <div class="">{{ prettySymbol(token2Symbol) }}</div>
       </div>
     </div>

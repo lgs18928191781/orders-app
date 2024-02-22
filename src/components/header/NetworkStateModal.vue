@@ -368,7 +368,7 @@ watch(isOpen, (open) => {
                                   <div class="flex items-center gap-3">
                                     <component
                                       :is="getFeePlanIcon(plan.title)"
-                                      class="w-6 h-6"
+                                      class="size-6"
                                     ></component>
 
                                     <RadioGroupLabel

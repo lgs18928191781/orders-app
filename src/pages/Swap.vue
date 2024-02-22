@@ -625,7 +625,7 @@ async function doSwap() {
           :calculating="calculating"
         />
 
-        <SwapGasStats v-show="!!Number(sourceAmount)" />
+        <SwapGasStats v-show="!!Number(sourceAmount)" :task-type="'swap'" />
       </div>
 
       <!-- disabled buttons: calculating or have unmets  -->

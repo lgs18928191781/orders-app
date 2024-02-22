@@ -229,7 +229,7 @@ watch(
           'rounded-full p-1 px-4 text-base flex items-center gap-1 bg-zinc-900',
         ]"
       >
-        <img :src="icon" class="w-5 h-5 rounded-full" v-if="icon" />
+        <img :src="icon" class="size-5 rounded-full" v-if="icon" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>

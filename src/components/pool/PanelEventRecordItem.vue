@@ -48,7 +48,7 @@ const onCopyOrderId = () => {
 
             <button title="copy order id" @click="onCopyOrderId">
               <CopyIcon
-                class="w-4 h-4 text-zinc-500 cursor-pointer hover:text-primary"
+                class="size-4 text-zinc-500 cursor-pointer hover:text-primary"
               />
             </button>
           </div>

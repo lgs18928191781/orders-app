@@ -280,7 +280,7 @@ watch(
       />
 
       <button v-if="side === 'pay' && amount" @click="updateAmount(0)">
-        <EraserIcon class="w-4 h-4 text-zinc-500 hover:text-zinc-300" />
+        <EraserIcon class="size-4 text-zinc-500 hover:text-zinc-300" />
       </button>
 
       <Loader2Icon class="animate-spin text-zinc-400" v-if="calculating" />
@@ -290,7 +290,7 @@ watch(
           'rounded-full p-1 px-4 text-xl flex items-center gap-1 bg-zinc-900',
         ]"
       >
-        <img :src="icon" class="w-6 h-6 rounded-full" v-if="icon" />
+        <img :src="icon" class="size-6 rounded-full" v-if="icon" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>

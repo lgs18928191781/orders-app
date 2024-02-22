@@ -165,7 +165,7 @@ async function goInscribe() {
           'rounded-full p-1 px-4 text-base flex items-center gap-1 bg-zinc-900',
         ]"
       >
-        <img :src="icon" class="w-5 h-5 rounded-full" v-if="icon" />
+        <img :src="icon" class="size-5 rounded-full" v-if="icon" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>
@@ -173,7 +173,7 @@ async function goInscribe() {
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-8">
-      <Loader2Icon class="animate-spin w-6 h-6 text-zinc-500" />
+      <Loader2Icon class="animate-spin size-6 text-zinc-500" />
     </div>
 
     <div v-else-if="myOneBrc20?.transferBalanceList.length === 0" class="my-4">
@@ -187,7 +187,7 @@ async function goInscribe() {
         class="cute-button p-2 rounded-md flex flex-col gap-0.5 items-center relative h-16 justify-center text-xs text-zinc-300"
         v-if="myOneBrc20 && new Decimal(myOneBrc20.availableBalance || 0).gt(0)"
       >
-        <PackagePlusIcon class="w-4 h-4" />
+        <PackagePlusIcon class="size-4" />
         <span>Inscribe</span>
       </button>
     </div>
@@ -229,12 +229,12 @@ async function goInscribe() {
         </div>
 
         <CheckCircleIcon
-          class="absolute right-0 top-0 w-5 h-5 text-primary/80 translate-x-[33%] translate-y-[-33%] bg-black/80 rounded-full p-0.5 rotate-12"
+          class="absolute right-0 top-0 size-5 text-primary/80 translate-x-[33%] translate-y-[-33%] bg-black/80 rounded-full p-0.5 rotate-12"
           v-if="isSelected(transferable)"
         ></CheckCircleIcon>
 
         <CircleIcon
-          class="absolute right-0 top-0 w-5 h-5 text-zinc-700 translate-x-[33%] translate-y-[-33%] bg-zinc-800 rounded-full p-0.5 rotate-12 group-hover:text-primary/60"
+          class="absolute right-0 top-0 size-5 text-zinc-700 translate-x-[33%] translate-y-[-33%] bg-zinc-800 rounded-full p-0.5 rotate-12 group-hover:text-primary/60"
           v-else
         ></CircleIcon>
       </button>
@@ -245,7 +245,7 @@ async function goInscribe() {
         class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center border-zinc-700 text-xs text-zinc-300 hover:bg-primary/5 hover:text-primary"
         v-if="myOneBrc20 && new Decimal(myOneBrc20.availableBalance || 0).gt(0)"
       >
-        <PackagePlusIcon class="w-4 h-4" />
+        <PackagePlusIcon class="size-4" />
         <span>Inscribe</span>
       </button>
     </div>

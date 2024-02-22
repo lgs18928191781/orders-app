@@ -8,7 +8,7 @@ import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStateModal } from '@/hooks/use-network-state-modal'
 
 import { prettyBalance } from '@/lib/formatters'
-import { SWAP_TX_SIZE } from '@/data/constants'
+import { SWAP_POOL_ADD_TX_SIZE, SWAP_TX_SIZE } from '@/data/constants'
 import { unit, useBtcUnit } from '@/lib/helpers'
 
 const feebStore = useFeebStore()
@@ -16,15 +16,18 @@ const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { openModal } = useNetworkStateModal()
 const { data: fiatRate } = useFiatRateQuery()
 
-const swapFees = computed(() => {
+const props = defineProps(['taskType'])
+
+const taskGas = computed(() => {
   if (!feebStore.get) return 0
 
-  return feebStore.get * SWAP_TX_SIZE
+  const txSize = props.taskType === 'add' ? SWAP_POOL_ADD_TX_SIZE : SWAP_TX_SIZE
+  return feebStore.get * txSize
 })
-const prettySwapFees = computed(() => {
-  if (!swapFees.value) return '0'
+const prettyTaskGas = computed(() => {
+  if (!taskGas.value) return '0'
 
-  const feeInBtc = swapFees.value
+  const feeInBtc = taskGas.value
 
   return `≈ ${prettyBalance(feeInBtc, get(useBtcUnit))} ${get(unit)}`
 })
@@ -47,12 +50,12 @@ const prettySwapFees = computed(() => {
     <div class="flex items-center justify-between text-sm">
       <span class="text-zinc-500">Gas</span>
       <div class="flex gap-3 items-center">
-        <div class="text-zinc-300">{{ prettySwapFees }}</div>
+        <div class="text-zinc-300">{{ prettyTaskGas }}</div>
         <div
           class="text-sm text-zinc-500 text-right"
-          v-if="isShowingFiat && fiatRate && swapFees"
+          v-if="isShowingFiat && fiatRate && taskGas"
         >
-          {{ getFiatPriceDisplay(swapFees, fiatRate) }}
+          {{ getFiatPriceDisplay(taskGas, fiatRate) }}
         </div>
       </div>
     </div>

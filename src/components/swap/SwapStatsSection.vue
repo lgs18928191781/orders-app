@@ -67,12 +67,12 @@ function toSwap() {
         <div class="flex items-center text-2xl">
           <img
             :src="token1Icon"
-            class="w-6 h-6 rounded-full"
+            class="size-6 rounded-full"
             v-if="token1Icon"
           />
           <img
             :src="token2Icon"
-            class="w-6 h-6 rounded-full -ml-2"
+            class="size-6 rounded-full -ml-2"
             v-if="token2Icon"
           />
           <div class="ml-2">
@@ -91,7 +91,7 @@ function toSwap() {
           >
             <img
               :src="token1Icon"
-              class="w-6 h-6 rounded-full"
+              class="size-6 rounded-full"
               v-if="token1Icon"
             />
 
@@ -109,7 +109,7 @@ function toSwap() {
           >
             <img
               :src="token2Icon"
-              class="w-6 h-6 rounded-full"
+              class="size-6 rounded-full"
               v-if="token2Icon"
             />
 
@@ -156,7 +156,7 @@ function toSwap() {
           <div class="flex items-center text-zinc-300 gap-2 mt-6">
             <img
               :src="token1Icon"
-              class="w-6 h-6 rounded-full"
+              class="size-6 rounded-full"
               v-if="token1Icon"
             />
 
@@ -172,7 +172,7 @@ function toSwap() {
           <div class="flex items-center text-zinc-300 gap-2 mt-3">
             <img
               :src="token2Icon"
-              class="w-6 h-6 rounded-full"
+              class="size-6 rounded-full"
               v-if="token2Icon"
             />
 

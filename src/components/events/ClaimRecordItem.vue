@@ -39,7 +39,7 @@ const { record } = defineProps<{
               {{ prettyTxid(record.sendId, 4) }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
         </div>
       </div>

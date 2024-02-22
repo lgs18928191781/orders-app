@@ -102,7 +102,7 @@ const currentLevelProgress = computed(() => {
           />
 
           <Loader2Icon
-            class="w-6 h-6 text-zinc-300 animate-spin-slow"
+            class="size-6 text-zinc-300 animate-spin-slow"
             v-if="isFetchingStats || isFetchingLeaderboard"
           />
         </div>
@@ -232,7 +232,7 @@ const currentLevelProgress = computed(() => {
             >
               <td class="text-center">
                 <TrophyIcon
-                  :class="['w-6 h-6 mx-auto', trophyColor(index)]"
+                  :class="['size-6 mx-auto', trophyColor(index)]"
                   v-if="index <= 2"
                 />
 

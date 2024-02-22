@@ -110,7 +110,7 @@ async function onClaimReward() {
             <EventSelect v-model:event-symbol="event" />
 
             <Loader2Icon
-              class="w-6 h-6 text-zinc-300 animate-spin-slow"
+              class="size-6 text-zinc-300 animate-spin-slow"
               v-if="isFetchingEventStats || isFetchingEventRemains"
             />
           </div>
