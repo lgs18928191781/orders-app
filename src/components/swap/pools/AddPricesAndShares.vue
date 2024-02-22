@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { prettySymbol } from '@/lib/formatters'
+import Decimal from 'decimal.js'
 import { computed } from 'vue'
 
 const props = defineProps([
@@ -10,10 +11,12 @@ const props = defineProps([
   'poolEquity',
 ])
 
-const ratioDisplay = computed(() => props.ratio.div(1e8).toDP().toFixed())
+const ratioDisplay = computed(() =>
+  (props.ratio as Decimal).div(1e8).toDP(8).toFixed()
+)
 
 const reversedRatioDisplay = computed(() =>
-  props.ratio.div(1e8).pow(-1).toDP().toFixed()
+  (props.ratio as Decimal).div(1e8).pow(-1).toDP(8).toFixed()
 )
 
 const equityShare = computed(() => {

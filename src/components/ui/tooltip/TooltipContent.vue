@@ -22,7 +22,7 @@ const forwarded = useForwardPropsEmits(props, emits)
       v-bind="{ ...forwarded, ...$attrs }"
       :class="
         cn(
-          'z-50 overflow-hidden rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-950 shadow-md  duration-1000 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50',
+          'z-50 overflow-hidden rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-950 shadow-md  duration-300 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300',
           $attrs.class ?? ''
         )
       "

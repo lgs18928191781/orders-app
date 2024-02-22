@@ -13,12 +13,13 @@ import { getBrc20s } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
 import gsap from 'gsap'
+import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
 const { selectedPair } = useSwapPoolPair()
 
-defineProps({
+const props = defineProps({
   side: {
     type: String,
     required: false,
@@ -29,6 +30,7 @@ defineProps({
     default: false,
   },
 })
+
 const symbol = defineModel('symbol', { required: true, type: String })
 const icon = computed(() => {
   if (!selectedPair.value) {
@@ -87,7 +89,7 @@ const amountTextSize = computed(() => {
   return 'text-4xl'
 })
 
-const emit = defineEmits(['update:symbol'])
+const emit = defineEmits(['update:symbol', 'hasEnough', 'notEnough'])
 
 // fiat price
 const { data: btcFiatRate } = useQuery({
@@ -122,14 +124,10 @@ const fiatPrice = computed(() => {
 })
 
 // balance
-const { data: btcBalance, isLoading: isLoadingBtcBalance } = useQuery({
-  queryKey: [
-    'balance',
-    { network: networkStore.network, address: connectionStore.getAddress },
-  ],
-  queryFn: () => connectionStore.adapter.getBalance(),
-  enabled: computed(() => connectionStore.connected),
-})
+const { data: btcBalance } = useExcludedBalanceQuery(
+  computed(() => connectionStore.getAddress),
+  computed(() => !!connectionStore.connected)
+)
 const { data: myBrc20s } = useQuery({
   queryKey: [
     'myBrc20s',
@@ -177,6 +175,28 @@ const balanceDisplay = computed(() => {
 
   return `${balance.value} ${symbol.value.toUpperCase()}`
 })
+
+const hasEnough = computed(() => {
+  if (!amount.value) {
+    return true
+  }
+
+  if (props.side === 'receive') {
+    return true
+  }
+
+  return new Decimal(amount.value).lte(new Decimal(balance.value))
+})
+watch(
+  () => hasEnough.value,
+  (hasEnough) => {
+    if (hasEnough) {
+      emit('hasEnough')
+    } else {
+      emit('notEnough')
+    }
+  }
+)
 </script>
 
 <template>
@@ -188,7 +208,13 @@ const balanceDisplay = computed(() => {
       <div
         class="bg-transparent flex-1 w-12 p-0 leading-loose"
         :class="[
-          calculating ? 'text-zinc-500' : 'text-zinc-100',
+          hasEnough
+            ? calculating
+              ? 'text-zinc-500'
+              : 'text-zinc-100 caret-primary'
+            : calculating
+            ? 'text-red-900/50 caret-red-900/50'
+            : 'text-red-500 caret-red-500',
           // if too long, make it smaller
           amountTextSize,
         ]"

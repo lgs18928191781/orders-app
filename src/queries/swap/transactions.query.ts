@@ -4,6 +4,7 @@ import { ComputedRef, computed } from 'vue'
 import { swapApiFetch } from '@/lib/fetch'
 import { Network } from '@/stores/network'
 import { sleep } from '@/lib/helpers'
+import { TaskType } from '@/queries/swap/types'
 
 export const getTransactions = async ({
   token1,
@@ -22,7 +23,7 @@ export const getTransactions = async ({
 }): Promise<
   {
     id: string
-    type: '1x' | 'x2' | '2x' | 'x1' | 'add' | 'remove'
+    type: TaskType
     status: 'failed' | 'completed'
     address: string
     txid?: string

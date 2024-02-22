@@ -75,3 +75,7 @@ input:focus {
 .swap-main-btn.disabled {
   @apply cursor-not-allowed bg-zinc-800 text-zinc-300/50;
 }
+
+.swap-main-border {
+  @apply border border-primary/30;
+}

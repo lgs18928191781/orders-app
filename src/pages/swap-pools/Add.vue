@@ -6,20 +6,16 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
+import { useBtcJsStore } from '@/stores/btcjs'
+import { useNetworkStore } from '@/stores/network'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
-import { useBtcJsStore } from '@/stores/btcjs'
-import { useNetworkStore } from '@/stores/network'
+import { useOngoingTask } from '@/hooks/use-ongoing-task'
 
 import { buildAdd, postTask, previewAdd } from '@/queries/swap'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { exclusiveChange } from '@/lib/build-helpers'
-
-import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
-import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
-import AddPricesAndShares from '@/components/swap/pools/AddPricesAndShares.vue'
-import MainBtn from '@/components/MainBtn.vue'
 import { sleep } from '@/lib/helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
@@ -233,13 +229,12 @@ function onAmountCleared() {
 }
 
 // mutations
+const { pushOngoing } = useOngoingTask()
 const queryClient = useQueryClient()
 const { mutate: mutatePostAdd } = useMutation({
   mutationFn: postTask,
-  onSuccess: async () => {
-    ElMessage.success('Add liquidity success')
-    await sleep(3000)
-    queryClient.invalidateQueries()
+  onSuccess: async ({ id: taskId }) => {
+    pushOngoing(taskId)
   },
   onError: (err: any) => {
     ElMessage.error(err.message)
@@ -337,6 +332,9 @@ async function doAddLiquidity() {
       v-model:symbol="token1Symbol"
       v-model:amount="token1Amount"
       :calculating="calculatingToken1"
+      :side="'pay'"
+      @has-enough="hasEnough = true"
+      @not-enough="hasEnough = false"
     />
   </div>
 

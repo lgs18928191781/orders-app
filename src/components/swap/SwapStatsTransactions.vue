@@ -27,6 +27,9 @@ import {
 import { getTransactionsQuery } from '@/queries/swap/transactions.query'
 import { Loader2Icon } from 'lucide-vue-next'
 import { CalendarSearchIcon } from 'lucide-vue-next'
+import { ExternalLink } from 'lucide-vue-next'
+import { ExternalLinkIcon } from 'lucide-vue-next'
+import { toTx } from '@/lib/helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 
@@ -81,6 +84,10 @@ function prettyType(type: '1x' | '2x' | 'x1' | 'x2' | 'add' | 'remove') {
     default:
       return type
   }
+}
+
+function isMe(address: string) {
+  return address === connectionStore.getAddress
 }
 </script>
 
@@ -206,9 +213,22 @@ function prettyType(type: '1x' | '2x' | 'x1' | 'x2' | 'add' | 'remove') {
             class="text-primary hover:underline cursor-pointer"
             @click="viewAddress(transaction.address)"
           >
-            {{ prettyOneSideAddress(transaction.address) }}
+            <span class="font-bold" v-if="isMe(transaction.address)">
+              (You)
+            </span>
+            <span v-else>{{ prettyOneSideAddress(transaction.address) }}</span>
           </div>
-          <div class="">{{ transaction.status }}</div>
+          <div class="inline-flex items-center justify-end gap-1">
+            {{ transaction.status }}
+            <button
+              v-if="transaction.txid && isMe(transaction.address)"
+              @click="toTx(transaction.txid, networkStore.network)"
+            >
+              <ExternalLinkIcon
+                class="h-4 w-4 text-zinc-500 hover:text-primary"
+              />
+            </button>
+          </div>
           <!-- <div class="">{{ prettyDate(transaction.updatedAt) }}</div> -->
           <div class="">{{ dayjs(transaction.updatedAt).fromNow() }}</div>
         </div>

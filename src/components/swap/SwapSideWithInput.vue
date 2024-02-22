@@ -11,6 +11,7 @@ import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { getBrcFiatRate, getFiatRate, getBrc20s } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -135,14 +136,10 @@ const fiatPrice = computed(() => {
 })
 
 // balance
-const { data: btcBalance, isLoading: isLoadingBtcBalance } = useQuery({
-  queryKey: [
-    'balance',
-    { network: networkStore.network, address: connectionStore.getAddress },
-  ],
-  queryFn: () => connectionStore.adapter.getBalance(),
-  enabled: computed(() => connectionStore.connected),
-})
+const { data: btcBalance } = useExcludedBalanceQuery(
+  computed(() => connectionStore.getAddress),
+  computed(() => !!connectionStore.connected)
+)
 const { data: myBrc20s } = useQuery({
   queryKey: [
     'myBrc20s',

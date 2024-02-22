@@ -4,22 +4,18 @@ import { ArrowDownIcon } from 'lucide-vue-next'
 import { refDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
+import { ElMessage } from 'element-plus'
 
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { useOngoingTask } from '@/hooks/use-ongoing-task'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
-
-import RemovePreview from '@/components/swap/pools/RemovePreview.vue'
-import RemovePoolPosition from '@/components/swap/pools/RemovePoolPosition.vue'
-import RemoveSlider from '@/components/swap/pools/RemoveSlider.vue'
-import MainBtn from '@/components/MainBtn.vue'
-import { useBuildingOverlay } from '@/hooks/use-building-overlay'
-import { ElMessage } from 'element-plus'
-import { IS_DEV } from '@/data/constants'
 import { buildRemove, postTask } from '@/queries/swap'
+import { IS_DEV } from '@/data/constants'
 import { sleep } from '@/lib/helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
@@ -179,13 +175,11 @@ watch(
   { immediate: true }
 )
 
-const queryClient = useQueryClient()
+const { pushOngoing } = useOngoingTask()
 const { mutate: mutatePostRemove } = useMutation({
   mutationFn: postTask,
-  onSuccess: async () => {
-    ElMessage.success('Remove liquidity success')
-    await sleep(3000)
-    queryClient.invalidateQueries()
+  onSuccess: async ({ id: taskId }) => {
+    pushOngoing(taskId)
   },
   onError: (err: any) => {
     ElMessage.error(err.message)

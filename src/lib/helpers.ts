@@ -63,8 +63,16 @@ export type BidTxSpec = {
   }[]
 }
 
-export const toTx = (txid: string) => {
-  window.open(`https://mempool.space/tx/${txid}`, '_blank')
+export const toTx = (
+  txid: string,
+  network: 'livenet' | 'testnet' = 'livenet'
+) => {
+  if (network === 'livenet') {
+    window.open(`https://mempool.space/tx/${txid}`, '_blank')
+    return
+  }
+
+  window.open(`https://mempool.space/testnet/tx/${txid}`, '_blank')
 }
 
 export const toBlock = (blockId: number) => {

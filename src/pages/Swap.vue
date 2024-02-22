@@ -12,6 +12,7 @@ import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { useOngoingTask } from '@/hooks/use-ongoing-task'
 
 import {
   SwapType,
@@ -25,15 +26,6 @@ import { exclusiveChange } from '@/lib/build-helpers'
 import { ERRORS } from '@/data/errors'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { sleep } from '@/lib/helpers'
-
-import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
-import SwapSideWithInput from '@/components/swap/SwapSideWithInput.vue'
-import SwapPriceDisclosure from '@/components/swap/SwapPriceDisclosure.vue'
-import SwapSideBrc from '@/components/swap/SwapSideBrc.vue'
-import SwapSideBtc from '@/components/swap/SwapSideBtc.vue'
-import MainBtn from '@/components/MainBtn.vue'
-import SwapLayout from '@/components/swap/SwapLayout.vue'
-import SwapGasStats from '@/components/swap/SwapGasStats.vue'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -49,6 +41,11 @@ const token2InscriptionIds = ref<string[]>([])
 
 const ratio = ref<Decimal>(new Decimal(0))
 const poolRatio = ref<Decimal>(new Decimal(0))
+const priceImpact = ref<Decimal>(new Decimal(0))
+const hasImpactWarning = computed(() => {
+  // greater than 15%
+  return priceImpact.value.gte(15)
+})
 
 const calculatingPay = ref(false)
 const calculatingReceive = ref(false)
@@ -59,20 +56,7 @@ const calculating = computed(
 // swap & flip related
 const swapType = ref<SwapType>('1x')
 const flipped = computed(() => ['2x', 'x1'].includes(swapType.value))
-const paySymbol = computed(() => {
-  if (flipped.value) {
-    return token2Symbol.value
-  } else {
-    return token1Symbol.value
-  }
-})
-const receiveSymbol = computed(() => {
-  if (flipped.value) {
-    return token1Symbol.value
-  } else {
-    return token2Symbol.value
-  }
-})
+const flippedControl = ref(false)
 const sourceAmount = computed(() => {
   if (swapType.value.includes('1')) {
     return token1Amount.value
@@ -84,9 +68,6 @@ const sourceAmount = computed(() => {
 // watch for swapType
 // if changed, calculate the other amount
 watch(swapType, async (newSwapType) => {
-  console.log('flipping')
-  console.log('source', newSwapType)
-
   if (!sourceAmount.value) return
 
   // if is flipping to x1 or 2x, clear every amounts and return (since arbitrary brc as input is not supported)
@@ -119,6 +100,7 @@ watch(swapType, async (newSwapType) => {
 
       ratio.value = new Decimal(preview.ratio)
       poolRatio.value = new Decimal(preview.poolRatio)
+      priceImpact.value = new Decimal(preview.priceImpact)
 
       if (newSwapType.includes('1')) {
         token2Amount.value = preview.targetAmount
@@ -128,8 +110,6 @@ watch(swapType, async (newSwapType) => {
     })
     .catch((e) => {
       if (e.message === ERRORS.INSUFFICIENT_LIQUIDITY) {
-        console.log('here')
-
         if (newSwapType.includes('1')) {
           token2Amount.value = undefined
         } else {
@@ -193,6 +173,7 @@ watch(
 
         ratio.value = new Decimal(preview.ratio)
         poolRatio.value = new Decimal(preview.poolRatio)
+        priceImpact.value = new Decimal(preview.priceImpact)
 
         if (swapType.value.includes('1')) {
           token2Amount.value = preview.targetAmount
@@ -224,8 +205,12 @@ watch(
 )
 
 // flip
-const flipAsset = () => {
+const flipAsset = async () => {
   // flip characters of type
+  flippedControl.value = !flippedControl.value
+
+  await sleep(200)
+
   switch (swapType.value) {
     case '1x':
       swapType.value = '2x'
@@ -244,6 +229,7 @@ const flipAsset = () => {
   // clear amounts
   token1Amount.value = undefined
   token2Amount.value = undefined
+  hasAmount.value = false
 
   // clear token2InscriptionIds
   token2InscriptionIds.value = []
@@ -401,14 +387,12 @@ watch(
 )
 
 // mutations
+const { pushOngoing } = useOngoingTask()
 const queryClient = useQueryClient()
 const { mutate: mutatePostSwap } = useMutation({
   mutationFn: postTask,
-  onSuccess: async () => {
-    ElMessage.success('Swap success')
-
-    await sleep(3000)
-    queryClient.invalidateQueries()
+  onSuccess: async ({ id: taskId }) => {
+    pushOngoing(taskId)
   },
   onError: (err: any) => {
     ElMessage.error(err.message)
@@ -544,7 +528,7 @@ async function doSwap() {
 <template>
   <SwapLayout>
     <div
-      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3 h-full"
+      class="swap-main-border rounded-3xl p-2 !pt-3 bg-zinc-900 space-y-3 h-full"
     >
       <!-- header -->
       <div class="flex gap-4 px-3">
@@ -602,9 +586,9 @@ async function doSwap() {
             />
 
             <button
-              class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
+              class="hidden group-hover:inline p-2 box-content transition-all duration-200 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
               :class="{
-                'rotate-180': flipped,
+                'rotate-180': flippedControl,
               }"
               @click="flipAsset"
             >
@@ -631,9 +615,11 @@ async function doSwap() {
         />
 
         <SwapPriceDisclosure
-          :pay-symbol="paySymbol"
-          :receive-symbol="receiveSymbol"
+          :token1-symbol="token1Symbol"
+          :token2-symbol="token2Symbol"
           v-show="!!Number(sourceAmount)"
+          :price-impact="priceImpact"
+          :has-impact-warning="hasImpactWarning"
           :ratio="ratio"
           :pool-ratio="poolRatio"
           :calculating="calculating"
@@ -641,29 +627,6 @@ async function doSwap() {
 
         <SwapGasStats v-show="!!Number(sourceAmount)" />
       </div>
-
-      <!--price impact-->
-      <!-- <div
-        v-if="
-          Math.abs(+tokenImpact.slip1) > 1 || Math.abs(+tokenImpact.slip2) > 1
-        "
-        class="flex items-center justify-between rounded-2xl border border-orange-300/30 p-3 text-sm"
-      >
-        <div>Price Impact Warning</div>
-
-        <div>
-          <span class="mr-5"
-            >${{ token1Symbol.toUpperCase() }}:<span class="text-red-500"
-              >{{ tokenImpact.slip1 }}%</span
-            ></span
-          >
-          <span
-            >{{ token2Symbol.toUpperCase() }}:<span class="text-green-500"
-              >{{ tokenImpact.slip2 }}%</span
-            >
-          </span>
-        </div>
-      </div> -->
 
       <!-- disabled buttons: calculating or have unmets  -->
       <MainBtn :class="['disabled']" v-if="calculating" :disabled="true">
@@ -680,7 +643,9 @@ async function doSwap() {
       </MainBtn>
 
       <!-- confirm button -->
-      <MainBtn v-else @click="doSwap">Swap</MainBtn>
+      <MainBtn v-else @click="doSwap" :dangerous="hasImpactWarning">
+        {{ hasImpactWarning ? 'Swap Anyway' : 'Swap' }}
+      </MainBtn>
     </div>
   </SwapLayout>
 </template>

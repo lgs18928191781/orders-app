@@ -3,9 +3,6 @@ import { useRoute } from 'vue-router'
 
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
-import SwapPairSelect from '@/components/swap/pools/SwapPairSelect.vue'
-import SwapLayout from '@/components/swap/SwapLayout.vue'
-
 const { pairStr } = useSwapPoolPair()
 
 const route = useRoute()

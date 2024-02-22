@@ -22,6 +22,7 @@ export const previewSwap = async ({
   serviceFee: string
   sourceAmount: string
   targetAmount: string
+  priceImpact: string
 }> => {
   const address = useConnectionStore().getAddress
 
@@ -76,43 +77,6 @@ export const previewAdd = async ({
   return res
 }
 
-export const getPoolStatus = async ({
-  token1,
-  token2,
-  address,
-  network,
-}: {
-  token1: string
-  token2: string
-  address: string
-  network: Network
-}): Promise<{
-  token1: string
-  token2: string
-  token1Pool: number
-  token2Pool: number
-  poolEquity: string
-  addressEquity: string
-  poolShare: string
-  token1ServiceAddress: string
-  token2ServiceAddress: string
-  token1ServicePubkey: string
-  token2ServicePubkey: string
-  token1PerToken2: string
-  token2PerToken1: string
-  token1PerToken2UsingBtcUnit: string
-  token2PerToken1UsingBtcUnit: string
-  token1Amount: string
-  token2Amount: string
-  token1AmountUsingBtcUnit: string
-}> => {
-  const res = await swapApiFetch(
-    `pools/${token1}-${token2}?address=${address}&net=${network}`
-  )
-
-  return res
-}
-
 export const previewRemove = async ({
   token1,
   token2,
@@ -152,6 +116,43 @@ export const previewRemove = async ({
     method: 'POST',
     body: JSON.stringify(body),
   })
+
+  return res
+}
+
+export const getPoolStatus = async ({
+  token1,
+  token2,
+  address,
+  network,
+}: {
+  token1: string
+  token2: string
+  address: string
+  network: Network
+}): Promise<{
+  token1: string
+  token2: string
+  token1Pool: number
+  token2Pool: number
+  poolEquity: string
+  addressEquity: string
+  poolShare: string
+  token1ServiceAddress: string
+  token2ServiceAddress: string
+  token1ServicePubkey: string
+  token2ServicePubkey: string
+  token1PerToken2: string
+  token2PerToken1: string
+  token1PerToken2UsingBtcUnit: string
+  token2PerToken1UsingBtcUnit: string
+  token1Amount: string
+  token2Amount: string
+  token1AmountUsingBtcUnit: string
+}> => {
+  const res = await swapApiFetch(
+    `pools/${token1}-${token2}?address=${address}&net=${network}`
+  )
 
   return res
 }
@@ -323,12 +324,7 @@ export const postTask = async ({
   buildId: string
   rawPsbt: string
 }): Promise<{
-  gas: string
-  ratio: string
-  poolRatio: string
-  serviceFee: string
-  sourceAmount: string
-  targetAmount: string
+  id: string
 }> => {
   const body = { buildId, rawPsbt }
 
