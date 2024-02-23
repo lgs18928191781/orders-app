@@ -8,14 +8,15 @@ import {
 } from '@headlessui/vue'
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRoute } from 'vue-router'
 
 import { useConnectionStore } from '@/stores/connection'
+import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
-import { useRoute } from 'vue-router'
 
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
@@ -23,6 +24,7 @@ const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
 const firstButtonRef = ref<HTMLElement | null>(null)
 
 const connectionStore = useConnectionStore()
+const credentialsStore = useCredentialsStore()
 async function connectToUnisat() {
   if (!window.unisat) {
     setMissingWallet('unisat')
@@ -31,6 +33,7 @@ async function connectToUnisat() {
 
   const connection = await connectionStore.connect('unisat')
   if (connection.status === 'connected') {
+    await credentialsStore.login()
     closeConnectionModal()
   }
 }
@@ -43,6 +46,7 @@ async function connectToOkx() {
 
   const connection = await connectionStore.connect('okx')
   if (connection.status === 'connected') {
+    await credentialsStore.login()
     closeConnectionModal()
   }
 }
@@ -60,6 +64,7 @@ async function connectToMetalet() {
     })
   })
   if (connection?.status === 'connected') {
+    await credentialsStore.login()
     closeConnectionModal()
   }
 }
@@ -119,7 +124,6 @@ const isSwapPage = computed(() => {
                 <div class="grid grid-cols-3 gap-4 mt-8 text-base">
                   <button
                     class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
-                    ref="firstButtonRef"
                     @click="connectToOkx"
                     v-if="!isSwapPage"
                   >
@@ -130,6 +134,7 @@ const isSwapPage = computed(() => {
                   <button
                     class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
                     @click="connectToUnisat"
+                    ref="firstButtonRef"
                   >
                     <img
                       class="h-12 rounded"

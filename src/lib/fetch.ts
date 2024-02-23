@@ -1,3 +1,9 @@
+import { useCredentialsStore } from '@/stores/credentials'
+
+export type ApiOptions = { headers?: HeadersInit } & RequestInit & {
+    auth?: boolean
+  }
+
 async function fetchWrapper(url: string, options?: RequestInit): Promise<any> {
   const response = await fetch(url, options)
   if (!response.ok) {
@@ -15,10 +21,7 @@ async function fetchWrapper(url: string, options?: RequestInit): Promise<any> {
 
 export default fetchWrapper
 
-export async function ordersCommonApiFetch(
-  url: string,
-  options?: { headers?: HeadersInit } & RequestInit
-) {
+export async function ordersCommonApiFetch(url: string, options?: ApiOptions) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/common/${url}`
   if (!options)
     options = {
@@ -31,6 +34,19 @@ export async function ordersCommonApiFetch(
   } else {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
   }
+  if (options.auth) {
+    const credentialsStore = useCredentialsStore()
+    const credential = credentialsStore.get
+    if (!credential) {
+      throw new Error('Please login first.')
+    }
+
+    options.headers = {
+      ...options.headers,
+      'X-Signature': credential.signature,
+      'X-Public-Key': credential.publicKey,
+    }
+  }
 
   const jsoned: {
     code: number
@@ -45,10 +61,7 @@ export async function ordersCommonApiFetch(
   return jsoned.data
 }
 
-export async function ordersV2Fetch(
-  url: string,
-  options?: { headers?: HeadersInit } & RequestInit
-) {
+export async function ordersV2Fetch(url: string, options?: ApiOptions) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/brc20/order-v2/${url}`
   if (!options)
     options = {
@@ -61,6 +74,19 @@ export async function ordersV2Fetch(
   } else {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
   }
+  if (options.auth) {
+    const credentialsStore = useCredentialsStore()
+    const credential = credentialsStore.get
+    if (!credential) {
+      throw new Error('Please login first.')
+    }
+
+    options.headers = {
+      ...options.headers,
+      'X-Signature': credential.signature,
+      'X-Public-Key': credential.publicKey,
+    }
+  }
 
   const jsoned: {
     code: number
@@ -75,10 +101,7 @@ export async function ordersV2Fetch(
   return jsoned.data
 }
 
-export async function ordersApiFetch(
-  url: string,
-  options?: { headers?: HeadersInit } & RequestInit
-) {
+export async function ordersApiFetch(url: string, options?: ApiOptions) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/brc20/${url}`
   if (!options)
     options = {
@@ -91,6 +114,19 @@ export async function ordersApiFetch(
   } else {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
   }
+  if (options.auth) {
+    const credentialsStore = useCredentialsStore()
+    const credential = credentialsStore.get
+    if (!credential) {
+      throw new Error('Please login first.')
+    }
+
+    options.headers = {
+      ...options.headers,
+      'X-Signature': credential.signature,
+      'X-Public-Key': credential.publicKey,
+    }
+  }
 
   const jsoned: {
     code: number
@@ -105,10 +141,7 @@ export async function ordersApiFetch(
   return jsoned.data
 }
 
-export async function swapApiFetch(
-  url: string,
-  options?: { headers?: HeadersInit } & RequestInit
-) {
+export async function swapApiFetch(url: string, options?: ApiOptions) {
   const swapApiUrl = `${import.meta.env.VITE_SWAP_API_HOST}/api/${url}`
   if (!options)
     options = {
@@ -120,6 +153,19 @@ export async function swapApiFetch(
   if (options.headers && 'Content-Type' in options.headers) {
   } else {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
+  }
+  if (options.auth) {
+    const credentialsStore = useCredentialsStore()
+    const credential = credentialsStore.get
+    if (!credential) {
+      throw new Error('Please login first.')
+    }
+
+    options.headers = {
+      ...options.headers,
+      'X-Signature': credential.signature,
+      'X-Public-Key': credential.publicKey,
+    }
   }
 
   const jsoned:

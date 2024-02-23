@@ -151,7 +151,10 @@ export const getPoolStatus = async ({
   token1AmountUsingBtcUnit: string
 }> => {
   const res = await swapApiFetch(
-    `pools/${token1}-${token2}?address=${address}&net=${network}`
+    `pools/${token1}-${token2}?address=${address}&net=${network}`,
+    {
+      auth: true,
+    }
   )
 
   return res

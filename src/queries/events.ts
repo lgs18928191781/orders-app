@@ -1,15 +1,12 @@
-import { IS_DEV } from '@/data/constants'
-import fetchWrapper from '@/lib/fetch'
+import fetchWrapper, { type ApiOptions } from '@/lib/fetch'
 import { raise } from '@/lib/helpers'
 import sign from '@/lib/sign'
 import { useConnectionStore } from '@/stores/connection'
+import { useCredentialsStore } from '@/stores/credentials'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 
-async function eventFetch(
-  url: string,
-  options?: { headers?: HeadersInit } & RequestInit
-) {
+async function eventFetch(url: string, options?: ApiOptions) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/event/${url}`
   if (!options)
     options = {
@@ -21,6 +18,19 @@ async function eventFetch(
   if (options.headers && 'Content-Type' in options.headers) {
   } else {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
+  }
+  if (options.auth) {
+    const credentialsStore = useCredentialsStore()
+    const credential = credentialsStore.get
+    if (!credential) {
+      throw new Error('Please login first.')
+    }
+
+    options.headers = {
+      ...options.headers,
+      'X-Signature': credential.signature,
+      'X-Public-Key': credential.publicKey,
+    }
   }
 
   const jsoned: {
@@ -36,10 +46,7 @@ async function eventFetch(
   return jsoned.data
 }
 
-async function rewardFetch(
-  url: string,
-  options?: { headers?: HeadersInit } & RequestInit
-) {
+async function rewardFetch(url: string, options?: ApiOptions) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/reward/${url}`
   if (!options)
     options = {
@@ -51,6 +58,19 @@ async function rewardFetch(
   if (options.headers && 'Content-Type' in options.headers) {
   } else {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
+  }
+  if (options.auth) {
+    const credentialsStore = useCredentialsStore()
+    const credential = credentialsStore.get
+    if (!credential) {
+      throw new Error('Please login first.')
+    }
+
+    options.headers = {
+      ...options.headers,
+      'X-Signature': credential.signature,
+      'X-Public-Key': credential.publicKey,
+    }
   }
 
   const jsoned: {
@@ -127,19 +147,13 @@ export const getClaimFees = async (): Promise<{
   rewardInscriptionFee: number
 }> => {
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     networkFeeRate: String(feeb),
     version: '2',
   })
 
-  return await rewardFetch(`cal/fee?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
-  })
+  return await rewardFetch(`cal/fee?${params}`, { auth: true })
 }
 
 export const postClaimReward = async ({
@@ -161,14 +175,10 @@ export const postClaimReward = async ({
 }) => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   return await rewardFetch(`claim`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       rewardAmount,

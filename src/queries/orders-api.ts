@@ -3,13 +3,20 @@ import Decimal from 'decimal.js'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
-import sign from '@/lib/sign'
 import fetchWrapper, { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
-import { raise, sleep } from '@/lib/helpers'
+import { raise } from '@/lib/helpers'
 
-export const login = async () => {
-  const { publicKey, signature } = await sign()
-  const address = useConnectionStore().getAddress
+export const login = async ({
+  address,
+  publicKey,
+  signature,
+}: {
+  address: string
+  publicKey: string
+  signature: string
+}) => {
+  const network = useNetworkStore().network
+
   const loginRes = await ordersApiFetch(`login/in`, {
     method: 'POST',
     headers: {
@@ -17,7 +24,7 @@ export const login = async () => {
       'X-Public-Key': publicKey,
     },
     body: JSON.stringify({
-      net: 'livenet',
+      net: network,
       address,
     }),
   })
@@ -263,8 +270,6 @@ export const constructBidPsbt = async ({
   psbtRaw: string
   orderId: string
 }> => {
-  const { publicKey, signature } = await sign()
-
   const address = useConnectionStore().getAddress
   const body = {
     net: network,
@@ -282,11 +287,8 @@ export const constructBidPsbt = async ({
   }
   const constructInfo = await ordersApiFetch(`order/bid-v2`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
     body: JSON.stringify(body),
+    auth: true,
   })
 
   // validate
@@ -389,17 +391,11 @@ export const getOneOrder = async ({
 }: {
   orderId: string
 }): Promise<DetailedOrder> => {
-  const { publicKey, signature } = await sign()
   const address = useConnectionStore().getAddress
 
   const order: DetailedOrder = await ordersApiFetch(
     `order/${orderId}?buyerAddress=${address}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    { auth: true }
   )
 
   return order
@@ -421,7 +417,6 @@ export const getOneBidOrder = async ({
   orderId: string
   inscriptionId: string
 }): Promise<BidV20Order> => {
-  const { publicKey, signature } = await sign()
   const address = useConnectionStore().getAddress
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
 
@@ -435,7 +430,8 @@ export const getOneBidOrder = async ({
   })
 
   const order: BidV20Order = await ordersApiFetch(
-    `order/bid-v2/do/pre?${params}`
+    `order/bid-v2/do/pre?${params}`,
+    { auth: true }
   ).then((order) => {
     order.furtherFee =
       order.releaseInscriptionFee +
@@ -458,7 +454,6 @@ export const getBuyEssentials = async ({
   tick: string
   buyerChangeAmount: number
 }): Promise<DetailedOrder> => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     buyerAddress: address,
     tick,
@@ -467,12 +462,7 @@ export const getBuyEssentials = async ({
 
   const order: DetailedOrder = await ordersApiFetch(
     `order/${orderId}?${params}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    { auth: true }
   )
 
   return order
@@ -609,14 +599,9 @@ export const pushSellTake = async ({
   networkFee: number
   networkFeeRate: number
 }) => {
-  const { publicKey, signature } = await sign()
-
   const sellRes = await ordersApiFetch(`order/bid/do`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       psbtRaw,
@@ -652,14 +637,9 @@ export const pushSellTakeV2 = async ({
   networkFee: number
   networkFeeRate: number
 }) => {
-  const { publicKey, signature } = await sign()
-
   const sellRes = await ordersApiFetch(`order/bid-v2/do`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       psbtRaw,
@@ -689,14 +669,9 @@ export const pushAskOrder = async ({
   psbtRaw: string
   amount: number
 }) => {
-  const { publicKey, signature } = await sign()
-
   const createRes = await ordersApiFetch(`order/ask/push`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       psbtRaw,
       address,
@@ -722,16 +697,11 @@ export const pushBuyTake = async ({
 }) => {
   const address = useConnectionStore().getAddress
 
-  const { publicKey, signature } = await sign()
-
   // if pushed successfully, update the Dummies
   // notify update psbt status
   const updateRes = await ordersApiFetch(`order/update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       address,
@@ -748,14 +718,9 @@ export const pushBuyTake = async ({
 export const cancelOrder = async ({ orderId }: { orderId: string }) => {
   const address = useConnectionStore().getAddress
   const network = useNetworkStore().network
-  const { publicKey, signature } = await sign()
-
   await ordersApiFetch(`order/update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       address,
@@ -789,13 +754,9 @@ export const pushBidOrder = async ({
   orderId: string
 }) => {
   try {
-    const { publicKey, signature } = await sign()
     const createRes = await ordersApiFetch(`order/bid/push`, {
       method: 'POST',
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
+      auth: true,
       body: JSON.stringify({
         net: network,
         address,
@@ -848,14 +809,9 @@ export const updateClaim = async ({
   psbtRaw: string
 }) => {
   const network = 'livenet'
-  const { publicKey, signature } = await sign()
-
   await ordersApiFetch(`claim/order/update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       address,

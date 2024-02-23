@@ -2,23 +2,16 @@ import Decimal from 'decimal.js'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import sign from '@/lib/sign'
 import { ordersV2Fetch } from '@/lib/fetch'
 
 export const getPlatformPublicKey = async (): Promise<{
   platformPublicKey: string
 }> => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     network: useNetworkStore().network,
   })
 
-  const res = await ordersV2Fetch(`bid/key?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
-  })
+  const res = await ordersV2Fetch(`bid/key?${params}`, { auth: true })
 
   return res
 }
@@ -94,7 +87,6 @@ export const getOrders = async ({
 }
 
 export const getMyOpenOrders = async ({ address }: { address: string }) => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     net: useNetworkStore().network,
     orderState: '1',
@@ -104,12 +96,7 @@ export const getMyOpenOrders = async ({ address }: { address: string }) => {
 
   const orders: Order[] = await ordersV2Fetch(
     `orders/user/${address}?${params}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    { auth: true }
   )
     .then(({ results }) => results)
     .then((orders) => {
@@ -148,7 +135,6 @@ type OrderHistory = Order & {
   dealTx?: string
 }
 export const getMyOrderHistory = async ({ address }: { address: string }) => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     net: useNetworkStore().network,
     orderState: '21',
@@ -158,12 +144,7 @@ export const getMyOrderHistory = async ({ address }: { address: string }) => {
 
   const orders: OrderHistory[] = await ordersV2Fetch(
     `orders/user/${address}?${params}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    { auth: true }
   )
     .then(({ results }) => results)
     .then((orders) => {
@@ -276,7 +257,6 @@ export const getBuyEssentials = async ({
   tick: string
   buyerChangeAmount: number
 }): Promise<DetailedOrder> => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     buyerAddress: address,
     tick,
@@ -284,10 +264,7 @@ export const getBuyEssentials = async ({
   })
 
   const order: DetailedOrder = await ordersV2Fetch(`${orderId}?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
 
   return order
@@ -304,14 +281,9 @@ export const postBuyTake = async ({
 }) => {
   const address = useConnectionStore().getAddress
 
-  const { publicKey, signature } = await sign()
-
   const updateRes = await ordersV2Fetch(`update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       address,
@@ -343,13 +315,9 @@ export const postBidOrder = async ({
   coinAmount: number
 }) => {
   try {
-    const { publicKey, signature } = await sign()
     const createRes = await ordersV2Fetch(`bid/push`, {
       method: 'POST',
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
+      auth: true,
       body: JSON.stringify({
         net: network,
         address,
@@ -375,18 +343,12 @@ export const getSellFees = async ({
   feeAddress: string
   platformFee: number
 }> => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     net: useNetworkStore().network,
     orderId,
   })
 
-  const res = await ordersV2Fetch(`bid/cal/fee?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
-  })
+  const res = await ordersV2Fetch(`bid/cal/fee?${params}`, { auth: true })
 
   return !res ? { feeAddress: '', platformFee: 0 } : res
 }
@@ -403,7 +365,6 @@ export const getSellEssentials = async ({
   orderId: string
   psbtRaw: string
 }> => {
-  const { publicKey, signature } = await sign()
   const address = useConnectionStore().getAddress
   const params = new URLSearchParams({
     net: useNetworkStore().network,
@@ -414,10 +375,7 @@ export const getSellEssentials = async ({
   })
 
   const res = await ordersV2Fetch(`bid/do/pre?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
 
   return res
@@ -436,14 +394,9 @@ export const postSellTake = async ({
 }): Promise<{
   txId: string
 }> => {
-  const { publicKey, signature } = await sign()
-
   const res = await ordersV2Fetch(`bid/do`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: useNetworkStore().network,
       networkFee,

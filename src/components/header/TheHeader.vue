@@ -1,27 +1,33 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { MenuIcon } from 'lucide-vue-next'
 
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
+import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
-import { isUnsupportedAddress } from '@/lib/helpers'
 
-import WalletMissingModal from './WalletMissingModal.vue'
-import AssetsDisplay from './AssetsDisplay.vue'
-import Notifications from './Notifications.vue'
-import TheNavbar from './TheNavbar.vue'
-import AddressMenu from '@/components/header/AddressMenu.vue'
-import NetworkStateButton from '@/components/header/NetworkStateButton.vue'
-import NetworkStateModal from '@/components/header/NetworkStateModal.vue'
+import { isUnsupportedAddress } from '@/lib/helpers'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
 const connectionStore = useConnectionStore()
+const credentialsStore = useCredentialsStore()
 
 const { openConnectionModal } = useConnectionModal()
+
+// login
+useQuery({
+  queryKey: ['address', { network: networkStore.network }],
+  queryFn: async () =>
+    credentialsStore
+      .login()
+      .then((credential) => (credential ? credential.address : null)),
+  retry: 0,
+  enabled: computed(() => connectionStore.connected),
+})
 
 const unisatAccountsChangedHandler = (accounts: string[]) => {
   if (connectionStore.last.wallet !== 'unisat') return
@@ -127,7 +133,7 @@ onBeforeUnmount(() => {
 <template>
   <ConnectionModal />
   <WalletMissingModal />
-  <NetworkStateModal />
+  <NetworkStateModal v-if="connectionStore.connected" />
 
   <header
     class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"

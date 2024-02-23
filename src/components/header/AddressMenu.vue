@@ -10,6 +10,7 @@ import {
   UnplugIcon,
   FuelIcon,
 } from 'lucide-vue-next'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
 import { useNetworkStore } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
@@ -20,11 +21,10 @@ import { prettyAddress } from '@/lib/formatters'
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
 import metaletIcon from '@/assets/metalet-icon.png?url'
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const credentialStore = useCredentialsStore()
+const credentialsStore = useCredentialsStore()
 
 // connect / address related
 const { data: address } = useQuery({
@@ -65,7 +65,7 @@ function clearCache() {
   const address = useConnectionStore().getAddress
   if (!address) return
 
-  credentialStore.remove(address)
+  credentialsStore.remove(address)
 
   ElMessage.success('Account cache cleared. Refreshing...')
 

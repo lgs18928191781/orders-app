@@ -1,6 +1,5 @@
 import { ordersApiFetch } from '@/lib/fetch'
 import { raise } from '@/lib/helpers'
-import sign from '@/lib/sign'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
@@ -28,13 +27,8 @@ export const getOnePoolPair = async ({
     address,
     pair: pairSymbol,
   })
-  const { publicKey, signature } = await sign()
-
   return await ordersApiFetch(`pool/pair/info/one?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then(
       (res: {
@@ -97,13 +91,9 @@ export const getMyPooledInscriptions = async ({
     tick,
     address,
   })
-  const { publicKey, signature } = await sign()
 
   return await ordersApiFetch(`pool/inscription?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   }).then((res) => {
     if (!res?.availableList) return []
 
@@ -160,14 +150,9 @@ export const pushAddLiquidity = async ({
   poolType,
   btcPoolMode,
 }: LiquidityOfferParams) => {
-  const { publicKey, signature } = await sign()
-
   return await ordersApiFetch(`pool/order/push`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       address,
       amount,
@@ -242,7 +227,6 @@ export const getMyPoolRecords = async ({
   address: string
   tick: string
 }): Promise<PoolRecord[]> => {
-  const { publicKey, signature } = await sign()
   const network = 'livenet'
   const params = new URLSearchParams({
     net: network,
@@ -253,10 +237,7 @@ export const getMyPoolRecords = async ({
   })
 
   return await ordersApiFetch(`pool/orders?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   }).then((res) => {
     return res?.results || []
   })
@@ -264,14 +245,10 @@ export const getMyPoolRecords = async ({
 
 export const removeLiquidity = async ({ orderId }: { orderId: string }) => {
   const network = useNetworkStore().network
-  const { publicKey, signature } = await sign()
 
   return await ordersApiFetch(`pool/order/update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       orderId,
@@ -310,7 +287,6 @@ export const getMyStandbys = async ({
 }): Promise<RewardRecord[]> => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     tick,
@@ -326,10 +302,7 @@ export const getMyStandbys = async ({
 
   return await ordersApiFetch(`pool/reward/records?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then((res) => {
       return res?.results || []
@@ -359,8 +332,6 @@ export const getMyUsedPoolRecords = async ({
   address: string
   tick: string
 }): Promise<PoolRecord[]> => {
-  const { publicKey, signature } = await sign()
-
   const network = 'livenet'
   const params = new URLSearchParams({
     net: network,
@@ -373,10 +344,7 @@ export const getMyUsedPoolRecords = async ({
   })
 
   return await ordersApiFetch(`pool/orders?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then((res) => {
       return res?.results || []
@@ -402,8 +370,6 @@ export const getMyReleasedRecords = async ({
   address: string
   tick: string
 }): Promise<ReleaseHistory[]> => {
-  const { publicKey, signature } = await sign()
-
   const network = 'livenet'
   const params = new URLSearchParams({
     net: network,
@@ -416,10 +382,7 @@ export const getMyReleasedRecords = async ({
   })
 
   return await ordersApiFetch(`pool/orders?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then((res) => {
       return res?.results || []
@@ -456,14 +419,10 @@ export const getReleaseEssential = async ({
 }): Promise<ReleaseEssential> => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   return await ordersApiFetch(`pool/order/claim`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       address,
       net: network,
@@ -480,14 +439,9 @@ export const submitRelease = async ({
   orderId: string
   psbtRaw: string
 }) => {
-  const { publicKey, signature } = await sign()
-
   return await ordersApiFetch(`pool/order/claim/commit`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       poolOrderId: orderId,
       psbtRaw,
@@ -505,8 +459,6 @@ export const getMyEventRecords = async ({
   address: string
   tick: string
 }): Promise<RewardRecord[]> => {
-  const { publicKey, signature } = await sign()
-
   const network = 'livenet'
   const params = new URLSearchParams({
     net: network,
@@ -517,10 +469,7 @@ export const getMyEventRecords = async ({
 
   return await ordersApiFetch(`pool/reward/records?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then((res) => {
       return res?.results || []
@@ -543,7 +492,6 @@ export const getMyEventRewardsEssential = async ({
   address: string
 }): Promise<RewardsEssential> => {
   const network = useNetworkStore().network
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     tick,
@@ -554,10 +502,7 @@ export const getMyEventRewardsEssential = async ({
 
   return await ordersApiFetch(`event/reward/info?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   }).then((res) => {
     if (res.HasReleasePoolOrderCount) {
       res.hasReleasePoolOrderCount = res.HasReleasePoolOrderCount
@@ -576,7 +521,6 @@ export const getMyStandbyRewardsEssential = async ({
   address: string
 }): Promise<RewardsEssential> => {
   const network = useNetworkStore().network
-  const { publicKey, signature } = await sign()
 
   const rewardType = tick === 'rdex' ? '12' : '2'
   const params = new URLSearchParams({
@@ -588,10 +532,7 @@ export const getMyStandbyRewardsEssential = async ({
 
   return await ordersApiFetch(`event/reward/info?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   }).then((res) => {
     if (res.HasReleasePoolOrderCount) {
       res.hasReleasePoolOrderCount = res.HasReleasePoolOrderCount
@@ -604,17 +545,13 @@ export const getMyStandbyRewardsEssential = async ({
 
 export const getRewardClaimFees = async () => {
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     networkFeeRate: String(feeb),
     version: '2',
   })
 
   return (await ordersApiFetch(`event/reward/cal/fee?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })) as {
     rewardInscriptionFee: number
     rewardSendFee: number
@@ -624,17 +561,13 @@ export const getRewardClaimFees = async () => {
 
 export const getEventClaimFees = async () => {
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     networkFeeRate: String(feeb),
     version: '2',
   })
 
   return (await ordersApiFetch(`event/reward/cal/fee?${params}`, {
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })) as {
     rewardInscriptionFee: number
     rewardSendFee: number
@@ -661,14 +594,10 @@ export const claimEventReward = async ({
 }) => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   return await ordersApiFetch(`event/reward/claim`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       rewardAmount,
@@ -705,15 +634,11 @@ export const claimStandbyReward = async ({
 }) => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
   const rewardType = tick === 'rdex' ? 12 : 2
 
   return await ordersApiFetch(`event/reward/claim`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       rewardAmount,
@@ -738,7 +663,6 @@ export const getMyEventRewardsClaimRecords = async ({
 }): Promise<RewardsClaimRecord[]> => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     tick,
@@ -749,10 +673,7 @@ export const getMyEventRewardsClaimRecords = async ({
 
   return await ordersApiFetch(`pool/reward/orders?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then((res) => {
       return res?.results || []
@@ -777,7 +698,6 @@ export const getMyStandbyRewardsClaimRecords = async ({
 }): Promise<RewardsClaimRecord[]> => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     tick,
@@ -788,10 +708,7 @@ export const getMyStandbyRewardsClaimRecords = async ({
 
   return await ordersApiFetch(`pool/reward/orders?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then((res) => {
       return res?.results || []
@@ -828,7 +745,6 @@ export const getMyRewardsEssential = async ({
   address: string
 }): Promise<RewardsEssential> => {
   const network = useNetworkStore().network
-  const { publicKey, signature } = await sign()
 
   const params = new URLSearchParams({
     tick,
@@ -838,10 +754,7 @@ export const getMyRewardsEssential = async ({
 
   return await ordersApiFetch(`pool/reward/info?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   }).then((res) => {
     if (res.HasReleasePoolOrderCount) {
       res.hasReleasePoolOrderCount = res.HasReleasePoolOrderCount
@@ -869,7 +782,6 @@ export const getMyRewardsClaimRecords = async ({
 }): Promise<RewardsClaimRecord[]> => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   const rewardType = tick === 'rdex' ? '11' : '0'
   const params = new URLSearchParams({
@@ -882,10 +794,7 @@ export const getMyRewardsClaimRecords = async ({
 
   return await ordersApiFetch(`pool/reward/orders?${params}`, {
     method: 'GET',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
   })
     .then((res) => {
       return res?.results || []
@@ -922,14 +831,10 @@ export const claimReward = async ({
 }) => {
   const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
-  const { publicKey, signature } = await sign()
 
   return await ordersApiFetch(`pool/reward/claim`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       rewardAmount,
