@@ -226,10 +226,11 @@ const flipAsset = async () => {
       break
   }
 
-  // clear amounts
+  // clear amounts and reset conditions
   token1Amount.value = undefined
   token2Amount.value = undefined
   hasAmount.value = false
+  moreThanThreshold.value = true
 
   // clear token2InscriptionIds
   token2InscriptionIds.value = []
@@ -275,6 +276,12 @@ const conditions: Ref<
     condition: 'insufficient-balance',
     message: 'Insufficient balance',
     priority: 5,
+    met: false,
+  },
+  {
+    condition: 'more-than-threshold',
+    message: 'Amount too small',
+    priority: 6,
     met: false,
   },
 ])
@@ -377,6 +384,30 @@ watch(
     } else {
       conditions.value = conditions.value.map((c) => {
         if (c.condition === 'enter-amount') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
+
+// 5th watcher: more-than-threshold
+const moreThanThreshold = ref(true)
+watch(
+  () => moreThanThreshold.value,
+  (moreThanThreshold) => {
+    if (moreThanThreshold) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
           c.met = false
         }
         return c
@@ -571,6 +602,8 @@ async function doSwap() {
           :calculating="calculatingPay"
           @has-enough="hasEnough = true"
           @not-enough="hasEnough = false"
+          @more-than-threshold="moreThanThreshold = true"
+          @less-than-threshold="moreThanThreshold = false"
           @amount-entered="hasAmount = true"
           @amount-cleared="hasAmount = false"
           @became-source="swapType = '1x'"
@@ -599,9 +632,12 @@ async function doSwap() {
 
         <SwapSideBtc
           side="receive"
+          use-case="swap"
           v-if="flipped"
           v-model:symbol="token1Symbol"
           v-model:amount="token1Amount"
+          @more-than-threshold="moreThanThreshold = true"
+          @less-than-threshold="moreThanThreshold = false"
           :calculating="calculatingReceive"
           @became-source="swapType = 'x1'"
         />
@@ -610,6 +646,8 @@ async function doSwap() {
           v-else
           v-model:symbol="token2Symbol"
           v-model:amount="token2Amount"
+          @more-than-threshold="moreThanThreshold = true"
+          @less-than-threshold="moreThanThreshold = false"
           :calculating="calculatingReceive"
           @became-source="swapType = 'x2'"
         />
@@ -629,7 +667,7 @@ async function doSwap() {
       </div>
 
       <!-- disabled buttons: calculating or have unmets  -->
-      <MainBtn :class="['disabled']" v-if="calculating" :disabled="true">
+      <MainBtn class="disabled" v-if="calculating" :disabled="true">
         <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
       </MainBtn>
 

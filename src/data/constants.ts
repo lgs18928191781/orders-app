@@ -69,3 +69,6 @@ export const BUY_PRICE_OUTPUT_INDEX = 2
 export const BUY_PAY_INPUT_INDEX = 4
 
 export const SIGNING_MESSAGE = 'orders.exchange'
+
+export const SWAP_THRESHOLD_AMOUNT = 10_000
+export const ADD_THRESHOLD_AMOUNT = 100_000

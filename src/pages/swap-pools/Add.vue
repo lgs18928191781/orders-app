@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch, type Ref, computed, PropType } from 'vue'
-import { PlusIcon } from 'lucide-vue-next'
+import { PlusIcon, Loader2Icon } from 'lucide-vue-next'
 import Decimal from 'decimal.js'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
@@ -16,8 +16,6 @@ import { useOngoingTask } from '@/hooks/use-ongoing-task'
 import { buildAdd, postTask, previewAdd } from '@/queries/swap'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { exclusiveChange } from '@/lib/build-helpers'
-import { sleep } from '@/lib/helpers'
-import SwapGasStats from '@/components/swap/SwapGasStats.vue'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -109,6 +107,12 @@ const conditions: Ref<
     condition: 'insufficient-balance',
     message: 'Insufficient balance',
     priority: 4,
+    met: false,
+  },
+  {
+    condition: 'more-than-threshold',
+    message: 'Amount too small',
+    priority: 5,
     met: false,
   },
 ])
@@ -212,6 +216,30 @@ watch(
     } else {
       conditions.value = conditions.value.map((c) => {
         if (c.condition === 'enter-amount') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
+
+// 5th watcher: more-than-threshold
+const moreThanThreshold = ref(true)
+watch(
+  () => moreThanThreshold.value,
+  (moreThanThreshold) => {
+    if (moreThanThreshold) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
           c.met = false
         }
         return c
@@ -333,9 +361,12 @@ async function doAddLiquidity() {
       v-model:symbol="token1Symbol"
       v-model:amount="token1Amount"
       :calculating="calculatingToken1"
-      :side="'pay'"
+      use-case="add"
+      side="pay"
       @has-enough="hasEnough = true"
       @not-enough="hasEnough = false"
+      @more-than-threshold="moreThanThreshold = true"
+      @less-than-threshold="moreThanThreshold = false"
     />
   </div>
 
@@ -352,9 +383,13 @@ async function doAddLiquidity() {
   <SwapGasStats v-show="ratio.gt(0) && poolEquity.gt(0)" :task-type="'add'" />
 
   <!-- disabled button -->
+  <MainBtn class="disabled" v-if="calculatingToken1" :disabled="true">
+    <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
+  </MainBtn>
+
   <MainBtn
     :class="[!!unmet && !unmet.handler && 'disabled']"
-    v-if="unmet"
+    v-else-if="unmet"
     :disabled="!unmet.handler"
     @click="!!unmet.handler && unmet.handler()"
   >

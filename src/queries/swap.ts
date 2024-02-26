@@ -37,6 +37,7 @@ export const previewSwap = async ({
   const res = await swapApiFetch('preview/swap', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }
@@ -73,6 +74,7 @@ export const previewAdd = async ({
   const res = await swapApiFetch('preview/add', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }
@@ -115,6 +117,7 @@ export const previewRemove = async ({
   const res = await swapApiFetch('preview/remove', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
 
   return res
@@ -192,6 +195,7 @@ export const buildAdd = async ({
   const res = await swapApiFetch('build/add', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }
@@ -220,6 +224,7 @@ export const buildRemove = async ({
   const res = await swapApiFetch('build/remove', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }
@@ -251,6 +256,7 @@ export const build1xSwap = async ({
   const res = await swapApiFetch('build/1x', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }
@@ -282,6 +288,7 @@ export const buildX2Swap = async ({
   const res = await swapApiFetch('build/x2', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }
@@ -316,6 +323,7 @@ export const build2xSwap = async ({
   const res = await swapApiFetch('build/2x', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }
@@ -334,6 +342,7 @@ export const postTask = async ({
   const res = await swapApiFetch('tasks', {
     method: 'POST',
     body: JSON.stringify(body),
+    auth: true,
   })
   return res
 }

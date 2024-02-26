@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
-import { Loader2Icon } from 'lucide-vue-next'
+import { Loader2Icon, AlertCircleIcon } from 'lucide-vue-next'
+import gsap from 'gsap'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
 import { getBrc20s } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
-import gsap from 'gsap'
-import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
+import { ADD_THRESHOLD_AMOUNT, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -24,6 +25,11 @@ const props = defineProps({
     type: String,
     required: false,
     validator: (side: string) => ['pay', 'receive'].includes(side),
+  },
+  useCase: {
+    type: String,
+    required: false,
+    validator: (useCase: string) => ['add', 'swap'].includes(useCase),
   },
   calculating: {
     type: Boolean,
@@ -89,7 +95,13 @@ const amountTextSize = computed(() => {
   return 'text-4xl'
 })
 
-const emit = defineEmits(['update:symbol', 'hasEnough', 'notEnough'])
+const emit = defineEmits([
+  'update:symbol',
+  'hasEnough',
+  'notEnough',
+  'moreThanThreshold',
+  'lessThanThreshold',
+])
 
 // fiat price
 const { data: btcFiatRate } = useQuery({
@@ -197,6 +209,28 @@ watch(
     }
   }
 )
+
+const threshold = computed(() =>
+  props.useCase === 'add' ? ADD_THRESHOLD_AMOUNT : SWAP_THRESHOLD_AMOUNT
+)
+const thresholdInBtc = computed(() => new Decimal(threshold.value).div(1e8))
+const amountMoreThanThreshold = computed(() => {
+  if (!amount.value) {
+    return true
+  }
+
+  return new Decimal(amount.value).gte(threshold.value)
+})
+watch(
+  () => amountMoreThanThreshold.value,
+  (moreThanThreshold) => {
+    if (moreThanThreshold) {
+      emit('moreThanThreshold')
+    } else {
+      emit('lessThanThreshold')
+    }
+  }
+)
 </script>
 
 <template>
@@ -234,6 +268,15 @@ watch(
           {{ prettySymbol(symbol) }}
         </div>
       </div>
+    </div>
+
+    <!-- warning -->
+    <div
+      class="text-red-500 text-sm -mt-2 mb-2 flex items-center gap-2"
+      v-if="hasEnough && !calculating && !amountMoreThanThreshold"
+    >
+      <AlertCircleIcon class="size-4" />
+      Amount should be at least {{ thresholdInBtc }} BTC
     </div>
 
     <!-- data footer -->

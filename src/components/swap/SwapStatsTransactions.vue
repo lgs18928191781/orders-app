@@ -6,6 +6,7 @@ import {
   CheckIcon,
   CalendarSearchIcon,
   ExternalLinkIcon,
+  Loader2Icon,
 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

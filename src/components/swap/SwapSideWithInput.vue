@@ -2,16 +2,17 @@
 import { computed, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
-import { Loader2Icon, EraserIcon } from 'lucide-vue-next'
+import { Loader2Icon, EraserIcon, AlertCircleIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrcFiatRate, getFiatRate, getBrc20s } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
-import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
+import { SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -51,7 +52,7 @@ const normalizedAmount = computed(() => {
   const dividedBy = symbol.value.toLowerCase() === 'btc' ? 1e8 : 1
   return new Decimal(amount.value).dividedBy(dividedBy).toDP().toFixed()
 })
-const updateAmount = (updatingAmount: number) => {
+const updateAmount = (updatingAmount: number | string) => {
   if (typeof updatingAmount === 'string') {
     updatingAmount = Number(updatingAmount)
   }
@@ -97,6 +98,8 @@ const amountTextSize = computed(() => {
 const emit = defineEmits([
   'hasEnough',
   'notEnough',
+  'moreThanThreshold',
+  'lessThanThreshold',
   'amountEntered',
   'amountCleared',
   'update:symbol',
@@ -229,6 +232,19 @@ const hasEnough = computed(() => {
   return new Decimal(amount.value).lte(new Decimal(balance.value))
 })
 
+const amountMoreThanThreshold = computed(() => {
+  // only check when symbol is btc
+  if (symbol.value !== 'btc') {
+    return true
+  }
+
+  if (!amount.value) {
+    return true
+  }
+
+  return new Decimal(amount.value).gte(SWAP_THRESHOLD_AMOUNT)
+})
+
 // watch for change of hasEnough; emit event
 watch(
   () => hasEnough.value,
@@ -237,6 +253,16 @@ watch(
       emit('hasEnough')
     } else {
       emit('notEnough')
+    }
+  }
+)
+watch(
+  () => amountMoreThanThreshold.value,
+  (moreThanThreshold) => {
+    if (moreThanThreshold) {
+      emit('moreThanThreshold')
+    } else {
+      emit('lessThanThreshold')
     }
   }
 )
@@ -258,7 +284,6 @@ watch(
   <div class="swap-sub-control-panel">
     <div class="text-zinc-400">You {{ side }}</div>
 
-    <!-- main control -->
     <div class="flex items-center space-x-2 justify-between h-16">
       <input
         class="bg-transparent quiet-input flex-1 w-12 p-0 leading-loose"
@@ -295,6 +320,15 @@ watch(
           {{ prettySymbol(symbol) }}
         </div>
       </div>
+    </div>
+
+    <!-- warning -->
+    <div
+      class="text-red-500 text-sm -mt-2 mb-2 flex items-center gap-2"
+      v-if="hasEnough && !calculating && !amountMoreThanThreshold"
+    >
+      <AlertCircleIcon class="size-4" />
+      Amount should be at least 0.0001 BTC
     </div>
 
     <!-- data footer -->
