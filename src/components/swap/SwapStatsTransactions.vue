@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
-import { ChevronRightIcon, CheckIcon } from 'lucide-vue-next'
+import {
+  ChevronRightIcon,
+  CheckIcon,
+  CalendarSearchIcon,
+  ExternalLinkIcon,
+} from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
@@ -12,11 +17,11 @@ import { useNetworkStore } from '@/stores/network'
 
 import {
   prettyBalance,
-  prettyDate,
   prettyOneSideAddress,
   prettySymbol,
-  prettyTimestamp,
 } from '@/lib/formatters'
+import { getTransactionsQuery } from '@/queries/swap/transactions.query'
+import { toTx } from '@/lib/helpers'
 
 import {
   Listbox,
@@ -24,12 +29,6 @@ import {
   ListboxOptions,
   ListboxOption,
 } from '@headlessui/vue'
-import { getTransactionsQuery } from '@/queries/swap/transactions.query'
-import { Loader2Icon } from 'lucide-vue-next'
-import { CalendarSearchIcon } from 'lucide-vue-next'
-import { ExternalLink } from 'lucide-vue-next'
-import { ExternalLinkIcon } from 'lucide-vue-next'
-import { toTx } from '@/lib/helpers'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 

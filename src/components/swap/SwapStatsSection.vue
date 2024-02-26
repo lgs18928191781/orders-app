@@ -2,6 +2,8 @@
 import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import Decimal from 'decimal.js'
+import { get } from '@vueuse/core'
 
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useConnectionStore } from '@/stores/connection'
@@ -10,10 +12,6 @@ import { useFiat } from '@/hooks/use-fiat'
 
 import { getPoolStatusQuery } from '@/queries/swap.query'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
-
-import SwapStatsTransactions from '@/components/swap/SwapStatsTransactions.vue'
-import { get } from '@vueuse/core'
-import Decimal from 'decimal.js'
 
 const { token1Symbol, token2Symbol, selectedPair, pairStr } = useSwapPoolPair()
 const token1Icon = computed(() => selectedPair.value?.token1Icon)
