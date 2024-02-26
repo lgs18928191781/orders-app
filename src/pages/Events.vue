@@ -15,9 +15,6 @@ import {
 import { sleep } from '@/lib/helpers'
 import { buildClaim } from '@/lib/builders/orders-v2'
 import { useBtcJsStore } from '@/stores/btcjs'
-
-import EventRecords from '@/components/events/Records.vue'
-import EventSelect from '@/components/events/EventSelect.vue'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 const connectionStore = useConnectionStore()
