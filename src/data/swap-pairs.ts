@@ -60,6 +60,14 @@ export const testnetSwapPairs = [
     token1Icon: btcLogo,
     token2Icon: rdexLogo,
   },
+  {
+    id: 2,
+    exactName: 'dexr',
+    token1Symbol: 'btc',
+    token2Symbol: 'dexr',
+    token1Icon: btcLogo,
+    token2Icon: rdexLogo,
+  },
 ]
 
 export default swapPairs

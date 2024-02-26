@@ -6,9 +6,6 @@ import { computed } from 'vue'
 import { getClaimHistory, getRewardHistory } from '@/queries/events'
 import { useConnectionStore } from '@/stores/connection'
 
-import RewardRecordItem from '@/components/events/RewardRecordItem.vue'
-import ClaimRecordItem from '@/components/events/ClaimRecordItem.vue'
-
 const connectionStore = useConnectionStore()
 
 const props = defineProps({

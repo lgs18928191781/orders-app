@@ -1,7 +1,11 @@
-import { getPoolStatus, previewRemove } from '@/queries/swap'
 import { Network } from '@/stores/network'
 import { queryOptions } from '@tanstack/vue-query'
 import { ComputedRef, computed } from 'vue'
+
+import { getPoolStatus, previewRemove } from '@/queries/swap'
+import { useCredentialsStore } from '@/stores/credentials'
+
+const credentialsStore = useCredentialsStore()
 
 export const getPoolStatusQuery = (
   filters: {
@@ -22,7 +26,7 @@ export const getPoolStatusQuery = (
         network: filters.network,
       }),
 
-    enabled,
+    enabled: computed(() => credentialsStore.ready && enabled.value),
     refetchInterval: 30000,
   })
 

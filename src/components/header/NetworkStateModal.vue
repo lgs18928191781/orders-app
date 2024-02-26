@@ -31,6 +31,7 @@ import { sleep, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance } from '@/lib/formatters'
 import { BID_TX_SIZE, BUY_TX_SIZE, SELL_TX_SIZE } from '@/data/constants'
 import { getRewardClaimFees } from '@/queries/pool'
+import { useCredentialsStore } from '@/stores/credentials'
 
 const { useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
@@ -93,6 +94,7 @@ const takeActions = [
 // fetch claim fees dynamically
 const claimFee = ref(0)
 async function getClaimFee() {
+  if (!useCredentialsStore().get) return
   const fees = await getRewardClaimFees()
   claimFee.value = new Decimal(fees.rewardInscriptionFee)
     .plus(fees.rewardSendFee)

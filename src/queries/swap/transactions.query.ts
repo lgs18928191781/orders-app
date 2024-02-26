@@ -3,8 +3,10 @@ import { ComputedRef, computed } from 'vue'
 
 import { swapApiFetch } from '@/lib/fetch'
 import { Network } from '@/stores/network'
-import { sleep } from '@/lib/helpers'
-import { TaskType } from '@/queries/swap/types'
+import { type TaskType } from '@/queries/swap/types'
+import { useCredentialsStore } from '@/stores/credentials'
+
+const credentialsStore = useCredentialsStore()
 
 export const getTransactions = async ({
   token1,
@@ -50,8 +52,10 @@ export const getTransactions = async ({
   if (onlyMyTransactions) {
     params.append('address', address)
   }
+
   const res = await swapApiFetch(
-    `pools/${token1}-${token2}/transactions?${params}`
+    `pools/${token1}-${token2}/transactions?${params}`,
+    { auth: onlyMyTransactions }
   )
 
   return res
@@ -80,6 +84,6 @@ export const getTransactionsQuery = (
         onlyMyTransactions: filters.onlyMyTransactions.value,
       }),
 
-    enabled,
+    enabled: computed(() => credentialsStore.ready && enabled.value),
     refetchInterval: 30000,
   })

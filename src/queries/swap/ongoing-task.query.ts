@@ -4,6 +4,9 @@ import { ComputedRef, Ref, computed } from 'vue'
 import { swapApiFetch } from '@/lib/fetch'
 import { Network } from '@/stores/network'
 import { TaskType } from '@/queries/swap/types'
+import { useCredentialsStore } from '@/stores/credentials'
+
+const credentialsStore = useCredentialsStore()
 
 export const getOngoingTask = async ({
   address,
@@ -68,6 +71,6 @@ export const getOngoingTaskQuery = (
         taskId: filters.taskId.value,
       }),
 
-    enabled,
+    enabled: computed(() => credentialsStore.ready && enabled.value),
     refetchInterval: refetchInterval || 1000,
   })

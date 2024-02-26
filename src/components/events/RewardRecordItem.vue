@@ -3,7 +3,6 @@ import { CopyIcon } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
 
 import { prettyAddress, prettyBalance, prettyTimestamp } from '@/lib/formatters'
-import { unit, useBtcUnit } from '@/lib/helpers'
 import { EVENT_REWARDS_TICK } from '@/data/constants'
 import { getRewardHistory } from '@/queries/events'
 

@@ -44,6 +44,15 @@ export const useCredentialsStore = defineStore('credentials', {
 
       return credential
     },
+
+    ready: (state) => {
+      const connectionStore = useConnectionStore()
+      const connected = connectionStore.connected
+      const address = connectionStore.getAddress
+      const credential = state.credentials.find((s) => s.address === address)
+
+      return connected && !!credential
+    },
   },
 
   actions: {
@@ -89,34 +98,40 @@ export const useCredentialsStore = defineStore('credentials', {
       let publicKey: string = connection.pubKey
       let signature: string = ''
 
-      switch (connection.wallet) {
-        case 'unisat':
-          publicKey = await window.unisat.getPublicKey()
-          signature = await connectionStore.adapter.signMessage(message)
-          break
-        case 'okx':
-          const account: {
-            address: string
-            publicKey: string
-            compressedPublicKey: string
-          } = await window.okxwallet.bitcoin.connect()
+      try {
+        switch (connection.wallet) {
+          case 'unisat':
+            publicKey = await window.unisat.getPublicKey()
+            signature = await connectionStore.adapter.signMessage(message)
+            break
+          case 'okx':
+            const account: {
+              address: string
+              publicKey: string
+              compressedPublicKey: string
+            } = await window.okxwallet.bitcoin.connect()
 
-          publicKey = account.compressedPublicKey || account.publicKey
-          signature = await window.okxwallet.bitcoin.signMessage(message, {
-            from: account.address,
-          })
-          break
-        case 'metalet':
-          publicKey = await window.metaidwallet.btc.getPublicKey()
-          signature = await connectionStore.adapter.signMessage(message)
-          break
-        default:
-          throw new Error(`Unsupported wallet: ${connection.wallet}`)
+            publicKey = account.compressedPublicKey || account.publicKey
+            signature = await window.okxwallet.bitcoin.signMessage(message, {
+              from: account.address,
+            })
+            break
+          case 'metalet':
+            publicKey = await window.metaidwallet.btc.getPublicKey()
+            signature = await connectionStore.adapter.signMessage(message)
+            break
+          default:
+            throw new Error(`Unsupported wallet: ${connection.wallet}`)
+        }
+        console.log('here')
+
+        this.add({ publicKey, signature, address })
+
+        return { publicKey, signature, address }
+      } catch (e) {
+        // it's likely that the user rejected the signing.
+        this.signing = false
       }
-
-      this.add({ publicKey, signature, address })
-
-      return { publicKey, signature, address }
     },
 
     async login() {

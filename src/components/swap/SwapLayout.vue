@@ -40,7 +40,7 @@ onMounted(() => {
       <!-- background blur -->
       <SwapBlur v-if="!isExpanded" />
       <!-- expand control -->
-      <SwapExpandControl />
+      <SwapExpandControl v-if="connectionStore.connected" />
     </div>
   </div>
 </template>

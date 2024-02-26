@@ -139,7 +139,7 @@ onBeforeUnmount(() => {
     class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
   >
     <div class="max-w-9xl flex items-center justify-between mx-auto px-3">
-      <TheNavbar />
+      <AppNavbar />
 
       <div class="flex gap-2">
         <button
@@ -148,6 +148,14 @@ onBeforeUnmount(() => {
           v-if="!connectionStore.connected"
         >
           Connect Wallet
+        </button>
+
+        <button
+          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
+          @click="credentialsStore.login()"
+          v-else-if="!credentialsStore.get"
+        >
+          Authorize
         </button>
 
         <template v-else>
@@ -160,7 +168,7 @@ onBeforeUnmount(() => {
               <NetworkStateButton />
             </div>
 
-            <Notifications />
+            <AppNotifications />
           </div>
 
           <button class="lg:hidden">
