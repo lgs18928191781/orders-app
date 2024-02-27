@@ -33,10 +33,6 @@ const links: {
     name: 'Events',
     path: '/events',
   },
-  {
-    name: 'Leaderboard',
-    path: '/leaderboard',
-  },
   // {
   //   name: 'Whitelist',
   //   path: '/whitelist',
@@ -53,9 +49,10 @@ function isLinkActive(path: string) {
     case '/pool':
       return route.path.startsWith('/pool')
     case '/events':
-      return route.path.startsWith('/events')
-    case '/leaderboard':
-      return route.path.startsWith('/leaderboard')
+      return (
+        route.path.startsWith('/events') ||
+        route.path.startsWith('/leaderboard')
+      )
     case '/swap/':
       return route.path.startsWith('/swap') || route.path.startsWith('/add')
 

@@ -84,9 +84,18 @@ const currentLevelProgress = computed(() => {
 
 <template>
   <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-2xl font-semibold text-center mb-6 text-zinc-100">
-      Leaderboard
-    </h1>
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-semibold text-left text-zinc-100">
+        Leaderboard
+      </h1>
+
+      <router-link
+        to="/events"
+        class="text-zinc-300 underline hover:text-primary"
+      >
+        Events & Rewards
+      </router-link>
+    </div>
 
     <section
       class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-primary/30 border border-primary/20"

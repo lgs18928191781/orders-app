@@ -92,9 +92,18 @@ async function onClaimReward() {
 
 <template>
   <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-2xl font-semibold text-left mb-6 text-zinc-100">
-      Events & Rewards
-    </h1>
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-semibold text-left text-zinc-100">
+        Events & Rewards
+      </h1>
+
+      <router-link
+        to="/leaderboard"
+        class="text-zinc-300 underline hover:text-primary"
+      >
+        Leaderboard
+      </router-link>
+    </div>
 
     <section
       class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-primary/30 border border-primary/20"
