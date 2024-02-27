@@ -7,6 +7,7 @@ import { isRestrictedRegion } from '@/lib/helpers'
 const Home = () => import('./pages/Home.vue')
 const Recover = () => import('./pages/Recover.vue')
 const Swap = () => import('./pages/Swap.vue')
+const Bridge = () => import('./pages/asset-bridge/Bridge.vue')
 const SwapPools = () => import('./pages/swap-pools/Index.vue')
 const Whitelist = () => import('./pages/Whitelist.vue')
 const Events = () => import('./pages/Events.vue')
@@ -37,6 +38,7 @@ const routes = [
     ],
   },
   { path: '/swap', component: Swap },
+  { path: '/bridge', component: Bridge },
   { path: '/whitelist', component: Whitelist },
   { path: '/events', component: Events },
   { path: '/leaderboard', component: Leaderboard },

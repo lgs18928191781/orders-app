@@ -28,6 +28,10 @@ const links: {
     version: 0,
   },
   {
+    name: 'Bridge',
+    path: '/bridge',
+  },
+  {
     name: 'Events',
     path: '/events',
   },
@@ -67,15 +71,15 @@ function isLinkActive(path: string) {
   <div class="flex items-center">
     <NavbarMenu />
 
-    <nav class="hidden ml-6 lg:flex items-center gap-x-2">
+    <nav class="ml-6 hidden items-center gap-x-2 lg:flex">
       <component
         :class="[
-          'px-4 py-2 text-sm font-medium rounded-md transition-all',
+          'rounded-md px-4 py-2 text-sm font-medium transition-all',
           isLinkActive(link.path)
             ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
             : 'text-zinc-300',
           link.disabled
-            ? 'text-zinc-500 cursor-default'
+            ? 'cursor-default text-zinc-500'
             : 'hover:bg-black hover:text-primary',
         ]"
         v-for="link in links"
@@ -86,13 +90,13 @@ function isLinkActive(path: string) {
       >
         {{ link.name }}
         <span
-          class="inline-flex items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400 -translate-y-2 -translate-x-1 absolute"
+          class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400"
           v-if="link.new"
         >
           New
         </span>
         <span
-          class="inline-flex items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400 -translate-y-2 -translate-x-1 absolute"
+          class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400"
           v-if="typeof link.version !== 'undefined'"
         >
           {{ 'V' + link.version }}

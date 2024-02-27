@@ -181,14 +181,14 @@ function onDisconnect() {
 
 <template>
   <Menu as="div" class="relative inline-block">
-    <MenuButton class="flex gap-2 pr-3 group">
+    <MenuButton class="group flex gap-2 pr-3">
       <img class="h-5" :src="walletIcon" alt="wallet icon" v-if="walletIcon" />
       <span class="text-sm text-primary">
         {{ address ? prettyAddress(address, 4) : '-' }}
       </span>
 
       <MenuIcon
-        class="h-5 text-zinc-300 group-hover:text-primary group-hover:scale-110"
+        class="h-5 text-zinc-300 group-hover:scale-110 group-hover:text-primary"
       />
     </MenuButton>
 
@@ -204,11 +204,11 @@ function onDisconnect() {
         class="absolute right-0 z-10 mt-4 flex w-screen max-w-min origin-top-right"
       >
         <div
-          class="w-56 shrink rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg ring-1 ring-zinc-900/5 overflow-hidden divide-y divide-zinc-700 shadow-primary/20"
+          class="w-56 shrink divide-y divide-zinc-700 overflow-hidden rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg shadow-primary/20 ring-1 ring-zinc-900/5"
         >
           <MenuItem v-slot="{ active }">
             <button
-              class="p-4 block hover:text-primary w-full text-left"
+              class="block w-full p-4 text-left hover:text-primary"
               @click="copyAddress"
             >
               Copy Address
@@ -217,7 +217,7 @@ function onDisconnect() {
 
           <MenuItem>
             <button
-              class="p-4 block hover:text-primary transition w-full text-left"
+              class="block w-full p-4 text-left transition hover:text-primary"
               @click="clearCache"
             >
               Clear Account Cache
@@ -226,7 +226,7 @@ function onDisconnect() {
 
           <MenuItem v-if="connectionStore.has">
             <button
-              class="p-4 block hover:text-primary transition w-full text-left"
+              class="block w-full p-4 text-left transition hover:text-primary"
               @click="onDisconnect"
             >
               Disconnect
