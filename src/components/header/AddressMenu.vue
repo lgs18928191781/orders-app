@@ -21,6 +21,8 @@ import { prettyAddress } from '@/lib/formatters'
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
 import metaletIcon from '@/assets/metalet-icon.png?url'
+import { ChevronsUpDownIcon } from 'lucide-vue-next'
+import { ChevronsDownUpIcon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -101,8 +103,8 @@ async function onGetGasFromFaucet() {
 </script>
 
 <template>
-  <Menu as="div" class="relative inline-block">
-    <MenuButton class="group flex items-center gap-2 pr-3">
+  <Menu as="div" class="relative inline-block" v-slot="{ open }">
+    <MenuButton class="group flex w-full items-center gap-2 lg:pr-3">
       <img class="h-5" :src="walletIcon" alt="wallet icon" v-if="walletIcon" />
       <span class="text-sm text-primary">
         {{ address ? prettyAddress(address, 4) : '-' }}
@@ -114,8 +116,13 @@ async function onGetGasFromFaucet() {
         (Testnet)
       </span>
 
+      <ChevronsDownUpIcon
+        class="ml-auto h-5 text-zinc-300 lg:hidden"
+        v-if="open"
+      />
+      <ChevronsUpDownIcon class="ml-auto h-5 text-zinc-300 lg:hidden" v-else />
       <MenuIcon
-        class="h-5 text-zinc-300 group-hover:scale-125 group-hover:text-primary"
+        class="hidden h-5 text-zinc-300 group-hover:scale-125 group-hover:text-primary lg:inline"
       />
     </MenuButton>
 

@@ -8,49 +8,28 @@ import {
   SwitchGroup,
   SwitchLabel,
 } from '@headlessui/vue'
-import { ElMessage } from 'element-plus'
 import { useStorage } from '@vueuse/core'
 
 import { VERSION } from '@/data/constants'
-import { useConnectionStore } from '@/stores/connection'
-import { useCredentialsStore } from '@/stores/credentials'
 import { useFiat } from '@/hooks/use-fiat'
 
 import logo from '@/assets/logo-new.png?url'
+import pureLogo from '@/assets/rdex.png?url'
 
 const useBtcUnit = useStorage('use-btc-unit', true)
-const connectionStore = useConnectionStore()
-const credentialStore = useCredentialsStore()
 const { isShowingFiat } = useFiat()
-
-function clearCache() {
-  // clear the credential cache of this wallet address
-  const address = useConnectionStore().getAddress
-  if (!address) return
-
-  credentialStore.remove(address)
-
-  ElMessage.success('Account cache cleared. Refreshing...')
-
-  setTimeout(() => {
-    window.location.reload()
-  }, 1000)
-}
-
-function onDisconnect() {
-  // remove from address store
-  connectionStore.disconnect()
-
-  // reload
-  window.location.reload()
-}
 </script>
 
 <template>
   <Menu class="relative" as="div">
     <div class="flex items-center">
       <MenuButton class="flex items-center gap-0.5 outline-none">
-        <img class="h-8 cursor-pointer lg:h-9" :src="logo" alt="Logo" />
+        <img class="h-8 cursor-pointer lg:hidden" :src="pureLogo" alt="Logo" />
+        <img
+          class="hidden h-9 cursor-pointer lg:block"
+          :src="logo"
+          alt="Logo"
+        />
       </MenuButton>
     </div>
 
@@ -125,24 +104,6 @@ function onDisconnect() {
               Recover
             </router-link>
           </MenuItem>
-
-          <!-- <MenuItem>
-            <button
-              class="p-4 block hover:text-primary transition w-full text-left"
-              @click="clearCache"
-            >
-              Clear Account Cache
-            </button>
-          </MenuItem> -->
-
-          <!-- <MenuItem v-if="connectionStore.has">
-            <button
-              class="p-4 block hover:text-primary transition w-full text-left"
-              @click="onDisconnect"
-            >
-              Disconnect
-            </button>
-          </MenuItem> -->
 
           <MenuItem>
             <router-link

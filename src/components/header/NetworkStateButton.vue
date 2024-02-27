@@ -84,12 +84,12 @@ const trafficColorClass = computed(() => {
 
 <template>
   <button
-    class="flex items-center gap-2 px-3 text-xs outline-none hover:scale-105"
+    class="-mr-3 flex items-center gap-2 px-3 text-xs outline-none lg:mr-0 lg:hover:scale-105"
     @click="openModal"
     v-if="true"
   >
-    <span class="">Network</span>
-    <span class="relative flex h-2 w-2">
+    <span class="hidden lg:inline">Network</span>
+    <span class="relative hidden h-2 w-2 lg:flex">
       <span
         class="absolute inline-flex h-full w-full animate-ping-slow rounded-full opacity-75"
         :class="trafficColorClass.secondaryBg"

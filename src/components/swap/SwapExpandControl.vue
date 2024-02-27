@@ -18,15 +18,6 @@ const { isExpanded, toggleExpand } = useExpandSwap()
     />
   </button>
 
-  <button class="hidden lg:inline" @click="toggleExpand">
-    <ChevronsLeftIcon
-      class="h-5 w-5 text-zinc-700 transition-all duration-300 group-hover:-translate-x-1 group-hover:text-primary/80"
-      :class="{
-        'rotate-180': isExpanded,
-      }"
-    />
-  </button>
-
   <!-- <button
     class="inline-flex justify-center w-full lg:hidden text-zinc-500 items-center gap-2 mt-2"
     @click="toggleExpand"

@@ -121,9 +121,11 @@ const isSwapPage = computed(() => {
                 </DialogTitle>
 
                 <!-- wallet buttons -->
-                <div class="mt-8 grid grid-cols-3 gap-4 text-base">
+                <div
+                  class="mt-8 grid grid-cols-2 gap-4 text-base lg:grid-cols-3"
+                >
                   <button
-                    class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToOkx"
                     v-if="!isSwapPage"
                   >
@@ -132,7 +134,7 @@ const isSwapPage = computed(() => {
                   </button>
 
                   <button
-                    class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToUnisat"
                     ref="firstButtonRef"
                   >
@@ -146,7 +148,7 @@ const isSwapPage = computed(() => {
 
                   <div class="relative" v-if="!isSwapPage">
                     <button
-                      class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30"
+                      class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30 lg:w-36"
                       @click="connectToMetalet"
                     >
                       <img
@@ -166,8 +168,8 @@ const isSwapPage = computed(() => {
                     Testnet environment.
                   </p>
                   <p>By connecting wallet,</p>
-                  <p class="flex gap-2">
-                    you agree to Orders.Exchange's
+                  <p class="">
+                    <span>you agree to Orders.Exchange's</span>
                     <a
                       href="https://orders-exchange.gitbook.io/orders/risks-and-disclaimer/risks-and-disclaimer"
                       target="_blank"

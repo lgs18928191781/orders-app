@@ -51,12 +51,12 @@ function onClearNotifications() {
 </script>
 
 <template>
-  <div class="hidden text-sm text-zinc-300 lg:block">
+  <div class="text-sm text-zinc-300">
     <div class="group flex items-center gap-1">
       <Menu as="div" class="relative inline-block text-left">
         <div>
           <MenuButton
-            class="group relative h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition-all duration-200 hover:text-primary"
+            class="group relative -mr-2 h-10 cursor-pointer items-center rounded-lg px-2 text-sm text-zinc-300 transition-all duration-200 hover:text-primary lg:mr-0 lg:bg-black/90 lg:px-4"
           >
             <div class="flex h-full w-full items-center">
               <BellRingIcon class="h-5 group-hover:animate-wiggle-once" />

@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 
-import NavbarMenu from './NavbarMenu.vue'
-
 const route = useRoute()
 
 const links: {
@@ -64,7 +62,7 @@ function isLinkActive(path: string) {
 
 <template>
   <div class="flex items-center">
-    <NavbarMenu />
+    <LogoMenu />
 
     <nav class="ml-6 hidden items-center gap-x-2 lg:flex">
       <component
@@ -98,7 +96,7 @@ function isLinkActive(path: string) {
         </span>
         <span
           class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400"
-          v-if="typeof link.version !== 'undefined'"
+          v-else-if="typeof link.version !== 'undefined'"
         >
           {{ 'V' + link.version }}
         </span>

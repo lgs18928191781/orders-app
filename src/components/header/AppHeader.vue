@@ -10,6 +10,7 @@ import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
 import { isUnsupportedAddress } from '@/lib/helpers'
+import MobileAppHeaderMenu from '@/components/overlays/MobileAppHeaderMenu.vue'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
@@ -136,14 +137,14 @@ onBeforeUnmount(() => {
   <NetworkStateModal v-if="connectionStore.connected" />
 
   <header
-    class="select-none border-b border-zinc-800 bg-zinc-900 py-2 lg:mb-3 lg:border-none lg:py-4"
+    class="select-none border-b border-zinc-800 bg-zinc-900 py-3 lg:mb-3 lg:border-none lg:py-4"
   >
-    <div class="mx-auto flex max-w-9xl items-center justify-between px-3">
+    <div class="mx-auto flex max-w-9xl items-center justify-between gap-4 px-3">
       <AppNavbar />
 
-      <div class="flex gap-2">
+      <div class="flex grow gap-2 lg:grow-0">
         <button
-          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:bg-primary hover:text-orange-950"
+          class="rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
           @click="openConnectionModal"
           v-if="!connectionStore.connected"
         >
@@ -151,7 +152,7 @@ onBeforeUnmount(() => {
         </button>
 
         <button
-          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:bg-primary hover:text-orange-950"
+          class="rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
           @click="credentialsStore.login()"
           v-else-if="!credentialsStore.get"
         >
@@ -171,11 +172,15 @@ onBeforeUnmount(() => {
             <AppNotifications />
           </div>
 
-          <button class="lg:hidden">
-            <MenuIcon class="h-6 w-6" />
-          </button>
+          <div class="flex grow items-center lg:hidden">
+            <MobileAppHeaderNavbar class="mr-auto" />
+            <MobileAppHeaderMenu />
+            <AppNotifications />
+          </div>
         </template>
       </div>
     </div>
+
+    <MobileAppHeaderSecondRow />
   </header>
 </template>

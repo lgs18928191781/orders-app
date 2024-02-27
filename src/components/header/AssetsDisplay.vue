@@ -6,6 +6,7 @@ import {
   ChevronsUpDownIcon,
   Loader2Icon,
   HelpCircleIcon,
+  WalletIcon,
 } from 'lucide-vue-next'
 import {
   Menu,
@@ -102,29 +103,28 @@ const { data: myBrc20s } = useQuery({
       v-if="excludedBalance !== undefined && balance !== undefined"
       class="group flex items-center gap-1"
     >
-      <Menu as="div" class="relative inline-block text-left">
-        <div>
-          <MenuButton
-            class="inline-flex w-full items-center justify-center gap-x-1 rounded-md px-3 shadow-sm"
+      <Menu as="div" class="relative inline-flex items-center text-left">
+        <MenuButton
+          class="inline-flex w-full items-center justify-center gap-x-1 rounded-md px-3 shadow-sm"
+        >
+          <WalletIcon class="inline size-4 lg:hidden" />
+          <span>
+            {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
+          </span>
+          <span
+            class="hidden text-xs lg:inline"
+            :class="availableBalanceRatioColor"
+            v-if="balance"
           >
-            <span>
-              {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
-            </span>
-            <span
-              class="text-xs"
-              :class="availableBalanceRatioColor"
-              v-if="balance"
-            >
-              ({{ ((excludedBalance / balance) * 100).toFixed(0) }}%)
-            </span>
+            ({{ ((excludedBalance / balance) * 100).toFixed(0) }}%)
+          </span>
 
-            <div class="flex h-4 w-4 items-center justify-center">
-              <ChevronsUpDownIcon
-                class="h-3 w-3 transition-all duration-200 ease-in-out group-hover:h-4 group-hover:w-4"
-              />
-            </div>
-          </MenuButton>
-        </div>
+          <div class="hidden h-4 w-4 items-center justify-center lg:flex">
+            <ChevronsUpDownIcon
+              class="h-3 w-3 transition-all duration-200 ease-in-out group-hover:h-4 group-hover:w-4"
+            />
+          </div>
+        </MenuButton>
 
         <transition
           enter-active-class="transition ease-out duration-100"
@@ -135,7 +135,7 @@ const { data: myBrc20s } = useQuery({
           leave-to-class="transform opacity-0 scale-95"
         >
           <MenuItems
-            class="absolute right-0 z-50 mt-4 w-80 origin-top-right divide-y divide-zinc-700 overflow-hidden rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            class="absolute right-0 z-50 mt-4 w-80 origin-top-right divide-y divide-zinc-700 overflow-hidden rounded-md bg-zinc-800 shadow-highlight ring-1 ring-black ring-opacity-5 focus:outline-none"
           >
             <MenuItem v-slot="{ active }" disabled>
               <div
