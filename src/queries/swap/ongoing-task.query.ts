@@ -40,15 +40,17 @@ export const getOngoingTask = async ({
     address,
     task_id: taskId,
   })
-  const res = await swapApiFetch(`ongoing-task?${params}`).then((res) => {
-    // mock status: 80% chance of built, 10% chance of failed, 10% chance of completed
-    // const dice = Math.random()
-    // const status = dice > 0.2 ? 'built' : dice > 0.15 ? 'failed' : 'completed'
-    // console.log({ status })
-    // res.status = status
+  const res = await swapApiFetch(`ongoing-task?${params}`, { auth: true }).then(
+    (res) => {
+      // mock status: 80% chance of built, 10% chance of failed, 10% chance of completed
+      // const dice = Math.random()
+      // const status = dice > 0.2 ? 'built' : dice > 0.15 ? 'failed' : 'completed'
+      // console.log({ status })
+      // res.status = status
 
-    return res
-  })
+      return res
+    },
+  )
 
   return res
 }
@@ -60,7 +62,7 @@ export const getOngoingTaskQuery = (
     taskId: Ref<string>
   },
   enabled: ComputedRef<boolean> = computed(() => true),
-  refetchInterval: any
+  refetchInterval: any,
 ) =>
   queryOptions({
     queryKey: ['swapOngoingTask', filters],
