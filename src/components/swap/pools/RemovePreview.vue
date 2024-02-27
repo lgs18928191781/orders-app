@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Loader2Icon } from 'lucide-vue-next'
+import { Loader2Icon, AlertCircleIcon } from 'lucide-vue-next'
+import Decimal from 'decimal.js'
 
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+
 import { prettySymbol } from '@/lib/formatters'
-import { AlertCircleIcon } from 'lucide-vue-next'
 import { SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
-import Decimal from 'decimal.js'
 
 defineProps([
   'preview',
