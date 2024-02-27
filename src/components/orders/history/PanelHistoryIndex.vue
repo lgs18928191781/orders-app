@@ -32,18 +32,18 @@ onMounted(() => {
 <template>
   <TabGroup
     as="div"
-    class="rounded-lg grow flex flex-col primary-panel"
+    class="primary-panel flex grow flex-col rounded-lg"
     :selected-index="selectedTab"
     @change="changeTab"
   >
-    <TabList class="p-3 rounded-t-md bg-zinc-800 space-x-4 font-bold">
+    <TabList class="space-x-4 rounded-t-md bg-zinc-800 p-3 font-bold">
       <Tab as="template" v-slot="{ selected }">
         <button
           :class="[
             selected
               ? 'text-primary underline underline-offset-4'
               : 'text-zinc-300',
-            'font-bold py-1 px-2 outline-none',
+            'px-2 py-1 font-bold outline-none',
           ]"
         >
           <span>My Open Orders</span>
@@ -56,7 +56,7 @@ onMounted(() => {
             selected
               ? 'text-primary underline underline-offset-4'
               : 'text-zinc-300',
-            'font-bold py-1 px-2 outline-none',
+            'px-2 py-1 font-bold outline-none',
           ]"
         >
           My Order History
@@ -68,7 +68,7 @@ onMounted(() => {
             selected
               ? 'text-primary underline underline-offset-4'
               : 'text-zinc-300',
-            'font-bold py-1 px-2 outline-none',
+            'px-2 py-1 font-bold outline-none',
           ]"
         >
           Market Trades({{ prettySymbol(fromSymbol) }})
@@ -76,7 +76,7 @@ onMounted(() => {
       </Tab>
     </TabList>
 
-    <TabPanels class="p-3 grow">
+    <TabPanels class="grow p-3">
       <PanelOpenOrders v-model:open-orders-count="openOrdersCount" />
       <PanelOrderHistory />
       <PanelMarketTrades />

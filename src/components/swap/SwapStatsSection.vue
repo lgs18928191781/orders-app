@@ -34,8 +34,8 @@ const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
       address,
       network,
     },
-    computed(() => !!address)
-  )
+    computed(() => !!address),
+  ),
 )
 
 const tvl = computed(() => {
@@ -56,7 +56,7 @@ function toSwap() {
 </script>
 
 <template>
-  <div class="grid gap-8" v-if="poolStatus">
+  <div class="hidden gap-8 lg:grid" v-if="poolStatus">
     <!-- row 1 -->
     <div class="flex items-end justify-between gap-4 text-sm xl:text-base">
       <!-- left -->
@@ -70,7 +70,7 @@ function toSwap() {
           />
           <img
             :src="token2Icon"
-            class="size-6 rounded-full -ml-2"
+            class="-ml-2 size-6 rounded-full"
             v-if="token2Icon"
           />
           <div class="ml-2">
@@ -85,7 +85,7 @@ function toSwap() {
         <!-- ratio -->
         <div class="space-y-2">
           <div
-            class="flex items-center text-zinc-300 gap-2 bg-zinc-800/80 px-4 py-2 rounded-xl text-sm xl:text-base"
+            class="flex items-center gap-2 rounded-xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-300 xl:text-base"
           >
             <img
               :src="token1Icon"
@@ -103,7 +103,7 @@ function toSwap() {
           </div>
 
           <div
-            class="flex items-center text-zinc-300 gap-2 bg-zinc-800/80 px-4 py-2 rounded-xl text-sm xl:text-base"
+            class="flex items-center gap-2 rounded-xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-300 xl:text-base"
           >
             <img
               :src="token2Icon"
@@ -123,16 +123,16 @@ function toSwap() {
       </div>
 
       <!-- right -->
-      <div class="text-zinc-300 space-x-3 flex justify-end">
+      <div class="flex justify-end space-x-3 text-zinc-300">
         <button
-          class="py-3 px-4 bg-zinc-700 rounded-xl hover:text-zinc-400"
+          class="rounded-xl bg-zinc-700 px-4 py-3 hover:text-zinc-400"
           @click="toAdd"
         >
           Add Liquidity
         </button>
 
         <button
-          class="py-2.5 px-6 rounded-xl bg-transparent border-2 border-primary text-orange-50 bg-opacity-80 hover:bg-opacity-100 border-opacity-60 hover:border-opacity-100 hover:text-primary"
+          class="rounded-xl border-2 border-primary border-opacity-60 bg-transparent bg-opacity-80 px-6 py-2.5 text-orange-50 hover:border-opacity-100 hover:bg-opacity-100 hover:text-primary"
           @click="toSwap"
         >
           Swap
@@ -147,11 +147,11 @@ function toSwap() {
       <div
         className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-zinc-900 bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,#18181b)] rounded-3xl z-10"
       ></div>
-      <div class="z-20 text-zinc-300 p-4 relative flex items-start gap-8">
-        <div class="p-4 bg-zinc-800/50 rounded-2xl w-72">
+      <div class="relative z-20 flex items-start gap-8 p-4 text-zinc-300">
+        <div class="w-72 rounded-2xl bg-zinc-800/50 p-4">
           <div class="label">Total Tokens Locked</div>
 
-          <div class="flex items-center text-zinc-300 gap-2 mt-6">
+          <div class="mt-6 flex items-center gap-2 text-zinc-300">
             <img
               :src="token1Icon"
               class="size-6 rounded-full"
@@ -167,7 +167,7 @@ function toSwap() {
             </div>
           </div>
 
-          <div class="flex items-center text-zinc-300 gap-2 mt-3">
+          <div class="mt-3 flex items-center gap-2 text-zinc-300">
             <img
               :src="token2Icon"
               class="size-6 rounded-full"
@@ -185,8 +185,8 @@ function toSwap() {
         </div>
 
         <!-- right stats area -->
-        <div class="grid grid-cols-3 grow gap-x-4 gap-y-2 text-sm">
-          <div class="col-span-3 text-primary/80 font-bold text-base">
+        <div class="grid grow grid-cols-3 gap-x-4 gap-y-2 text-sm">
+          <div class="col-span-3 text-base font-bold text-primary/80">
             Pool Overview
           </div>
           <div class="">
@@ -213,7 +213,7 @@ function toSwap() {
             </div>
           </div>
 
-          <div class="col-span-3 text-primary/80 font-bold mt-6 text-base">
+          <div class="col-span-3 mt-6 text-base font-bold text-primary/80">
             Your Position
           </div>
 
@@ -255,6 +255,6 @@ function toSwap() {
 }
 
 .value {
-  @apply flex items-center text-zinc-300 gap-2 mt-1 font-bold;
+  @apply mt-1 flex items-center gap-2 font-bold text-zinc-300;
 }
 </style>

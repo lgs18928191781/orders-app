@@ -69,14 +69,14 @@ const impactColor = computed(() => {
     <TooltipProvider v-if="hasImpactWarning">
       <Tooltip>
         <TooltipTrigger
-          class="flex items-center justify-between rounded-2xl border border-red-500/30 p-3 text-sm mt-2 cursor-pointer"
+          class="mt-2 flex cursor-pointer items-center justify-between rounded-2xl border border-red-500/30 p-3 text-sm"
           as="div"
         >
           <div>Price Impact Warning</div>
           <span class="text-red-500">~{{ priceImpact }}%</span>
         </TooltipTrigger>
 
-        <TooltipContent side="left" :side-offset="2" class="w-96 py-6 px-4">
+        <TooltipContent side="left" :side-offset="2" class="w-96 px-4 py-6">
           <p>
             A swap of this size may have a high price impact, given the current
             liquidity in the pool. There may be a large difference between the
@@ -92,12 +92,12 @@ const impactColor = computed(() => {
     <Disclosure
       v-slot="{ open }"
       as="div"
-      class="rounded-2xl border border-zinc-700 p-4 mt-2"
+      class="mt-2 rounded-2xl border border-zinc-700 p-4"
     >
       <div class="text-zinc-500" v-if="calculating">Calculating...</div>
       <template v-else>
         <DisclosureButton
-          class="flex w-full items-center justify-between text-sm focus:outline-none text-zinc-300"
+          class="flex w-full items-center justify-between text-sm text-zinc-300 focus:outline-none"
         >
           <div class="space-y-1">
             <div class="flex items-center gap-2">
@@ -117,7 +117,7 @@ const impactColor = computed(() => {
           </div>
 
           <ChevronDownIcon
-            class="h-5 w-5 duration-200 text-zinc-500"
+            class="h-5 w-5 text-zinc-500 duration-200"
             :class="{ 'rotate-180 transform': open }"
           />
         </DisclosureButton>
@@ -132,7 +132,7 @@ const impactColor = computed(() => {
             leave-to-class="translate-y-1 opacity-0 "
           >
             <DisclosurePanel
-              class="text-sm border-t border-zinc-700 pt-4 mt-4 flex flex-col gap-2"
+              class="mt-4 flex flex-col gap-2 border-t border-zinc-700 pt-4 text-sm"
               static
             >
               <div class="flex w-full items-center justify-between">
@@ -142,7 +142,7 @@ const impactColor = computed(() => {
 
               <div class="flex w-full items-center justify-start gap-2">
                 <span class="label">Service fee</span>
-                <span class="ml-auto line-through text-zinc-500 decoration-2">
+                <span class="ml-auto text-zinc-500 line-through decoration-2">
                   1.5%
                 </span>
                 <span

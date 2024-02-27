@@ -74,8 +74,8 @@ async function submitRemove() {
 </script>
 
 <template>
-  <div class="max-w-md mx-auto">
-    <form action="" class="flex flex-col min-h-[40vh]">
+  <div class="mx-auto max-w-md">
+    <form action="" class="flex min-h-[40vh] flex-col">
       <Listbox as="div" v-model="selectedRecord" class="grow">
         <ListboxLabel
           class="block text-base font-medium leading-6 text-zinc-300"
@@ -104,7 +104,7 @@ async function submitRemove() {
                     selectedRecord.coinAmount
                   } ${selectedRecord.tick.toUpperCase()} / ${prettyBalance(
                     selectedRecord.amount,
-                    useBtcUnit
+                    useBtcUnit,
                   )} ${unit}`
                 }}
               </span>
@@ -129,12 +129,12 @@ async function submitRemove() {
             leave-to-class="opacity-0"
           >
             <ListboxOptions
-              class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-zinc-800 py-1 text-base shadow-lg ring-zinc-700 ring-1 ring-inset focus:outline-none sm:text-sm"
+              class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-zinc-800 py-1 text-base shadow-lg ring-1 ring-inset ring-zinc-700 focus:outline-none sm:text-sm"
             >
               <ListboxOption
                 v-if="!poolRecords?.length"
                 :disabled="true"
-                class="text-right text-zinc-500 text-sm py-2 px-4"
+                class="px-4 py-2 text-right text-sm text-zinc-500"
               >
                 No Records
               </ListboxOption>
@@ -149,16 +149,16 @@ async function submitRemove() {
                 <li
                   :class="[
                     active ? 'bg-primary text-orange-950' : 'text-zinc-300',
-                    'relative select-none py-2 pl-3 pr-9 flex gap-4 group cursor-pointer items-center',
+                    'group relative flex cursor-pointer select-none items-center gap-4 py-2 pl-3 pr-9',
                   ]"
                 >
-                  <span class="shrink-0 text-zinc-500 text-xs"
+                  <span class="shrink-0 text-xs text-zinc-500"
                     >#{{ index + 1 }}</span
                   >
                   <div
                     :class="[
                       selected ? 'font-semibold' : 'font-normal',
-                      'truncate flex items-center justify-between w-full',
+                      'flex w-full items-center justify-between truncate',
                     ]"
                   >
                     <span
@@ -176,11 +176,11 @@ async function submitRemove() {
                           record.coinAmount
                         } ${record.tick.toUpperCase()} / ${prettyBalance(
                           record.amount,
-                          useBtcUnit
+                          useBtcUnit,
                         )} ${unit}`
                       }}
                     </span>
-                    <span class="text-zinc-500 text-xs">
+                    <span class="text-xs text-zinc-500">
                       {{ `${prettyTimestamp(record.timestamp)}` }}
                     </span>
                   </div>
@@ -203,7 +203,7 @@ async function submitRemove() {
 
       <div class="flex justify-center">
         <button
-          class="mx-auto bg-primary w-full py-3 text-orange-950 rounded-md disabled:cursor-not-allowed disabled:opacity-30"
+          class="mx-auto w-full rounded-md bg-primary py-3 text-orange-950 disabled:cursor-not-allowed disabled:opacity-30"
           :disabled="!selectedRecord"
           @click.prevent="submitRemove"
         >

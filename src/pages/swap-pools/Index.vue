@@ -14,10 +14,10 @@ function isLinkActive(keyword: string) {
 <template>
   <SwapLayout>
     <div
-      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 h-full"
+      class="h-full rounded-3xl border border-primary/30 bg-zinc-900 p-2 pt-3 shadow-md"
     >
       <!-- header -->
-      <div class="px-3 flex gap-4 border-b border-zinc-800 pb-2">
+      <div class="flex gap-4 border-b border-zinc-800 px-3 pb-2">
         <router-link
           to="/swap"
           class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
@@ -36,11 +36,11 @@ function isLinkActive(keyword: string) {
       </div>
 
       <!-- pair control -->
-      <div class="flex justify-between items-center mt-4">
+      <div class="mt-4 flex items-center justify-between">
         <!-- sub nav -->
         <div class="flex items-center gap-1 text-sm">
           <router-link
-            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary px-4"
+            class="rounded-md px-4 py-1 text-sm font-medium transition-all hover:bg-black hover:text-primary"
             :class="
               isLinkActive('swap-pools-add')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
@@ -52,7 +52,7 @@ function isLinkActive(keyword: string) {
           </router-link>
 
           <router-link
-            class="py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary px-4"
+            class="rounded-md px-4 py-1 text-sm font-medium transition-all hover:bg-black hover:text-primary"
             :class="
               isLinkActive('swap-pools-remove')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'

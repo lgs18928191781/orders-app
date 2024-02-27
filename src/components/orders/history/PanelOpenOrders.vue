@@ -65,10 +65,10 @@ const { mutate } = useMutation({
 </script>
 
 <template>
-  <TabPanel class="text-sm h-full flex flex-col">
+  <TabPanel class="flex h-full flex-col text-sm">
     <!-- table header -->
     <div
-      class="grid grid-cols-12 gap-2 text-zinc-500 border-b border-zinc-700 pb-4"
+      class="grid grid-cols-12 gap-2 border-b border-zinc-700 pb-4 text-zinc-500"
     >
       <div class="col-span-2">Order Time</div>
       <div class="col-span-2">Pair</div>
@@ -76,14 +76,14 @@ const { mutate } = useMutation({
       <div class="col-span-2">Price</div>
       <div class="col-span-2">Amount</div>
       <div class="col-span-2">Total</div>
-      <div class="col-span-1 text-right flex items-center justify-end">
+      <div class="col-span-1 flex items-center justify-end text-right">
         <MenuIcon class="h-5 w-5" />
       </div>
     </div>
 
     <!-- table body -->
     <div
-      class="grow flex flex-col gap-2 items-center justify-center text-zinc-500 text-base"
+      class="flex grow flex-col items-center justify-center gap-2 text-base text-zinc-500"
       v-if="!connectionStore.connected"
     >
       <PlugZapIcon class="h-10 w-10 text-zinc-500" />
@@ -91,14 +91,14 @@ const { mutate } = useMutation({
     </div>
 
     <div
-      class="grow flex items-center justify-center text-zinc-500 text-sm"
+      class="flex grow items-center justify-center text-sm text-zinc-500"
       v-else-if="isLoading"
     >
-      <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+      <Loader2Icon class="h-8 w-8 animate-spin text-zinc-500" />
     </div>
 
     <div
-      class="grow flex flex-col gap-2 items-center justify-center text-zinc-500 text-base"
+      class="flex grow flex-col items-center justify-center gap-2 text-base text-zinc-500"
       v-else-if="openOrders && openOrders.length === 0"
     >
       <CalendarSearchIcon class="h-10 w-10 text-zinc-500" />
@@ -106,11 +106,11 @@ const { mutate } = useMutation({
     </div>
 
     <div
-      class="py-4 flex flex-col gap-2 overflow-y-auto h-1 flex-auto nicer-scrollbar pr-3 -mr-3"
+      class="nicer-scrollbar -mr-3 flex h-1 flex-auto flex-col gap-2 overflow-y-auto py-4 pr-3"
       v-else
     >
       <div
-        class="grid grid-cols-12 gap-2 text-zinc-300 items-start"
+        class="grid grid-cols-12 items-start gap-2 text-zinc-300"
         v-for="order in openOrders"
         :key="order.orderId"
       >
@@ -155,11 +155,11 @@ const { mutate } = useMutation({
 
         <div class="col-span-1 text-right">
           <button
-            class="text-zinc-700 hover:text-primary group"
+            class="group text-zinc-700 hover:text-primary"
             @click="mutate({ orderId: order.orderId })"
           >
-            <XIcon class="h-5 w-5 inline group-hover:hidden" />
-            <XSquareIcon class="h-5 w-5 hidden group-hover:inline" />
+            <XIcon class="inline h-5 w-5 group-hover:hidden" />
+            <XSquareIcon class="hidden h-5 w-5 group-hover:inline" />
           </button>
         </div>
       </div>

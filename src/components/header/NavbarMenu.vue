@@ -49,8 +49,8 @@ function onDisconnect() {
 <template>
   <Menu class="relative" as="div">
     <div class="flex items-center">
-      <MenuButton class="outline-none flex items-center gap-0.5">
-        <img class="h-8 lg:h-9 cursor-pointer" :src="logo" alt="Logo" />
+      <MenuButton class="flex items-center gap-0.5 outline-none">
+        <img class="h-8 cursor-pointer lg:h-9" :src="logo" alt="Logo" />
       </MenuButton>
     </div>
 
@@ -64,16 +64,16 @@ function onDisconnect() {
     >
       <MenuItems class="absolute left-0 z-50 mt-1 flex w-screen max-w-min">
         <div
-          class="w-56 shrink rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg ring-1 ring-zinc-900/5 overflow-hidden divide-y divide-zinc-700 shadow-primary/20"
+          class="w-56 shrink divide-y divide-zinc-700 overflow-hidden rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg shadow-primary/20 ring-1 ring-zinc-900/5"
         >
           <MenuItem>
-            <router-link to="/" class="p-4 block hover:text-primary transition">
+            <router-link to="/" class="block p-4 transition hover:text-primary">
               Home
             </router-link>
           </MenuItem>
 
           <MenuItem :disabled="true">
-            <div class="flex items-center p-4 justify-between font-normal">
+            <div class="flex items-center justify-between p-4 font-normal">
               <span class="text-zinc-500">Liquidity Mode</span>
               <span>PSBT</span>
             </div>
@@ -82,10 +82,10 @@ function onDisconnect() {
           <MenuItem :disabled="true">
             <SwitchGroup
               as="div"
-              class="flex items-center p-4 justify-between font-normal"
+              class="flex items-center justify-between p-4 font-normal"
             >
               <SwitchLabel class="text-zinc-500">Unit</SwitchLabel>
-              <Switch v-model="useBtcUnit" class="border-none flex">
+              <Switch v-model="useBtcUnit" class="flex border-none">
                 <span :class="[useBtcUnit ? 'text-primary' : 'text-zinc-500']">
                   BTC
                 </span>
@@ -100,7 +100,7 @@ function onDisconnect() {
           <MenuItem :disabled="true">
             <SwitchGroup
               as="div"
-              class="flex items-center p-4 justify-between font-normal"
+              class="flex items-center justify-between p-4 font-normal"
             >
               <SwitchLabel class="text-zinc-500">Show $ Price</SwitchLabel>
               <Switch
@@ -120,7 +120,7 @@ function onDisconnect() {
           <MenuItem>
             <router-link
               to="/recover"
-              class="p-4 block hover:text-primary transition"
+              class="block p-4 transition hover:text-primary"
             >
               Recover
             </router-link>
@@ -147,14 +147,14 @@ function onDisconnect() {
           <MenuItem>
             <router-link
               to="/changelog"
-              class="p-4 block hover:text-primary transition"
+              class="block p-4 transition hover:text-primary"
             >
               Changelog
             </router-link>
           </MenuItem>
 
           <MenuItem :disabled="true">
-            <div class="flex items-center p-4 justify-between font-normal">
+            <div class="flex items-center justify-between p-4 font-normal">
               <span class="text-zinc-500">Version</span>
               <span>{{ VERSION }}</span>
             </div>

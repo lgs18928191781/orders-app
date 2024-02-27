@@ -29,7 +29,7 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
       <button
         :class="[
           open ? 'bg-black' : 'bg-zinc-900',
-          'rounded-full  p-1 px-2 flex items-center gap-1 border border-zinc-700 hover:bg-black text-base hover:border-black',
+          'flex items-center gap-1 rounded-full border border-zinc-700 p-1 px-2 text-base hover:border-black hover:bg-black',
         ]"
       >
         <div class="flex" v-if="selectedPair">
@@ -43,7 +43,7 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
             prettySymbol(selectedPair.token2Symbol)
           }}
         </div>
-        <div v-else class="text-base pl-2 text-primary">Select token</div>
+        <div v-else class="pl-2 text-base text-primary">Select token</div>
         <ChevronDownIcon class="h-5 w-5" />
       </button>
     </ListboxButton>
@@ -57,7 +57,7 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute right-0 z-50 mt-2 origin-top-right rounded-md bg-black shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-56 divide-y divide-zinc-900 shadow-primary/10"
+        class="nicer-scrollbar absolute right-0 z-50 mt-2 max-h-[40vh] w-56 origin-top-right divide-y divide-zinc-900 overflow-auto rounded-md bg-black shadow-lg shadow-primary/10 ring-1 ring-black ring-opacity-5 focus:outline-none"
       >
         <ListboxOption
           v-slot="{ active, selected }"
@@ -67,7 +67,7 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
         >
           <button
             :class="[
-              'flex items-center p-4 text-sm w-max min-w-full gap-2 rounded',
+              'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm',
               active ? 'bg-primary/70' : 'bg-black',
             ]"
           >
@@ -86,7 +86,7 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-primary ml-auto"
+              class="ml-auto h-5 w-5 text-primary"
               aria-hidden="true"
             />
           </button>

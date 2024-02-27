@@ -69,7 +69,7 @@ watch(
     const priceInBtc = selectedAskOrder.price.toNumber()
     updatePrice(priceInBtc)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 async function buildOrder() {
@@ -131,7 +131,7 @@ const totalExchangePrice = computed(() => {
 })
 
 const hasEnoughPrice = computed(
-  () => IS_DEV || totalExchangePrice.value >= 10000
+  () => IS_DEV || totalExchangePrice.value >= 10000,
 )
 const canPlaceOrder = computed(() => {
   return price.value > 0 && limitBrcAmount.value > 0 && hasEnoughPrice.value
@@ -181,7 +181,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 </script>
 
 <template>
-  <TabPanel class="h-full flex flex-col justify-between">
+  <TabPanel class="flex h-full flex-col justify-between">
     <div class="">
       <div class="rounded-md border border-zinc-500 p-2">
         <div class="flex items-center justify-between">
@@ -194,14 +194,17 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
             <div class="relative w-full">
               <input
                 type="text"
-                class="w-full py-2 pl-2 pr-16 text-right placeholder-zinc-500 quiet-input bg-transparent"
+                class="quiet-input w-full bg-transparent py-2 pl-2 pr-16 text-right placeholder-zinc-500"
                 :placeholder="unit"
                 :value="
                   useBtcUnit
                     ? new Decimal(price).dividedBy(1e8).toDP().toFixed()
                     : price
                 "
-                @input="(event: any) => updatePrice(event.target.value, useBtcUnit.value)"
+                @input="
+                  (event: any) =>
+                    updatePrice(event.target.value, useBtcUnit.value)
+                "
               />
               <span
                 class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
@@ -211,7 +214,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
             </div>
 
             <div
-              class="text-sm text-zinc-500 text-right pr-2 -mt-2"
+              class="-mt-2 pr-2 text-right text-sm text-zinc-500"
               v-if="isShowingFiat && fiatRate && price"
             >
               {{ getFiatPriceDisplay(price, fiatRate) }}
@@ -257,7 +260,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
               v-model.number="exchangeOrdiAmount"
             />
             <span
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400 uppercase"
+              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 uppercase text-zinc-400"
             >
               ${{ selectedPair.fromSymbol }}
             </span>
@@ -313,7 +316,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 
               <ListboxOption
                 v-if="!myBrc20Info?.transferBalanceList.length"
-                class="text-right cursor-default px-2 py-4 text-zinc-500"
+                class="cursor-default px-2 py-4 text-right text-zinc-500"
               >
                 No Transferable Balance
               </ListboxOption>
@@ -372,7 +375,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
           </div>
 
           <div
-            class="text-sm text-zinc-500 text-right"
+            class="text-right text-sm text-zinc-500"
             v-if="isShowingFiat && fiatRate && totalExchangePrice"
           >
             {{ getFiatPriceDisplay(totalExchangePrice, fiatRate) }}

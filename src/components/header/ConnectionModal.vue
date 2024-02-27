@@ -111,9 +111,9 @@ const isSwapPage = computed(() => {
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
-              class="relative transform overflow-hidden rounded-lg bg-zinc-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:px-8 sm:py-6 z-50"
+              class="relative z-50 transform overflow-hidden rounded-lg bg-zinc-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:px-8 sm:py-6"
             >
-              <div class="text-left my-4">
+              <div class="my-4 text-left">
                 <DialogTitle
                   class="text-xl font-semibold leading-6 text-zinc-100"
                 >
@@ -121,9 +121,9 @@ const isSwapPage = computed(() => {
                 </DialogTitle>
 
                 <!-- wallet buttons -->
-                <div class="grid grid-cols-3 gap-4 mt-8 text-base">
+                <div class="mt-8 grid grid-cols-3 gap-4 text-base">
                   <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
+                    class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
                     @click="connectToOkx"
                     v-if="!isSwapPage"
                   >
@@ -132,7 +132,7 @@ const isSwapPage = computed(() => {
                   </button>
 
                   <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
+                    class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
                     @click="connectToUnisat"
                     ref="firstButtonRef"
                   >
@@ -146,7 +146,7 @@ const isSwapPage = computed(() => {
 
                   <div class="relative" v-if="!isSwapPage">
                     <button
-                      class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 enabled:hover:shadow-md enabled:hover:shadow-primary/30 enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 disabled:opacity-30"
+                      class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30"
                       @click="connectToMetalet"
                     >
                       <img
@@ -160,7 +160,7 @@ const isSwapPage = computed(() => {
                 </div>
 
                 <!-- footer -->
-                <div class="mt-16 text-xs text-zinc-500 space-y-1">
+                <div class="mt-16 space-y-1 text-xs text-zinc-500">
                   <p v-if="isSwapPage" class="text-primary">
                     Swap module is currently only supported on Unisat wallet and
                     Testnet environment.

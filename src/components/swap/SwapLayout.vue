@@ -30,12 +30,12 @@ onMounted(() => {
   <SwapOngoingTaskModal />
 
   <div
-    class="grow flex justify-center gap-8 xl:gap-12 pt-8 px-3 max-w-9xl w-full mx-auto"
+    class="mx-auto flex w-full max-w-9xl grow justify-center gap-8 p-3 lg:pt-8 xl:gap-12"
     :class="[isExpanded ? 'items-start' : 'items-start']"
   >
-    <SwapStatsSection v-show="isExpanded" class="flex-1 mb-8" />
+    <SwapStatsSection v-show="isExpanded" class="flex-1 lg:mb-8" />
 
-    <div :class="['relative rounded-3xl w-112 z-10 mb-8 max-w-md']">
+    <div :class="['relative z-10 w-112 max-w-md rounded-3xl lg:mb-8']">
       <slot></slot>
       <!-- background blur -->
       <SwapBlur v-if="!isExpanded" />

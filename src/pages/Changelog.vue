@@ -3,11 +3,11 @@ import changelog from '@/data/changelog'
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto scroll-my-12">
+  <div class="mx-auto max-w-2xl scroll-my-12">
     <h1 class="text-center text-3xl font-bold">Changelog</h1>
 
     <div
-      class="mt-12 divide-y divide-zinc-700 max-h-[80vh] overflow-y-auto pr-8 nicer-scrollbar"
+      class="nicer-scrollbar mt-12 max-h-[80vh] divide-y divide-zinc-700 overflow-y-auto pr-8"
     >
       <div class="py-12 first:pt-0 last:pb-0" v-for="log in changelog">
         <div class="flex items-center">
@@ -16,7 +16,7 @@ import changelog from '@/data/changelog'
           </h2>
           <span class="ml-auto text-sm text-zinc-500">{{ log.date }}</span>
         </div>
-        <ul class="list-disc list-outside mt-2 text-sm ml-4">
+        <ul class="ml-4 mt-2 list-outside list-disc text-sm">
           <li v-for="change in log.changes" class="mt-2">
             {{ change }}
           </li>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronsLeftIcon } from 'lucide-vue-next'
+import { ChevronsDownIcon, ChevronsLeftIcon } from 'lucide-vue-next'
 
 import { useExpandSwap } from '@/hooks/use-expand-swap'
 const { isExpanded, toggleExpand } = useExpandSwap()
@@ -7,16 +7,38 @@ const { isExpanded, toggleExpand } = useExpandSwap()
 
 <template>
   <button
-    class="absolute top-0 left-0 flex justify-center -translate-x-[60%] px-2 h-full -z-10 pr-8 rounded-l-3xl transition-all group hover:bg-gradient-to-r from-transparent to-primary/[0.15] pb-8"
+    class="group absolute left-0 top-0 -z-10 hidden h-full -translate-x-[60%] justify-center rounded-l-3xl from-transparent to-primary/[0.15] px-2 pb-8 pr-8 transition-all hover:bg-gradient-to-r lg:flex"
     @click="toggleExpand"
   >
     <ChevronsLeftIcon
-      class="h-5 w-5 text-zinc-700 mt-16 group-hover:-translate-x-1 group-hover:text-primary/80 transition-all duration-300"
+      class="mt-16 h-5 w-5 text-zinc-700 transition-all duration-300 group-hover:-translate-x-1 group-hover:text-primary/80"
       :class="{
         'rotate-180': isExpanded,
       }"
     />
   </button>
+
+  <button class="hidden lg:inline" @click="toggleExpand">
+    <ChevronsLeftIcon
+      class="h-5 w-5 text-zinc-700 transition-all duration-300 group-hover:-translate-x-1 group-hover:text-primary/80"
+      :class="{
+        'rotate-180': isExpanded,
+      }"
+    />
+  </button>
+
+  <!-- <button
+    class="inline-flex justify-center w-full lg:hidden text-zinc-500 items-center gap-2 mt-2"
+    @click="toggleExpand"
+  >
+    <ChevronsDownIcon
+      class="h-5 w-5 group-hover:-translate-x-1 group-hover:text-primary/80 transition-all duration-300"
+      :class="{
+        'rotate-180': isExpanded,
+      }"
+    />
+    <span> Show pool stats </span>
+  </button> -->
 </template>
 
 <style scoped></style>

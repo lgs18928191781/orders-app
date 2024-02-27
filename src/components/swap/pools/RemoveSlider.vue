@@ -17,10 +17,10 @@ const removePercentage = defineModel<number[]>('removePercentage', {
     <Slider v-model="removePercentage" :max="100" :step="1" />
 
     <!-- percentage buttons -->
-    <div class="grid grid-cols-4 gap-4 justify-between mt-4">
+    <div class="mt-4 grid grid-cols-4 justify-between gap-4">
       <button
         :key="p"
-        class="cute-button py-2 rounded-lg text-zinc-300 text-sm"
+        class="cute-button rounded-lg py-2 text-sm text-zinc-300"
         @click="removePercentage[0] = p"
         v-for="p in presets"
       >

@@ -70,10 +70,10 @@ watch(
       //     'Your BTC balance is not enough to start a transaction. Please deposit some BTC to your address.',
       // })
       ElMessage.warning(
-        'Your BTC balance is not enough to start a transaction. Please deposit some BTC to your address.'
+        'Your BTC balance is not enough to start a transaction. Please deposit some BTC to your address.',
       )
     }
-  }
+  },
 )
 
 const { data: myBrc20s } = useQuery({
@@ -91,7 +91,7 @@ const { data: myBrc20s } = useQuery({
     }),
 
   enabled: computed(
-    () => networkStore.network !== 'testnet' && !!connectionStore.getAddress
+    () => networkStore.network !== 'testnet' && !!connectionStore.getAddress,
   ),
 })
 </script>
@@ -145,14 +145,14 @@ const { data: myBrc20s } = useQuery({
                 ]"
               >
                 <div class="text-primary">BTC</div>
-                <div class="flex items-center mt-2 justify-between">
+                <div class="mt-2 flex items-center justify-between">
                   <div class="text-xs text-zinc-500">Available Balance</div>
                   <div class="text-xs">
                     {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
                   </div>
                 </div>
 
-                <div class="flex items-center mt-1 justify-between">
+                <div class="mt-1 flex items-center justify-between">
                   <div class="text-xs text-zinc-500">Total Balance</div>
                   <div class="text-xs">
                     {{ prettyBalance(balance, useBtcUnit) }} {{ unit }}
@@ -160,7 +160,7 @@ const { data: myBrc20s } = useQuery({
                 </div>
 
                 <!-- usable % -->
-                <div class="flex items-center mt-1 justify-between">
+                <div class="mt-1 flex items-center justify-between">
                   <div class="text-xs text-zinc-500">Available BTC %</div>
                   <div
                     class="text-xs"
@@ -174,7 +174,7 @@ const { data: myBrc20s } = useQuery({
 
                 <Disclosure>
                   <DisclosureButton
-                    class="py-2 text-xs mt-2 underline inline-flex items-center gap-1"
+                    class="mt-2 inline-flex items-center gap-1 py-2 text-xs underline"
                   >
                     <HelpCircleIcon class="h-4 w-4 text-primary" />
                     Why can I only use part of my BTC?
@@ -188,7 +188,7 @@ const { data: myBrc20s } = useQuery({
                     leave-to-class="transform scale-95 opacity-0"
                   >
                     <DisclosurePanel
-                      class="text-zinc-300 text-xs bg-black rounded-md p-2 -mx-2"
+                      class="-mx-2 rounded-md bg-black p-2 text-xs text-zinc-300"
                     >
                       <p class="">
                         There are 2 parts of your overall BTC balance that you
@@ -224,7 +224,7 @@ const { data: myBrc20s } = useQuery({
                   active && 'bg-zinc-950',
                 ]"
               >
-                <div class="text-primary uppercase">${{ brc20.token }}</div>
+                <div class="uppercase text-primary">${{ brc20.token }}</div>
                 <div class="mt-2 space-y-1 text-xs">
                   <div class="flex items-center justify-between gap-1">
                     <span class="text-zinc-500">Available</span>
@@ -232,7 +232,7 @@ const { data: myBrc20s } = useQuery({
                       {{
                         prettyCoinDisplay(
                           brc20.availableBalance,
-                          '$' + brc20.token
+                          '$' + brc20.token,
                         )
                       }}
                     </span>
@@ -243,7 +243,7 @@ const { data: myBrc20s } = useQuery({
                       {{
                         prettyCoinDisplay(
                           brc20.transferBalance,
-                          '$' + brc20.token
+                          '$' + brc20.token,
                         )
                       }}
                     </span>

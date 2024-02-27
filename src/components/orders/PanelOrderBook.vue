@@ -20,13 +20,13 @@ watch(isShowingFiat, () => {
 <template>
   <div class="primary-panel flex flex-col">
     <div
-      class="p-4 bg-zinc-800 flex items-center lg:flex-row gap-4 rounded-t-md justify-between"
+      class="flex items-center justify-between gap-4 rounded-t-md bg-zinc-800 p-4 lg:flex-row"
     >
       <div class="font-bold">Order Book</div>
 
       <SwitchGroup
         as="div"
-        class="flex items-center justify-between font-normal gap-2"
+        class="flex items-center justify-between gap-2 font-normal"
       >
         <Switch
           v-model="isShowingFiat"

@@ -102,20 +102,20 @@ async function onGetGasFromFaucet() {
 
 <template>
   <Menu as="div" class="relative inline-block">
-    <MenuButton class="flex gap-2 pr-3 group items-center">
+    <MenuButton class="group flex items-center gap-2 pr-3">
       <img class="h-5" :src="walletIcon" alt="wallet icon" v-if="walletIcon" />
       <span class="text-sm text-primary">
         {{ address ? prettyAddress(address, 4) : '-' }}
       </span>
       <span
-        class="text-xs text-red-500 font-bold"
+        class="text-xs font-bold text-red-500"
         v-if="networkStore.network === 'testnet'"
       >
         (Testnet)
       </span>
 
       <MenuIcon
-        class="h-5 text-zinc-300 group-hover:text-primary group-hover:scale-125"
+        class="h-5 text-zinc-300 group-hover:scale-125 group-hover:text-primary"
       />
     </MenuButton>
 
@@ -131,28 +131,28 @@ async function onGetGasFromFaucet() {
         class="absolute right-0 z-50 mt-4 flex w-screen max-w-min origin-top-right"
       >
         <div
-          class="w-56 shrink rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg ring-1 ring-zinc-900/5 overflow-hidden divide-y divide-zinc-700 shadow-primary/20"
+          class="w-56 shrink divide-y divide-zinc-700 overflow-hidden rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg shadow-primary/20 ring-1 ring-zinc-900/5"
         >
           <MenuItem v-slot="{ active }">
             <button
-              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="copyAddress"
             >
-              <CopyIcon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <CopyIcon class="inline-block h-4 w-4 group-hover:scale-125" />
               <span>Copy Address</span>
             </button>
           </MenuItem>
 
           <MenuItem v-slot="{ active }" as="div">
-            <div class="px-4 pt-4 -mb-2 text-sm text-zinc-500">
+            <div class="-mb-2 px-4 pt-4 text-sm text-zinc-500">
               Network: {{ networkStore.network }}
             </div>
             <button
-              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="switchNetwork"
             >
               <ArrowRightLeftIcon
-                class="h-4 w-4 inline-block group-hover:scale-125"
+                class="inline-block h-4 w-4 group-hover:scale-125"
               />
               <span>Switch Network</span>
             </button>
@@ -164,30 +164,30 @@ async function onGetGasFromFaucet() {
             v-if="networkStore.network === 'testnet'"
           >
             <button
-              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="onGetGasFromFaucet"
             >
-              <FuelIcon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <FuelIcon class="inline-block h-4 w-4 group-hover:scale-125" />
               <span>Testnet Faucet</span>
             </button>
           </MenuItem>
 
           <MenuItem>
             <button
-              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="clearCache"
             >
-              <Trash2Icon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <Trash2Icon class="inline-block h-4 w-4 group-hover:scale-125" />
               <span>Clear Account Cache</span>
             </button>
           </MenuItem>
 
           <MenuItem v-if="connectionStore.has">
             <button
-              class="p-4 flex gap-2 items-center hover:text-primary w-full text-left group"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="onDisconnect"
             >
-              <UnplugIcon class="h-4 w-4 inline-block group-hover:scale-125" />
+              <UnplugIcon class="inline-block h-4 w-4 group-hover:scale-125" />
               <span>Disconnect</span>
             </button>
           </MenuItem>

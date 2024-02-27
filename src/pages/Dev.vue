@@ -49,7 +49,7 @@ function toOutputScript() {
   const btcjs = btcJsStore.get!
   const outputScript = btcjs.address.toOutputScript(
     'tb1p4g232ucvzqr09dkjccj6fzx56ccyptss69hznz5grdj0fwmcc7ysdj6a3s',
-    testnet
+    testnet,
   )
   console.log({ outputScript: outputScript.toString('hex') })
 }
@@ -71,7 +71,7 @@ function onSignTaproot() {
   const btcjs = btcJsStore.get!
   const psbt = btcjs.Psbt.fromHex(
     '70736274ff0100fd080102000000025242f878b9f889b022fd55982505567f9e2ac7aab9c5194fd2a22a942f5346050000000000ffffffff75f02384d28074ea07cf822fe30695c3e1903b656466dafbc350a922d6c475c20100000000ffffffff042202000000000000225120ead1ab45dad93c3fee5114a586e5548f16076c391854a084fd5961abafcdfacca086010000000000225120aa1515730c1006f2b6d2c625a488d4d63040ae10d16e298a881b64f4bb78c7899808000000000000225120196631527aa44e6842e99e46541ebd50770eb99f691da7eb264b57144118b3966652040000000000225120ead1ab45dad93c3fee5114a586e5548f16076c391854a084fd5961abafcdfacc000000000001012b2202000000000000225120196631527aa44e6842e99e46541ebd50770eb99f691da7eb264b57144118b3960001012beee3050000000000225120ead1ab45dad93c3fee5114a586e5548f16076c391854a084fd5961abafcdfacc0103040100000001134174ec95aa7cdaf85a3628b20ac418781a0c6cc82b93a938ebb2f378b1b19c015688de9ad877a28e7c33dbf807c37777c8c61d84e1409898b4ab5b7f2e980cfa8e0101172001a16b9c992536e31f7d1a7e2f6019871d6f07346999d15ca04a60dc2b4a62af0000000000',
-    { network: testnet }
+    { network: testnet },
   )
   console.log({ psbt })
 
@@ -115,7 +115,7 @@ function onSignTaproot() {
 
 <template>
   <div class="p-8">
-    <button class="border p-2 rounded-md" @click="decodePsbt">
+    <button class="rounded-md border p-2" @click="decodePsbt">
       decode psbt
     </button>
   </div>
@@ -124,22 +124,22 @@ function onSignTaproot() {
     <h3>Test Reactivity</h3>
 
     <div class="flex gap-4">
-      <button @click="addRandom" class="p-2 rounded border border-zinc-500">
+      <button @click="addRandom" class="rounded border border-zinc-500 p-2">
         Add Random String
       </button>
 
       <button
         @click="toOutputScript"
-        class="p-2 rounded border border-zinc-500"
+        class="rounded border border-zinc-500 p-2"
       >
         to output script
       </button>
 
-      <button @click="onToAddress" class="p-2 rounded border border-zinc-500">
+      <button @click="onToAddress" class="rounded border border-zinc-500 p-2">
         taproot pubkey to address
       </button>
 
-      <button @click="onSignTaproot" class="p-2 rounded border border-zinc-500">
+      <button @click="onSignTaproot" class="rounded border border-zinc-500 p-2">
         sign taproot
       </button>
     </div>

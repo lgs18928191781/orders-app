@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
   window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
   window.metaidwallet?.removeListener(
     'accountsChanged',
-    metaletAccountsChangedHandler
+    metaletAccountsChangedHandler,
   )
 })
 </script>
@@ -136,14 +136,14 @@ onBeforeUnmount(() => {
   <NetworkStateModal v-if="connectionStore.connected" />
 
   <header
-    class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
+    class="select-none border-b border-zinc-800 bg-zinc-900 py-2 lg:mb-3 lg:border-none lg:py-4"
   >
-    <div class="max-w-9xl flex items-center justify-between mx-auto px-3">
+    <div class="mx-auto flex max-w-9xl items-center justify-between px-3">
       <AppNavbar />
 
       <div class="flex gap-2">
         <button
-          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
+          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:bg-primary hover:text-orange-950"
           @click="openConnectionModal"
           v-if="!connectionStore.connected"
         >
@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
         </button>
 
         <button
-          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
+          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:bg-primary hover:text-orange-950"
           @click="credentialsStore.login()"
           v-else-if="!credentialsStore.get"
         >
@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
         </button>
 
         <template v-else>
-          <div class="items-center gap-2 hidden lg:flex">
+          <div class="hidden items-center gap-2 lg:flex">
             <div
               class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
             >

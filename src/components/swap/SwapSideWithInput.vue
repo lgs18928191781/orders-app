@@ -141,7 +141,7 @@ const fiatPrice = computed(() => {
 // balance
 const { data: btcBalance } = useExcludedBalanceQuery(
   computed(() => connectionStore.getAddress),
-  computed(() => !!connectionStore.connected)
+  computed(() => !!connectionStore.connected),
 )
 const { data: myBrc20s } = useQuery({
   queryKey: [
@@ -162,7 +162,7 @@ const balance = computed(() => {
   if (symbol.value !== 'btc') {
     // find symbol's balance
     const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
+      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase(),
     )
 
     if (!brc20) {
@@ -196,7 +196,7 @@ const useTotalBalance = () => {
   if (symbol.value !== 'btc') {
     // find symbol's balance
     const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
+      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase(),
     )
 
     if (!brc20) {
@@ -254,7 +254,7 @@ watch(
     } else {
       emit('notEnough')
     }
-  }
+  },
 )
 watch(
   () => amountMoreThanThreshold.value,
@@ -264,7 +264,7 @@ watch(
     } else {
       emit('lessThanThreshold')
     }
-  }
+  },
 )
 
 // watch for change of amount; emit event
@@ -276,7 +276,7 @@ watch(
     } else {
       emit('amountCleared')
     }
-  }
+  },
 )
 </script>
 
@@ -284,17 +284,17 @@ watch(
   <div class="swap-sub-control-panel">
     <div class="text-zinc-400">You {{ side }}</div>
 
-    <div class="flex items-center space-x-2 justify-between h-16">
+    <div class="flex h-16 items-center justify-between space-x-2">
       <input
-        class="bg-transparent quiet-input flex-1 w-12 p-0 leading-loose"
+        class="quiet-input w-12 flex-1 bg-transparent p-0 leading-loose"
         :class="[
           hasEnough
             ? calculating
               ? 'text-zinc-500'
               : 'text-zinc-100 caret-primary'
             : calculating
-            ? 'text-red-900/50 caret-red-900/50'
-            : 'text-red-500 caret-red-500',
+              ? 'text-red-900/50 caret-red-900/50'
+              : 'text-red-500 caret-red-500',
           // if too long, make it smaller
           amountTextSize,
         ]"
@@ -312,7 +312,7 @@ watch(
 
       <div
         :class="[
-          'rounded-full p-1 px-4 text-xl flex items-center gap-1 bg-zinc-900',
+          'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-xl',
         ]"
       >
         <img :src="icon" class="size-6 rounded-full" v-if="icon" />
@@ -324,7 +324,7 @@ watch(
 
     <!-- warning -->
     <div
-      class="text-red-500 text-sm -mt-2 mb-2 flex items-center gap-2"
+      class="-mt-2 mb-2 flex items-center gap-2 text-sm text-red-500"
       v-if="hasEnough && !calculating && !amountMoreThanThreshold"
     >
       <AlertCircleIcon class="size-4" />
@@ -344,7 +344,7 @@ watch(
 
       <!-- balance -->
       <button
-        class="text-xs text-zinc-400 hover:underline hover:text-primary"
+        class="text-xs text-zinc-400 hover:text-primary hover:underline"
         v-if="side === 'pay'"
         v-show="!!symbol"
         @click="useTotalBalance"

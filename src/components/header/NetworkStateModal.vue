@@ -104,7 +104,7 @@ async function getClaimFee() {
 function getPoolActionsPriceDisplay(
   actionSize: number,
   equalitySymbol: string = '>=',
-  isClaim?: boolean
+  isClaim?: boolean,
 ) {
   if (!selectedFeebPlan.value)
     return {
@@ -131,7 +131,7 @@ function getPoolActionsPriceDisplay(
   const btcPriceDisplay =
     prettyBalance(
       actionSize * selectedFeebPlan.value.feeRate,
-      get(useBtcUnit)
+      get(useBtcUnit),
     ) +
     ' ' +
     unit.value
@@ -140,7 +140,7 @@ function getPoolActionsPriceDisplay(
     fiatRate.value && actionSize > 0
       ? getFiatPriceDisplay(
           actionSize * selectedFeebPlan.value.feeRate,
-          get(fiatRate)
+          get(fiatRate),
         )
       : ''
 
@@ -170,7 +170,7 @@ const selectedFeebPlan = computed(() => {
   }
 
   return feebPlans.value.find(
-    (plan) => plan.title === selectedFeebPlanTitle.value
+    (plan) => plan.title === selectedFeebPlanTitle.value,
   )
 })
 // tell feebStore whenever selectedFeebPlan changes
@@ -188,7 +188,7 @@ watch(
       await getClaimFee()
     })
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 )
 
 const traffic = computed(() => {
@@ -262,7 +262,7 @@ watch(isOpen, (open) => {
 
 <template>
   <Dialog
-    class="relative text-sm text-zinc-300 z-50"
+    class="relative z-50 text-sm text-zinc-300"
     :open="isOpen"
     @close="closeModal"
   >
@@ -279,7 +279,7 @@ watch(isOpen, (open) => {
       <div class="fixed inset-0 overflow-y-auto text-zinc-300">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
-            class="w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none px-4 shadow-primary/20"
+            class="w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 px-4 shadow-lg shadow-primary/20 ring-1 ring-black ring-opacity-5 focus:outline-none"
           >
             <div class="divide-y-2 divide-zinc-700">
               <div class="py-4">
@@ -310,17 +310,17 @@ watch(isOpen, (open) => {
                       </div>
                     </transition>
 
-                    <div class="font-bold py-1" :class="trafficColorClass.text">
+                    <div class="py-1 font-bold" :class="trafficColorClass.text">
                       {{ traffic }}
                     </div>
                   </div>
                 </div>
 
-                <div class="text-zinc-500 mt-4 text-xs">
+                <div class="mt-4 text-xs text-zinc-500">
                   <p>
                     BTC network traffic is
                     <span
-                      class="font-bold text-xs bg-black py-1 px-2 rounded whitespace-nowrap"
+                      class="whitespace-nowrap rounded bg-black px-2 py-1 text-xs font-bold"
                       :class="[trafficColorClass.text]"
                     >
                       {{ traffic }}
@@ -337,7 +337,7 @@ watch(isOpen, (open) => {
 
               <div class="grid grid-cols-5 divide-x-2 divide-zinc-700 py-4">
                 <div
-                  class="flex flex-col items-stretch gap-4 justify-between pr-4 col-span-2"
+                  class="col-span-2 flex flex-col items-stretch justify-between gap-4 pr-4"
                 >
                   <div class="item-label leading-none">Choose Gas Plan</div>
 
@@ -378,7 +378,7 @@ watch(isOpen, (open) => {
                                       :class="
                                         checked ? 'text-white' : 'text-zinc-300'
                                       "
-                                      class="font-medium text-lg"
+                                      class="text-lg font-medium"
                                     >
                                       {{ plan.fullTitle || plan.title }}
                                     </RadioGroupLabel>
@@ -395,14 +395,14 @@ watch(isOpen, (open) => {
                                   >
                                     <div class="mt-1">
                                       <div
-                                        class="flex gap-1 items-center mb-1"
+                                        class="mb-1 flex items-center gap-1"
                                         v-if="
                                           plan.title.toLowerCase() === 'custom'
                                         "
                                       >
                                         <input
                                           type="text"
-                                          class="bg-transparent text-sm w-8 border-0 outline-none border-b !border-zinc-500 py-0.5 px-0 focus:ring-0 focus:ring-transparent text-center rounded"
+                                          class="w-8 rounded border-0 border-b !border-zinc-500 bg-transparent px-0 py-0.5 text-center text-sm outline-none focus:ring-0 focus:ring-transparent"
                                           autocomplete="off"
                                           :class="
                                             checked
@@ -442,7 +442,7 @@ watch(isOpen, (open) => {
                   </div>
                 </div>
 
-                <div class="pl-4 col-span-3">
+                <div class="col-span-3 pl-4">
                   <div class="item-label align-top leading-none">
                     Estimated Gas
                   </div>
@@ -451,7 +451,7 @@ watch(isOpen, (open) => {
                     <h3 class="text-zinc-500">Make Order Actions</h3>
                     <div class="mt-1.5">
                       <div
-                        class="flex items-center justify-between py-3 border-y border-zinc-700"
+                        class="flex items-center justify-between border-y border-zinc-700 py-3"
                         v-for="action in makeActions"
                         :key="action.title"
                       >
@@ -459,12 +459,12 @@ watch(isOpen, (open) => {
                           {{ action.title }}
                         </div>
 
-                        <div class="text-right flex gap-4">
+                        <div class="flex gap-4 text-right">
                           <div class="font-bold">
                             {{
                               getPoolActionsPriceDisplay(action.size).inCrypto
                             }}
-                            <div class="pl-2 text-zinc-500 text-xs">
+                            <div class="pl-2 text-xs text-zinc-500">
                               {{
                                 getPoolActionsPriceDisplay(action.size).inFiat
                               }}
@@ -474,10 +474,10 @@ watch(isOpen, (open) => {
                       </div>
                     </div>
 
-                    <h3 class="text-zinc-500 mt-12">Take Order Actions</h3>
+                    <h3 class="mt-12 text-zinc-500">Take Order Actions</h3>
                     <div class="mt-1.5">
                       <div
-                        class="flex items-center justify-between py-3 border-y border-zinc-700"
+                        class="flex items-center justify-between border-y border-zinc-700 py-3"
                         v-for="action in takeActions"
                         :key="action.title"
                       >
@@ -485,12 +485,12 @@ watch(isOpen, (open) => {
                           {{ action.title }}
                         </div>
 
-                        <div class="text-right flex gap-4">
+                        <div class="flex gap-4 text-right">
                           <div class="font-bold">
                             {{
                               getPoolActionsPriceDisplay(action.size).inCrypto
                             }}
-                            <div class="pl-2 text-zinc-500 text-xs">
+                            <div class="pl-2 text-xs text-zinc-500">
                               {{
                                 getPoolActionsPriceDisplay(action.size).inFiat
                               }}
@@ -512,6 +512,6 @@ watch(isOpen, (open) => {
 
 <style scoped>
 .item-label {
-  @apply text-zinc-300 shrink-0;
+  @apply shrink-0 text-zinc-300;
 }
 </style>

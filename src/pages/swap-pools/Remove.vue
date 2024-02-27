@@ -33,8 +33,8 @@ const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
       address,
       network,
     },
-    computed(() => !!address)
-  )
+    computed(() => !!address),
+  ),
 )
 const poolShare = computed(() => {
   if (!poolStatus.value) return '0%'
@@ -69,8 +69,8 @@ const { data: preview, isFetching: isFetchingPreview } = useQuery(
       address,
       network,
     },
-    computed(() => !!address)
-  )
+    computed(() => !!address),
+  ),
 )
 const token1Amount = computed(() => {
   if (!preview.value) return new Decimal('0')
@@ -151,7 +151,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // fourth watcher: hasAmount
@@ -177,7 +177,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 5th watcher: more-than-threshold
@@ -205,7 +205,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const { pushOngoing } = useOngoingTask()

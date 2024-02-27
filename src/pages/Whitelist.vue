@@ -33,7 +33,7 @@ sleep(1000).then(() => {
 const theClaim: Ref<null | Awaited<ReturnType<typeof getOneClaim>>> = ref(null)
 const queryingClaim = ref(false)
 const hasClaim = computed(
-  () => !!theClaim.value && theClaim.value.coinAmount > 0
+  () => !!theClaim.value && theClaim.value.coinAmount > 0,
 )
 const claimableDisplay = computed(() => {
   const balance = theClaim.value?.coinAmount
@@ -78,7 +78,7 @@ watch(
     }
     queryingClaim.value = false
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const claiming = ref(false)
@@ -159,7 +159,7 @@ async function claim() {
   <ClaimingOverlay v-if="claiming" />
 
   <div
-    class="border border-zinc-300 rounded-xl mx-auto mt-[25vh] w-[60vw] max-w-2xl p-8 text-zinc-300"
+    class="mx-auto mt-[25vh] w-[60vw] max-w-2xl rounded-xl border border-zinc-300 p-8 text-zinc-300"
   >
     <div class="space-y-10">
       <div class="flex flex-col gap-y-2">
@@ -167,19 +167,19 @@ async function claim() {
         <input
           type="text"
           placeholder="address"
-          class="w-full rounded bg-zinc-800 p-2 placeholder-zinc-500 outline-none border border-zinc-700 text-sm"
+          class="w-full rounded border border-zinc-700 bg-zinc-800 p-2 text-sm placeholder-zinc-500 outline-none"
           v-model="claimingAddress"
           name="address"
           autocomplete="off"
         />
       </div>
 
-      <div class="text-center text-xl flex items-center gap-2 justify-center">
+      <div class="flex items-center justify-center gap-2 text-center text-xl">
         <span class="text-zinc-500">Available:</span>
 
         <LoaderIcon
           v-if="queryingClaim"
-          class="h-4 w-4 text-zinc-300 animate-spin-slow"
+          class="h-4 w-4 animate-spin-slow text-zinc-300"
         />
         <span v-else>{{ claimableDisplay }}</span>
       </div>

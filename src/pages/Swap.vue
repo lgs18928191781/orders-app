@@ -50,7 +50,7 @@ const hasImpactWarning = computed(() => {
 const calculatingPay = ref(false)
 const calculatingReceive = ref(false)
 const calculating = computed(
-  () => calculatingPay.value || calculatingReceive.value
+  () => calculatingPay.value || calculatingReceive.value,
 )
 
 // swap & flip related
@@ -135,7 +135,7 @@ watch(
   [token1Amount, token2Amount],
   async (
     [newToken1Amount, newToken2Amount],
-    [oldToken1Amount, oldToken2Amount]
+    [oldToken1Amount, oldToken2Amount],
   ) => {
     const sourceChanging = swapType.value.includes('1')
       ? newToken1Amount !== oldToken1Amount
@@ -201,7 +201,7 @@ watch(
         calculatingPay.value = false
         calculatingReceive.value = false
       })
-  }
+  },
 )
 
 // flip
@@ -321,7 +321,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -343,7 +343,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 // third watcher: hasEnough
 const hasEnough = ref(true)
@@ -366,7 +366,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // fourth watcher: hasAmount
@@ -390,7 +390,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 5th watcher: more-than-threshold
@@ -414,7 +414,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // mutations
@@ -468,7 +468,7 @@ const afterBuildSwap = async ({
         psbt1xFinished.toHex(),
         {
           autoFinalized: false,
-        }
+        },
       )
       if (!signed1x) return
       if (!sourceAmount.value) return
@@ -495,7 +495,7 @@ const afterBuildSwap = async ({
         psbtX2Finished.toHex(),
         {
           autoFinalized: false,
-        }
+        },
       )
       if (!signedX2) return
       if (!sourceAmount.value) return
@@ -559,7 +559,7 @@ async function doSwap() {
 <template>
   <SwapLayout>
     <div
-      class="swap-main-border rounded-3xl p-2 !pt-3 bg-zinc-900 space-y-3 h-full"
+      class="swap-main-border h-full space-y-3 rounded-3xl bg-zinc-900 p-2 lg:!pt-3"
     >
       <!-- header -->
       <div class="flex gap-4 px-3">
@@ -610,16 +610,16 @@ async function doSwap() {
         />
 
         <!-- flip -->
-        <div class="h-0 relative flex justify-center z-30 my-0.5">
+        <div class="relative z-30 my-0.5 flex h-0 justify-center">
           <div
-            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-110 duration-150"
+            class="group absolute -translate-y-1/2 rounded-xl bg-zinc-900 p-1 transition-all duration-150 hover:scale-110"
           >
             <ArrowDownIcon
-              class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
+              class="box-content inline h-4 w-4 rounded-lg bg-zinc-800 p-2 group-hover:hidden"
             />
 
             <button
-              class="hidden group-hover:inline p-2 box-content transition-all duration-200 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
+              class="box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm shadow-primary/80 transition-all duration-200 group-hover:inline"
               :class="{
                 'rotate-180': flippedControl,
               }"
@@ -668,7 +668,7 @@ async function doSwap() {
 
       <!-- disabled buttons: calculating or have unmets  -->
       <MainBtn class="disabled" v-if="calculating" :disabled="true">
-        <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
+        <Loader2Icon class="mx-auto animate-spin text-zinc-400" />
       </MainBtn>
 
       <MainBtn

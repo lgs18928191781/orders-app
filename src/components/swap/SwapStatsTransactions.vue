@@ -52,8 +52,8 @@ const { data: transactions, isLoading: isLoadingTransactions } = useQuery(
       selectedTransactionType: computed(() => selectedTransactionType.value),
       onlyMyTransactions: computed(() => onlyMyTransactions.value),
     },
-    computed(() => !!address)
-  )
+    computed(() => !!address),
+  ),
 )
 
 function viewAddress(address: string) {
@@ -74,12 +74,12 @@ function prettyType(type: '1x' | '2x' | 'x1' | 'x2' | 'add' | 'remove') {
     case '1x':
     case 'x2':
       return `Swap ${prettySymbol(token1Symbol.value)} for ${prettySymbol(
-        token2Symbol.value
+        token2Symbol.value,
       )}`
     case '2x':
     case 'x1':
       return `Swap ${prettySymbol(token2Symbol.value)} for ${prettySymbol(
-        token1Symbol.value
+        token1Symbol.value,
       )}`
     default:
       return type
@@ -94,24 +94,24 @@ function isMe(address: string) {
 <template>
   <div class="">
     <div
-      class="flex items-center gap-8 justify-between"
+      class="flex items-center justify-between gap-8"
       v-if="connectionStore.connected"
     >
-      <legend class="text-xl text-zinc-300 capitalize">transactions</legend>
+      <legend class="text-xl capitalize text-zinc-300">transactions</legend>
 
-      <div class="flex items-center gap-2 cursor-pointer group">
+      <div class="group flex cursor-pointer items-center gap-2">
         <input
           id="onlyMyTransactions"
           v-model="onlyMyTransactions"
           aria-describedby="comments-description"
           name="comments"
           type="checkbox"
-          class="h-5 w-5 rounded-md border-gray-500 text-primary cursor-pointer bg-zinc-900"
+          class="h-5 w-5 cursor-pointer rounded-md border-gray-500 bg-zinc-900 text-primary"
         />
 
         <label
           for="onlyMyTransactions"
-          class="text-zinc-500 text-sm group-hover:text-zinc-300 cursor-pointer select-none"
+          class="cursor-pointer select-none text-sm text-zinc-500 group-hover:text-zinc-300"
           @click="selectedTransactionType = 'all'"
         >
           View my transactions
@@ -119,13 +119,13 @@ function isMe(address: string) {
       </div>
     </div>
 
-    <div class="p-8 rounded-3xl bg-zinc-900 mt-4 grid">
-      <div class="grid-row pr-6 -mr-4">
+    <div class="mt-4 grid rounded-3xl bg-zinc-900 p-8">
+      <div class="grid-row -mr-4 pr-6">
         <div class="">
           <Listbox v-model="selectedTransactionType">
             <div class="relative mt-1">
               <ListboxButton
-                class="relative w-28 rounded-lg bg-zinc-900 py-2 pl-3 pr-8 text-left shadow-md focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-primary/50 sm:text-sm border border-zinc-700"
+                class="relative w-28 rounded-lg border border-zinc-700 bg-zinc-900 py-2 pl-3 pr-8 text-left shadow-md focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-primary/50 sm:text-sm"
               >
                 <span class="block truncate capitalize">{{
                   selectedTransactionType
@@ -158,7 +158,7 @@ function isMe(address: string) {
                     <li
                       :class="[
                         active ? 'bg-primary/70' : 'bg-black',
-                        'relative select-none py-2 pl-4 pr-10 cursor-pointer capitalize',
+                        'relative cursor-pointer select-none py-2 pl-4 pr-10 capitalize',
                       ]"
                     >
                       {{ t }}
@@ -185,21 +185,21 @@ function isMe(address: string) {
       </div>
 
       <div
-        class="mt-8 flex items-center justify-center text-zinc-500 text-sm"
+        class="mt-8 flex items-center justify-center text-sm text-zinc-500"
         v-if="isLoadingTransactions"
       >
-        <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+        <Loader2Icon class="h-8 w-8 animate-spin text-zinc-500" />
       </div>
 
       <div
         v-else-if="transactions && transactions.length === 0"
-        class="text-center mt-8 text-zinc-500 text-base flex flex-col items-center justify-center gap-2"
+        class="mt-8 flex flex-col items-center justify-center gap-2 text-center text-base text-zinc-500"
       >
         <CalendarSearchIcon class="h-10 w-10 text-zinc-500" />
         <div class="">No transactions</div>
       </div>
 
-      <div v-else class="max-h-96 overflow-auto nicer-scrollbar pr-4 -mr-4">
+      <div v-else class="nicer-scrollbar -mr-4 max-h-96 overflow-auto pr-4">
         <div
           v-for="(transaction, index) in transactions"
           :key="transaction.id"
@@ -210,7 +210,7 @@ function isMe(address: string) {
           <div class="">{{ prettyBalance(transaction.amount1) }}</div>
           <div class="">{{ transaction.amount2 }}</div>
           <div
-            class="text-primary hover:underline cursor-pointer"
+            class="cursor-pointer text-primary hover:underline"
             @click="viewAddress(transaction.address)"
           >
             <span class="font-bold" v-if="isMe(transaction.address)">
@@ -239,7 +239,7 @@ function isMe(address: string) {
 
 <style scoped>
 .grid-row {
-  @apply grid gap-6 items-center text-2xs text-zinc-300 border-b border-zinc-800 py-2 xl:text-xs 2xl:text-sm xl:py-4;
+  @apply grid items-center gap-6 border-b border-zinc-800 py-2 text-2xs text-zinc-300 xl:py-4 xl:text-xs 2xl:text-sm;
   grid-template-columns: 1.5fr repeat(4, 1fr) 1.5fr;
 }
 .grid-row div {

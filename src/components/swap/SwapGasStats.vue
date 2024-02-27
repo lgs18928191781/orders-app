@@ -34,7 +34,7 @@ const prettyTaskGas = computed(() => {
 </script>
 
 <template>
-  <div class="p-4 flex flex-col gap-2">
+  <div class="flex flex-col gap-2 p-4">
     <div class="flex w-full items-center justify-start gap-2">
       <span class="label">Gas Plan</span>
 
@@ -49,10 +49,10 @@ const prettyTaskGas = computed(() => {
 
     <div class="flex items-center justify-between text-sm">
       <span class="text-zinc-500">Gas</span>
-      <div class="flex gap-3 items-center">
+      <div class="flex items-center gap-3">
         <div class="text-zinc-300">{{ prettyTaskGas }}</div>
         <div
-          class="text-sm text-zinc-500 text-right"
+          class="text-right text-sm text-zinc-500"
           v-if="isShowingFiat && fiatRate && taskGas"
         >
           {{ getFiatPriceDisplay(taskGas, fiatRate) }}

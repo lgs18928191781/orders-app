@@ -51,20 +51,20 @@ function onClearNotifications() {
 </script>
 
 <template>
-  <div class="hidden lg:block text-sm text-zinc-300">
+  <div class="hidden text-sm text-zinc-300 lg:block">
     <div class="group flex items-center gap-1">
       <Menu as="div" class="relative inline-block text-left">
         <div>
           <MenuButton
-            class="h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition-all hover:text-primary relative duration-200 group"
+            class="group relative h-10 cursor-pointer items-center rounded-lg bg-black/90 px-4 text-sm text-zinc-300 transition-all duration-200 hover:text-primary"
           >
-            <div class="w-full h-full flex items-center">
+            <div class="flex h-full w-full items-center">
               <BellRingIcon class="h-5 group-hover:animate-wiggle-once" />
             </div>
 
             <!-- badge showing notifications count -->
             <span
-              class="items-center rounded-md bg-red-400/40 px-1.5 font-medium text-red-400 absolute top-0 right-0 translate-x-1 -translate-y-1 text-sm"
+              class="absolute right-0 top-0 -translate-y-1 translate-x-1 items-center rounded-md bg-red-400/40 px-1.5 text-sm font-medium text-red-400"
               v-if="notifications && notifications.length"
             >
               {{ notifications.length }}
@@ -91,7 +91,7 @@ function onClearNotifications() {
             >
               <div
                 :class="[
-                  'block px-6 py-4 transition-all cursor-pointer',
+                  'block cursor-pointer px-6 py-4 transition-all',
                   active && 'bg-zinc-950',
                 ]"
                 @click="onNotificationClick(notification)"
@@ -102,7 +102,7 @@ function onClearNotifications() {
                   </span>
 
                   <span
-                    class="text-primary bg-orange-500/10 rounded px-2 py-0.5 text-xs"
+                    class="rounded bg-orange-500/10 px-2 py-0.5 text-xs text-primary"
                   >
                     {{ notification.notificationCount }}
                   </span>
@@ -125,7 +125,7 @@ function onClearNotifications() {
             >
               <div
                 :class="[
-                  'block px-6 py-4 cursor-pointer text-zinc-500 hover:text-zinc-300',
+                  'block cursor-pointer px-6 py-4 text-zinc-500 hover:text-zinc-300',
                   active && 'bg-zinc-950',
                 ]"
                 @click="onClearNotifications"

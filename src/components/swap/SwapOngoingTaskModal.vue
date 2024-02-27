@@ -36,8 +36,8 @@ const { data: task } = useQuery(
       taskId,
     },
     hasOngoing,
-    () => (taskStatus.value === 'running' ? 1000 : false)
-  )
+    () => (taskStatus.value === 'running' ? 1000 : false),
+  ),
 )
 watch(
   task,
@@ -49,7 +49,7 @@ watch(
       taskStatus.value = newTask.status
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const extendedTask = computed(() => {
@@ -133,10 +133,10 @@ function copyFailedReason() {
 
 <template>
   <div
-    class="fixed inset-0 bg-black/40 backdrop-blur flex flex-col items-center justify-center gap-8 px-8 z-[100]"
+    class="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-black/40 px-8 backdrop-blur"
     v-show="hasOngoing"
   >
-    <div class="text-zinc-300 bg-zinc-800 rounded-xl min-w-96 px-8 py-6">
+    <div class="min-w-96 rounded-xl bg-zinc-800 px-8 py-6 text-zinc-300">
       <div class="flex items-center justify-between">
         <h3>Ongoing Task</h3>
         <button
@@ -149,20 +149,20 @@ function copyFailedReason() {
       </div>
 
       <!-- body -->
-      <div class="mt-8 flex justify-center flex-col items-center gap-8">
+      <div class="mt-8 flex flex-col items-center justify-center gap-8">
         <template v-if="taskStatus === 'running'">
           <Loader2Icon class="size-24 animate-spin text-zinc-500" />
-          <p class="capitalize text-lg">Running...</p>
+          <p class="text-lg capitalize">Running...</p>
         </template>
 
         <template v-else-if="taskStatus === 'completed'">
           <CheckIcon
-            class="size-24 text-zinc-800 bg-green-500 rounded-full p-2"
+            class="size-24 rounded-full bg-green-500 p-2 text-zinc-800"
             :stroke-width="3"
           />
 
           <div class="flex items-center justify-between self-stretch">
-            <p class="capitalize text-lg mr-auto">Success!</p>
+            <p class="mr-auto text-lg capitalize">Success!</p>
 
             <button
               @click="toExplorer"
@@ -176,15 +176,15 @@ function copyFailedReason() {
         <template v-else-if="taskStatus === 'failed'">
           <FrownIcon class="size-24 text-red-500" />
           <div class="self-stretch">
-            <p class="capitalize text-lg text-center">Failed</p>
+            <p class="text-center text-lg capitalize">Failed</p>
             <div
-              class="bg-zinc-900 rounded-lg p-2 mt-2 text-sm cursor-pointer group"
+              class="group mt-2 cursor-pointer rounded-lg bg-zinc-900 p-2 text-sm"
               v-if="task?.failedReason"
               @click="copyFailedReason"
             >
               <h5 class="text-zinc-500">Error Message:</h5>
               <p
-                class="mt-1 group-hover:bg-primary/10 group-hover:text-white rounded p-1 -m-1"
+                class="-m-1 mt-1 rounded p-1 group-hover:bg-primary/10 group-hover:text-white"
               >
                 {{ task.failedReason }}
               </p>
@@ -193,16 +193,16 @@ function copyFailedReason() {
         </template>
       </div>
 
-      <div class="border border-zinc-700 rounded-3xl mt-4 p-2">
-        <div class="flex items-center justify-center my-2 gap-2">
+      <div class="mt-4 rounded-3xl border border-zinc-700 p-2">
+        <div class="my-2 flex items-center justify-center gap-2">
           <h5
-            class="font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 text-lg leading-none"
+            class="bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text text-lg font-bold leading-none text-transparent"
           >
             {{ extendedTask?.typeDisplay }}
           </h5>
         </div>
 
-        <div class="bg-black px-4 py-2 rounded-2xl" v-if="extendedTask">
+        <div class="rounded-2xl bg-black px-4 py-2" v-if="extendedTask">
           <div
             class="flex items-center gap-2 text-sm"
             v-if="extendedTask.type === 'swap'"
@@ -216,7 +216,7 @@ function copyFailedReason() {
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
             }}</span>
 
-            <ArrowRightIcon class="size-4 mx-2" />
+            <ArrowRightIcon class="mx-2 size-4" />
 
             <img
               :src="extendedTask.toIcon"
@@ -238,11 +238,11 @@ function copyFailedReason() {
               <span>{{
                 prettyCoinDisplay(
                   extendedTask.fromAmount,
-                  extendedTask.fromToken
+                  extendedTask.fromToken,
                 )
               }}</span>
 
-              <PlusIcon class="size-4 mx-2" />
+              <PlusIcon class="mx-2 size-4" />
 
               <img
                 :src="extendedTask.toIcon"
@@ -268,7 +268,7 @@ function copyFailedReason() {
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
             }}</span>
 
-            <PlusIcon class="size-4 mx-2" />
+            <PlusIcon class="mx-2 size-4" />
 
             <img
               :src="extendedTask.toIcon"
@@ -281,7 +281,7 @@ function copyFailedReason() {
           </div>
         </div>
 
-        <div class="bg-black px-4 py-2 rounded-full text-center" v-else>
+        <div class="rounded-full bg-black px-4 py-2 text-center" v-else>
           ...
         </div>
       </div>

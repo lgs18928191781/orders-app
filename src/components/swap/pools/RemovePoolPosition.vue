@@ -35,7 +35,7 @@ const token2AddressAmount = computed(() => {
       <img :src="token1Icon" class="size-6 rounded-full" v-if="token1Icon" />
       <img
         :src="token2Icon"
-        class="size-6 rounded-full -ml-2"
+        class="-ml-2 size-6 rounded-full"
         v-if="token2Icon"
       />
       <div class="ml-2">

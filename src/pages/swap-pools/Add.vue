@@ -153,7 +153,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -175,7 +175,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 // third watcher: hasEnough
 const hasEnough = ref(true)
@@ -198,7 +198,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // fourth watcher: hasAmount
@@ -222,7 +222,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 5th watcher: more-than-threshold
@@ -246,7 +246,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 function onAmountCleared() {
@@ -291,7 +291,7 @@ const afterBuildAdd = async ({
   if (!psbtAddFinished) throw new Error('Failed to add change')
 
   const signedAdd = await connectionStore.adapter.signPsbt(
-    psbtAddFinished.toHex()
+    psbtAddFinished.toHex(),
   )
   if (!signedAdd) return
 
@@ -384,7 +384,7 @@ async function doAddLiquidity() {
 
   <!-- disabled button -->
   <MainBtn class="disabled" v-if="calculatingToken1" :disabled="true">
-    <Loader2Icon class="animate-spin text-zinc-400 mx-auto" />
+    <Loader2Icon class="mx-auto animate-spin text-zinc-400" />
   </MainBtn>
 
   <MainBtn

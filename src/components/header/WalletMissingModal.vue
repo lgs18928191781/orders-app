@@ -22,17 +22,17 @@ function goToMissingWallet() {
   if (missingWallet.value === 'unisat') {
     window.open(
       'https://chrome.google.com/webstore/detail/unisat-wallet/ppbibelpcjmhbdihakflkdcoccbgbkpo',
-      '_blank'
+      '_blank',
     )
   } else if (missingWallet.value === 'okx') {
     window.open(
       'https://chromewebstore.google.com/detail/mcohilncbfahbmgdjkbpemcciiolgcge',
-      '_blank'
+      '_blank',
     )
   } else if (missingWallet.value === 'metalet') {
     window.open(
       'https://chromewebstore.google.com/detail/metalet/lbjapbcmmceacocpimbpbidpgmlmoaao',
-      '_blank'
+      '_blank',
     )
   }
 }
@@ -97,7 +97,7 @@ function goToMissingWallet() {
                   </DialogTitle>
                   <div class="mt-2">
                     <DialogDescription
-                      class="text-sm text-zinc-500 text-center"
+                      class="text-center text-sm text-zinc-500"
                     >
                       Please install
                       <span class="capitalize">{{ missingWallet }}</span> wallet
@@ -115,7 +115,7 @@ function goToMissingWallet() {
                 >
                   Go to
 
-                  <span class="capitalize mx-2">
+                  <span class="mx-2 capitalize">
                     {{ missingWallet }}
                   </span>
                   wallet

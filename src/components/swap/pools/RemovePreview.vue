@@ -21,13 +21,13 @@ const token1Icon = computed(() => selectedPair.value?.token1Icon)
 const token2Icon = computed(() => selectedPair.value?.token2Icon)
 
 const thresholdInBtc = computed(() =>
-  new Decimal(SWAP_THRESHOLD_AMOUNT).div(1e8)
+  new Decimal(SWAP_THRESHOLD_AMOUNT).div(1e8),
 )
 </script>
 
 <template>
   <div class="swap-sub-static-panel text-2xl text-zinc-300">
-    <div class="flex justify-between items-center gap-4">
+    <div class="flex items-center justify-between gap-4">
       <div class="" v-if="isFetchingPreview">
         <Loader2Icon class="h-5 animate-spin" />
       </div>
@@ -39,14 +39,14 @@ const thresholdInBtc = computed(() =>
       </div>
     </div>
     <div
-      class="text-red-500 text-sm flex items-center gap-2 mt-1"
+      class="mt-1 flex items-center gap-2 text-sm text-red-500"
       v-if="token1Amount.gt(0) && !moreThanThreshold"
     >
       <AlertCircleIcon class="size-4" />
       Amount should be at least {{ thresholdInBtc }} BTC
     </div>
 
-    <div class="flex justify-between items-center gap-4 mt-4">
+    <div class="mt-4 flex items-center justify-between gap-4">
       <div class="" v-if="isFetchingPreview">
         <Loader2Icon class="h-5 animate-spin" />
       </div>

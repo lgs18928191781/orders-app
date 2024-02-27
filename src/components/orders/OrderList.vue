@@ -64,7 +64,7 @@ watch(
       }
     }, 100)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const rearrangedAskOrders = computed(() => {
@@ -89,7 +89,7 @@ const { data: marketPrice } = useQuery({
 </script>
 
 <template>
-  <div class="grow py-2 flex flex-col">
+  <div class="flex grow flex-col py-2">
     <!-- head -->
     <div class="grid grid-cols-3 gap-1 px-2">
       <div class="th th-sticky">Price ({{ unit }})</div>
@@ -101,7 +101,7 @@ const { data: marketPrice } = useQuery({
           </span>
           <img
             :src="selectedPair.fromIcon"
-            class="h-4 rounded-full inline ml-1"
+            class="ml-1 inline h-4 rounded-full"
           />
         </div>
       </div>
@@ -111,23 +111,23 @@ const { data: marketPrice } = useQuery({
           <span class="ml-2">({{ unit }})</span>
           <img
             :src="selectedPair.toIcon"
-            class="h-4 rounded-full inline ml-1"
+            class="ml-1 inline h-4 rounded-full"
           />
         </div>
       </div>
     </div>
 
     <!-- orders -->
-    <div class="flex flex-col grow">
+    <div class="flex grow flex-col">
       <div
-        class="nicer-scrollbar flex-auto h-1 overflow-y-scroll pr-1"
+        class="nicer-scrollbar h-1 flex-auto overflow-y-scroll pr-1"
         id="askOrders"
       >
         <div
           class="flex h-full w-full items-center justify-center"
           v-if="isLoadingAskOrders"
         >
-          <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+          <Loader2Icon class="h-8 w-8 animate-spin text-zinc-500" />
         </div>
 
         <div
@@ -167,7 +167,7 @@ const { data: marketPrice } = useQuery({
               }}
             </span>
             <span
-              class="text-xs text-zinc-500 pl-2"
+              class="pl-2 text-xs text-zinc-500"
               v-if="isShowingFiat && fiatRate && marketPrice"
             >
               {{ getFiatPriceDisplay(marketPrice, fiatRate) }}
@@ -176,12 +176,12 @@ const { data: marketPrice } = useQuery({
         </el-tooltip>
       </div>
 
-      <div class="nicer-scrollbar flex-auto h-1 overflow-y-scroll pr-1">
+      <div class="nicer-scrollbar h-1 flex-auto overflow-y-scroll pr-1">
         <div
           class="flex h-full items-center justify-center"
           v-if="isLoadingBidOrders"
         >
-          <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+          <Loader2Icon class="h-8 w-8 animate-spin text-zinc-500" />
         </div>
 
         <div
@@ -211,7 +211,7 @@ const { data: marketPrice } = useQuery({
 
 <style scoped>
 .th {
-  @apply pb-2 pt-0 text-left text-sm font-normal text-zinc-500 col-span-1;
+  @apply col-span-1 pb-2 pt-0 text-left text-sm font-normal text-zinc-500;
 }
 
 .th-sticky {
@@ -219,6 +219,6 @@ const { data: marketPrice } = useQuery({
 }
 
 .th-right {
-  @apply pb-2 pt-0 text-right text-sm font-normal text-zinc-500 col-span-1;
+  @apply col-span-1 pb-2 pt-0 text-right text-sm font-normal text-zinc-500;
 }
 </style>

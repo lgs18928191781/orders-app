@@ -8,17 +8,17 @@ import PanelTrade from '@/components/orders/PanelTrade.vue'
 
 <template>
   <div
-    class="grid grid-flow-dense grid-cols-10 mx-auto px-3 mb-6 grow w-full max-w-9xl gap-3 grid-rows-5"
+    class="mx-auto mb-6 grid w-full max-w-9xl grow grid-flow-dense grid-cols-10 grid-rows-5 gap-3 px-3"
   >
     <!-- <div class="col-span-7 flex flex-col">
       <div class="grid grid-cols-7 gap-3 mb-3"> -->
     <PanelPairInfo class="col-span-4 row-span-3" />
 
     <!-- table -->
-    <PanelTrade class="col-span-3 grow row-span-3" />
+    <PanelTrade class="col-span-3 row-span-3 grow" />
     <!-- </div> -->
 
-    <PanelHistoryIndex class="col-span-10 2xl:col-span-7 row-span-2" />
+    <PanelHistoryIndex class="col-span-10 row-span-2 2xl:col-span-7" />
     <!-- </div> -->
 
     <PanelOrderBook class="col-span-3 row-span-3 2xl:row-span-5" />
