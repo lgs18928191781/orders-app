@@ -15,7 +15,7 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
 import { buildRemove, postTask } from '@/queries/swap'
-import { IS_DEV } from '@/data/constants'
+import { IS_DEV, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -104,6 +104,12 @@ const conditions: Ref<
   {
     condition: 'enter-amount',
     message: 'Select amount',
+    priority: 2,
+    met: false,
+  },
+  {
+    condition: 'more-than-threshold',
+    message: 'Amount too small',
     priority: 3,
     met: false,
   },
@@ -165,6 +171,34 @@ watch(
     } else {
       conditions.value = conditions.value.map((c) => {
         if (c.condition === 'enter-amount') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true }
+)
+
+// 5th watcher: more-than-threshold
+const moreThanThreshold = computed(() => {
+  if (!preview.value) return false
+
+  return token1Amount.value.gte(SWAP_THRESHOLD_AMOUNT)
+})
+watch(
+  () => moreThanThreshold.value,
+  (moreThanThreshold) => {
+    if (moreThanThreshold) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
           c.met = false
         }
         return c
@@ -245,6 +279,7 @@ async function doRemoveLiquidity() {
       :is-fetching-preview="isFetchingPreview"
       :token-1-amount="token1Amount"
       :token-2-amount="token2Amount"
+      :more-than-threshold="moreThanThreshold"
     />
 
     <SwapGasStats v-show="token1Amount.gt(0)" :task-type="'remove'" />
