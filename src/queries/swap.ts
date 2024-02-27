@@ -157,7 +157,7 @@ export const getPoolStatus = async ({
     `pools/${token1}-${token2}?address=${address}&net=${network}`,
     {
       auth: true,
-    }
+    },
   )
 
   return res
@@ -337,7 +337,8 @@ export const postTask = async ({
 }): Promise<{
   id: string
 }> => {
-  const body = { buildId, rawPsbt }
+  const address = useConnectionStore().getAddress
+  const body = { buildId, rawPsbt, address }
 
   const res = await swapApiFetch('tasks', {
     method: 'POST',
