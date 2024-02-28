@@ -98,7 +98,7 @@ export const isRestrictedRegion = (geo: string) => {
 
 export const getOkxLink = () => {
   const dappUrl = IS_DEV
-    ? 'https://orders-app-frontier-git-feature-responsive-mvc-labs.vercel.app/'
+    ? 'https://preview-ywsm.orders.exchange/'
     : 'https://' + window.location.host + '/'
   const encodedDappUrl = encodeURIComponent(dappUrl)
   const deepLink = 'okx://wallet/dapp/url?dappUrl=' + encodedDappUrl
