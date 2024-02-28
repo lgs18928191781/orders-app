@@ -1,5 +1,6 @@
 import { swapApiFetch } from '@/lib/fetch'
 import { sleep } from '@/lib/helpers'
+import { type InscriptionUtxo } from '@/queries/swap/types'
 import { useConnectionStore } from '@/stores/connection'
 import { Network } from '@/stores/network'
 
@@ -168,13 +169,13 @@ export const buildAdd = async ({
   token2,
   source,
   sourceAmount,
-  inscriptionIds,
+  inscriptionUtxos,
 }: {
   token1: string
   token2: string
   source: 'token1' | 'token2'
   sourceAmount: string
-  inscriptionIds: string[]
+  inscriptionUtxos: InscriptionUtxo[]
 }): Promise<{
   rawPsbt: string
   buildId: string
@@ -189,7 +190,7 @@ export const buildAdd = async ({
     token2,
     source,
     sourceAmount,
-    inscriptionIds,
+    inscriptionUtxos,
   }
 
   const res = await swapApiFetch('build/add', {
@@ -297,12 +298,12 @@ export const build2xSwap = async ({
   token1,
   token2,
   sourceAmount,
-  inscriptionIds,
+  inscriptionUtxos,
 }: {
   token1: string
   token2: string
   sourceAmount: string
-  inscriptionIds: string[]
+  inscriptionUtxos: InscriptionUtxo[]
 }): Promise<{
   rawPsbt: string
   buildId: string
@@ -317,7 +318,7 @@ export const build2xSwap = async ({
     token1,
     token2,
     sourceAmount,
-    inscriptionIds,
+    inscriptionUtxos,
   }
 
   const res = await swapApiFetch('build/2x', {

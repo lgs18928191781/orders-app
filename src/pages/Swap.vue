@@ -26,6 +26,7 @@ import { exclusiveChange } from '@/lib/build-helpers'
 import { ERRORS } from '@/data/errors'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { sleep } from '@/lib/helpers'
+import { type InscriptionUtxo } from '@/queries/swap/types'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -37,7 +38,7 @@ const networkStore = useNetworkStore()
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const token1Amount = ref<string>()
 const token2Amount = ref<string>()
-const token2InscriptionIds = ref<string[]>([])
+const token2InscriptionUtxos = ref<InscriptionUtxo[]>([])
 
 const ratio = ref<Decimal>(new Decimal(0))
 const poolRatio = ref<Decimal>(new Decimal(0))
@@ -232,8 +233,8 @@ const flipAsset = async () => {
   hasAmount.value = false
   moreThanThreshold.value = true
 
-  // clear token2InscriptionIds
-  token2InscriptionIds.value = []
+  // clear token2InscriptionUtxos
+  token2InscriptionUtxos.value = []
 }
 
 // unmet conditions for swap
@@ -551,7 +552,7 @@ async function doSwap() {
     token1: token1Symbol.value.toLowerCase(),
     token2: token2Symbol.value.toLowerCase(),
     sourceAmount: sourceAmount.value,
-    inscriptionIds: token2InscriptionIds.value,
+    inscriptionUtxos: token2InscriptionUtxos.value,
   })
 }
 </script>
@@ -587,7 +588,7 @@ async function doSwap() {
           v-if="flipped"
           v-model:symbol="token2Symbol"
           v-model:amount="token2Amount"
-          v-model:inscription-ids="token2InscriptionIds"
+          v-model:inscription-utxos="token2InscriptionUtxos"
           @has-enough="hasEnough = true"
           @not-enough="hasEnough = false"
           @amount-entered="hasAmount = true"

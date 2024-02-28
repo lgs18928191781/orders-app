@@ -16,6 +16,7 @@ import { useOngoingTask } from '@/hooks/use-ongoing-task'
 import { buildAdd, postTask, previewAdd } from '@/queries/swap'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { exclusiveChange } from '@/lib/build-helpers'
+import { type InscriptionUtxo } from '@/queries/swap/types'
 
 const { token1Symbol, token2Symbol } = useSwapPoolPair()
 const { openConnectionModal } = useConnectionModal()
@@ -27,7 +28,7 @@ const networkStore = useNetworkStore()
 const token1Amount = ref<string>()
 const token2Amount = ref<string>()
 const calculatingToken1 = ref(false)
-const token2InscriptionIds = ref<string[]>([])
+const token2InscriptionUtxos = ref<InscriptionUtxo[]>([])
 const ratio = ref(new Decimal(0))
 const addEquity = ref(new Decimal(0))
 const poolEquity = ref(new Decimal(0))
@@ -250,7 +251,7 @@ watch(
 )
 
 function onAmountCleared() {
-  token2InscriptionIds.value = []
+  token2InscriptionUtxos.value = []
   ratio.value = new Decimal(0)
   addEquity.value = new Decimal(0)
   poolEquity.value = new Decimal(0)
@@ -334,7 +335,7 @@ async function doAddLiquidity() {
     token2: token2Symbol.value.toLowerCase(),
     source: 'token2',
     sourceAmount: token2Amount.value,
-    inscriptionIds: token2InscriptionIds.value,
+    inscriptionUtxos: token2InscriptionUtxos.value,
   })
 }
 </script>
@@ -345,7 +346,7 @@ async function doAddLiquidity() {
     <SwapSideBrc
       v-model:symbol="token2Symbol"
       v-model:amount="token2Amount"
-      v-model:inscription-ids="token2InscriptionIds"
+      v-model:inscription-utxos="token2InscriptionUtxos"
       @has-enough="hasEnough = true"
       @not-enough="hasEnough = false"
       @amount-entered="hasAmount = true"

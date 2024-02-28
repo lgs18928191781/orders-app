@@ -22,6 +22,7 @@ import {
 import { getOneBrc20Query } from '@/queries/orders-api.query'
 import { calcFiatPrice } from '@/lib/helpers'
 import { prettyInscriptionId, prettySymbol } from '@/lib/formatters'
+import { type InscriptionUtxo } from '@/queries/swap/types'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -35,9 +36,9 @@ const props = defineProps({
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
-const inscriptionIds = defineModel('inscriptionIds', {
+const inscriptionUtxos = defineModel('inscriptionUtxos', {
   required: true,
-  type: Array as () => string[],
+  type: Array as () => InscriptionUtxo[],
 })
 const icon = computed(() => selectedPair.value?.token2Icon)
 
@@ -119,13 +120,18 @@ function isSelected(transferable: Brc20Transferable) {
 watch(
   selecteds,
   (newSelecteds) => {
-    // update amount and inscriptionIds when selecteds changed
+    // update amount and inscriptionUtxos when selecteds changed
     amount.value = newSelecteds
       .reduce((prev, curr) => {
         return prev.add(new Decimal(curr.amount))
       }, new Decimal(0))
       .toFixed(0)
-    inscriptionIds.value = newSelecteds.map((t) => t.inscriptionId)
+    inscriptionUtxos.value = newSelecteds.map((t) => {
+      return {
+        id: t.inscriptionId,
+        satoshis: t.outValue,
+      }
+    })
 
     // if has selecteds, emit hasAmount; else emit amountCleared
     if (newSelecteds.length > 0) {
