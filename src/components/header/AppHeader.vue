@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
 
       <div class="flex grow gap-2 lg:grow-0">
         <button
-          class="rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
+          class="ml-auto rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:ml-0 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
           @click="openConnectionModal"
           v-if="!connectionStore.connected"
         >
@@ -152,7 +152,7 @@ onBeforeUnmount(() => {
         </button>
 
         <button
-          class="rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
+          class="ml-auto rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:ml-0 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
           @click="credentialsStore.login()"
           v-else-if="!credentialsStore.get"
         >

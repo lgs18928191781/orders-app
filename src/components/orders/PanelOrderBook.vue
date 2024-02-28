@@ -1,13 +1,10 @@
 <script lang="ts" setup>
 import { Switch, SwitchGroup } from '@headlessui/vue'
-import { useStorage } from '@vueuse/core'
 import { watch } from 'vue'
 import { DollarSignIcon } from 'lucide-vue-next'
 
 import { useScrollOrdersArea } from '@/hooks/use-scroll-orders-area'
 import { useFiat } from '@/hooks/use-fiat'
-
-import OrderList from './OrderList.vue'
 
 const { isShowingFiat } = useFiat()
 const { scroll } = useScrollOrdersArea()
@@ -18,7 +15,7 @@ watch(isShowingFiat, () => {
 </script>
 
 <template>
-  <div class="primary-panel flex flex-col">
+  <div class="primary-panel flex min-h-screen flex-col lg:min-h-0">
     <div
       class="flex items-center justify-between gap-4 rounded-t-md bg-zinc-800 p-4 lg:flex-row"
     >

@@ -42,6 +42,7 @@ declare module '@vue/runtime-core' {
     NotAvailable: typeof import('./src/components/overlays/NotAvailable.vue')['default']
     Notifications: typeof import('./src/components/header/Notifications.vue')['default']
     OperationPanel: typeof import('./src/components/pool/OperationPanel.vue')['default']
+    OrderbookLayout: typeof import('./src/components/orders/OrderbookLayout.vue')['default']
     OrderIndex: typeof import('./src/components/orders/OrderIndex.vue')['default']
     OrderItem: typeof import('./src/components/orders/OrderItem.vue')['default']
     OrderList: typeof import('./src/components/orders/OrderList.vue')['default']

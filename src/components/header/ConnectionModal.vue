@@ -14,6 +14,8 @@ import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
+import { isMobile, isOKApp, getOkxLink } from '@/lib/helpers'
+
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
@@ -39,15 +41,20 @@ async function connectToUnisat() {
 }
 
 async function connectToOkx() {
-  if (!window.okxwallet) {
-    setMissingWallet('okx')
-    return
-  }
+  if (isMobile() && !isOKApp()) {
+    const encodedUrl = getOkxLink()
+    window.location.href = encodedUrl
+  } else {
+    if (!window.okxwallet) {
+      setMissingWallet('okx')
+      return
+    }
 
-  const connection = await connectionStore.connect('okx')
-  if (connection.status === 'connected') {
-    await credentialsStore.login()
-    closeConnectionModal()
+    const connection = await connectionStore.connect('okx')
+    if (connection.status === 'connected') {
+      await credentialsStore.login()
+      closeConnectionModal()
+    }
   }
 }
 
@@ -137,6 +144,7 @@ const isSwapPage = computed(() => {
                     class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToUnisat"
                     ref="firstButtonRef"
+                    v-if="!isMobile()"
                   >
                     <img
                       class="h-12 rounded"
@@ -146,19 +154,18 @@ const isSwapPage = computed(() => {
                     <span class="">Unisat</span>
                   </button>
 
-                  <div class="relative" v-if="!isSwapPage">
-                    <button
-                      class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30 lg:w-36"
-                      @click="connectToMetalet"
-                    >
-                      <img
-                        class="h-12 rounded"
-                        :src="MetaletIcon"
-                        alt="Metamask"
-                      />
-                      <span class="">Metalet</span>
-                    </button>
-                  </div>
+                  <button
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30 lg:w-36"
+                    @click="connectToMetalet"
+                    v-if="!isMobile()"
+                  >
+                    <img
+                      class="h-12 rounded"
+                      :src="MetaletIcon"
+                      alt="Metamask"
+                    />
+                    <span class="">Metalet</span>
+                  </button>
                 </div>
 
                 <!-- footer -->

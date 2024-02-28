@@ -76,7 +76,7 @@ onMounted(() => {
       </Tab>
     </TabList>
 
-    <TabPanels class="grow p-3">
+    <TabPanels class="h-[50vh] grow p-3 lg:h-auto">
       <PanelOpenOrders v-model:open-orders-count="openOrdersCount" />
       <PanelOrderHistory />
       <PanelMarketTrades />

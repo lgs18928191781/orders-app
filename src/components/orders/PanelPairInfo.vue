@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import OrdersPanelHeader from '@/components/orders/PanelHeader.vue'
-import KLineChart from '@/components/orders/KLineChart.vue'
 </script>
 
 <template>

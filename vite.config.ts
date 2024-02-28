@@ -7,6 +7,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
+import terminal from 'vite-plugin-terminal'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,6 +16,7 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    terminal(),
     nodePolyfills({
       // To exclude specific polyfills, add them to this list.
       exclude: [
@@ -54,7 +56,7 @@ export default defineConfig({
   },
   server: {
     open: true,
-    // host: true,
+    host: true,
     port: 5174,
   },
   build: {
