@@ -22,6 +22,7 @@ import {
 import { getOneBrc20Query } from '@/queries/orders-api.query'
 import { calcFiatPrice } from '@/lib/helpers'
 import { prettyInscriptionId, prettySymbol } from '@/lib/formatters'
+import { type InscriptionUtxo } from '@/queries/swap/types'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -35,9 +36,9 @@ const props = defineProps({
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
-const inscriptionIds = defineModel('inscriptionIds', {
+const inscriptionUtxos = defineModel('inscriptionUtxos', {
   required: true,
-  type: Array as () => string[],
+  type: Array as () => InscriptionUtxo[],
 })
 const icon = computed(() => selectedPair.value?.token2Icon)
 
@@ -89,8 +90,8 @@ const { data: myOneBrc20, isLoading } = useQuery(
       network: networkStore.network,
       tick: token2Symbol,
     },
-    computed(() => connectionStore.connected)
-  )
+    computed(() => connectionStore.connected),
+  ),
 )
 
 // amount
@@ -119,13 +120,18 @@ function isSelected(transferable: Brc20Transferable) {
 watch(
   selecteds,
   (newSelecteds) => {
-    // update amount and inscriptionIds when selecteds changed
+    // update amount and inscriptionUtxos when selecteds changed
     amount.value = newSelecteds
       .reduce((prev, curr) => {
         return prev.add(new Decimal(curr.amount))
       }, new Decimal(0))
       .toFixed(0)
-    inscriptionIds.value = newSelecteds.map((t) => t.inscriptionId)
+    inscriptionUtxos.value = newSelecteds.map((t) => {
+      return {
+        id: t.inscriptionId,
+        satoshis: t.outValue,
+      }
+    })
 
     // if has selecteds, emit hasAmount; else emit amountCleared
     if (newSelecteds.length > 0) {
@@ -134,7 +140,7 @@ watch(
       emit('amountCleared')
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 const tweenedAmount = reactive({
@@ -157,12 +163,12 @@ async function goInscribe() {
     <div class="flex items-center gap-2">
       <div class="text-zinc-400" v-if="side">You {{ side }}</div>
 
-      <div class="text-zinc-100 text-lg ml-auto">
+      <div class="ml-auto text-lg text-zinc-100">
         {{ tweenedAmount.number.toFixed(0) }}
       </div>
       <div
         :class="[
-          'rounded-full p-1 px-4 text-base flex items-center gap-1 bg-zinc-900',
+          'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-base',
         ]"
       >
         <img :src="icon" class="size-5 rounded-full" v-if="icon" />
@@ -173,18 +179,18 @@ async function goInscribe() {
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-8">
-      <Loader2Icon class="animate-spin size-6 text-zinc-500" />
+      <Loader2Icon class="size-6 animate-spin text-zinc-500" />
     </div>
 
     <div v-else-if="myOneBrc20?.transferBalanceList.length === 0" class="my-4">
-      <div class="text-xs text-zinc-400 mb-2">
+      <div class="mb-2 text-xs text-zinc-400">
         No transferable {{ prettySymbol(symbol) }}.
       </div>
 
       <!-- inscribe button -->
       <button
         @click="goInscribe"
-        class="cute-button p-2 rounded-md flex flex-col gap-0.5 items-center relative h-16 justify-center text-xs text-zinc-300"
+        class="cute-button relative flex h-16 flex-col items-center justify-center gap-0.5 rounded-md p-2 text-xs text-zinc-300"
         v-if="myOneBrc20 && new Decimal(myOneBrc20.availableBalance || 0).gt(0)"
       >
         <PackagePlusIcon class="size-4" />
@@ -193,7 +199,7 @@ async function goInscribe() {
     </div>
 
     <div
-      class="grid items-center grid-cols-3 gap-2 mb-4 max-h-[20vh] overflow-auto nicer-scrollbar pr-2 -mr-2 pt-2 mt-2"
+      class="nicer-scrollbar -mr-2 mb-4 mt-2 grid max-h-[20vh] grid-cols-3 items-center gap-2 overflow-auto pr-2 pt-2"
       v-else
     >
       <div
@@ -211,30 +217,30 @@ async function goInscribe() {
         </button>
       </div>
       <button
-        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center group"
+        class="group relative flex h-16 flex-col items-center justify-center gap-0.5 rounded-md border p-2 hover:border-primary/60"
         :class="[
           isSelected(transferable)
-            ? 'bg-black border-primary/60 text-primary'
-            : 'bg-zinc-800 border-zinc-700 text-zinc-300',
+            ? 'border-primary/60 bg-black text-primary'
+            : 'border-zinc-700 bg-zinc-800 text-zinc-300',
         ]"
         v-for="transferable in myOneBrc20?.transferBalanceList"
         :key="transferable.inscriptionId"
         @click="toggleSelect(transferable)"
       >
-        <div class="text-sm self-center">
+        <div class="self-center text-sm">
           {{ transferable.amount }}
         </div>
-        <div class="text-xs text-zinc-400 bg-zinc-700 rounded-sm px-1">
+        <div class="rounded-sm bg-zinc-700 px-1 text-xs text-zinc-400">
           {{ prettyInscriptionId(transferable.inscriptionId) }}
         </div>
 
         <CheckCircleIcon
-          class="absolute right-0 top-0 size-5 text-primary/80 translate-x-[33%] translate-y-[-33%] bg-black/80 rounded-full p-0.5 rotate-12"
+          class="absolute right-0 top-0 size-5 translate-x-[33%] translate-y-[-33%] rotate-12 rounded-full bg-black/80 p-0.5 text-primary/80"
           v-if="isSelected(transferable)"
         ></CheckCircleIcon>
 
         <CircleIcon
-          class="absolute right-0 top-0 size-5 text-zinc-700 translate-x-[33%] translate-y-[-33%] bg-zinc-800 rounded-full p-0.5 rotate-12 group-hover:text-primary/60"
+          class="absolute right-0 top-0 size-5 translate-x-[33%] translate-y-[-33%] rotate-12 rounded-full bg-zinc-800 p-0.5 text-zinc-700 group-hover:text-primary/60"
           v-else
         ></CircleIcon>
       </button>
@@ -242,7 +248,7 @@ async function goInscribe() {
       <!-- inscribe button -->
       <button
         @click="goInscribe"
-        class="border p-2 rounded-md flex flex-col gap-0.5 items-center hover:border-primary/60 relative h-16 justify-center border-zinc-700 text-xs text-zinc-300 hover:bg-primary/5 hover:text-primary"
+        class="relative flex h-16 flex-col items-center justify-center gap-0.5 rounded-md border border-zinc-700 p-2 text-xs text-zinc-300 hover:border-primary/60 hover:bg-primary/5 hover:text-primary"
         v-if="myOneBrc20 && new Decimal(myOneBrc20.availableBalance || 0).gt(0)"
       >
         <PackagePlusIcon class="size-4" />
@@ -263,7 +269,7 @@ async function goInscribe() {
 
       <!-- balance -->
       <div
-        class="text-xs text-zinc-400 flex gap-1"
+        class="flex gap-1 text-xs text-zinc-400"
         v-if="!!symbol && !!myOneBrc20"
       >
         <div>Balance:</div>
