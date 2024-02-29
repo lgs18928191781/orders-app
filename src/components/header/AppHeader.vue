@@ -86,30 +86,6 @@ onMounted(async () => {
   if (window.unisat) {
     const unisat = window.unisat
     unisat.on('accountsChanged', unisatAccountsChangedHandler)
-
-    // getNetwork
-    const network: Network = await unisat.getNetwork()
-    // const network: Network = 'livenet'
-    const address = connectionStore.getAddress
-
-    // if not in whitelist, switch to mainnet
-    // if (network !== 'livenet' && address && !whitelist.includes(address)) {
-    //   const switchRes = await unisat.switchNetwork('livenet').catch(() => false)
-    //   if (!switchRes) {
-    //     ElMessage({
-    //       message: 'Testnet is not available, please switch to livenet.',
-    //       type: 'error',
-    //       onClose: () => {
-    //         // redirect to a blank page
-    //         window.location.href = 'about:blank'
-    //       },
-    //     })
-    //   }
-
-    //   networkStore.set('livenet')
-    //   return
-    // }
-    networkStore.set(network)
   }
 
   if (window.okxwallet) {
@@ -181,6 +157,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <MobileAppHeaderSecondRow />
+    <MobileAppHeaderSecondRow v-if="connectionStore.connected" />
   </header>
 </template>

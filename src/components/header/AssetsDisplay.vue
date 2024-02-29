@@ -18,12 +18,13 @@ import {
   DisclosurePanel,
 } from '@headlessui/vue'
 
-import { prettyBalance, prettyCoinDisplay } from '@/lib/formatters'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { getBrc20s } from '@/queries/orders-api'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
+
+import { getBrc20s } from '@/queries/orders-api'
 import { unit, useBtcUnit } from '@/lib/helpers'
+import { prettyBalance, prettyCoinDisplay } from '@/lib/formatters'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -39,7 +40,7 @@ const { data: balance } = useQuery({
   enabled,
 })
 
-const { data: excludedBalance } = useExcludedBalanceQuery(address, enabled)
+const { data: excludedBalance, isLoading: isLoadingExcludedBalance } = useExcludedBalanceQuery(address, enabled)
 
 const availableBalanceRatioColor = computed(() => {
   if (excludedBalance.value === undefined || balance.value === undefined) {
@@ -256,8 +257,6 @@ const { data: myBrc20s } = useQuery({
       </Menu>
     </div>
 
-    <span v-else>
-      <Loader2Icon class="h-5 animate-spin" />
-    </span>
+      <Loader2Icon class="h-5 animate-spin ml-3" v-else-if="isLoadingExcludedBalance" />
   </div>
 </template>

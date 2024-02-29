@@ -8,6 +8,7 @@ import * as metaletAdapter from '@/wallet-adapters/metalet'
 import { login } from '@/queries/orders-api'
 import { ElMessage } from 'element-plus'
 import { IS_DEV } from '@/data/constants'
+import { Network, useNetworkStore } from './network'
 
 function getWalletAdapter(wallet: Wallet) {
   switch (wallet) {
@@ -63,7 +64,7 @@ export const useConnectionStore = defineStore('connection', {
       if (IS_DEV && import.meta.env.VITE_TESTING_ADDRESS) {
         console.log(
           'Using testing address',
-          import.meta.env.VITE_TESTING_ADDRESS
+          import.meta.env.VITE_TESTING_ADDRESS,
         )
         return import.meta.env.VITE_TESTING_ADDRESS as string
       }
@@ -146,6 +147,24 @@ export const useConnectionStore = defineStore('connection', {
       this.last.address = await this.adapter.getAddress()
       this.last.pubKey = await this.adapter.getPubKey()
 
+      // sync network
+      const networkStore = useNetworkStore()
+      if (this.last.wallet === 'okx') {
+        networkStore.set('livenet')
+      } else if (this.last.wallet === 'unisat') {
+        const network: Network = await window.unisat.getNetwork()
+        networkStore.set(network)
+      } else if (this.last.wallet === 'metalet') {
+        const network: Network = await window.metaidwallet
+          .getNetwork()
+          .then((n: 'mainnet' | 'testnet') => {
+            if (n === 'mainnet') return 'livenet'
+
+            return 'testnet'
+          })
+        networkStore.set(network)
+      }
+
       return this.last
     },
 
@@ -159,6 +178,10 @@ export const useConnectionStore = defineStore('connection', {
       this.last.status = 'disconnected'
       this.last.address = ''
       this.last.pubKey = ''
+
+      // reset network
+      const networkStore = useNetworkStore()
+      networkStore.set('livenet')
     },
   },
 })

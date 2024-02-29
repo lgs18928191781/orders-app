@@ -6,9 +6,8 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useRoute } from 'vue-router'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
@@ -75,11 +74,6 @@ async function connectToMetalet() {
     closeConnectionModal()
   }
 }
-
-const route = useRoute()
-const isSwapPage = computed(() => {
-  return route.fullPath.includes('swap')
-})
 </script>
 
 <template>
@@ -134,7 +128,6 @@ const isSwapPage = computed(() => {
                   <button
                     class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToOkx"
-                    v-if="!isSwapPage"
                   >
                     <img class="h-12 rounded" :src="OkxIcon" alt="Metamask" />
                     <span class="">OKX</span>
@@ -170,10 +163,6 @@ const isSwapPage = computed(() => {
 
                 <!-- footer -->
                 <div class="mt-16 space-y-1 text-xs text-zinc-500">
-                  <p v-if="isSwapPage" class="text-primary">
-                    Swap module is currently only supported on Unisat wallet and
-                    Testnet environment.
-                  </p>
                   <p>By connecting wallet,</p>
                   <p class="">
                     <span>you agree to Orders.Exchange's</span>
