@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { terminal } from 'virtual:terminal'
-
 async function connectToOkx() {}
 </script>
 

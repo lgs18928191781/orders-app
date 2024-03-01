@@ -1,6 +1,8 @@
-import { IS_DEV } from '@/data/constants'
 import { computedEager, useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
+import terminal from 'virtual:terminal'
+
+import { IS_DEV } from '@/data/constants'
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -112,10 +114,19 @@ export const isMobile = () => {
   const ua = navigator.userAgent
   const isIOS = /iphone|ipad|ipod|ios/i.test(ua)
   const isAndroid = /android|XiaoMi|MiuiBrowser/i.test(ua)
+  console.log({ ua })
   return isIOS || isAndroid
 }
 
 export const isOKApp = () => {
   const ua = navigator.userAgent
   return /OKApp/i.test(ua)
+}
+
+export const log = (msg: any) => {
+  if (isMobile()) {
+    return terminal.log(msg)
+  }
+
+  return console.log(msg)
 }

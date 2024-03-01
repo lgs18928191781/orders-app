@@ -7,6 +7,7 @@ import { useConnectionStore } from '@/stores/connection'
 import {
   generateRandomString,
   isUnsupportedAddress,
+  log,
   raise,
 } from '@/lib/helpers'
 import {
@@ -96,10 +97,10 @@ export const getAddress = async () => {
     // await window.okxwallet.bitcoin.disconnect()
 
     ElMessage.error(
-      'Please use a native SegWit or Taproot address (Starts with bc1)'
+      'Please use a native SegWit or Taproot address (Starts with bc1)',
     )
     throw new Error(
-      'Please use a native SegWit or Taproot address (Starts with bc1)'
+      'Please use a native SegWit or Taproot address (Starts with bc1)',
     )
   }
 
@@ -130,7 +131,7 @@ export const connect: () => Promise<{
       // await window.okxwallet.bitcoin.disconnect()
 
       throw new Error(
-        'Please use a native SegWit or Taproot address (Starts with bc1)'
+        'Please use a native SegWit or Taproot address (Starts with bc1)',
       )
     }
 
@@ -157,16 +158,17 @@ export const getBalance = async () => {
 
   const balance: number = await fetchBalance(address).then(
     (balanceInfo) =>
-      Math.round(balanceInfo.confirmed) + Math.round(balanceInfo.unconfirmed)
+      Math.round(balanceInfo.confirmed) + Math.round(balanceInfo.unconfirmed),
   )
   return balance
 }
 
 export const inscribe = async (tick: string) => {
+  log('inscribe okx...')
   checkOkx()
 
   const address = useConnectionStore().getAddress
-  console.log({ tick })
+  log({ tick })
 
   return await window.okxwallet.bitcoin.inscribe({
     type: 51,
@@ -222,7 +224,7 @@ export const pushPsbt = async (psbt: string): Promise<string> => {
           type: 52,
         },
       ],
-      address
+      address,
     )
     .then((res) => {
       return res[0][randomId]
