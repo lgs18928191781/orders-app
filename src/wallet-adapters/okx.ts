@@ -6,6 +6,7 @@ import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
 import {
   generateRandomString,
+  isMobile,
   isUnsupportedAddress,
   log,
   raise,
@@ -164,11 +165,13 @@ export const getBalance = async () => {
 }
 
 export const inscribe = async (tick: string) => {
-  alert('inscribe okx...')
   checkOkx()
+  if (isMobile()) {
+    ElMessage.warning('Please inscribe BRC-20 directly in the Okx wallet.')
+    return
+  }
 
   const address = useConnectionStore().getAddress
-  alert(tick)
 
   return await window.okxwallet.bitcoin.inscribe({
     type: 51,
