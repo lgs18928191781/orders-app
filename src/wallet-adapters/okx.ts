@@ -164,11 +164,11 @@ export const getBalance = async () => {
 }
 
 export const inscribe = async (tick: string) => {
-  log('inscribe okx...')
+  alert('inscribe okx...')
   checkOkx()
 
   const address = useConnectionStore().getAddress
-  log({ tick })
+  alert(tick)
 
   return await window.okxwallet.bitcoin.inscribe({
     type: 51,
