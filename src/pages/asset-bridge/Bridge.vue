@@ -12,7 +12,7 @@
         class="container-header grid grid-cols-2 items-center justify-between gap-4 px-3.5 py-2 text-sm text-zinc-300 lg:flex"
       >
         <span>Select Asset:</span>
-        <PairSelect class="col-span-1"></PairSelect>
+        <BridgePairSelect class="col-span-1"></BridgePairSelect>
       </div>
       <div class="grid p-6">
         <div>
@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
 import { computed, ref, reactive, toRaw, onMounted } from 'vue'
-import PairSelect from '@/components/orders/PairSelect.vue'
+import BridgePairSelect from '@/components/bridge/BridgeSelectPairs.vue'
 import swap from '@/assets/icon_swap.svg?url'
 import BridgeSwapItem from '@/components/bridge/BridgeSwapItem.vue'
 import { useConnectionStore } from '@/stores/connection'

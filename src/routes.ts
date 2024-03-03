@@ -38,7 +38,7 @@ const routes = [
     ],
   },
   { path: '/swap', component: Swap },
-  { path: '/bridge', component: Bridge },
+  { path: '/bridge/:pair?', component: Bridge },
   { path: '/whitelist', component: Whitelist },
   { path: '/events', component: Events },
   { path: '/leaderboard', component: Leaderboard },

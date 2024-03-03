@@ -13,6 +13,7 @@ declare module '@vue/runtime-core' {
     AddressMenu: typeof import('./src/components/header/AddressMenu.vue')['default']
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
     AssetSelect: typeof import('./src/components/AssetSelect.vue')['default']
+    BridgeSelectPairs: typeof import('./src/components/bridge/BridgeSelectPairs.vue')['default']
     BridgeSwapItem: typeof import('./src/components/bridge/BridgeSwapItem.vue')['default']
     Building: typeof import('./src/components/overlays/Building.vue')['default']
     ClaimRecordItem: typeof import('./src/components/events/ClaimRecordItem.vue')['default']
