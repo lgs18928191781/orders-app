@@ -16,12 +16,26 @@
       </div>
       <div class="grid p-6">
         <div>
-          <BridgeSwapItem ref="swapItem"></BridgeSwapItem>
+          <BridgeSwapItem
+            opName="From"
+            :assetInfo="fromAsset.val"
+            ref="swapItem"
+          ></BridgeSwapItem>
         </div>
         <div class="item-center triggle-icon my-8 flex justify-center">
-          <img class="h-5 w-5" :src="swap" alt="" />
+          <img
+            class="h-5 w-5 transition-all duration-300 hover:scale-105"
+            :class="{
+              'rotate-180': fromAsset.val.network === AssetNetwork.BTC,
+            }"
+            @click="converSwapItem"
+            :src="swap"
+            alt=""
+          />
         </div>
-        <div><BridgeSwapItem></BridgeSwapItem></div>
+        <div>
+          <BridgeSwapItem opName="To" :assetInfo="toAsset.val"></BridgeSwapItem>
+        </div>
         <div class="fee-wrap mt-2.5 flex">
           <span class="mr-4">Fee rate:0.1%</span>
           <span>20 confirmation on MVC TXs</span>
@@ -43,7 +57,10 @@
           ]"
         >
           <Loader2Icon class="mr-1.5 h-5 animate-spin" />
-          <span>{{ btnStatus.value }}</span>
+          <span
+            :class="[btnStatus.color == BtnColor.default ? 'textBlack' : '']"
+            >{{ btnStatus.value }}</span
+          >
         </button>
       </div>
     </div>
@@ -75,7 +92,7 @@
         </div>
         <div class="success-footer mt-12">
           <button
-            @click="swapSuccess = !swapSuccess"
+            @click="confrimSwap"
             :class="[
               'w-full',
               'text-sm',
@@ -98,22 +115,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive } from 'vue'
+import { computed, ref, reactive, toRaw, onMounted } from 'vue'
 import PairSelect from '@/components/orders/PairSelect.vue'
 import swap from '@/assets/icon_swap.svg?url'
 import BridgeSwapItem from '@/components/bridge/BridgeSwapItem.vue'
 import { useConnectionStore } from '@/stores/connection'
 import { Loader2Icon } from 'lucide-vue-next'
 import { CheckCircle2 } from 'lucide-vue-next'
-
+import { AssetNetwork } from '@/data/constants'
+import { getAssetPairList } from '@/queries/bridge-api'
 enum BtnColor {
   default = 'default',
   error = 'error',
   confrimingAndDone = 'confrimingAndDone',
   unLogin = 'unLogin',
 }
+
 const swapItem = ref()
-const swapSuccess = ref(true)
+const swapSuccess = ref(false)
+const fromAsset = reactive({
+  val: {
+    network: AssetNetwork.BTC,
+    balance: 1000,
+    symbol: 'RDEX',
+    decimal: 0,
+  },
+})
+const toAsset = reactive({
+  val: {
+    network: AssetNetwork.MVC,
+    balance: 2000,
+    symbol: 'RDEX',
+    decimal: 0,
+  },
+})
 const successInfo: {
   [key: string]: {
     title: string
@@ -136,7 +171,6 @@ const successInfo: {
   },
   networkFee: {
     title: 'Network Fee',
-
     symbol: '',
     amount: 0,
   },
@@ -172,6 +206,16 @@ const btnStatus = computed(() => {
     }
   }
 })
+
+function converSwapItem() {
+  const temp = toRaw(fromAsset.val)
+  fromAsset.val = toAsset.val
+  toAsset.val = temp
+}
+
+function confrimSwap() {
+  swapSuccess.value = !swapSuccess.value
+}
 </script>
 <style scoped lang="scss">
 .bridge-wrap {
@@ -194,6 +238,14 @@ const btnStatus = computed(() => {
           color: #d4d4d8;
         }
       }
+    }
+  }
+}
+
+.op-btn {
+  button {
+    .textBlack {
+      color: #17171a;
     }
   }
 }

@@ -1,12 +1,12 @@
 <template>
   <div class="item-center grid">
     <div class="flex items-center justify-between">
-      <div class="textGray text-sm">From</div>
+      <div class="textGray text-sm">{{ opName }}</div>
       <div class="flex text-sm">
         <span class="textGray">Balance:</span>
         <div class="text-color-primary">
-          <span class="mr-1">{{ formatNum(accountBalance) }}</span
-          ><span>RDEX</span>
+          <span class="mr-1">{{ formatNum(assetInfo.balance) }}</span
+          ><span>{{ assetInfo.symbol }}</span>
         </div>
       </div>
     </div>
@@ -15,7 +15,7 @@
         <Listbox
           as="div"
           class="relative inline-block text-left"
-          :model-value="curretnNetwork"
+          :model-value="assetInfo.network"
           @update:model-value="$emit('update:assetSymbol', $event)"
         >
           <ListboxButton v-slot="{ open }" as="template">
@@ -25,12 +25,15 @@
                 'mx-2.5 flex items-center px-2 py-3 text-base hover:bg-zinc-700',
               ]"
             >
-              <img :src="BtcIcon" class="h-6 w-6" />
+              <img
+                :src="assetInfo.network == AssetNetwork.BTC ? BtcIcon : MVC"
+                class="h-7 w-7 rounded-full"
+              />
               <!-- <div class="mr-1" v-if="selectNetwork">
                 {{ selectNetwork }}
               </div> -->
-              <div class="pl-2 text-sm">
-                {{ curretnNetwork }}
+              <div class="flex pl-2 text-sm">
+                {{ assetInfo.network }}<span class="ml-1.5">Network</span>
               </div>
               <ChevronDownIcon class="h-5 w-5" color="#71717A" />
             </button>
@@ -99,8 +102,21 @@ import {
 } from '@headlessui/vue'
 import { reactive, ref, computed } from 'vue'
 import BtcIcon from '@/assets/btc.svg?url'
+import MVC from '@/assets/mvc_logo.png?url'
 import { ChevronDownIcon, CheckIcon } from 'lucide-vue-next'
 import { formatNum } from '@/lib/formatters'
+import { AssetNetwork } from '@/data/constants'
+interface AssetInfo {
+  network: AssetNetwork
+  balance: number
+  symbol: string
+  decimal: number
+}
+const props = defineProps<{
+  opName: string
+  assetInfo: AssetInfo
+}>()
+
 const curretnNetwork = ref('BTC')
 const swapAmount = ref(0)
 const accountBalance = ref(13216)
