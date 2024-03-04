@@ -10,15 +10,17 @@ const bridgePairs = [
     targetName: 'Test Bitcoin',
     fromIcon: btcLogo,
     toIcon: btcLogo,
+    network: 'BTC',
   },
   {
     id: 2,
     fromSymbol: 'XEDR',
     originName: 'XEDR',
-    toSymbol: 'TXEDR',
-    targetName: 'Test Bitcoin',
+    toSymbol: 'XEDR',
+    targetName: 'Test XEDR',
     fromIcon: btcLogo,
     toIcon: btcLogo,
+    network: 'BRC20',
   },
 ] as {
   id: number
@@ -28,6 +30,7 @@ const bridgePairs = [
   targetName: string
   fromIcon: string
   toIcon: string
+  network: string
 }[]
 
 export default bridgePairs

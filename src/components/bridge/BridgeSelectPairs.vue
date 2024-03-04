@@ -26,12 +26,12 @@ const { selectBridgePair, selectedPair } = useBridgePair()
   >
     <div>
       <ListboxButton
-        class="inline-flex w-full items-center justify-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-opacity-80"
+        class="inline-flex w-full items-center justify-center gap-x-1.5 rounded-md bg-black px-3 py-1.5 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-opacity-80"
         v-slot="{ open }"
       >
         <div class="flex">
-          <img :src="selectedPair.fromIcon" class="h-6 rounded-full" />
-          <img :src="selectedPair.toIcon" class="-ml-2 h-6 rounded-full" />
+          <img :src="selectedPair.fromIcon" class="h-5 rounded-full" />
+          <img :src="selectedPair.toIcon" class="-ml-2 h-5 rounded-full" />
         </div>
 
         <span class="font-bold uppercase"
@@ -66,13 +66,13 @@ const { selectBridgePair, selectedPair } = useBridgePair()
         >
           <button
             :class="[
-              'flex w-max min-w-full items-center p-4 text-sm',
+              'flex w-max min-w-full items-center p-4 text-xs',
               active && 'bg-black',
             ]"
           >
             <div class="flex">
-              <img :src="pair.fromIcon" class="h-6 rounded-full" />
-              <img :src="pair.toIcon" class="-ml-2 h-6 rounded-full" />
+              <img :src="pair.fromIcon" class="h-5 rounded-full" />
+              <img :src="pair.toIcon" class="-ml-2 h-5 rounded-full" />
             </div>
 
             <div class="relative">

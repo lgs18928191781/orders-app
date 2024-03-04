@@ -4,7 +4,7 @@
       <div class="textGray text-sm">{{ opName }}</div>
       <div class="flex text-sm">
         <span class="textGray">Balance:</span>
-        <div class="text-color-primary">
+        <div class="text-primary">
           <span class="mr-1">{{ formatNum(assetInfo.balance) }}</span
           ><span>{{ assetInfo.symbol }}</span>
         </div>
@@ -22,12 +22,12 @@
             <button
               :class="[
                 open ? 'bg-zinc-700' : 'bg-zinc-900',
-                'mx-2.5 flex items-center px-2 py-3 text-base hover:bg-zinc-700',
+                'mx-2.5 flex items-center px-2 py-3 text-sm hover:bg-zinc-700',
               ]"
             >
               <img
                 :src="assetInfo.network == AssetNetwork.BTC ? BtcIcon : MVC"
-                class="h-7 w-7 rounded-full"
+                class="h-6 w-6 rounded-full"
               />
               <!-- <div class="mr-1" v-if="selectNetwork">
                 {{ selectNetwork }}
@@ -79,9 +79,11 @@
 
         <div class="relative flex w-full items-center">
           <input
-            v-model="swapAmount"
+            :value="props.modelValue"
+            @input="emit('update:modelValue', $event.target?.value)"
             type="text"
-            class="input-wrap quiet-input mr-2.5 w-full rounded-md py-2 pl-2 text-right placeholder-zinc-500"
+            :readonly="disableInput"
+            class="input-wrap quiet-input mr-2.5 w-full rounded-md py-1 pl-2 text-right placeholder-zinc-500"
             :class="[inputColorDanger ? 'danger' : '']"
           />
         </div>
@@ -112,19 +114,30 @@ interface AssetInfo {
   symbol: string
   decimal: number
 }
-const props = defineProps<{
+
+interface Props {
   opName: string
   assetInfo: AssetInfo
-}>()
+  modelValue: number
+}
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: 0,
+})
+
+const emit = defineEmits(['update:modelValue'])
 
 const curretnNetwork = ref('BTC')
-const swapAmount = ref(0)
+
 const accountBalance = ref(13216)
 const useNetwork = reactive(['BTC', 'MVC'])
 const inputColorDanger = computed(() => {
-  if (swapAmount.value > accountBalance.value) {
+  if (props.modelValue > accountBalance.value) {
     return true
   } else return
+})
+
+const disableInput = computed(() => {
+  return props.opName == 'To'
 })
 
 const selectNetwork = computed(() => {
@@ -137,7 +150,6 @@ const selectNetwork = computed(() => {
 })
 
 defineExpose({
-  swapAmount,
   accountBalance,
 })
 </script>
@@ -148,9 +160,9 @@ defineExpose({
 .item-wrap {
   border: 1px solid #71717a;
 }
-.text-color-primary {
+/* .text-color-primary {
   color: #fdba74;
-}
+} */
 
 .input-wrap {
   background: #3f3f45;

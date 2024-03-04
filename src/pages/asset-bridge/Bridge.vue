@@ -1,30 +1,32 @@
 <template>
-  <ConnectionModal />
-  <WalletMissingModal />
+  <!-- <ConnectionModal />
+  <WalletMissingModal /> -->
   <div
     class="bridge-wrap relative mx-auto mt-16 max-w-md origin-top lg:scale-125 xl:scale-150"
   >
     <div
       v-if="!swapSuccess"
-      class="bridge-container flex flex-col space-y-3 rounded-lg border bg-zinc-900 py-3"
+      class="bridge-container flex flex-col space-y-3 rounded-3xl border border-primary/30 bg-zinc-900 py-3 shadow-md"
     >
       <div
-        class="container-header grid grid-cols-2 items-center justify-between gap-4 px-3.5 py-2 text-sm text-zinc-300 lg:flex"
+        class="container-header grid grid-cols-2 items-center justify-between gap-4 px-3.5 pb-2 text-sm text-zinc-300 lg:flex"
       >
         <span>Select Asset:</span>
         <BridgePairSelect class="col-span-1"></BridgePairSelect>
       </div>
-      <div class="grid p-6">
+      <div class="grid p-6 pt-3">
         <div>
           <BridgeSwapItem
+            v-model="swapFromAmount"
             opName="From"
             :assetInfo="fromAsset.val"
-            ref="swapItem"
           ></BridgeSwapItem>
         </div>
-        <div class="item-center triggle-icon my-8 flex justify-center">
+        <div
+          class="item-center triggle-icon my-6 flex justify-center text-primary"
+        >
           <img
-            class="h-5 w-5 transition-all duration-300 hover:scale-105"
+            class="h-4 w-4 transition-all duration-300 hover:scale-105"
             :class="{
               'rotate-180': fromAsset.val.network === AssetNetwork.BTC,
             }"
@@ -34,21 +36,30 @@
           />
         </div>
         <div>
-          <BridgeSwapItem opName="To" :assetInfo="toAsset.val"></BridgeSwapItem>
+          <BridgeSwapItem
+            :modelValue="swapToAmount"
+            opName="To"
+            :assetInfo="toAsset.val"
+          ></BridgeSwapItem>
         </div>
         <div class="fee-wrap mt-2.5 flex">
-          <span class="mr-4">Fee rate:0.1%</span>
-          <span>20 confirmation on MVC TXs</span>
+          <span class="mr-4">Fee rate:{{ feeInfo.val.feeRate }}%</span>
+          <span
+            >{{ feeInfo.val.comfirmation }} confirmation on
+            {{ toAsset.val.network }} TXs</span
+          >
         </div>
       </div>
       <div class="op-btn mt-20 w-full px-6">
         <button
+          :disabled="btnStatus.disable"
+          @click="confrimSwap"
           :class="[
             'w-full',
             'text-base',
             'mb-5',
             'rounded-lg',
-            'py-5',
+            'py-3',
             'flex',
             'item-center',
             'justify-center',
@@ -56,7 +67,7 @@
             btnStatus.color,
           ]"
         >
-          <Loader2Icon class="mr-1.5 h-5 animate-spin" />
+          <Loader2Icon v-if="false" class="mr-1.5 h-5 animate-spin" />
           <span
             :class="[btnStatus.color == BtnColor.default ? 'textBlack' : '']"
             >{{ btnStatus.value }}</span
@@ -64,35 +75,43 @@
         </button>
       </div>
     </div>
-    <div v-else class="swap-success-wrap rounded-lg">
+    <div
+      v-else
+      class="swap-success-wrap rounded-3xl border-primary/30 bg-zinc-900"
+    >
       <div class="swap-success-container grid px-8 pt-16 shadow-md">
         <div class="success-header flex flex-col items-center justify-center">
           <div>
             <CheckCircle2 color="#22C55E" :size="60" />
           </div>
           <div class="mt-3.5 flex flex-col items-center justify-center text-sm">
-            <span>Convert ORDI</span>
-            <span>from 'BTC Network' to 'MVC Network' success.</span>
+            <span>Convert {{ successInfo.send.symbol }}</span>
+            <span
+              >from '{{ fromAsset.val.network }} Network' to '{{
+                toAsset.val.network
+              }}
+              Network' success.</span
+            >
           </div>
         </div>
-        <div class="success-body mt-4 grid grid-rows-4 gap-y-4 text-xs">
+        <div class="success-body mt-4 grid grid-rows-4 gap-y-4 text-sm">
           <div
             v-for="item in successInfo"
             class="item flex items-center justify-between"
           >
-            <div class="left">
-              <span>{{ item.title }}</span
+            <div class="left flex items-center">
+              <span class="mr-1">{{ item.title }}</span
               ><span class="desc" v-if="item?.desc">({{ item?.desc }})</span>
             </div>
-            <div class="right">
+            <div class="right flex items-center">
               <span>{{ item.amount }}</span
-              ><span>{{ item.symbol }}</span>
+              ><span class="ml-2" v-if="item.symbol">{{ item.symbol }}</span>
             </div>
           </div>
         </div>
         <div class="success-footer mt-12">
           <button
-            @click="confrimSwap"
+            @click="Done"
             :class="[
               'w-full',
               'text-sm',
@@ -111,11 +130,16 @@
         </div>
       </div>
     </div>
+
+    <!-- background blur -->
+    <SwapBlur />
+
+    <CheckMetaletProvider></CheckMetaletProvider>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive, toRaw, onMounted } from 'vue'
+import { computed, ref, reactive, toRaw, onMounted, watch } from 'vue'
 import BridgePairSelect from '@/components/bridge/BridgeSelectPairs.vue'
 import swap from '@/assets/icon_swap.svg?url'
 import BridgeSwapItem from '@/components/bridge/BridgeSwapItem.vue'
@@ -124,6 +148,14 @@ import { Loader2Icon } from 'lucide-vue-next'
 import { CheckCircle2 } from 'lucide-vue-next'
 import { AssetNetwork } from '@/data/constants'
 import { getAssetPairList } from '@/queries/bridge-api'
+import SwapBlur from '@/components/swap/SwapBlur.vue'
+import { useBridgeTools } from '@/hooks/use-bridge-tool'
+import Decimal from 'decimal.js'
+import CheckMetaletProvider from '@/components/bridge/CheckMetaletProvider.vue'
+import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
+import { useBridgePair } from '@/hooks/use-bridge-pair'
+import { prettyTimestamp } from '@/lib/formatters'
+const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
   error = 'error',
@@ -131,30 +163,63 @@ enum BtnColor {
   unLogin = 'unLogin',
 }
 
-const swapItem = ref()
+const { openConnectionModal, closeConnectionModal } =
+  useCheckMetaletLoginModal()
+
+const swapFromAmount = ref(0)
+const feeInfo = reactive({
+  val: {
+    feeRate: '--',
+    comfirmation: 1,
+  },
+})
 const swapSuccess = ref(false)
+const BridgeTools = useBridgeTools()
+const assetInfo = reactive({ val: {} })
+
 const fromAsset = reactive({
   val: {
     network: AssetNetwork.BTC,
-    balance: 1000,
-    symbol: 'RDEX',
+    balance: 10000000,
+    symbol: '--',
     decimal: 0,
   },
 })
 const toAsset = reactive({
   val: {
     network: AssetNetwork.MVC,
-    balance: 2000,
-    symbol: 'RDEX',
+    balance: 10000000,
+    symbol: '--',
     decimal: 0,
   },
 })
+
+onMounted(async () => {
+  // console.log('selectedPair', selectedPair)
+  assetInfo.val = await getAssetPairList()
+  console.log('assetInfo.val', assetInfo.val.assetList)
+  const currentPairs = assetInfo.val.assetList!.filter((item) => {
+    return (
+      item.originSymbol == selectedPair.value.fromSymbol &&
+      item.targetSymbol == selectedPair.value.toSymbol
+    )
+  })
+  const { decimals, originSymbol, targetSymbol } = currentPairs[0]
+  fromAsset.val.decimal = decimals
+  fromAsset.val.symbol = originSymbol
+
+  toAsset.val.symbol = targetSymbol
+  toAsset.val.decimal = decimals
+  console.log('currentPairs', currentPairs[0])
+  // debugger
+})
+
 const successInfo: {
   [key: string]: {
     title: string
     desc?: string
     symbol: string
-    amount: number
+    amount: number | string
   }
 } = reactive({
   send: {
@@ -165,7 +230,7 @@ const successInfo: {
   },
   receive: {
     title: 'Receive',
-    desc: '1321321',
+    desc: '',
     symbol: '',
     amount: 0,
   },
@@ -178,31 +243,89 @@ const successInfo: {
     title: 'Time',
 
     symbol: '',
-    amount: 0,
+    amount: '',
   },
 })
 const connectionStore = useConnectionStore()
-console.log('connectionStore', connectionStore.connected)
+
+const checkWalletType = () => {
+  if (!connectionStore.connected || connectionStore.last.wallet !== 'metalet') {
+    openConnectionModal()
+  } else {
+    closeConnectionModal()
+  }
+}
+
 const btnStatus = computed(() => {
-  if (swapItem.value?.swapAmount > swapItem.value?.accountBalance) {
+  if (swapFromAmount.value > fromAsset.val.balance) {
     return {
       value: 'The balance is not enough',
       color: BtnColor.error,
+      disable: true,
+    }
+  } else if (lessThanMinLimited.value) {
+    return {
+      value: 'Less than Bridge MinmumLimit',
+      color: BtnColor.error,
+      disable: true,
+    }
+  } else if (lastThanMaxLimited.value) {
+    return {
+      value: 'Over than Bridge MaxmumLimit',
+      color: BtnColor.error,
+      disable: true,
     }
   } else if (!connectionStore.connected) {
     return {
       value: 'Connect Wallet',
       color: BtnColor.unLogin,
+      disable: false,
     }
   } else if (swapSuccess.value) {
     return {
       value: 'Done',
       color: BtnColor.confrimingAndDone,
+      disable: false,
     }
   } else {
     return {
-      value: 'Convert to ORDI on MVC network',
+      value: `Convert to ${fromAsset.val.symbol} on ${toAsset.val.network} network`,
       color: BtnColor.default,
+      disable: false,
+    }
+  }
+})
+
+const lessThanMinLimited = ref(false)
+const lastThanMaxLimited = ref(false)
+
+const swapToAmount = computed(() => {
+  if (swapFromAmount.value == 0 || !swapFromAmount.value) {
+    return 0
+  } else {
+    lessThanMinLimited.value = false
+    lastThanMaxLimited.value = false
+    try {
+      const { confirmNumber, receiveAmount } = BridgeTools.calcReceiveInfo(
+        new Decimal(swapFromAmount.value).toNumber(),
+        assetInfo.val
+      )
+      feeInfo.val.comfirmation = confirmNumber
+      return receiveAmount
+    } catch (error) {
+      if ((error as any).message) {
+        if (
+          +swapFromAmount.value <
+          +JSON.parse((error as any).message).amountLimitMinimum
+        ) {
+          lessThanMinLimited.value = true
+        } else if (
+          +swapFromAmount.value >
+          +JSON.parse((error as any).message).amountLimitMaximum
+        ) {
+          lastThanMaxLimited.value = true
+        }
+      }
     }
   }
 })
@@ -214,16 +337,33 @@ function converSwapItem() {
 }
 
 function confrimSwap() {
-  swapSuccess.value = !swapSuccess.value
+  if (swapFromAmount.value <= 0) {
+    return
+  }
+  successInfo.send.amount = swapFromAmount.value
+  successInfo.send.desc =
+    fromAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
+  successInfo.send.symbol = fromAsset.val.symbol
+  successInfo.receive.amount = swapToAmount.value
+  successInfo.receive.desc =
+    fromAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
+  successInfo.receive.symbol = toAsset.val.symbol
+  successInfo.networkFee.symbol = fromAsset.val.symbol
+  successInfo.time.amount = prettyTimestamp(Date.now())
+
+  swapSuccess.value = true
 }
+
+function Done() {
+  swapSuccess.value = false
+}
+
+checkWalletType()
 </script>
 <style scoped lang="scss">
 .bridge-wrap {
   width: 540px;
-  .bridge-container {
-    border: 1px solid #453c35;
-    box-shadow: 0px 3px 5px 0px rgba(77, 58, 44, 0.75);
-  }
+
   .swap-success-wrap {
     border: 1px solid #453c35;
     box-shadow: 0px 3px 5px 0px rgba(77, 58, 44, 0.75);
@@ -257,9 +397,9 @@ function confrimSwap() {
   font-size: 13px;
 }
 .default {
-  background-color: #fdba74;
+  background-color: #ffa02a;
   &:hover {
-    box-shadow: 0 0 8px #fdba74;
+    box-shadow: 0 0 8px #ffa02a;
   }
 }
 .error {
@@ -277,13 +417,14 @@ function confrimSwap() {
 
 .unLogin {
   background-color: transparent;
-  border: 1px solid #fdba74;
+  border: 1px solid #ffa02a;
   &:hover {
-    box-shadow: 0 0 8px #fdba74;
+    box-shadow: 0 0 8px #ffa02a;
   }
 }
 .triggle-icon > img {
   cursor: pointer;
+  color: #ffa02a;
   &:hover {
     scale: 1.2;
   }

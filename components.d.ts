@@ -16,6 +16,8 @@ declare module '@vue/runtime-core' {
     BridgeSelectPairs: typeof import('./src/components/bridge/BridgeSelectPairs.vue')['default']
     BridgeSwapItem: typeof import('./src/components/bridge/BridgeSwapItem.vue')['default']
     Building: typeof import('./src/components/overlays/Building.vue')['default']
+    CheckIsMetaletProvider: typeof import('./src/components/bridge/CheckIsMetaletProvider.vue')['default']
+    CheckMetaletProvider: typeof import('./src/components/bridge/CheckMetaletProvider.vue')['default']
     ClaimRecordItem: typeof import('./src/components/events/ClaimRecordItem.vue')['default']
     ConfirmationModal: typeof import('./src/components/overlays/ConfirmationModal.vue')['default']
     ConnectionModal: typeof import('./src/components/header/ConnectionModal.vue')['default']

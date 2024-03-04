@@ -7,6 +7,7 @@ export function useBridgePair() {
   const router = useRouter()
 
   const selectedPairId = ref(bridgePairs[0].id)
+
   const selectedPair = computed(() => {
     const pair = bridgePairs.find((a) => a.id === selectedPairId.value)
     if (pair) {

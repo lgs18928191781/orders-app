@@ -27,7 +27,7 @@ function getWalletProvider(wallet: Wallet) {
     case 'unisat':
       return window.unisat
     case 'okx':
-      return window.unisat
+      return window.okxwallet
     case 'metalet':
       return window.metaidwallet
     default:

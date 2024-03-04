@@ -6,8 +6,15 @@ export const getAssetPairList = async () => {
   })
 }
 
-export const createPrepayOrderMintBrc20Req = async (data: any) => {
-  return await bridgeApiFetch(`/createPrepayOrderMintBrc20`, {
+export const createPrepayOrderMintBtcReq = async (data: any) => {
+  return await bridgeApiFetch(`/createPrepayOrderMintBtc`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const submitPrepayOrderMintBtcReq = async (data: any) => {
+  return await bridgeApiFetch(`/submitPrepayOrderMintBtc`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
