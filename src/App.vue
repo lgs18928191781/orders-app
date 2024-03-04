@@ -44,6 +44,7 @@ queryClient.setDefaultOptions({
 <template>
   <Toaster />
   <BuildingOverlay />
+  <TokenSelectModal />
   <NotAvailableOverlay v-if="false" />
 
   <template v-else>

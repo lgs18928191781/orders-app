@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDownIcon, CheckIcon } from 'lucide-vue-next'
+import { ChevronDownIcon, CheckIcon, PackagePlus } from 'lucide-vue-next'
 import {
   Listbox,
   ListboxButton,
@@ -7,15 +7,18 @@ import {
   ListboxOptions,
 } from '@headlessui/vue'
 
-import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { prettySymbol } from '@/lib/formatters'
 import { useNetworkStore } from '@/stores/network'
+import { useTokenSelectModal } from '@/hooks/use-token-select-modal'
+
+import { prettySymbol } from '@/lib/formatters'
+import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
 
 const network = useNetworkStore().network
 const usingSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
 
 const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
+const { openModal } = useTokenSelectModal()
 </script>
 
 <template>
@@ -89,6 +92,21 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
               class="ml-auto h-5 w-5 text-primary"
               aria-hidden="true"
             />
+          </button>
+        </ListboxOption>
+
+        <!-- add pool button -->
+        <ListboxOption v-slot="{ active, selected }">
+          <button
+            :class="[
+              'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm',
+              active ? 'bg-primary/70' : 'bg-black',
+            ]"
+            @click="openModal"
+          >
+            <PackagePlus class="h-6 w-6 text-primary" />
+
+            <div class="text-base font-bold">Add Pool</div>
           </button>
         </ListboxOption>
       </ListboxOptions>

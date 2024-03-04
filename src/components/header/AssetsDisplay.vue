@@ -40,7 +40,8 @@ const { data: balance } = useQuery({
   enabled,
 })
 
-const { data: excludedBalance, isLoading: isLoadingExcludedBalance } = useExcludedBalanceQuery(address, enabled)
+const { data: excludedBalance, isLoading: isLoadingExcludedBalance } =
+  useExcludedBalanceQuery(address, enabled)
 
 const availableBalanceRatioColor = computed(() => {
   if (excludedBalance.value === undefined || balance.value === undefined) {
@@ -104,7 +105,10 @@ const { data: myBrc20s } = useQuery({
       v-if="excludedBalance !== undefined && balance !== undefined"
       class="group flex items-center gap-1"
     >
-      <Menu as="div" class="relative inline-flex items-center text-left">
+      <Menu
+        as="div"
+        class="relative inline-flex items-center self-stretch text-left"
+      >
         <MenuButton
           class="inline-flex w-full items-center justify-center gap-x-1 rounded-md px-3 shadow-sm"
         >
@@ -136,7 +140,7 @@ const { data: myBrc20s } = useQuery({
           leave-to-class="transform opacity-0 scale-95"
         >
           <MenuItems
-            class="absolute right-0 z-50 mt-4 w-80 origin-top-right divide-y divide-zinc-700 overflow-hidden rounded-md bg-zinc-800 shadow-highlight ring-1 ring-black ring-opacity-5 focus:outline-none"
+            class="absolute left-0 top-0 z-50 mt-8 w-80 origin-top-right divide-y divide-zinc-700 overflow-hidden rounded-md bg-zinc-800 shadow-highlight ring-1 ring-black ring-opacity-5 focus:outline-none lg:left-auto lg:right-0"
           >
             <MenuItem v-slot="{ active }" disabled>
               <div
@@ -257,6 +261,9 @@ const { data: myBrc20s } = useQuery({
       </Menu>
     </div>
 
-      <Loader2Icon class="h-5 animate-spin ml-3" v-else-if="isLoadingExcludedBalance" />
+    <Loader2Icon
+      class="ml-3 h-5 animate-spin"
+      v-else-if="isLoadingExcludedBalance"
+    />
   </div>
 </template>

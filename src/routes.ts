@@ -19,6 +19,7 @@ const Maintaining = () => import('./pages/Maintaining.vue')
 
 const routes = [
   { path: '/orders/:pair?', component: Home, alias: '/' },
+  // { path: '/swap-pools/add', component: SwapPoolsAdd }
   {
     path: '/swap-pools/:pair?',
     component: SwapPools,
