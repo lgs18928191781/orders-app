@@ -1,126 +1,30 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
-import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import {
+  MenuIcon,
+  CopyIcon,
+  ArrowRightLeftIcon,
+  Trash2Icon,
+  UnplugIcon,
+  FuelIcon,
+} from 'lucide-vue-next'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { MenuIcon } from 'lucide-vue-next'
+
+import { useNetworkStore } from '@/stores/network'
+import { useConnectionStore } from '@/stores/connection'
+import { useCredentialsStore } from '@/stores/credentials'
 
 import { prettyAddress } from '@/lib/formatters'
-import { useNetworkStore, type Network } from '@/stores/network'
-import { useConnectionStore } from '@/stores/connection'
-import whitelist from '@/lib/whitelist'
-import { isUnsupportedAddress } from '@/lib/helpers'
-import { useCredentialsStore } from '@/stores/credentials'
 
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
 import metaletIcon from '@/assets/metalet-icon.png?url'
 
 const networkStore = useNetworkStore()
-const queryClient = useQueryClient()
 const connectionStore = useConnectionStore()
-const credentialStore = useCredentialsStore()
-
-const unisatAccountsChangedHandler = (accounts: string[]) => {
-  if (connectionStore.last.wallet !== 'unisat') return
-  if (!accounts[0]) {
-    // disconnect
-    connectionStore.disconnect()
-    return
-  }
-
-  if (isUnsupportedAddress(accounts[0])) return
-
-  ElMessage.warning({
-    message: 'Unisat account changed. Refreshing page...',
-    type: 'warning',
-    onClose: () => {
-      queryClient.invalidateQueries()
-      window.location.reload()
-    },
-  })
-}
-const okxAccountsChangedHandler = (accounts: string[] | null) => {
-  if (connectionStore.last.wallet !== 'okx') return
-  if (!accounts) {
-    // disconnect
-    connectionStore.disconnect()
-    return
-  }
-
-  console.log({ accounts })
-
-  if (isUnsupportedAddress(accounts[0])) return
-
-  ElMessage.warning({
-    message: 'Okx account changed. Refreshing page...',
-    type: 'warning',
-    onClose: () => {
-      queryClient.invalidateQueries()
-      window.location.reload()
-    },
-  })
-}
-
-const metaletAccountsChangedHandler = () => {
-  if (useConnectionStore().last.wallet !== 'metalet') return
-
-  ElMessage.warning({
-    message: 'Metalet account changed. Refreshing page...',
-    type: 'warning',
-    onClose: () => {
-      window.location.reload()
-    },
-  })
-}
-
-onMounted(async () => {
-  if (window.unisat) {
-    const unisat = window.unisat
-    unisat.on('accountsChanged', unisatAccountsChangedHandler)
-
-    // getNetwork
-    // const network: Network = await unisat.getNetwork()
-    const network: Network = 'livenet'
-    const address = connectionStore.getAddress
-
-    // if not in whitelist, switch to mainnet
-    if (network !== 'livenet' && address && !whitelist.includes(address)) {
-      const switchRes = await unisat.switchNetwork('livenet').catch(() => false)
-      if (!switchRes) {
-        ElMessage({
-          message: 'Testnet is not available, please switch to livenet.',
-          type: 'error',
-          onClose: () => {
-            // redirect to a blank page
-            window.location.href = 'about:blank'
-          },
-        })
-      }
-
-      networkStore.set('livenet')
-      return
-    }
-    networkStore.set(network)
-  }
-
-  if (window.okxwallet) {
-    window.okxwallet.bitcoin.on('accountsChanged', okxAccountsChangedHandler)
-  }
-
-  if (window.metaidwallet) {
-    window.metaidwallet.on('accountsChanged', metaletAccountsChangedHandler)
-  }
-})
-onBeforeUnmount(() => {
-  // remove event listener
-  window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
-  window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
-  window.metaidwallet?.removeListener(
-    'accountsChanged',
-    metaletAccountsChangedHandler
-  )
-})
+const credentialsStore = useCredentialsStore()
 
 // connect / address related
 const { data: address } = useQuery({
@@ -161,7 +65,7 @@ function clearCache() {
   const address = useConnectionStore().getAddress
   if (!address) return
 
-  credentialStore.remove(address)
+  credentialsStore.remove(address)
 
   ElMessage.success('Account cache cleared. Refreshing...')
 
@@ -177,18 +81,41 @@ function onDisconnect() {
   // reload
   window.location.reload()
 }
+
+async function switchNetwork() {
+  if (connectionStore.last.wallet !== 'unisat') {
+    ElMessage({
+      message: 'Only Unisat wallet supports switching network.',
+      type: 'error',
+    })
+    return
+  }
+
+  const toNetwork = networkStore.network === 'testnet' ? 'livenet' : 'testnet'
+  await window.unisat.switchNetwork(toNetwork)
+}
+
+async function onGetGasFromFaucet() {
+  window.open('https://coinfaucet.eu/en/btc-testnet/', '_blank')
+}
 </script>
 
 <template>
   <Menu as="div" class="relative inline-block">
-    <MenuButton class="group flex gap-2 pr-3">
+    <MenuButton class="group flex items-center gap-2 pr-3">
       <img class="h-5" :src="walletIcon" alt="wallet icon" v-if="walletIcon" />
       <span class="text-sm text-primary">
         {{ address ? prettyAddress(address, 4) : '-' }}
       </span>
+      <span
+        class="text-xs font-bold text-red-500"
+        v-if="networkStore.network === 'testnet'"
+      >
+        (Testnet)
+      </span>
 
       <MenuIcon
-        class="h-5 text-zinc-300 group-hover:scale-110 group-hover:text-primary"
+        class="h-5 text-zinc-300 group-hover:scale-125 group-hover:text-primary"
       />
     </MenuButton>
 
@@ -201,35 +128,67 @@ function onDisconnect() {
       leave-to-class="transform opacity-0 scale-95"
     >
       <MenuItems
-        class="absolute right-0 z-10 mt-4 flex w-screen max-w-min origin-top-right"
+        class="absolute right-0 z-50 mt-4 flex w-screen max-w-min origin-top-right"
       >
         <div
           class="w-56 shrink divide-y divide-zinc-700 overflow-hidden rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg shadow-primary/20 ring-1 ring-zinc-900/5"
         >
           <MenuItem v-slot="{ active }">
             <button
-              class="block w-full p-4 text-left hover:text-primary"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="copyAddress"
             >
-              Copy Address
+              <CopyIcon class="inline-block h-4 w-4 group-hover:scale-125" />
+              <span>Copy Address</span>
+            </button>
+          </MenuItem>
+
+          <MenuItem v-slot="{ active }" as="div">
+            <div class="-mb-2 px-4 pt-4 text-sm text-zinc-500">
+              Network: {{ networkStore.network }}
+            </div>
+            <button
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
+              @click="switchNetwork"
+            >
+              <ArrowRightLeftIcon
+                class="inline-block h-4 w-4 group-hover:scale-125"
+              />
+              <span>Switch Network</span>
+            </button>
+          </MenuItem>
+
+          <MenuItem
+            v-slot="{ active }"
+            as="div"
+            v-if="networkStore.network === 'testnet'"
+          >
+            <button
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
+              @click="onGetGasFromFaucet"
+            >
+              <FuelIcon class="inline-block h-4 w-4 group-hover:scale-125" />
+              <span>Testnet Faucet</span>
             </button>
           </MenuItem>
 
           <MenuItem>
             <button
-              class="block w-full p-4 text-left transition hover:text-primary"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="clearCache"
             >
-              Clear Account Cache
+              <Trash2Icon class="inline-block h-4 w-4 group-hover:scale-125" />
+              <span>Clear Account Cache</span>
             </button>
           </MenuItem>
 
           <MenuItem v-if="connectionStore.has">
             <button
-              class="block w-full p-4 text-left transition hover:text-primary"
+              class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="onDisconnect"
             >
-              Disconnect
+              <UnplugIcon class="inline-block h-4 w-4 group-hover:scale-125" />
+              <span>Disconnect</span>
             </button>
           </MenuItem>
         </div>

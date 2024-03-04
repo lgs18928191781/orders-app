@@ -16,8 +16,8 @@ import PoolPairSelect from '@/components/pool/PoolPairSelect.vue'
 const selectedPair = inject(selectedPoolPairKey, defaultPoolPair)
 
 // pair info
-const { data: pairInfo } = useQuery(
-  [
+const { data: pairInfo } = useQuery({
+  queryKey: [
     'pairInfo',
     {
       from: selectedPair.fromSymbol,
@@ -25,16 +25,14 @@ const { data: pairInfo } = useQuery(
       address: useConnectionStore().getAddress,
     },
   ],
-  () =>
+  queryFn: () =>
     getOnePoolPair({
       from: selectedPair.fromSymbol,
       to: selectedPair.toSymbol,
       address: useConnectionStore().getAddress,
     }),
-  {
-    enabled: !!selectedPair.fromSymbol && !!selectedPair.toSymbol,
-  }
-)
+  enabled: !!selectedPair.fromSymbol && !!selectedPair.toSymbol,
+})
 
 const infoMap = computed(() => {
   if (!pairInfo.value) {

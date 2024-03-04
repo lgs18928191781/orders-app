@@ -7,7 +7,7 @@ import { useBtcJsStore } from '@/stores/btcjs'
 import { useGeoStore } from '@/stores/geo'
 
 import Toaster from '@/components/ui/toast/Toaster.vue'
-import TheHeader from '@/components/header/TheHeader.vue'
+import AppHeader from '@/components/header/AppHeader.vue'
 import NotAvailableOverlay from '@/components/overlays/NotAvailable.vue'
 import BuildingOverlay from '@/components/overlays/Building.vue'
 
@@ -36,6 +36,7 @@ const queryClient = useQueryClient()
 queryClient.setDefaultOptions({
   queries: {
     staleTime: 1000 * 30, // 30 seconds
+    // staleTime: 0,
   },
 })
 </script>
@@ -46,7 +47,8 @@ queryClient.setDefaultOptions({
   <NotAvailableOverlay v-if="false" />
 
   <template v-else>
-    <TheHeader v-if="geoStore.pass" />
+    <AppHeader v-if="geoStore.pass" />
+
     <router-view :key="$route.fullPath"></router-view>
   </template>
 </template>

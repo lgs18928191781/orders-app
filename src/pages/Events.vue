@@ -15,9 +15,6 @@ import {
 import { sleep } from '@/lib/helpers'
 import { buildClaim } from '@/lib/builders/orders-v2'
 import { useBtcJsStore } from '@/stores/btcjs'
-
-import EventRecords from '@/components/events/Records.vue'
-import EventSelect from '@/components/events/EventSelect.vue'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 const connectionStore = useConnectionStore()
@@ -94,10 +91,19 @@ async function onClaimReward() {
 </script>
 
 <template>
-  <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
-    <h1 class="text-2xl font-semibold text-left mb-6 text-zinc-100">
-      Events & Rewards
-    </h1>
+  <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-semibold text-left text-zinc-100">
+        Events & Rewards
+      </h1>
+
+      <router-link
+        to="/leaderboard"
+        class="text-zinc-300 underline hover:text-primary"
+      >
+        Leaderboard
+      </router-link>
+    </div>
 
     <section
       class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-primary/30 border border-primary/20"
@@ -110,7 +116,7 @@ async function onClaimReward() {
             <EventSelect v-model:event-symbol="event" />
 
             <Loader2Icon
-              class="w-6 h-6 text-zinc-300 animate-spin-slow"
+              class="size-6 text-zinc-300 animate-spin-slow"
               v-if="isFetchingEventStats || isFetchingEventRemains"
             />
           </div>

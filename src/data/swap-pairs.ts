@@ -41,7 +41,7 @@ const swapPairs = [
 }[]
 
 if (IS_DEV) {
-  swapPairs.push({
+  swapPairs.unshift({
     id: 15,
     exactName: 'ORXC',
     token1Symbol: 'btc',
@@ -50,5 +50,24 @@ if (IS_DEV) {
     token2Icon: rdexLogo,
   })
 }
+
+export const testnetSwapPairs = [
+  {
+    id: 1,
+    exactName: 'xedr',
+    token1Symbol: 'btc',
+    token2Symbol: 'xedr',
+    token1Icon: btcLogo,
+    token2Icon: rdexLogo,
+  },
+  {
+    id: 2,
+    exactName: 'dexr',
+    token1Symbol: 'btc',
+    token2Symbol: 'dexr',
+    token1Icon: btcLogo,
+    token2Icon: rdexLogo,
+  },
+]
 
 export default swapPairs

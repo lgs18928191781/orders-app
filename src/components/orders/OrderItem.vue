@@ -63,7 +63,7 @@ const isFreeOrder = computed(() => {
         <TooltipProvider v-if="isMyOrder">
           <Tooltip>
             <TooltipTrigger as-child>
-              <UserIcon class="w-3 h-3 ml-1 cursor-default" />
+              <UserIcon class="size-3 ml-1 cursor-default" />
             </TooltipTrigger>
             <TooltipContent class="duration-500">
               <p>Your order</p>

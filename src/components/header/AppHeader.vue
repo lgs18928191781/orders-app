@@ -1,27 +1,33 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { MenuIcon } from 'lucide-vue-next'
 
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
-import whitelist from '@/lib/whitelist'
+import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
-import { isUnsupportedAddress } from '@/lib/helpers'
 
-import WalletMissingModal from './WalletMissingModal.vue'
-import AssetsDisplay from './AssetsDisplay.vue'
-import NetworkState from './NetworkState.vue'
-import Notifications from './Notifications.vue'
-import TheNavbar from './TheNavbar.vue'
-import AddressMenu from '@/components/header/AddressMenu.vue'
+import { isUnsupportedAddress } from '@/lib/helpers'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
 const connectionStore = useConnectionStore()
+const credentialsStore = useCredentialsStore()
 
 const { openConnectionModal } = useConnectionModal()
+
+// login
+useQuery({
+  queryKey: ['address', { network: networkStore.network }],
+  queryFn: async () =>
+    credentialsStore
+      .login()
+      .then((credential) => (credential ? credential.address : null)),
+  retry: 0,
+  enabled: computed(() => connectionStore.connected),
+})
 
 const unisatAccountsChangedHandler = (accounts: string[]) => {
   if (connectionStore.last.wallet !== 'unisat') return
@@ -81,27 +87,27 @@ onMounted(async () => {
     unisat.on('accountsChanged', unisatAccountsChangedHandler)
 
     // getNetwork
-    // const network: Network = await unisat.getNetwork()
-    const network: Network = 'livenet'
+    const network: Network = await unisat.getNetwork()
+    // const network: Network = 'livenet'
     const address = connectionStore.getAddress
 
     // if not in whitelist, switch to mainnet
-    if (network !== 'livenet' && address && !whitelist.includes(address)) {
-      const switchRes = await unisat.switchNetwork('livenet').catch(() => false)
-      if (!switchRes) {
-        ElMessage({
-          message: 'Testnet is not available, please switch to livenet.',
-          type: 'error',
-          onClose: () => {
-            // redirect to a blank page
-            window.location.href = 'about:blank'
-          },
-        })
-      }
+    // if (network !== 'livenet' && address && !whitelist.includes(address)) {
+    //   const switchRes = await unisat.switchNetwork('livenet').catch(() => false)
+    //   if (!switchRes) {
+    //     ElMessage({
+    //       message: 'Testnet is not available, please switch to livenet.',
+    //       type: 'error',
+    //       onClose: () => {
+    //         // redirect to a blank page
+    //         window.location.href = 'about:blank'
+    //       },
+    //     })
+    //   }
 
-      networkStore.set('livenet')
-      return
-    }
+    //   networkStore.set('livenet')
+    //   return
+    // }
     networkStore.set(network)
   }
 
@@ -127,12 +133,13 @@ onBeforeUnmount(() => {
 <template>
   <ConnectionModal />
   <WalletMissingModal />
+  <NetworkStateModal v-if="connectionStore.connected" />
 
   <header
     class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
   >
     <div class="max-w-9xl flex items-center justify-between mx-auto px-3">
-      <TheNavbar />
+      <AppNavbar />
 
       <div class="flex gap-2">
         <button
@@ -143,6 +150,14 @@ onBeforeUnmount(() => {
           Connect Wallet
         </button>
 
+        <button
+          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
+          @click="credentialsStore.login()"
+          v-else-if="!credentialsStore.get"
+        >
+          Authorize
+        </button>
+
         <template v-else>
           <div class="items-center gap-2 hidden lg:flex">
             <div
@@ -150,10 +165,10 @@ onBeforeUnmount(() => {
             >
               <AddressMenu />
               <AssetsDisplay />
-              <NetworkState />
+              <NetworkStateButton />
             </div>
 
-            <Notifications />
+            <AppNotifications />
           </div>
 
           <button class="lg:hidden">

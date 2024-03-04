@@ -13,6 +13,10 @@ export const useFiat = createGlobalState(() => {
       queryFn: getFiatRate,
     })
 
+  function getFiatPrice(price: number | string, rate: number): number {
+    return new Decimal(price).times(rate).toNumber()
+  }
+
   function getFiatPriceDisplay(
     price: number | string,
     rate: number,
@@ -34,6 +38,7 @@ export const useFiat = createGlobalState(() => {
   return {
     isShowingFiat,
     useFiatRateQuery,
+    getFiatPrice,
     getFiatPriceDisplay,
   }
 })

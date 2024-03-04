@@ -52,11 +52,11 @@ const { mutate } = useMutation({
   mutationFn: cancelOrder,
   onSuccess: () => {
     ElMessage.success('Order canceled')
-    queryClient.invalidateQueries(['myOpenOrders'])
-    queryClient.invalidateQueries(['myOrderHistory'])
-    queryClient.invalidateQueries(['askOrders'])
-    queryClient.invalidateQueries(['bidOrders'])
-    queryClient.invalidateQueries(['excludedBalance'])
+    queryClient.invalidateQueries({ queryKey: ['myOpenOrders'] })
+    queryClient.invalidateQueries({ queryKey: ['myOrderHistory'] })
+    queryClient.invalidateQueries({ queryKey: ['askOrders'] })
+    queryClient.invalidateQueries({ queryKey: ['bidOrders'] })
+    queryClient.invalidateQueries({ queryKey: ['excludedBalance'] })
   },
   onError: (err: any) => {
     ElMessage.error(err.message)

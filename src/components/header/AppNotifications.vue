@@ -40,7 +40,7 @@ const queryClient = useQueryClient()
 const { mutate } = useMutation({
   mutationFn: clearNotifications,
   onSuccess: () => {
-    queryClient.invalidateQueries(['notifications'])
+    queryClient.invalidateQueries({ queryKey: ['notifications'] })
   },
 })
 function onClearNotifications() {

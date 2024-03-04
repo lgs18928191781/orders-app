@@ -204,7 +204,7 @@ const cannotTakeOrderReason = computed(() => {
         <div class="flex gap-2">
           <!-- <button class="hover:scale-125" @click="">
             <ArrowRightLeftIcon
-              class="w-4 h-4 text-zinc-500 hover:text-primary"
+              class="size-4 text-zinc-500 hover:text-primary"
             />
           </button> -->
 

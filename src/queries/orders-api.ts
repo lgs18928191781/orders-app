@@ -3,13 +3,20 @@ import Decimal from 'decimal.js'
 import { useConnectionStore } from '@/stores/connection'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
-import sign from '@/lib/sign'
 import fetchWrapper, { ordersApiFetch, ordersCommonApiFetch } from '@/lib/fetch'
 import { raise } from '@/lib/helpers'
 
-export const login = async () => {
-  const { publicKey, signature } = await sign()
-  const address = useConnectionStore().getAddress
+export const login = async ({
+  address,
+  publicKey,
+  signature,
+}: {
+  address: string
+  publicKey: string
+  signature: string
+}) => {
+  const network = useNetworkStore().network
+
   const loginRes = await ordersApiFetch(`login/in`, {
     method: 'POST',
     headers: {
@@ -17,7 +24,7 @@ export const login = async () => {
       'X-Public-Key': publicKey,
     },
     body: JSON.stringify({
-      net: 'livenet',
+      net: network,
       address,
     }),
   })
@@ -34,7 +41,7 @@ export const getFiatRate = async (): Promise<number> => {
 
 export const getBrcFiatRate = async (): Promise<Record<string, number>> => {
   const res = await fetchWrapper(
-    `https://www.metalet.space/wallet-api/v3/coin/brc20/price`
+    `https://www.metalet.space/wallet-api/v3/coin/brc20/price`,
   )
 
   // use per satoshi price
@@ -79,10 +86,10 @@ export type Notification = {
   notificationType: number
 }
 export const getNotifications = async (
-  address: string
+  address: string,
 ): Promise<Notification[]> => {
   const notifications = await ordersApiFetch(
-    `common/notification/address?address=${address}`
+    `common/notification/address?address=${address}`,
   )
 
   return notifications?.results || []
@@ -99,7 +106,7 @@ export const clearNotifications = async ({
     `common/notification/clear?address=${address}&notificationType=${notificationType}`,
     {
       method: 'GET',
-    }
+    },
   )
 
   return 'success'
@@ -107,7 +114,7 @@ export const clearNotifications = async ({
 
 export const getOrdiBalance = async (
   address: string,
-  network: 'livenet' | 'testnet'
+  network: 'livenet' | 'testnet',
 ) => {
   // fake data for testnet
   if (network === 'testnet') {
@@ -133,7 +140,7 @@ export type BidCandidate = {
 export const getBidCandidates = async (
   network: 'livenet' | 'testnet',
   tick: string,
-  isPool: boolean = true
+  isPool: boolean = true,
 ): Promise<BidCandidate[]> => {
   const address = useConnectionStore().getAddress
   const params = new URLSearchParams({
@@ -143,7 +150,7 @@ export const getBidCandidates = async (
     isPool: String(isPool),
   })
   let candidates: BidCandidate[] = await ordersApiFetch(
-    `order/bid/pre?${params}`
+    `order/bid/pre?${params}`,
   ).then(({ availableList }) => availableList)
 
   if (candidates) {
@@ -162,7 +169,7 @@ export const getBidCandidates = async (
 
       // fix coinRatePrice
       candidate.coinRatePrice = new Decimal(
-        candidate.coinPrice / 10 ** candidate.coinPriceDecimalNum
+        candidate.coinPrice / 10 ** candidate.coinPriceDecimalNum,
       ).toNumber()
 
       return candidate
@@ -215,7 +222,7 @@ export const getBidCandidateInfo = async ({
   }
 
   const candidateInfo = await ordersApiFetch(
-    `order/bid?${params}&inscriptionId=${inscriptionId}`
+    `order/bid?${params}&inscriptionId=${inscriptionId}`,
   )
 
   // validate
@@ -263,8 +270,6 @@ export const constructBidPsbt = async ({
   psbtRaw: string
   orderId: string
 }> => {
-  const { publicKey, signature } = await sign()
-
   const address = useConnectionStore().getAddress
   const body = {
     net: network,
@@ -282,11 +287,8 @@ export const constructBidPsbt = async ({
   }
   const constructInfo = await ordersApiFetch(`order/bid-v2`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
     body: JSON.stringify(body),
+    auth: true,
   })
 
   // validate
@@ -373,7 +375,7 @@ export const getOrders = async ({
       // order's coinRatePrice is incorrect, so we need to calculate it
       orders.forEach((order: Order) => {
         order.coinRatePrice = new Decimal(
-          order.amount / order.coinAmount
+          order.amount / order.coinAmount,
         ).toNumber()
       })
 
@@ -389,17 +391,11 @@ export const getOneOrder = async ({
 }: {
   orderId: string
 }): Promise<DetailedOrder> => {
-  const { publicKey, signature } = await sign()
   const address = useConnectionStore().getAddress
 
   const order: DetailedOrder = await ordersApiFetch(
     `order/${orderId}?buyerAddress=${address}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    { auth: true },
   )
 
   return order
@@ -421,7 +417,6 @@ export const getOneBidOrder = async ({
   orderId: string
   inscriptionId: string
 }): Promise<BidV20Order> => {
-  const { publicKey, signature } = await sign()
   const address = useConnectionStore().getAddress
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
 
@@ -435,7 +430,8 @@ export const getOneBidOrder = async ({
   })
 
   const order: BidV20Order = await ordersApiFetch(
-    `order/bid-v2/do/pre?${params}`
+    `order/bid-v2/do/pre?${params}`,
+    { auth: true },
   ).then((order) => {
     order.furtherFee =
       order.releaseInscriptionFee +
@@ -458,7 +454,6 @@ export const getBuyEssentials = async ({
   tick: string
   buyerChangeAmount: number
 }): Promise<DetailedOrder> => {
-  const { publicKey, signature } = await sign()
   const params = new URLSearchParams({
     buyerAddress: address,
     tick,
@@ -467,12 +462,7 @@ export const getBuyEssentials = async ({
 
   const order: DetailedOrder = await ordersApiFetch(
     `order/${orderId}?${params}`,
-    {
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
-    }
+    { auth: true },
   )
 
   return order
@@ -489,14 +479,14 @@ export const getMarketPrice = async ({ tick }: { tick: string }) => {
   // const network = useNetworkStore().network
   const network = 'livenet' // TODO
   const marketPrice: number = await ordersApiFetch(
-    `tickers?tick=${tick}&net=${network}`
+    `tickers?tick=${tick}&net=${network}`,
   )
     .then(({ results: tickers }) => tickers)
     .then((tickers: Ticker[]) => {
       if (tickers.length === 0) return 0
 
       const theTicker = tickers.find(
-        (ticker) => ticker.tick === tick && ticker.net === network
+        (ticker) => ticker.tick === tick && ticker.net === network,
       )
 
       return theTicker ? Number(theTicker.avgPrice) : 0
@@ -509,7 +499,9 @@ export type Brc20Transferable = {
   inscriptionId: string
   inscriptionNumber: string
   amount: string
+  outValue: number
 }
+
 export type Brc20 = {
   availableBalance: string
   balance: string
@@ -524,13 +516,17 @@ export const getOneBrc20 = async ({
   tick: string
   address: string
 }) => {
-  let brc20: Brc20 = await ordersApiFetch(`address/${address}/${tick}`)
+  const network = useNetworkStore().network
+  let brc20: Brc20 = await ordersApiFetch(
+    `address/${address}/${tick}?net=${network}`,
+  )
 
   // map inscriptionId into : notation
   if (brc20) {
     brc20.transferBalanceList = brc20.transferBalanceList.map((transfer) => {
       const inscriptionNumber = transfer.inscriptionNumber
       const amount = transfer.amount
+      const outValue = transfer.outValue
 
       let inscriptionId
       if (transfer.inscriptionId.includes(':')) {
@@ -546,8 +542,17 @@ export const getOneBrc20 = async ({
         inscriptionId,
         inscriptionNumber,
         amount,
+        outValue,
       }
     })
+
+    // copy 10 times
+    // const copied = [...brc20.transferBalanceList]
+    // for (let i = 0; i < 10; i++) {
+    //   copied.push(...brc20.transferBalanceList)
+    // }
+
+    // brc20.transferBalanceList = copied
   }
 
   return brc20 || {}
@@ -563,16 +568,17 @@ export type Brx20Brief = {
 export const getBrc20s = async ({
   address,
   tick,
+  network,
 }: {
   address: string
   tick?: string
+  network: 'livenet' | 'testnet'
 }) => {
-  const network = 'livenet'
   let path = `address/${address}/balance/info?net=${network}`
   if (tick) path += `&tick=${tick}`
 
   const brc20s = await ordersApiFetch(path).then(
-    ({ balanceList }: { balanceList: Brx20Brief[] }) => balanceList
+    ({ balanceList }: { balanceList: Brx20Brief[] }) => balanceList,
   )
 
   return brc20s || []
@@ -597,14 +603,9 @@ export const pushSellTake = async ({
   networkFee: number
   networkFeeRate: number
 }) => {
-  const { publicKey, signature } = await sign()
-
   const sellRes = await ordersApiFetch(`order/bid/do`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       psbtRaw,
@@ -640,14 +641,9 @@ export const pushSellTakeV2 = async ({
   networkFee: number
   networkFeeRate: number
 }) => {
-  const { publicKey, signature } = await sign()
-
   const sellRes = await ordersApiFetch(`order/bid-v2/do`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       psbtRaw,
@@ -677,14 +673,9 @@ export const pushAskOrder = async ({
   psbtRaw: string
   amount: number
 }) => {
-  const { publicKey, signature } = await sign()
-
   const createRes = await ordersApiFetch(`order/ask/push`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       psbtRaw,
       address,
@@ -710,16 +701,11 @@ export const pushBuyTake = async ({
 }) => {
   const address = useConnectionStore().getAddress
 
-  const { publicKey, signature } = await sign()
-
   // if pushed successfully, update the Dummies
   // notify update psbt status
   const updateRes = await ordersApiFetch(`order/update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       address,
@@ -736,14 +722,9 @@ export const pushBuyTake = async ({
 export const cancelOrder = async ({ orderId }: { orderId: string }) => {
   const address = useConnectionStore().getAddress
   const network = useNetworkStore().network
-  const { publicKey, signature } = await sign()
-
   await ordersApiFetch(`order/update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       address,
@@ -777,13 +758,9 @@ export const pushBidOrder = async ({
   orderId: string
 }) => {
   try {
-    const { publicKey, signature } = await sign()
     const createRes = await ordersApiFetch(`order/bid/push`, {
       method: 'POST',
-      headers: {
-        'X-Signature': signature,
-        'X-Public-Key': publicKey,
-      },
+      auth: true,
       body: JSON.stringify({
         net: network,
         address,
@@ -822,7 +799,7 @@ export const getOneClaim = async ({
 }> => {
   const network = 'livenet'
   return await ordersApiFetch(
-    `claim/order?tick=${tick}&address=${address}&net=${network}`
+    `claim/order?tick=${tick}&address=${address}&net=${network}`,
   )
 }
 
@@ -836,14 +813,9 @@ export const updateClaim = async ({
   psbtRaw: string
 }) => {
   const network = 'livenet'
-  const { publicKey, signature } = await sign()
-
   await ordersApiFetch(`claim/order/update`, {
     method: 'POST',
-    headers: {
-      'X-Signature': signature,
-      'X-Public-Key': publicKey,
-    },
+    auth: true,
     body: JSON.stringify({
       net: network,
       address,
@@ -864,7 +836,7 @@ export const getListingUtxos: () => Promise<
   const address = useConnectionStore().getAddress
 
   const utxos = await ordersApiFetch(
-    `order/bid/dummy/${address}?net=${network}`
+    `order/bid/dummy/${address}?net=${network}`,
   ).then(({ results }) => results || [])
 
   return utxos

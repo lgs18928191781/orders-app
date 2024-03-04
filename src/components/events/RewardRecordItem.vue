@@ -3,7 +3,6 @@ import { CopyIcon } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
 
 import { prettyAddress, prettyBalance, prettyTimestamp } from '@/lib/formatters'
-import { unit, useBtcUnit } from '@/lib/helpers'
 import { EVENT_REWARDS_TICK } from '@/data/constants'
 import { getRewardHistory } from '@/queries/events'
 
@@ -45,7 +44,7 @@ const onCopyOrderId = () => {
 
             <button title="copy order id" @click="onCopyOrderId">
               <CopyIcon
-                class="w-4 h-4 text-zinc-500 cursor-pointer hover:text-primary"
+                class="size-4 text-zinc-500 cursor-pointer hover:text-primary"
               />
             </button>
           </div>

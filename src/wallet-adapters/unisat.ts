@@ -114,8 +114,6 @@ export const signPsbt = async (
 
   const signed = await window.unisat.signPsbt(psbt, options)
 
-  console.log({ equals: signed === psbt })
-
   return signed
 }
 

@@ -173,7 +173,7 @@ export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
     useConnectionStore().getAddress ??
     raise('Please connect to a wallet first.')
 
-  const isP2TR = address.startsWith('bc1p')
+  const isP2TR = address.startsWith('bc1p') || address.startsWith('tb1p')
   const lostInternalPubkey = !input.tapInternalKey
 
   if (isP2TR && lostInternalPubkey) {
@@ -182,10 +182,6 @@ export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
     )
     const { output } = useBtcJsStore().get!.payments.p2tr({
       internalPubkey: tapInternalKey,
-    })
-    console.log({
-      script1: input.witnessUtxo?.script.toString('hex'),
-      script2: output.toString('hex'),
     })
     if (input.witnessUtxo?.script.toString('hex') == output.toString('hex')) {
       input.tapInternalKey = tapInternalKey
@@ -268,7 +264,11 @@ export async function exclusiveChange({
 
   // construct input
   const btcjs = useBtcJsStore().get!
-  const paymentPrevOutputScript = btcjs.address.toOutputScript(address)
+  const networkStore = useNetworkStore()
+  const paymentPrevOutputScript = btcjs.address.toOutputScript(
+    address,
+    networkStore.typedNetwork
+  )
 
   if (estimate) {
     // if estimating, we assume a payment utxo that is absurdly large
@@ -292,7 +292,9 @@ export async function exclusiveChange({
     let psbtClone: Psbt
     // .clone has bug when there is no input; so we have to manually add the output
     if (vin === 0) {
-      psbtClone = new btcjs.Psbt()
+      psbtClone = new btcjs.Psbt({
+        network: networkStore.typedNetwork,
+      })
       // add outputs manually
       const vout = psbt.txOutputs.length
       for (let i = 0; i < vout; i++) {
@@ -302,7 +304,6 @@ export async function exclusiveChange({
       psbtClone = psbt.clone()
     }
     psbtClone.addInput(paymentInput)
-    console.log({ psbtClone })
 
     // Add change output
     let fee = useSize
@@ -343,6 +344,7 @@ export async function exclusiveChange({
 
   // Add in one by one until we have enough value to pay
   // multiple change
+  console.log({ paymentUtxos })
   for (let i = 0; i < paymentUtxos.length; i++) {
     const paymentUtxo = paymentUtxos[i]
     const paymentWitnessUtxo = {
@@ -420,6 +422,7 @@ export async function exclusiveChange({
     } else {
       fee += safeOutputValue(changeValue)
     }
+    console.log({ psbt })
 
     return {
       psbt,

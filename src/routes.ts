@@ -21,7 +21,7 @@ const Maintaining = () => import('./pages/Maintaining.vue')
 const routes = [
   { path: '/orders/:pair?', component: Home, alias: '/' },
   {
-    path: '/swap-pools/:pair',
+    path: '/swap-pools/:pair?',
     component: SwapPools,
     children: [
       {
@@ -37,8 +37,9 @@ const routes = [
       },
     ],
   },
-  { path: '/swap', component: Swap },
+  // { path: '/swap', component: Swap },
   { path: '/bridge/:pair?', component: Bridge },
+  { path: '/swap/:pair?', component: Swap, name: 'swap' },
   { path: '/whitelist', component: Whitelist },
   { path: '/events', component: Events },
   { path: '/leaderboard', component: Leaderboard },

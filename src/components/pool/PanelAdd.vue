@@ -404,7 +404,7 @@ async function onConfirm() {
 
                   <img
                     :src="funArrowSvg"
-                    class="object-fill w-16 h-16 absolute right-0 top-0 translate-y-[50%] translate-x-[80%] -rotate-[60deg] pointer-events-none"
+                    class="object-fill size-16 absolute right-0 top-0 translate-y-[50%] translate-x-[80%] -rotate-[60deg] pointer-events-none"
                   />
                 </div>
               </Listbox>

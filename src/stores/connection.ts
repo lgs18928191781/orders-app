@@ -70,7 +70,9 @@ export const useConnectionStore = defineStore('connection', {
 
       return state.last.address
     },
-    isTaproot: (state) => state.last.address.startsWith('bc1p'),
+    isTaproot: (state) =>
+      state.last.address.startsWith('bc1p') ||
+      state.last.address.startsWith('tb1p'),
     getPubKey: (state) => state.last.pubKey,
     provider: (state) => {
       if (!state.last) return null
@@ -124,8 +126,6 @@ export const useConnectionStore = defineStore('connection', {
 
           this.last = connection
 
-          await login()
-
           return this.last
         }
       } catch (e: any) {
@@ -145,8 +145,6 @@ export const useConnectionStore = defineStore('connection', {
       this.last.status = 'connected'
       this.last.address = await this.adapter.getAddress()
       this.last.pubKey = await this.adapter.getPubKey()
-
-      await login()
 
       return this.last
     },
