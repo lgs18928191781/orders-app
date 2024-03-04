@@ -15,7 +15,7 @@
         ></div>
       </TransitionChild>
 
-      <div class="fixed inset-0 z-10 m-auto w-6/12 overflow-y-auto">
+      <div class="fixed inset-0 z-10 m-auto w-5/12 overflow-y-auto">
         <div
           class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
         >
@@ -55,7 +55,11 @@
                   type="button"
                   class="item-center flex justify-center rounded-xl bg-zinc-700 px-3 py-2 font-bold transition hover:bg-primary hover:text-orange-950"
                 >
-                  Confrim
+                  <Loader2Icon
+                    v-if="confrimLogin"
+                    class="mr-1.5 animate-spin"
+                  />
+                  <span>Confrim</span>
                 </button>
               </div>
             </DialogPanel>
@@ -76,24 +80,32 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { ref } from 'vue'
+import { Loader2Icon } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useConnectionStore } from '@/stores/connection'
 const router = useRouter()
+const confrimLogin = ref(false)
 const { isConnectionMetaletModal, closeConnectionModal } =
   useCheckMetaletLoginModal()
 const connectionStore = useConnectionStore()
 async function trggleMetaletLogin() {
-  if (!connectionStore.connected) {
-    await connectionStore.connect('metalet')
-    closeConnectionModal()
-  } else if (
-    connectionStore.connected &&
-    connectionStore.last.wallet !== 'metalet'
-  ) {
-    connectionStore.disconnect()
-    await connectionStore.connect('metalet')
-    closeConnectionModal()
-    window.location.reload()
+  confrimLogin.value = true
+  try {
+    if (!connectionStore.connected) {
+      await connectionStore.connect('metalet')
+      closeConnectionModal()
+    } else if (
+      connectionStore.connected &&
+      connectionStore.last.wallet !== 'metalet'
+    ) {
+      connectionStore.disconnect()
+      await connectionStore.connect('metalet')
+      closeConnectionModal()
+      window.location.reload()
+    }
+    confrimLogin.value = false
+  } catch (error) {
+    confrimLogin.value = false
   }
 }
 
