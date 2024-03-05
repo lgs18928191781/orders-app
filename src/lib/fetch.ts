@@ -201,19 +201,19 @@ export async function bridgeApiFetch(
   } else {
     options.headers = { ...options.headers, 'Content-Type': 'application/json' }
   }
-  if (options.auth) {
-    const credentialsStore = useCredentialsStore()
-    const credential = credentialsStore.get
-    if (!credential) {
-      throw new Error('Please login first.')
-    }
+  // if (options?.auth) {
+  //   const credentialsStore = useCredentialsStore()
+  //   const credential = credentialsStore.get
+  //   if (!credential) {
+  //     throw new Error('Please login first.')
+  //   }
 
-    options.headers = {
-      ...options.headers,
-      'X-Signature': credential.signature,
-      'X-Public-Key': credential.publicKey,
-    }
-  }
+  //   options.headers = {
+  //     ...options.headers,
+  //     'X-Signature': credential.signature,
+  //     'X-Public-Key': credential.publicKey,
+  //   }
+  // }
 
   const jsoned:
     | {

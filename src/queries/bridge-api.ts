@@ -1,6 +1,6 @@
 import { bridgeApiFetch } from '@/lib/fetch'
 
-export const getAssetPairList = async () => {
+export const getAssetPairList = async (): Promise<any> => {
   return await bridgeApiFetch(`/assetList`, {
     method: 'GET',
   })

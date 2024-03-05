@@ -11,6 +11,7 @@ const bridgePairs = [
     fromIcon: btcLogo,
     toIcon: btcLogo,
     network: 'BTC',
+    isNew: false,
   },
   {
     id: 2,
@@ -21,6 +22,7 @@ const bridgePairs = [
     fromIcon: btcLogo,
     toIcon: btcLogo,
     network: 'BRC20',
+    isNew: false,
   },
 ] as {
   id: number
@@ -31,6 +33,7 @@ const bridgePairs = [
   fromIcon: string
   toIcon: string
   network: string
+  isNew?: boolean
 }[]
 
 export default bridgePairs

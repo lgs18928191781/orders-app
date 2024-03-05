@@ -82,7 +82,7 @@
       <div class="swap-success-container grid px-8 pt-16 shadow-md">
         <div class="success-header flex flex-col items-center justify-center">
           <div>
-            <CheckCircle2 color="#22C55E" :size="60" />
+            <CheckCircle2 color="#22C55E" :size="80" />
           </div>
           <div class="mt-3.5 flex flex-col items-center justify-center text-sm">
             <span>Convert {{ successInfo.send.symbol }}</span>
@@ -155,6 +155,8 @@ import CheckMetaletProvider from '@/components/bridge/CheckMetaletProvider.vue'
 import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
 import { useBridgePair } from '@/hooks/use-bridge-pair'
 import { prettyTimestamp } from '@/lib/formatters'
+import { ElMessage } from 'element-plus'
+
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -175,12 +177,12 @@ const feeInfo = reactive({
 })
 const swapSuccess = ref(false)
 const BridgeTools = useBridgeTools()
-const assetInfo = reactive({ val: {} })
+const assetInfo: { val: any } = reactive({ val: {} })
 
 const fromAsset = reactive({
   val: {
     network: AssetNetwork.BTC,
-    balance: 10000000,
+    balance: 120000000,
     symbol: '--',
     decimal: 0,
   },
@@ -188,31 +190,32 @@ const fromAsset = reactive({
 const toAsset = reactive({
   val: {
     network: AssetNetwork.MVC,
-    balance: 10000000,
+    balance: 120000000,
     symbol: '--',
     decimal: 0,
   },
 })
 
-onMounted(async () => {
-  // console.log('selectedPair', selectedPair)
-  assetInfo.val = await getAssetPairList()
-  console.log('assetInfo.val', assetInfo.val.assetList)
-  const currentPairs = assetInfo.val.assetList!.filter((item) => {
-    return (
-      item.originSymbol == selectedPair.value.fromSymbol &&
-      item.targetSymbol == selectedPair.value.toSymbol
-    )
-  })
-  const { decimals, originSymbol, targetSymbol } = currentPairs[0]
-  fromAsset.val.decimal = decimals
-  fromAsset.val.symbol = originSymbol
+async function getAssetInfo() {
+  try {
+    assetInfo.val = await getAssetPairList()
 
-  toAsset.val.symbol = targetSymbol
-  toAsset.val.decimal = decimals
-  console.log('currentPairs', currentPairs[0])
-  // debugger
-})
+    const currentPairs = assetInfo.val.assetList!.filter((item: any) => {
+      return (
+        item.originSymbol == selectedPair.value.fromSymbol &&
+        item.targetSymbol == selectedPair.value.toSymbol
+      )
+    })
+    const { decimals, originSymbol, targetSymbol } = currentPairs[0]
+    fromAsset.val.decimal = decimals
+    fromAsset.val.symbol = originSymbol
+
+    toAsset.val.symbol = targetSymbol
+    toAsset.val.decimal = decimals
+  } catch (error) {
+    return ElMessage.error((error as any).message)
+  }
+}
 
 const successInfo: {
   [key: string]: {
@@ -344,9 +347,9 @@ function confrimSwap() {
   successInfo.send.desc =
     fromAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
   successInfo.send.symbol = fromAsset.val.symbol
-  successInfo.receive.amount = swapToAmount.value
+  successInfo.receive.amount = +swapToAmount.value!
   successInfo.receive.desc =
-    fromAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
+    toAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
   successInfo.receive.symbol = toAsset.val.symbol
   successInfo.networkFee.symbol = fromAsset.val.symbol
   successInfo.time.amount = prettyTimestamp(Date.now())
@@ -359,6 +362,7 @@ function Done() {
 }
 
 checkWalletType()
+getAssetInfo()
 </script>
 <style scoped lang="scss">
 .bridge-wrap {
@@ -384,6 +388,7 @@ checkWalletType()
 
 .op-btn {
   button {
+    cursor: pointer;
     .textBlack {
       color: #17171a;
     }
@@ -405,6 +410,7 @@ checkWalletType()
 .error {
   background-color: #ef4444;
   &:hover {
+    opacity: 0.85;
     box-shadow: 0 0 8px #ef4444;
   }
 }

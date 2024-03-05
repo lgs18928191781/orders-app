@@ -16,7 +16,6 @@
           as="div"
           class="relative inline-block text-left"
           :model-value="assetInfo.network"
-          @update:model-value="$emit('update:assetSymbol', $event)"
         >
           <ListboxButton v-slot="{ open }" as="template">
             <button
@@ -80,7 +79,7 @@
         <div class="relative flex w-full items-center">
           <input
             :value="props.modelValue"
-            @input="emit('update:modelValue', $event.target?.value)"
+            @input="emit('update:modelValue', ($event as any).target!.value)"
             type="text"
             :readonly="disableInput"
             class="input-wrap quiet-input mr-2.5 w-full rounded-md py-1 pl-2 text-right placeholder-zinc-500"
@@ -128,10 +127,9 @@ const emit = defineEmits(['update:modelValue'])
 
 const curretnNetwork = ref('BTC')
 
-const accountBalance = ref(13216)
 const useNetwork = reactive(['BTC', 'MVC'])
 const inputColorDanger = computed(() => {
-  if (props.modelValue > accountBalance.value) {
+  if (props.modelValue > props.assetInfo.balance) {
     return true
   } else return
 })
@@ -147,10 +145,6 @@ const selectNetwork = computed(() => {
   }
 
   return selected
-})
-
-defineExpose({
-  accountBalance,
 })
 </script>
 <style scoped>
