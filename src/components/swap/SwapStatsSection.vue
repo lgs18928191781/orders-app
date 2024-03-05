@@ -9,6 +9,7 @@ import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useFiat } from '@/hooks/use-fiat'
+import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
 
 import { getPoolStatusQuery } from '@/queries/swap.query'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
@@ -16,6 +17,8 @@ import { prettyBalance, prettySymbol } from '@/lib/formatters'
 const { token1Symbol, token2Symbol, selectedPair, pairStr } = useSwapPoolPair()
 const token1Icon = computed(() => selectedPair.value?.token1Icon)
 const token2Icon = computed(() => selectedPair.value?.token2Icon)
+
+const { isEmpty } = useEmptyPoolSignal()
 
 const { useFiatRateQuery, getFiatPrice, getFiatPriceDisplay } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
@@ -60,7 +63,7 @@ function toSwap() {
     <!-- row 1 -->
     <div class="flex items-end justify-between gap-4 text-sm xl:text-base">
       <!-- left -->
-      <div class="flex flex-col gap-6">
+      <div class="flex flex-col items-start gap-6">
         <!-- title -->
         <div class="flex items-center text-2xl">
           <img
@@ -79,6 +82,10 @@ function toSwap() {
             >
               {{ prettySymbol(token1Symbol) }}/{{ prettySymbol(token2Symbol) }}
             </p>
+          </div>
+
+          <div class="ml-2 text-base text-zinc-500" v-if="isEmpty">
+            (New Pool)
           </div>
         </div>
 
@@ -134,6 +141,7 @@ function toSwap() {
         <button
           class="rounded-xl border-2 border-primary border-opacity-60 bg-transparent bg-opacity-80 px-6 py-2.5 text-orange-50 hover:border-opacity-100 hover:bg-opacity-100 hover:text-primary"
           @click="toSwap"
+          v-if="!isEmpty"
         >
           Swap
         </button>
@@ -245,7 +253,7 @@ function toSwap() {
     </div>
 
     <!-- row 3 -->
-    <SwapStatsTransactions />
+    <SwapStatsTransactions v-if="!isEmpty" />
   </div>
 </template>
 

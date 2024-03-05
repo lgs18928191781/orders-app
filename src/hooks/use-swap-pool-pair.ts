@@ -10,7 +10,7 @@ export function useSwapPoolPair() {
   const usingSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
   const router = useRouter()
 
-  const selectedPairId = ref(usingSwapPairs[0].id)
+  const selectedPairId = ref(-1)
   const selectedPair = computed(() => {
     return usingSwapPairs.find((a) => a.id === selectedPairId.value)
   })
@@ -29,10 +29,13 @@ export function useSwapPoolPair() {
       (a.token1Symbol.toUpperCase() === token1Symbol.value.toUpperCase() &&
         a.token2Symbol.toUpperCase() === token2Symbol.value.toUpperCase()) ||
       (a.token2Symbol.toUpperCase() === token1Symbol.value.toUpperCase() &&
-        a.token1Symbol.toUpperCase() === token2Symbol.value.toUpperCase())
+        a.token1Symbol.toUpperCase() === token2Symbol.value.toUpperCase()),
   )
   if (selected) {
     selectedPairId.value = selected.id
+  } else {
+    // reset to default
+    selectedPairId.value = -1
   }
 
   function selectPair(id: number) {

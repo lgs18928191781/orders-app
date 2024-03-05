@@ -164,6 +164,43 @@ export const getPoolStatus = async ({
   return res
 }
 
+export const buildInit = async ({
+  token1,
+  token2,
+  token1Amount,
+  token2Amount,
+  inscriptionUtxos,
+}: {
+  token1: string
+  token2: string
+  token1Amount: string
+  token2Amount: string
+  inscriptionUtxos: InscriptionUtxo[]
+}): Promise<{
+  rawPsbt: string
+  buildId: string
+}> => {
+  const address = useConnectionStore().getAddress
+  const pubkey = useConnectionStore().getPubKey
+
+  const body = {
+    address,
+    pubkey,
+    token1,
+    token2,
+    token1Amount,
+    token2Amount,
+    inscriptionUtxos,
+  }
+
+  const res = await swapApiFetch('build/init', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    auth: true,
+  })
+  return res
+}
+
 export const buildAdd = async ({
   token1,
   token2,

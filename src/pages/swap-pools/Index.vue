@@ -2,8 +2,10 @@
 import { useRoute } from 'vue-router'
 
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
 
 const { pairStr } = useSwapPoolPair()
+const { isEmpty } = useEmptyPoolSignal()
 
 const route = useRoute()
 function isLinkActive(keyword: string) {
@@ -21,6 +23,7 @@ function isLinkActive(keyword: string) {
         <router-link
           to="/swap"
           class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
+          v-if="!isEmpty"
         >
           Swap
         </router-link>
@@ -59,6 +62,7 @@ function isLinkActive(keyword: string) {
                 : 'text-zinc-300'
             "
             :to="`/swap-pools/${pairStr}/remove`"
+            v-if="!isEmpty"
           >
             Remove
           </router-link>

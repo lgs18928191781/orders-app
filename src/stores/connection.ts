@@ -84,6 +84,7 @@ export const useConnectionStore = defineStore('connection', {
 
       const adapter: {
         initPsbt: () => Psbt
+        getMvcAddress?: () => Promise<string>
         finishPsbt: (psbt: string) => string
         getAddress: () => Promise<string>
         getPubKey: () => Promise<string>
