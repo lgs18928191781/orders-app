@@ -268,17 +268,17 @@ const successInfo: {
 })
 const connectionStore = useConnectionStore()
 
-const checkWalletType = () => {
-  const isBridgeComponment = route.path.indexOf('/bridge') > -1
-  if (
-    (!connectionStore.connected || connectionStore.last.wallet !== 'metalet') &&
-    !isBridgeComponment
-  ) {
-    openConnectionModal()
-  } else {
-    closeConnectionModal()
-  }
-}
+// const checkWalletType = () => {
+//   const isBridgeComponment = route.path.indexOf('/bridge') > -1
+//   if (
+//     (!connectionStore.connected || connectionStore.last.wallet !== 'metalet') &&
+//     !isBridgeComponment
+//   ) {
+//     openConnectionModal()
+//   } else {
+//     closeConnectionModal()
+//   }
+// }
 
 const btnStatus = computed(() => {
   if (swapFromAmount.value > fromAsset.val.balance) {
@@ -394,7 +394,6 @@ function Done() {
   swapSuccess.value = false
 }
 
-checkWalletType()
 getAssetInfo()
 </script>
 <style scoped lang="scss">

@@ -46,7 +46,7 @@ const routes = [
       const connectionStore = useConnectionStore()
       const { openConnectionModal } = useCheckMetaletLoginModal()
       if (
-        !connectionStore.connected ||
+        connectionStore.connected &&
         connectionStore.last.wallet !== 'metalet'
       ) {
         openConnectionModal()
