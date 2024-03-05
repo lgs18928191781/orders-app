@@ -106,7 +106,7 @@ const { openModal } = useTokenSelectModal()
           >
             <PackagePlus class="h-6 w-6 text-primary" />
 
-            <div class="text-base font-bold">Add Pool</div>
+            <div class="text-base font-bold">Create Pool</div>
           </button>
         </ListboxOption>
       </ListboxOptions>

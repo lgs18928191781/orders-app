@@ -53,7 +53,7 @@ watch(
 )
 
 const extendedTask = computed(() => {
-  if (!task.value || !selectedPair.value) {
+  if (!task.value) {
     return null
   }
 
@@ -67,8 +67,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value.token1Icon,
-        toIcon: selectedPair.value.token2Icon,
+        fromIcon: selectedPair.value?.token1Icon,
+        toIcon: selectedPair.value?.token2Icon,
       }
     case '2x':
     case 'x1':
@@ -79,8 +79,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token1,
         fromAmount: task.value.amount2,
         toAmount: task.value.amount1,
-        fromIcon: selectedPair.value.token2Icon,
-        toIcon: selectedPair.value.token1Icon,
+        fromIcon: selectedPair.value?.token2Icon,
+        toIcon: selectedPair.value?.token1Icon,
       }
     case 'add':
       return {
@@ -90,9 +90,10 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value.token1Icon,
-        toIcon: selectedPair.value.token2Icon,
+        fromIcon: selectedPair.value?.token1Icon,
+        toIcon: selectedPair.value?.token2Icon,
       }
+
     case 'remove':
       return {
         type: 'remove',
@@ -101,8 +102,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value.token1Icon,
-        toIcon: selectedPair.value.token2Icon,
+        fromIcon: selectedPair.value?.token1Icon,
+        toIcon: selectedPair.value?.token2Icon,
       }
     default:
       return null
@@ -136,7 +137,9 @@ function copyFailedReason() {
     class="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-black/40 px-8 backdrop-blur"
     v-show="hasOngoing"
   >
-    <div class="min-w-96 rounded-xl bg-zinc-800 px-8 py-6 text-zinc-300">
+    <div
+      class="min-w-96 max-w-md rounded-xl bg-zinc-800 px-8 py-6 text-zinc-300"
+    >
       <div class="flex items-center justify-between">
         <h3>Ongoing Task</h3>
         <button
@@ -184,7 +187,7 @@ function copyFailedReason() {
             >
               <h5 class="text-zinc-500">Error Message:</h5>
               <p
-                class="-m-1 mt-1 rounded p-1 group-hover:bg-primary/10 group-hover:text-white"
+                class="-m-1 mt-1 text-wrap rounded p-1 group-hover:bg-primary/10 group-hover:text-white"
               >
                 {{ task.failedReason }}
               </p>
@@ -211,6 +214,7 @@ function copyFailedReason() {
               :src="extendedTask.fromIcon"
               :alt="extendedTask.fromToken"
               class="size-6"
+              v-if="extendedTask.fromIcon"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
@@ -222,6 +226,7 @@ function copyFailedReason() {
               :src="extendedTask.toIcon"
               :alt="extendedTask.toToken"
               class="size-6"
+              v-if="extendedTask.toIcon"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -234,6 +239,7 @@ function copyFailedReason() {
                 :src="extendedTask.fromIcon"
                 :alt="extendedTask.fromToken"
                 class="size-6"
+                v-if="extendedTask.fromIcon"
               />
               <span>{{
                 prettyCoinDisplay(
@@ -248,6 +254,7 @@ function copyFailedReason() {
                 :src="extendedTask.toIcon"
                 :alt="extendedTask.toToken"
                 class="size-6"
+                v-if="extendedTask.toIcon"
               />
               <span>{{
                 prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -263,6 +270,7 @@ function copyFailedReason() {
               :src="extendedTask.fromIcon"
               :alt="extendedTask.fromToken"
               class="size-6"
+              v-if="extendedTask.fromIcon"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
@@ -274,6 +282,7 @@ function copyFailedReason() {
               :src="extendedTask.toIcon"
               :alt="extendedTask.toToken"
               class="size-6"
+              v-if="extendedTask.toIcon"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
