@@ -19,6 +19,10 @@ export function finishPsbt<T>(psbt: T): T {
   return psbt
 }
 
+export const getMvcAddress = async () => {
+  return 'undefined'
+}
+
 export const getAddress = async () => {
   if (!window.unisat) {
     return ''

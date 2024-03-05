@@ -77,18 +77,35 @@ interface Window {
         >[]
       >
     }
-  },
+  }
   metaidwallet: {
-    on: (eventName: string, handler: ({ mvcAddress: string, btcAddress: string }) => void) => void
-    removeListener: (eventName: string, handler: ({ mvcAddress: string, btcAddress: string }) => void) => void
+    getAddress: () => Promise<string>
+    on: (
+      eventName: string,
+      handler: ({ mvcAddress: string, btcAddress: string }) => void
+    ) => void
+    removeListener: (
+      eventName: string,
+      handler: ({ mvcAddress: string, btcAddress: string }) => void
+    ) => void
     btc: {
       getAddress: () => Promise<string>
       getPublicKey: () => Promise<string>
-      connect: () => Promise<{ address?: string, pubKey?: string, status?: string }>
+      connect: () => Promise<{
+        address?: string
+        pubKey?: string
+        status?: string
+      }>
       getBalance: (chain: string) => Promise<{ total: number }>
       inscribeTransfer: (tick: string) => Promise<string>
       signMessage: (message: string) => Promise<string>
-      signPsbt: ({ psbtHex, options }: { psbtHex: string, options?: any }) => Promise<string>
+      signPsbt: ({
+        psbtHex,
+        options,
+      }: {
+        psbtHex: string
+        options?: any
+      }) => Promise<string>
       pushPsbt: (psbt: string) => Promise<string>
       signPsbts: (psbtHexs: string[], options?: any[]) => Promise<string[]>
     }

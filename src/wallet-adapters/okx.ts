@@ -29,6 +29,10 @@ export function initPsbt() {
   return new bitcoinJs.Psbt()
 }
 
+export const getMvcAddress = async () => {
+  return 'undefined'
+}
+
 export function finishPsbt(psbtStr: string): string {
   return psbtStr
   const btcjs = useBtcJsStore().get ?? raise('btcjs not initialized')

@@ -5,8 +5,6 @@ import {
   submitPrepayOrderMintBtcReq,
 } from '@/queries/bridge-api'
 export function useBridgeTools() {
-  // const mintAmount = 100000 //100000
-
   function confirmNumberBySeqAndAmount(
     amount: number,
     seq: number[][],

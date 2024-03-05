@@ -53,7 +53,7 @@
       <div class="op-btn mt-20 w-full px-6">
         <button
           :disabled="btnStatus.disable"
-          @click="confrimSwap"
+          @click="BtnOperate"
           :class="[
             'w-full',
             'text-base',
@@ -156,7 +156,8 @@ import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
 import { useBridgePair } from '@/hooks/use-bridge-pair'
 import { prettyTimestamp } from '@/lib/formatters'
 import { ElMessage } from 'element-plus'
-
+import { getOneBrc20 } from '@/queries/orders-api'
+import { useRoute } from 'vue-router'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -176,6 +177,7 @@ const feeInfo = reactive({
   },
 })
 const swapSuccess = ref(false)
+const route = useRoute()
 const BridgeTools = useBridgeTools()
 const assetInfo: { val: any } = reactive({ val: {} })
 
@@ -198,6 +200,7 @@ const toAsset = reactive({
 
 async function getAssetInfo() {
   try {
+    let queryAddress = ''
     assetInfo.val = await getAssetPairList()
 
     const currentPairs = assetInfo.val.assetList!.filter((item: any) => {
@@ -207,6 +210,20 @@ async function getAssetInfo() {
       )
     })
     const { decimals, originSymbol, targetSymbol } = currentPairs[0]
+
+    // if (fromAsset.val.network == AssetNetwork.BTC) {
+    //   queryAddress=connectionStore.last.address
+    // } else if (fromAsset.val.network == AssetNetwork.MVC) {
+    //   queryAddress=await connectionStore.adapter.getMvcAddress()
+    // }
+    // debugger
+    //  Promise.all([getOneBrc20({
+    //   tick: originSymbol,
+    //   address::''
+    // })]).then(() => {
+
+    // })
+
     fromAsset.val.decimal = decimals
     fromAsset.val.symbol = originSymbol
 
@@ -252,7 +269,11 @@ const successInfo: {
 const connectionStore = useConnectionStore()
 
 const checkWalletType = () => {
-  if (!connectionStore.connected || connectionStore.last.wallet !== 'metalet') {
+  const isBridgeComponment = route.path.indexOf('/bridge') > -1
+  if (
+    (!connectionStore.connected || connectionStore.last.wallet !== 'metalet') &&
+    !isBridgeComponment
+  ) {
     openConnectionModal()
   } else {
     closeConnectionModal()
@@ -337,6 +358,18 @@ function converSwapItem() {
   const temp = toRaw(fromAsset.val)
   fromAsset.val = toAsset.val
   toAsset.val = temp
+}
+
+function BtnOperate() {
+  if (btnStatus.value.color == BtnColor.unLogin) {
+    connetMetalet()
+  } else if (btnStatus.value.color == BtnColor.default) {
+    confrimSwap()
+  }
+}
+
+async function connetMetalet() {
+  await connectionStore.connect('metalet')
 }
 
 function confrimSwap() {
