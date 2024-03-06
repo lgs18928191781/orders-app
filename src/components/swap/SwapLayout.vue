@@ -41,8 +41,6 @@ watch(
         setEmpty()
       } else {
         reset()
-        console.log('reset')
-        console.log(isEmpty.value)
       }
     }
   },

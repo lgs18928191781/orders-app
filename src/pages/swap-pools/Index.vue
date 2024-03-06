@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
+import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
-const { pairStr } = useSwapPoolPair()
 const { isEmpty } = useEmptyPoolSignal()
+const { pairStr } = useSwapPoolPair()
 
 const route = useRoute()
 function isLinkActive(keyword: string) {
@@ -18,25 +18,7 @@ function isLinkActive(keyword: string) {
     <div
       class="h-full rounded-3xl border border-primary/30 bg-zinc-900 p-2 pt-3 shadow-md"
     >
-      <!-- header -->
-      <div class="flex gap-4 border-b border-zinc-800 px-3 pb-2">
-        <router-link
-          to="/swap"
-          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
-          v-if="!isEmpty"
-        >
-          Swap
-        </router-link>
-
-        <router-link
-          to="/swap-pools"
-          class="flex items-center space-x-1 text-zinc-200"
-        >
-          Pools
-        </router-link>
-
-        <SwapPairSelect class="ml-auto" />
-      </div>
+      <SwapMainPanelHeader />
 
       <!-- pair control -->
       <div class="mt-4 flex items-center justify-between">

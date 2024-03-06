@@ -94,6 +94,7 @@ declare module '@vue/runtime-core' {
     SwapGapStats: typeof import('./src/components/swap/SwapGapStats.vue')['default']
     SwapGasStats: typeof import('./src/components/swap/SwapGasStats.vue')['default']
     SwapLayout: typeof import('./src/components/swap/SwapLayout.vue')['default']
+    SwapMainPanelHeader: typeof import('./src/components/swap/SwapMainPanelHeader.vue')['default']
     SwapOngoingOperation: typeof import('./src/components/swap/SwapOngoingOperation.vue')['default']
     SwapOngoingTask: typeof import('./src/components/swap/SwapOngoingTask.vue')['default']
     SwapOngoingTaskModal: typeof import('./src/components/swap/SwapOngoingTaskModal.vue')['default']

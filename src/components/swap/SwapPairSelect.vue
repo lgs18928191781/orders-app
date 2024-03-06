@@ -6,16 +6,23 @@ import {
   ListboxOption,
   ListboxOptions,
 } from '@headlessui/vue'
+import { useQuery } from '@tanstack/vue-query'
 
 import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { useNetworkStore } from '@/stores/network'
 import { useTokenSelectModal } from '@/hooks/use-token-select-modal'
 
-import { prettySymbol } from '@/lib/formatters'
+import { useNetworkStore } from '@/stores/network'
+import { useConnectionStore } from '@/stores/connection'
+
 import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
+import { prettySymbol } from '@/lib/formatters'
+import { getPoolsQuery } from '@/queries/swap/pools.query'
 
 const network = useNetworkStore().network
-const usingSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
+const address = useConnectionStore().getAddress
+const defaultSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
+
+const { data: pools } = useQuery(getPoolsQuery({ address, network }))
 
 const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
 const { openModal } = useTokenSelectModal()
@@ -64,7 +71,7 @@ const { openModal } = useTokenSelectModal()
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="pair in usingSwapPairs"
+          v-for="pair in defaultSwapPairs"
           :key="pair.id"
           :value="pair.id"
         >

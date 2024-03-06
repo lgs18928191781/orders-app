@@ -562,24 +562,7 @@ async function doSwap() {
     <div
       class="swap-main-border h-full space-y-3 rounded-xl bg-zinc-900 p-2 lg:rounded-3xl lg:!pt-3"
     >
-      <!-- header -->
-      <div class="flex gap-4 px-3">
-        <router-link
-          to="/swap"
-          class="flex items-center space-x-1 text-zinc-200"
-        >
-          Swap
-        </router-link>
-
-        <router-link
-          to="/swap-pools"
-          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
-        >
-          Pools
-        </router-link>
-
-        <SwapPairSelect class="ml-auto" />
-      </div>
+      <SwapMainPanelHeader />
 
       <!-- body -->
       <div class="text-sm">
