@@ -8,23 +8,20 @@ import {
 } from '@headlessui/vue'
 import { useQuery } from '@tanstack/vue-query'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useTokenSelectModal } from '@/hooks/use-token-select-modal'
 
 import { useNetworkStore } from '@/stores/network'
-import { useConnectionStore } from '@/stores/connection'
 
-import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
 import { prettySymbol } from '@/lib/formatters'
 import { getPoolsQuery } from '@/queries/swap/pools.query'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 
 const network = useNetworkStore().network
-const address = useConnectionStore().getAddress
-const defaultSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
 
-const { data: pools } = useQuery(getPoolsQuery({ address, network }))
+const { data: poolPairs } = useQuery(getPoolsQuery({ network }))
 
-const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
+const { pairStr, selectPair, token1, token2, token1Icon, token2Icon } =
+  useSwapPool()
 const { openModal } = useTokenSelectModal()
 </script>
 
@@ -32,7 +29,7 @@ const { openModal } = useTokenSelectModal()
   <Listbox
     as="div"
     class="relative inline-block text-left"
-    v-model="selectedPairId"
+    :default-value="pairStr"
     @update:model-value="selectPair"
   >
     <ListboxButton v-slot="{ open }" as="template">
@@ -42,16 +39,12 @@ const { openModal } = useTokenSelectModal()
           'flex items-center gap-1 rounded-full border border-zinc-700 p-1 px-2 text-base hover:border-black hover:bg-black',
         ]"
       >
-        <div class="flex" v-if="selectedPair">
-          <img :src="selectedPair.token1Icon" class="h-6 rounded-full" />
-          <img :src="selectedPair.token2Icon" class="-ml-2 h-6 rounded-full" />
+        <div class="flex" v-if="pairStr">
+          <IconImage :src="token1Icon" class="size-6 rounded-full" />
+          <IconImage :src="token2Icon" class="-ml-2 size-6 rounded-full" />
         </div>
-        <div class="mr-1" v-if="selectedPair">
-          {{
-            prettySymbol(selectedPair.token1Symbol) +
-            '-' +
-            prettySymbol(selectedPair.token2Symbol)
-          }}
+        <div class="mr-1" v-if="pairStr">
+          {{ prettySymbol(token1) + '-' + prettySymbol(token2) }}
         </div>
         <div v-else class="pl-2 text-base text-primary">Select token</div>
         <ChevronDownIcon class="h-5 w-5" />
@@ -71,7 +64,7 @@ const { openModal } = useTokenSelectModal()
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="pair in defaultSwapPairs"
+          v-for="pair in poolPairs"
           :key="pair.id"
           :value="pair.id"
         >
@@ -82,16 +75,12 @@ const { openModal } = useTokenSelectModal()
             ]"
           >
             <div class="flex">
-              <img :src="pair.token1Icon" class="h-6 rounded-full" />
-              <img :src="pair.token2Icon" class="-ml-2 h-6 rounded-full" />
+              <IconImage :src="token1Icon" class="size-6 rounded-full" />
+              <IconImage :src="token2Icon" class="-ml-2 size-6 rounded-full" />
             </div>
 
             <div class="text-base font-bold">
-              {{
-                prettySymbol(pair.token1Symbol) +
-                '-' +
-                prettySymbol(pair.token2Symbol)
-              }}
+              {{ prettySymbol(pair.token1) + '-' + prettySymbol(pair.token2) }}
             </div>
 
             <CheckIcon

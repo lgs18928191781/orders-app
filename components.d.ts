@@ -25,6 +25,7 @@ declare module '@vue/runtime-core' {
     EventClaimRecords: typeof import('./src/components/pool/EventClaimRecords.vue')['default']
     EventRecords: typeof import('./src/components/events/EventRecords.vue')['default']
     EventSelect: typeof import('./src/components/events/EventSelect.vue')['default']
+    IconImage: typeof import('./src/components/IconImage.vue')['default']
     IssueItem: typeof import('./src/components/recover/IssueItem.vue')['default']
     KLineChart: typeof import('./src/components/orders/KLineChart.vue')['default']
     Loading: typeof import('./src/components/overlays/Loading.vue')['default']
