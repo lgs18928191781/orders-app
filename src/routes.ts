@@ -43,6 +43,7 @@ const routes = [
     path: '/bridge/:pair?',
     component: Bridge,
     beforeEnter: () => {
+      debugger
       const connectionStore = useConnectionStore()
       const { openConnectionModal } = useCheckMetaletLoginModal()
       if (

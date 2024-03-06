@@ -31,6 +31,26 @@ export const prettyTxid = (txid: string, len = 6) => {
   return `${txid.slice(0, len)}...${txid.slice(-len)}`
 }
 
+export const formatUnitToSats = (
+  value: number | string,
+  decimal: number = 8
+) => {
+  if (!value) {
+    return 0
+  }
+  return new Decimal(value).mul(10 ** decimal).toNumber()
+}
+
+export const formatUnitToBtc = (
+  value: number | string,
+  decimal: number = 8
+) => {
+  if (!value) {
+    return 0
+  }
+  return new Decimal(value).div(10 ** decimal).toNumber()
+}
+
 export const prettyBalance = (
   balance: number | string | Decimal | undefined,
   useBtcUnit: boolean | RemovableRef<boolean> = true

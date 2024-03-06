@@ -80,7 +80,7 @@
           <input
             :value="props.modelValue"
             @input="emit('update:modelValue', ($event as any).target!.value)"
-            type="text"
+            type="number"
             :readonly="disableInput"
             class="input-wrap quiet-input mr-2.5 w-full rounded-md py-1 pl-2 text-right placeholder-zinc-500"
             :class="[inputColorDanger ? 'danger' : '']"
@@ -107,6 +107,7 @@ import MVC from '@/assets/mvc_logo.png?url'
 import { ChevronDownIcon, CheckIcon } from 'lucide-vue-next'
 import { formatNum } from '@/lib/formatters'
 import { AssetNetwork } from '@/data/constants'
+import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 interface AssetInfo {
   network: AssetNetwork
   balance: number
@@ -129,7 +130,11 @@ const curretnNetwork = ref('BTC')
 
 const useNetwork = reactive(['BTC', 'MVC'])
 const inputColorDanger = computed(() => {
-  if (props.modelValue > props.assetInfo.balance) {
+  console.log('props.modelValue', props.modelValue, props.assetInfo.balance)
+  if (
+    formatUnitToBtc(props.modelValue, props.assetInfo.decimal) >
+    formatUnitToBtc(props.assetInfo.balance, props.assetInfo.decimal)
+  ) {
     return true
   } else return
 })
