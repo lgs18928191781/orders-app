@@ -28,7 +28,7 @@ function getWalletProvider(wallet: Wallet) {
     case 'unisat':
       return window.unisat
     case 'okx':
-      return window.unisat
+      return window.okxwallet
     case 'metalet':
       return window.metaidwallet
     default:
@@ -94,7 +94,7 @@ export const useConnectionStore = defineStore('connection', {
         }>
         disconnect: () => Promise<void>
         getBalance: () => Promise<number>
-        inscribe: (tick: string) => Promise<string>
+        inscribe: (tick: string) => Promise<string | undefined>
         signPsbt: (psbt: string, options?: any) => Promise<string>
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
