@@ -6,7 +6,7 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import { ElMessage } from 'element-plus'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
@@ -17,7 +17,7 @@ import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
 import { buildRemove, postTask } from '@/queries/swap'
 import { IS_DEV, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
-const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { token1, token2 } = useSwapPool()
 const { openConnectionModal } = useConnectionModal()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const connectionStore = useConnectionStore()
@@ -28,8 +28,8 @@ const network = networkStore.network
 const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
   getPoolStatusQuery(
     {
-      token1: token1Symbol,
-      token2: token2Symbol,
+      token1: token1,
+      token2: token2,
       address,
       network,
     },
@@ -63,8 +63,8 @@ const removeEquity = computed(() => {
 const { data: preview, isFetching: isFetchingPreview } = useQuery(
   getPreviewRemoveQuery(
     {
-      token1: token1Symbol,
-      token2: token2Symbol,
+      token1: token1,
+      token2: token2,
       removeEquity,
       address,
       network,
@@ -259,8 +259,8 @@ async function doRemoveLiquidity() {
 
   // go for it!
   mutateBuildRemove({
-    token1: token1Symbol.value.toLowerCase(),
-    token2: token2Symbol.value.toLowerCase(),
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
     removeEquity: removeEquity.value,
   })
 }

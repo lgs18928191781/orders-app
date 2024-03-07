@@ -4,7 +4,7 @@ import { DropletsIcon } from 'lucide-vue-next'
 import { computed, watch } from 'vue'
 
 import { useExpandSwap } from '@/hooks/use-expand-swap'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
 
 import { useConnectionStore } from '@/stores/connection'
@@ -13,7 +13,7 @@ import { useNetworkStore } from '@/stores/network'
 import { getPoolStatusQuery } from '@/queries/swap.query'
 
 const { isExpanded } = useExpandSwap()
-const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { token1, token2 } = useSwapPool()
 const { setEmpty, reset, isEmpty } = useEmptyPoolSignal()
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
@@ -23,8 +23,8 @@ const network = networkStore.network
 const { data: poolStatus } = useQuery(
   getPoolStatusQuery(
     {
-      token1: token1Symbol,
-      token2: token2Symbol,
+      token1,
+      token2,
       address,
       network,
     },

@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Loader2Icon, AlertCircleIcon } from 'lucide-vue-next'
 import Decimal from 'decimal.js'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 
 import { prettySymbol } from '@/lib/formatters'
 import { SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
@@ -16,9 +16,7 @@ defineProps([
   'moreThanThreshold',
 ])
 
-const { token1Symbol, token2Symbol, selectedPair } = useSwapPoolPair()
-const token1Icon = computed(() => selectedPair.value?.token1Icon)
-const token2Icon = computed(() => selectedPair.value?.token2Icon)
+const { token1, token2, token1Icon, token2Icon } = useSwapPool()
 
 const thresholdInBtc = computed(() =>
   new Decimal(SWAP_THRESHOLD_AMOUNT).div(1e8),
@@ -35,7 +33,7 @@ const thresholdInBtc = computed(() =>
 
       <div class="flex items-center gap-2">
         <img :src="token1Icon" class="size-6 rounded-full" v-if="token1Icon" />
-        <div class="">{{ prettySymbol(token1Symbol) }}</div>
+        <div class="">{{ prettySymbol(token1) }}</div>
       </div>
     </div>
     <div
@@ -54,7 +52,7 @@ const thresholdInBtc = computed(() =>
 
       <div class="flex items-center gap-2">
         <img :src="token2Icon" class="size-6 rounded-full" v-if="token2Icon" />
-        <div class="">{{ prettySymbol(token2Symbol) }}</div>
+        <div class="">{{ prettySymbol(token2) }}</div>
       </div>
     </div>
   </div>

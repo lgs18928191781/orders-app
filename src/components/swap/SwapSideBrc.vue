@@ -12,7 +12,7 @@ import {
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 
 import {
   type Brc20Transferable,
@@ -26,7 +26,7 @@ import { type InscriptionUtxo } from '@/queries/swap/types'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { selectedPair, token2Symbol } = useSwapPoolPair()
+const { token2, token2Icon } = useSwapPool()
 
 const props = defineProps({
   side: {
@@ -40,7 +40,6 @@ const inscriptionUtxos = defineModel('inscriptionUtxos', {
   required: true,
   type: Array as () => InscriptionUtxo[],
 })
-const icon = computed(() => selectedPair.value?.token2Icon)
 
 const emit = defineEmits([
   'hasEnough',
@@ -88,7 +87,7 @@ const { data: myOneBrc20, isLoading } = useQuery(
     {
       address: connectionStore.getAddress,
       network: networkStore.network,
-      tick: token2Symbol,
+      tick: token2,
     },
     computed(() => connectionStore.connected),
   ),
@@ -152,9 +151,9 @@ watch(amount, (n) => {
 
 async function goInscribe() {
   const adapter = connectionStore.adapter
-  if (!selectedPair.value) return
+  if (!token2.value) return
 
-  await adapter?.inscribe(selectedPair.value.exactName)
+  await adapter?.inscribe(token2.value)
 }
 </script>
 
@@ -171,7 +170,7 @@ async function goInscribe() {
           'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-base',
         ]"
       >
-        <img :src="icon" class="size-5 rounded-full" v-if="icon" />
+        <img :src="token2Icon" class="size-5 rounded-full" v-if="token2Icon" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>

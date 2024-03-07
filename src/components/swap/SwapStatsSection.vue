@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import Decimal from 'decimal.js'
 import { get } from '@vueuse/core'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useFiat } from '@/hooks/use-fiat'
@@ -14,9 +14,7 @@ import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
 import { getPoolStatusQuery } from '@/queries/swap.query'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
 
-const { token1Symbol, token2Symbol, selectedPair, pairStr } = useSwapPoolPair()
-const token1Icon = computed(() => selectedPair.value?.token1Icon)
-const token2Icon = computed(() => selectedPair.value?.token2Icon)
+const { token1, token2, token1Icon, token2Icon, pairStr } = useSwapPool()
 
 const { isEmpty } = useEmptyPoolSignal()
 
@@ -32,8 +30,8 @@ const network = networkStore.network
 const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
   getPoolStatusQuery(
     {
-      token1: token1Symbol,
-      token2: token2Symbol,
+      token1: token1,
+      token2: token2,
       address,
       network,
     },
@@ -80,7 +78,7 @@ function toSwap() {
             <p
               className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 "
             >
-              {{ prettySymbol(token1Symbol) }}/{{ prettySymbol(token2Symbol) }}
+              {{ prettySymbol(token1) }}/{{ prettySymbol(token2) }}
             </p>
           </div>
 
@@ -102,9 +100,9 @@ function toSwap() {
 
             <div class="">
               {{
-                `1 ${prettySymbol(token1Symbol)} = ${
+                `1 ${prettySymbol(token1)} = ${
                   poolStatus.token2PerToken1UsingBtcUnit
-                } ${prettySymbol(token2Symbol)}`
+                } ${prettySymbol(token2)}`
               }}
             </div>
           </div>
@@ -120,9 +118,9 @@ function toSwap() {
 
             <div class="">
               {{
-                `1 ${prettySymbol(token2Symbol)} = ${
+                `1 ${prettySymbol(token2)} = ${
                   poolStatus.token1PerToken2UsingBtcUnit
-                } ${prettySymbol(token1Symbol)}`
+                } ${prettySymbol(token1)}`
               }}
             </div>
           </div>
@@ -167,7 +165,7 @@ function toSwap() {
             />
 
             <div class="">
-              {{ `${prettySymbol(token1Symbol)}` }}
+              {{ `${prettySymbol(token1)}` }}
             </div>
 
             <div class="ml-auto font-bold">
@@ -183,7 +181,7 @@ function toSwap() {
             />
 
             <div class="">
-              {{ `${prettySymbol(token2Symbol)}` }}
+              {{ `${prettySymbol(token2)}` }}
             </div>
 
             <div class="ml-auto font-bold">
@@ -234,7 +232,7 @@ function toSwap() {
           </div>
 
           <div class="">
-            <div class="label">{{ prettySymbol(token1Symbol) }}</div>
+            <div class="label">{{ prettySymbol(token1) }}</div>
 
             <div class="value">
               {{ poolStatus.token1AmountUsingBtcUnit }}
@@ -242,7 +240,7 @@ function toSwap() {
           </div>
 
           <div class="">
-            <div class="label">{{ prettySymbol(token2Symbol) }}</div>
+            <div class="label">{{ prettySymbol(token2) }}</div>
 
             <div class="value">
               {{ poolStatus.token2Amount }}

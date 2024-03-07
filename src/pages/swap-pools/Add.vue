@@ -8,7 +8,7 @@ import { ElMessage } from 'element-plus'
 import { useConnectionStore } from '@/stores/connection'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useOngoingTask } from '@/hooks/use-ongoing-task'
@@ -20,7 +20,7 @@ import { type InscriptionUtxo } from '@/queries/swap/types'
 import SwapSideWithInput from '@/components/swap/SwapSideWithInput.vue'
 import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
 
-const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { token1, token2 } = useSwapPool()
 const { openConnectionModal } = useConnectionModal()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const { isEmpty } = useEmptyPoolSignal()
@@ -52,8 +52,8 @@ watch(token2Amount, async (newAmount) => {
   calculatingToken1.value = true
 
   previewAdd({
-    token1: token1Symbol.value.toLowerCase(),
-    token2: token2Symbol.value.toLowerCase(),
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
     source: 'token2',
     sourceAmount: newAmount,
   })
@@ -164,7 +164,7 @@ watch(
 )
 
 watch(
-  () => [token1Symbol.value, token2Symbol.value],
+  () => [token1.value, token2.value],
   ([from, to]) => {
     if (from && to) {
       conditions.value = conditions.value.map((c) => {
@@ -349,16 +349,16 @@ async function doAddLiquidity() {
   // go for it!
   if (isEmpty.value) {
     mutateBuildInit({
-      token1: token1Symbol.value.toLowerCase(),
-      token2: token2Symbol.value.toLowerCase(),
+      token1: token1.value.toLowerCase(),
+      token2: token2.value.toLowerCase(),
       token1Amount: token1Amount.value,
       token2Amount: token2Amount.value,
       inscriptionUtxos: token2InscriptionUtxos.value,
     })
   } else {
     mutateBuildAdd({
-      token1: token1Symbol.value.toLowerCase(),
-      token2: token2Symbol.value.toLowerCase(),
+      token1: token1.value.toLowerCase(),
+      token2: token2.value.toLowerCase(),
       source: 'token2',
       sourceAmount: token2Amount.value,
       inscriptionUtxos: token2InscriptionUtxos.value,
@@ -371,7 +371,7 @@ async function doAddLiquidity() {
   <div class="my-4 space-y-0.5 text-sm">
     <!-- brc first -->
     <SwapSideBrc
-      v-model:symbol="token2Symbol"
+      v-model:symbol="token2"
       v-model:amount="token2Amount"
       v-model:inscription-utxos="token2InscriptionUtxos"
       @has-enough="hasEnough = true"
@@ -385,7 +385,7 @@ async function doAddLiquidity() {
     </div>
 
     <SwapSideWithInput
-      v-model:symbol="token1Symbol"
+      v-model:symbol="token1"
       v-model:amount="token1Amount"
       :calculating="calculatingToken1"
       use-case="init"
@@ -398,7 +398,7 @@ async function doAddLiquidity() {
     />
 
     <SwapSideBtc
-      v-model:symbol="token1Symbol"
+      v-model:symbol="token1"
       v-model:amount="token1Amount"
       :calculating="calculatingToken1"
       use-case="add"
@@ -413,8 +413,8 @@ async function doAddLiquidity() {
   <AddPricesAndShares
     class="my-4"
     v-if="ratio.gt(0) && poolEquity.gt(0)"
-    :token-1-symbol="token1Symbol"
-    :token-2-symbol="token2Symbol"
+    :token-1-symbol="token1"
+    :token-2-symbol="token2"
     :ratio="ratio"
     :add-equity="addEquity"
     :pool-equity="poolEquity"

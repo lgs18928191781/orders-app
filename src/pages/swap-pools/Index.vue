@@ -2,10 +2,10 @@
 import { useRoute } from 'vue-router'
 
 import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 
 const { isEmpty } = useEmptyPoolSignal()
-const { pairStr } = useSwapPoolPair()
+const { pairStr } = useSwapPool()
 
 const route = useRoute()
 function isLinkActive(keyword: string) {

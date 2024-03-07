@@ -7,7 +7,7 @@ import gsap from 'gsap'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
@@ -18,7 +18,7 @@ import { ADD_THRESHOLD_AMOUNT, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { selectedPair } = useSwapPoolPair()
+const { token1Icon } = useSwapPool()
 
 const props = defineProps({
   side: {
@@ -38,17 +38,6 @@ const props = defineProps({
 })
 
 const symbol = defineModel('symbol', { required: true, type: String })
-const icon = computed(() => {
-  if (!selectedPair.value) {
-    return null
-  }
-
-  if (symbol.value === selectedPair.value.token1Symbol) {
-    return selectedPair.value.token1Icon
-  }
-
-  return selectedPair.value.token2Icon
-})
 
 // amount
 const amount = defineModel('amount', { type: String })
@@ -263,7 +252,7 @@ watch(
           'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-base',
         ]"
       >
-        <img :src="icon" class="size-5 rounded-full" v-if="icon" />
+        <img :src="token1Icon" class="size-5 rounded-full" v-if="token1Icon" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>

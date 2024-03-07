@@ -10,7 +10,7 @@ import { useNetworkStore } from '@/stores/network'
 import { useBtcJsStore } from '@/stores/btcjs'
 
 import { useConnectionModal } from '@/hooks/use-connection-modal'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useOngoingTask } from '@/hooks/use-ongoing-task'
 
@@ -35,7 +35,7 @@ const btcjsStore = useBtcJsStore()
 const networkStore = useNetworkStore()
 
 // symbol & amount
-const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { token1, token2 } = useSwapPool()
 const token1Amount = ref<string>()
 const token2Amount = ref<string>()
 const token2InscriptionUtxos = ref<InscriptionUtxo[]>([])
@@ -86,8 +86,8 @@ watch(swapType, async (newSwapType) => {
   }
 
   previewSwap({
-    token1: token1Symbol.value.toLowerCase(),
-    token2: token2Symbol.value.toLowerCase(),
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
     swapType: newSwapType,
     sourceAmount: sourceAmount.value,
   })
@@ -159,8 +159,8 @@ watch(
     }
 
     previewSwap({
-      token1: token1Symbol.value.toLowerCase(),
-      token2: token2Symbol.value.toLowerCase(),
+      token1: token1.value.toLowerCase(),
+      token2: token2.value.toLowerCase(),
       swapType: swapType.value,
       sourceAmount: sourceAmount.value,
     })
@@ -326,7 +326,7 @@ watch(
 )
 
 watch(
-  () => [token1Symbol.value, token2Symbol.value],
+  () => [token1.value, token2.value],
   ([from, to]) => {
     if (from && to) {
       conditions.value = conditions.value.map((c) => {
@@ -549,8 +549,8 @@ async function doSwap() {
 
   // go for it!
   mutateBuildSwap({
-    token1: token1Symbol.value.toLowerCase(),
-    token2: token2Symbol.value.toLowerCase(),
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
     sourceAmount: sourceAmount.value,
     inscriptionUtxos: token2InscriptionUtxos.value,
   })
@@ -569,7 +569,7 @@ async function doSwap() {
         <SwapSideBrc
           side="pay"
           v-if="flipped"
-          v-model:symbol="token2Symbol"
+          v-model:symbol="token2"
           v-model:amount="token2Amount"
           v-model:inscription-utxos="token2InscriptionUtxos"
           @has-enough="hasEnough = true"
@@ -581,7 +581,7 @@ async function doSwap() {
         <SwapSideWithInput
           side="pay"
           v-else
-          v-model:symbol="token1Symbol"
+          v-model:symbol="token1"
           v-model:amount="token1Amount"
           :calculating="calculatingPay"
           @has-enough="hasEnough = true"
@@ -618,7 +618,7 @@ async function doSwap() {
           side="receive"
           use-case="swap"
           v-if="flipped"
-          v-model:symbol="token1Symbol"
+          v-model:symbol="token1"
           v-model:amount="token1Amount"
           @more-than-threshold="moreThanThreshold = true"
           @less-than-threshold="moreThanThreshold = false"
@@ -628,7 +628,7 @@ async function doSwap() {
         <SwapSideWithInput
           side="receive"
           v-else
-          v-model:symbol="token2Symbol"
+          v-model:symbol="token2"
           v-model:amount="token2Amount"
           @more-than-threshold="moreThanThreshold = true"
           @less-than-threshold="moreThanThreshold = false"
@@ -637,8 +637,8 @@ async function doSwap() {
         />
 
         <SwapPriceDisclosure
-          :token1-symbol="token1Symbol"
-          :token2-symbol="token2Symbol"
+          :token1-symbol="token1"
+          :token2-symbol="token2"
           v-show="!!Number(sourceAmount)"
           :price-impact="priceImpact"
           :has-impact-warning="hasImpactWarning"

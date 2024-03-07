@@ -14,7 +14,7 @@ import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useOngoingTask } from '@/hooks/use-ongoing-task'
 import { getOngoingTaskQuery } from '@/queries/swap/ongoing-task.query'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 
 import { prettyCoinDisplay } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
@@ -25,7 +25,7 @@ const networkStore = useNetworkStore()
 const address = connectionStore.getAddress
 const network = networkStore.network
 const { hasOngoing, taskId, clearOngoing } = useOngoingTask()
-const { selectedPair } = useSwapPoolPair()
+const { token1Icon, token2Icon } = useSwapPool()
 
 const taskStatus = ref('running')
 const { data: task } = useQuery(
@@ -67,8 +67,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value?.token1Icon,
-        toIcon: selectedPair.value?.token2Icon,
+        fromIcon: token1Icon,
+        toIcon: token2Icon,
       }
     case '2x':
     case 'x1':
@@ -79,8 +79,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token1,
         fromAmount: task.value.amount2,
         toAmount: task.value.amount1,
-        fromIcon: selectedPair.value?.token2Icon,
-        toIcon: selectedPair.value?.token1Icon,
+        fromIcon: token2Icon,
+        toIcon: token1Icon,
       }
     case 'add':
       return {
@@ -90,8 +90,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value?.token1Icon,
-        toIcon: selectedPair.value?.token2Icon,
+        fromIcon: token1Icon,
+        toIcon: token2Icon,
       }
 
     case 'remove':
@@ -102,8 +102,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value?.token1Icon,
-        toIcon: selectedPair.value?.token2Icon,
+        fromIcon: token1Icon,
+        toIcon: token2Icon,
       }
     default:
       return null

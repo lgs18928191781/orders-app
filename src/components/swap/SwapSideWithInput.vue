@@ -6,7 +6,7 @@ import { Loader2Icon, EraserIcon, AlertCircleIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrcFiatRate, getFiatRate, getBrc20s } from '@/queries/orders-api'
@@ -16,7 +16,7 @@ import { SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { selectedPair } = useSwapPoolPair()
+const { pairStr, token1Icon, token2Icon, token1 } = useSwapPool()
 
 const props = defineProps({
   side: {
@@ -31,15 +31,15 @@ const props = defineProps({
 })
 const symbol = defineModel('symbol', { required: true, type: String })
 const icon = computed(() => {
-  if (!selectedPair.value) {
+  if (!pairStr.value) {
     return null
   }
 
-  if (symbol.value === selectedPair.value.token1Symbol) {
-    return selectedPair.value.token1Icon
+  if (symbol.value === token1.value) {
+    return token1Icon.value
   }
 
-  return selectedPair.value.token2Icon
+  return token2Icon.value
 })
 
 // amount

@@ -12,7 +12,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 
@@ -31,7 +31,7 @@ import {
   ListboxOption,
 } from '@headlessui/vue'
 
-const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { token1, token2 } = useSwapPool()
 
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
@@ -45,8 +45,8 @@ const onlyMyTransactions = ref(false)
 const { data: transactions, isLoading: isLoadingTransactions } = useQuery(
   getTransactionsQuery(
     {
-      token1: token1Symbol,
-      token2: token2Symbol,
+      token1,
+      token2,
       address,
       network,
       selectedTransactionType: computed(() => selectedTransactionType.value),
@@ -73,13 +73,13 @@ function prettyType(type: '1x' | '2x' | 'x1' | 'x2' | 'add' | 'remove') {
 
     case '1x':
     case 'x2':
-      return `Swap ${prettySymbol(token1Symbol.value)} for ${prettySymbol(
-        token2Symbol.value,
+      return `Swap ${prettySymbol(token1.value)} for ${prettySymbol(
+        token2.value,
       )}`
     case '2x':
     case 'x1':
-      return `Swap ${prettySymbol(token2Symbol.value)} for ${prettySymbol(
-        token1Symbol.value,
+      return `Swap ${prettySymbol(token2.value)} for ${prettySymbol(
+        token1.value,
       )}`
     default:
       return type
@@ -177,8 +177,8 @@ function isMe(address: string) {
           </Listbox>
         </div>
         <!-- <div class="">Total Value</div> -->
-        <div class="">{{ prettySymbol(token1Symbol) }} Amount</div>
-        <div class="">{{ prettySymbol(token2Symbol) }} Amount</div>
+        <div class="">{{ prettySymbol(token1) }} Amount</div>
+        <div class="">{{ prettySymbol(token2) }} Amount</div>
         <div class="">Account</div>
         <div class="">Status</div>
         <div class="">Time</div>

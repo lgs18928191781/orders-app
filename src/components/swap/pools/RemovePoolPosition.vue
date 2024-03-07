@@ -2,12 +2,10 @@
 import Decimal from 'decimal.js'
 import { computed } from 'vue'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { prettySymbol } from '@/lib/formatters'
 
-const { token1Symbol, token2Symbol, selectedPair } = useSwapPoolPair()
-const token1Icon = computed(() => selectedPair.value?.token1Icon)
-const token2Icon = computed(() => selectedPair.value?.token2Icon)
+const { token1, token2, token1Icon, token2Icon } = useSwapPool()
 
 const props = defineProps(['poolStatus', 'poolShare'])
 
@@ -39,7 +37,7 @@ const token2AddressAmount = computed(() => {
         v-if="token2Icon"
       />
       <div class="ml-2">
-        {{ prettySymbol(token1Symbol) }}/{{ prettySymbol(token2Symbol) }}
+        {{ prettySymbol(token1) }}/{{ prettySymbol(token2) }}
       </div>
 
       <div class="ml-auto">
@@ -56,7 +54,7 @@ const token2AddressAmount = computed(() => {
     </div>
 
     <div class="flex items-center text-sm">
-      <div class="ml-2">{{ prettySymbol(token1Symbol) }}:</div>
+      <div class="ml-2">{{ prettySymbol(token1) }}:</div>
 
       <div class="ml-auto">
         {{ poolStatus?.token1AmountUsingBtcUnit || '-' }}
@@ -64,7 +62,7 @@ const token2AddressAmount = computed(() => {
     </div>
 
     <div class="flex items-center text-sm">
-      <div class="ml-2">{{ prettySymbol(token2Symbol) }}:</div>
+      <div class="ml-2">{{ prettySymbol(token2) }}:</div>
 
       <div class="ml-auto">
         {{ poolStatus?.token2Amount || '-' }}
