@@ -199,14 +199,6 @@ const currentAssetInfo = reactive<{ val: assetReqReturnType }>({
   val: {},
 })
 
-async function init() {
-  const pubk = await BridgeTools.getPublicKey()
-  console.log('await connectionStore.provider.btc.getUtxos()', btcJsStore, pubk)
-  debugger
-}
-
-onMounted(() => init())
-
 const fromAsset = reactive({
   val: {
     network: AssetNetwork.BTC,
@@ -239,7 +231,7 @@ async function getAssetInfo() {
     const { decimals, originSymbol, targetSymbol, network } = currentPairs[0]
     console.log('assetInfo.val', currentPairs[0])
     currentAssetInfo.val = currentPairs[0]
-    debugger
+
     if (connectionStore.connected) {
       if (fromAsset.val.network == AssetNetwork.BTC) {
         queryAddress = connectionStore.last.address
@@ -425,24 +417,23 @@ async function confrimSwap() {
   if (swapFromAmount.value <= 0) {
     return
   }
-  console.log(' assetInfo.val.originTokenId', currentAssetInfo.val)
+  // console.log(' assetInfo.val.originTokenId', currentAssetInfo.val)
 
-  const publicKey = await connectionStore.adapter.getPubKey()
-  const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
+  // const publicKey = await connectionStore.adapter.getPubKey()
+  // const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
 
-  //const publicKey=await connectionStore.adapter.getPubKey()
-  BridgeTools.sumitBridgeOrder({
-    amount: formatUnitToSats(
-      swapFromAmount.value,
-      currentAssetInfo.val.decimal
-    ),
-    originTokenId: currentAssetInfo.val.originTokenId,
-    addressType: AddressType.P2WPKH,
-    publicKey: publicKey,
-    publicKeySign: publicKeySign,
-  })
+  // BridgeTools.sumitBridgeOrder({
+  //   amount: formatUnitToSats(
+  //     swapFromAmount.value,
+  //     currentAssetInfo.val.decimal
+  //   ),
+  //   originTokenId: currentAssetInfo.val.originTokenId,
+  //   addressType: AddressType.P2WPKH,
+  //   publicKey: publicKey,
+  //   publicKeySign: publicKeySign,
+  // })
+  //return
 
-  return
   successInfo.send.amount = swapFromAmount.value
   successInfo.send.desc =
     fromAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'

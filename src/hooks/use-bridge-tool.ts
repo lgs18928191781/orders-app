@@ -185,7 +185,6 @@ export function useBridgeTools() {
         txHex: psbt.extractTransaction().toHex(),
       }
       await submitPrepayOrderMintBtc(submitPrepayOrderMintDto)
-      debugger
     } catch (error) {}
   }
 
