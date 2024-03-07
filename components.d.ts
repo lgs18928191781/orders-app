@@ -23,6 +23,7 @@ declare module '@vue/runtime-core' {
     ClaimRecordItem: typeof import('./src/components/events/ClaimRecordItem.vue')['default']
     ConfirmationModal: typeof import('./src/components/overlays/ConfirmationModal.vue')['default']
     ConnectionModal: typeof import('./src/components/header/ConnectionModal.vue')['default']
+    ElPopover: typeof import('element-plus/es')['ElPopover']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     EventClaimRecords: typeof import('./src/components/pool/EventClaimRecords.vue')['default']
     EventRecords: typeof import('./src/components/events/EventRecords.vue')['default']

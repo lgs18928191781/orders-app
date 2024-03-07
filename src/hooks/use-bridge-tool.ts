@@ -43,6 +43,7 @@ type prepayOrderParams = {
   addressType: AddressType
   publicKey: string
   publicKeySign: string
+  feeBtc: number
 }
 
 export function useBridgeTools() {
@@ -147,11 +148,11 @@ export function useBridgeTools() {
       payInput['witnessUtxo'] = { value: utxo.satoshi, script: payment.output }
     }
     if (['P2PKH'].includes(addressType)) {
-      const rawTx = await this.mempoolReturn.bitcoin.transactions.getTxHex({
-        txid: utxo.txId,
-      })
-      const tx = Transaction.fromHex(rawTx)
-      payInput['nonWitnessUtxo'] = tx.toBuffer()
+      // const rawTx = await this.mempoolReturn.bitcoin.transactions.getTxHex({
+      //   txid: utxo.txId,
+      // })
+      // const tx = Transaction.fromHex(rawTx)
+      // payInput['nonWitnessUtxo'] = tx.toBuffer()
     }
     return payInput
   }
@@ -172,6 +173,7 @@ export function useBridgeTools() {
       addressType,
       publicKey,
       publicKeySign,
+      feeBtc,
     }
     try {
       const createResp = await createPrepayOrderMintBtc(createPrepayOrderDto)
