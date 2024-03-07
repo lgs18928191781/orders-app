@@ -5,6 +5,7 @@ import {
   submitPrepayOrderMintBtcReq,
 } from '@/queries/bridge-api'
 import { useBtcJsStore } from '@/stores/btcjs'
+import { Buffer } from 'buffer'
 import Decimal from 'decimal.js'
 import { useNetworkStore } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
@@ -61,7 +62,7 @@ export function useBridgeTools() {
   function confirmNumberBySeqAndAmount(
     amount: number,
     seq: number[][],
-    network: 'BTC' | 'BRC20' | 'MVC'
+    network: 'BTC' | 'BRC20' | 'MVC',
   ) {
     for (const item of seq) {
       const [start, end, confirmBtc, confirmMvc] = item
@@ -87,7 +88,7 @@ export function useBridgeTools() {
   }
 
   async function createPrepayOrderMintBtc(
-    data: prepayOrderParams
+    data: prepayOrderParams,
   ): Promise<prepayOrderReturnType> {
     const res = await createPrepayOrderMintBtcReq(data)
     return res.data
@@ -197,7 +198,7 @@ export function useBridgeTools() {
   function getTotalSatoshi(utxos: UTXO[]): Decimal {
     return utxos.reduce(
       (total, utxo) => total.add(utxo.satoshi),
-      new Decimal(0)
+      new Decimal(0),
     )
   }
 
@@ -212,7 +213,7 @@ export function useBridgeTools() {
   async function send(
     recipient: string,
     amount: Decimal | number,
-    feeRate = 57
+    feeRate = 57,
   ) {
     const connectionStore = useConnectionStore()
     const btcJsStore = useBtcJsStore().get!
@@ -263,7 +264,7 @@ export function useBridgeTools() {
       total = getTotalSatoshi(selectedUTXOs)
       const psbt = await buildPsbt(
         selectedUTXOs,
-        total.minus(amount).minus(fee)
+        total.minus(amount).minus(fee),
       )
       fee = calculateFee(psbt, feeRate)
     }
@@ -298,7 +299,7 @@ export function useBridgeTools() {
       mintAmount,
       confirmSequence,
       // mint btc -> mvc, get mvc confirm number
-      'BTC'
+      'BTC',
     )
     const btcAsset = assetList[0]
     let bridgeFee: number = 0
