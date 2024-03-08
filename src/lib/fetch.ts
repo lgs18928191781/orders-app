@@ -187,7 +187,8 @@ export async function swapApiFetch(url: string, options?: ApiOptions) {
 
 export async function bridgeApiFetch(
   url: string,
-  options?: { headers?: HeadersInit } & RequestInit
+  options?: { headers?: HeadersInit } & RequestInit,
+  returnRaw: boolean = false
 ) {
   const ordersApiUrl = `https://www.orders.exchange/api-bridge-testnet${url}`
   if (!options)
@@ -228,7 +229,7 @@ export async function bridgeApiFetch(
   if (jsoned.status === 'error') {
     throw new Error(jsoned.message)
   }
-
+  if (returnRaw) return jsoned
   return jsoned.data
 }
 

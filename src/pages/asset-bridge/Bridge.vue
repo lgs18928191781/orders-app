@@ -71,6 +71,7 @@
             >{{ btnStatus.value }}</span
           >
         </button>
+        <button @click="redeem">redeem</button>
       </div>
     </div>
     <div
@@ -162,6 +163,7 @@ import { getOneBrc20 } from '@/queries/orders-api'
 import { useRoute } from 'vue-router'
 import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import { useBtcJsStore } from '@/stores/btcjs'
+import { useBridgeRedeem } from '@/hooks/use-bridge-redeem'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -182,6 +184,7 @@ const connectionStore = useConnectionStore()
 const btcJsStore = useBtcJsStore()
 const route = useRoute()
 const BridgeTools = useBridgeTools()
+const BridgeRedeem = useBridgeRedeem()
 
 const swapFromAmount = ref(0)
 const feeInfo = reactive({
@@ -406,6 +409,18 @@ function BtnOperate() {
     connetMetalet()
   } else if (btnStatus.value.color == BtnColor.default) {
     confrimSwap()
+  }
+}
+async function redeem() {
+  try {
+    if (currentAssetInfo.val.network === 'BTC') {
+      await BridgeRedeem.redeemBtc(10000, currentAssetInfo.val)
+    }
+    if (currentAssetInfo.val.network === 'BRC20') {
+      await BridgeRedeem.redeemBrc20(1000000000, currentAssetInfo.val)
+    }
+  } catch (err) {
+    console.log(err)
   }
 }
 
