@@ -19,13 +19,15 @@ import { useSwapPool } from '@/hooks/use-swap-pool'
 import { prettyCoinDisplay } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
 import { ElMessage } from 'element-plus'
+import { useTokenIcon } from '@/hooks/use-token-icon'
+import { computedEager } from '@vueuse/core'
+import IconImage from '@/components/IconImage.vue'
 
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const address = connectionStore.getAddress
 const network = networkStore.network
 const { hasOngoing, taskId, clearOngoing } = useOngoingTask()
-const { token1Icon, token2Icon } = useSwapPool()
 
 const taskStatus = ref('running')
 const { data: task } = useQuery(
@@ -52,7 +54,19 @@ watch(
   { immediate: true },
 )
 
-const extendedTask = computed(() => {
+const token1 = computedEager(() => {
+  if (!task.value) return ''
+  return task.value.token1
+})
+
+const token2 = computedEager(() => {
+  if (!task.value) return ''
+  return task.value.token2
+})
+const { iconUrl: token1Icon } = useTokenIcon(token1)
+const { iconUrl: token2Icon } = useTokenIcon(token2)
+
+const extendedTask = computedEager(() => {
   if (!task.value) {
     return null
   }
@@ -210,9 +224,8 @@ function copyFailedReason() {
             class="flex items-center gap-2 text-sm"
             v-if="extendedTask.type === 'swap'"
           >
-            <img
+            <IconImage
               :src="extendedTask.fromIcon"
-              :alt="extendedTask.fromToken"
               class="size-6"
               v-if="extendedTask.fromIcon"
             />
@@ -222,9 +235,8 @@ function copyFailedReason() {
 
             <ArrowRightIcon class="mx-2 size-4" />
 
-            <img
+            <IconImage
               :src="extendedTask.toIcon"
-              :alt="extendedTask.toToken"
               class="size-6"
               v-if="extendedTask.toIcon"
             />
@@ -235,9 +247,8 @@ function copyFailedReason() {
 
           <div class="" v-else-if="extendedTask.type === 'add'">
             <div class="flex items-center gap-2 text-sm">
-              <img
+              <IconImage
                 :src="extendedTask.fromIcon"
-                :alt="extendedTask.fromToken"
                 class="size-6"
                 v-if="extendedTask.fromIcon"
               />
@@ -250,9 +261,8 @@ function copyFailedReason() {
 
               <PlusIcon class="mx-2 size-4" />
 
-              <img
+              <IconImage
                 :src="extendedTask.toIcon"
-                :alt="extendedTask.toToken"
                 class="size-6"
                 v-if="extendedTask.toIcon"
               />
@@ -266,10 +276,9 @@ function copyFailedReason() {
             class="flex items-center gap-2 text-sm"
             v-else-if="extendedTask.type === 'remove'"
           >
-            <img
+            <IconImage
               :src="extendedTask.fromIcon"
-              :alt="extendedTask.fromToken"
-              class="size-6"
+              class="size-6 rounded-full"
               v-if="extendedTask.fromIcon"
             />
             <span>{{
@@ -278,10 +287,9 @@ function copyFailedReason() {
 
             <PlusIcon class="mx-2 size-4" />
 
-            <img
+            <IconImage
               :src="extendedTask.toIcon"
-              :alt="extendedTask.toToken"
-              class="size-6"
+              class="size-6 rounded-full"
               v-if="extendedTask.toIcon"
             />
             <span>{{

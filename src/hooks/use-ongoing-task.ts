@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 
 export const useOngoingTask = createGlobalState(() => {
   // state
-  const taskId = ref('')
+  const taskId = ref('0e2bcc04-80bc-491d-9bef-ed6c1e7598b9')
 
   const hasOngoing = computed(() => !!taskId.value)
 
