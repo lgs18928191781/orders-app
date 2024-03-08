@@ -100,6 +100,7 @@ export function useBridgeRedeem() {
   async function signPublicKey(): Promise<{
     publicKey: string
     publicKeySign: string
+    publicKeyReceiveSign:string
   }> {
     const btcJsStore = useBtcJsStore()
     const connectionStore = useConnectionStore()
@@ -108,25 +109,31 @@ export function useBridgeRedeem() {
     const publicKey = btcJsStore
       .ECPair!.fromPublicKey(publicKeyBuffer)
       .publicKey.toString('hex')
+    const publicKeyReceiveSign = await connectionStore.adapter.signMessage(publicKey)
     const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
+   
+    
     return {
       publicKey,
       publicKeySign,
+      publicKeyReceiveSign
     }
   }
 
   async function redeemBtc(
     redeemAmount: number,
     btcAsset: Asset,
-    addressType: 'P2TR' | 'P2WPKH' | 'P2TR'='P2WPKH'
+    addressType: 'P2TR' | 'P2WPKH' | 'P2TR' = 'P2WPKH'
   ): Promise<{ orderId: string; txid: string }> {
-    const { publicKey, publicKeySign } = await signPublicKey()
+    const { publicKey, publicKeySign,publicKeyReceiveSign } = await signPublicKey()
     const createPrepayOrderDto = {
       amount: redeemAmount,
       originTokenId: btcAsset.originTokenId,
       addressType,
       publicKey: publicKey,
-      publicKeySign: publicKeySign,
+      publicKeySign: publicKeyReceiveSign,
+      publicKeyReceive: publicKey,
+      publicKeyReceiveSign:publicKeySign,
     }
     const createResp = await createPrepayOrderRedeemBtc(createPrepayOrderDto)
     const { orderId, bridgeAddress } = createResp
@@ -252,7 +259,7 @@ export function useBridgeRedeem() {
   async function redeemBrc20(
     redeemAmount: number,
     asset: Asset,
-    addressType: 'P2TR' | 'P2WPKH' | 'P2TR'='P2WPKH'
+    addressType: 'P2TR' | 'P2WPKH' | 'P2TR' = 'P2WPKH'
   ): Promise<{ orderId: string; txid: string }> {
     const { publicKey, publicKeySign } = await signPublicKey()
     const createPrepayOrderDto = {
@@ -261,6 +268,8 @@ export function useBridgeRedeem() {
       addressType,
       publicKey: publicKey,
       publicKeySign: publicKeySign,
+      publicKeyReceive: publicKey,
+      publicKeyReceiveSign: publicKeySign,
     }
     const createResp = await createPrepayOrderRedeemBrc20(createPrepayOrderDto)
     const { orderId, bridgeAddress } = createResp
