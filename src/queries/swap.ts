@@ -140,8 +140,7 @@ export const getPoolStatus = async ({
   token1Pool: number
   token2Pool: number
   poolEquity: string
-  addressEquity: string
-  poolShare: string
+
   token1ServiceAddress: string
   token2ServiceAddress: string
   token1ServicePubkey: string
@@ -150,9 +149,19 @@ export const getPoolStatus = async ({
   token2PerToken1: string
   token1PerToken2UsingBtcUnit: string
   token2PerToken1UsingBtcUnit: string
-  token1Amount: string
-  token2Amount: string
-  token1AmountUsingBtcUnit: string
+
+  addressEquityOverall: string
+  addressEquityAvailable: string
+  addressEquityPending: string
+
+  poolShareAvailable: string
+  poolSharePending: string
+  token1AmountAvailable: string
+  token2AmountAvailable: string
+  token1AmountPending: string
+  token2AmountPending: string
+  token1AmountUsingBtcUnitAvailable: string
+  token1AmountUsingBtcUnitPending: string
 }> => {
   const res = await swapApiFetch(
     `pools/${token1}-${token2}?address=${address}&net=${network}`,

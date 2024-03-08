@@ -36,17 +36,6 @@ const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
     computed(() => !!address),
   ),
 )
-const poolShare = computed(() => {
-  if (!poolStatus.value) return '0%'
-
-  return (
-    new Decimal(poolStatus.value.addressEquity)
-      .div(poolStatus.value.poolEquity)
-      .mul(100)
-      .toDP(4)
-      .toFixed() + '%'
-  )
-})
 
 const removePercentage = ref([0])
 const debouncedPercentage = refDebounced(removePercentage, 300)
@@ -56,7 +45,7 @@ const removeEquity = computed(() => {
 
   return new Decimal(debouncedPercentage.value[0])
     .div(100)
-    .mul(poolStatus.value.addressEquity || 0)
+    .mul(poolStatus.value.addressEquityAvailable || 0)
     .toFixed(4)
 })
 
@@ -300,7 +289,6 @@ async function doRemoveLiquidity() {
     <RemovePoolPosition
       v-if="poolStatus"
       :pool-status="poolStatus"
-      :pool-share="poolShare"
       class="mt-8"
     />
   </div>

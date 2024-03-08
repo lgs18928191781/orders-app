@@ -13,23 +13,23 @@ const swapPairs = [
     token1Icon: btcLogo,
     token2Icon: rdexLogo,
   },
-  {
-    id: 2,
-    exactName: 'ordi',
-    token1Symbol: 'btc',
-    token2Symbol: 'ordi',
-    token1Icon: btcLogo,
-    token2Icon: ordiLogo,
-  },
-  {
-    id: 4,
-    exactName: 'sats',
-    token1Symbol: 'btc',
-    token2Symbol: 'sats',
-    token1Icon: btcLogo,
-    token2Icon: satsLogo,
-    useDecimals: 16,
-  },
+  // {
+  //   id: 2,
+  //   exactName: 'ordi',
+  //   token1Symbol: 'btc',
+  //   token2Symbol: 'ordi',
+  //   token1Icon: btcLogo,
+  //   token2Icon: ordiLogo,
+  // },
+  // {
+  //   id: 4,
+  //   exactName: 'sats',
+  //   token1Symbol: 'btc',
+  //   token2Symbol: 'sats',
+  //   token1Icon: btcLogo,
+  //   token2Icon: satsLogo,
+  //   useDecimals: 16,
+  // },
 ] as {
   id: number
   exactName: string

@@ -3,9 +3,19 @@ import { useRouteParams } from '@vueuse/router'
 import { useRouter } from 'vue-router'
 
 import { useTokenIcon } from '@/hooks/use-token-icon'
+import { useNetworkStore } from '@/stores/network'
 
 export function useSwapPool() {
-  const pairStr = useRouteParams('pair') as Ref<string>
+  let pairStr = useRouteParams('pair') as Ref<string>
+  if (!pairStr.value) {
+    // use default
+    const networkStore = useNetworkStore()
+    if (networkStore.network === 'testnet') {
+      pairStr.value = 'btc-xedr'
+    } else {
+      pairStr.value = 'btc-rdex'
+    }
+  }
 
   const token1 = computed(() => pairStr.value.split('-')[0])
   const token2 = computed(() => pairStr.value.split('-')[1])

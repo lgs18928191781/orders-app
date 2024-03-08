@@ -13,6 +13,7 @@ import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
 
 import { getPoolStatusQuery } from '@/queries/swap.query'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { Loader2Icon } from 'lucide-vue-next'
 
 const { token1, token2, token1Icon, token2Icon, pairStr } = useSwapPool()
 
@@ -37,6 +38,11 @@ const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
     },
     computed(() => !!address),
   ),
+)
+const hasPending = computed(
+  () =>
+    poolStatus.value?.poolSharePending !== '0' &&
+    poolStatus.value?.poolSharePending !== '0%',
 )
 
 const tvl = computed(() => {
@@ -227,7 +233,11 @@ function toSwap() {
             <div class="label">Pool Share</div>
 
             <div class="value">
-              {{ poolStatus.poolShare }}
+              {{ poolStatus.poolShareAvailable }}
+            </div>
+            <div class="secondary flex items-center gap-2" v-if="hasPending">
+              {{ '+ ' + poolStatus.poolSharePending }}
+              <Loader2Icon class="size-3 animate-spin" />
             </div>
           </div>
 
@@ -235,7 +245,11 @@ function toSwap() {
             <div class="label">{{ prettySymbol(token1) }}</div>
 
             <div class="value">
-              {{ poolStatus.token1AmountUsingBtcUnit }}
+              {{ poolStatus.token1AmountUsingBtcUnitAvailable }}
+            </div>
+            <div class="secondary flex items-center gap-2" v-if="hasPending">
+              {{ '+ ' + poolStatus.token1AmountUsingBtcUnitPending }}
+              <Loader2Icon class="size-3 animate-spin" />
             </div>
           </div>
 
@@ -243,7 +257,11 @@ function toSwap() {
             <div class="label">{{ prettySymbol(token2) }}</div>
 
             <div class="value">
-              {{ poolStatus.token2Amount }}
+              {{ poolStatus.token2AmountAvailable }}
+            </div>
+            <div class="secondary flex items-center gap-2" v-if="hasPending">
+              {{ '+ ' + poolStatus.token2AmountPending }}
+              <Loader2Icon class="size-3 animate-spin" />
             </div>
           </div>
         </div>
@@ -262,5 +280,9 @@ function toSwap() {
 
 .value {
   @apply mt-1 flex items-center gap-2 font-bold text-zinc-300;
+}
+
+.secondary {
+  @apply text-zinc-500;
 }
 </style>
