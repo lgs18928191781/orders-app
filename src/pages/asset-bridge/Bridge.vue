@@ -412,6 +412,7 @@ function BtnOperate() {
   }
 }
 async function redeem() {
+  //TODO 限定metalet 钱包
   try {
     if (currentAssetInfo.val.network === 'BTC') {
       await BridgeRedeem.redeemBtc(10000, currentAssetInfo.val)
