@@ -10,6 +10,7 @@ import Toaster from '@/components/ui/toast/Toaster.vue'
 import AppHeader from '@/components/header/AppHeader.vue'
 import NotAvailableOverlay from '@/components/overlays/NotAvailable.vue'
 import BuildingOverlay from '@/components/overlays/Building.vue'
+import { isDefined } from '@vueuse/core'
 
 const btcJsStore = useBtcJsStore()
 const geoStore = useGeoStore()
@@ -26,6 +27,7 @@ onMounted(async () => {
   const btcjs = window.bitcoin
   btcjs.initEccLib(secp256k1)
   btcJsStore.set(btcjs)
+  alert(btcJsStore.get)
 
   // initialize related btc modules
   const ECPair = window.ecpair.ECPairFactory(secp256k1)
