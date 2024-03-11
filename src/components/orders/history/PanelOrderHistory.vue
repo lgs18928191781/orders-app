@@ -31,10 +31,10 @@ const { data: orderHistory, isLoading } = useQuery({
 </script>
 
 <template>
-  <TabPanel class="text-sm h-full flex flex-col">
+  <TabPanel class="flex h-full flex-col text-sm">
     <!-- table header -->
     <div
-      class="grid grid-cols-12 gap-2 text-zinc-500 border-b border-zinc-700 pb-4"
+      class="grid grid-cols-12 gap-2 border-b border-zinc-700 pb-4 text-zinc-500"
     >
       <div class="col-span-2">Order Time</div>
       <div class="col-span-1">Pair</div>
@@ -47,7 +47,7 @@ const { data: orderHistory, isLoading } = useQuery({
 
     <!-- table body -->
     <div
-      class="grow flex flex-col gap-2 items-center justify-center text-zinc-500 text-base"
+      class="flex grow flex-col items-center justify-center gap-2 text-base text-zinc-500"
       v-if="!connectionStore.connected"
     >
       <PlugZapIcon class="h-10 w-10 text-zinc-500" />
@@ -55,14 +55,14 @@ const { data: orderHistory, isLoading } = useQuery({
     </div>
 
     <div
-      class="grow flex items-center justify-center text-zinc-500 text-sm"
+      class="flex grow items-center justify-center text-sm text-zinc-500"
       v-else-if="isLoading"
     >
-      <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+      <Loader2Icon class="h-8 w-8 animate-spin text-zinc-500" />
     </div>
 
     <div
-      class="grow flex flex-col gap-2 items-center justify-center text-zinc-500 text-base"
+      class="flex grow flex-col items-center justify-center gap-2 py-20 text-base text-zinc-500"
       v-else-if="orderHistory && orderHistory.length === 0"
     >
       <CalendarSearchIcon class="h-10 w-10 text-zinc-500" />
@@ -70,11 +70,11 @@ const { data: orderHistory, isLoading } = useQuery({
     </div>
 
     <div
-      class="py-4 flex flex-col gap-2 overflow-y-auto h-1 flex-auto nicer-scrollbar pr-3 -mr-3"
+      class="nicer-scrollbar -mr-3 flex h-1 flex-auto flex-col gap-2 overflow-y-auto py-4 pr-3"
       v-else
     >
       <div
-        class="grid grid-cols-12 gap-2 text-zinc-300 items-start"
+        class="grid grid-cols-12 items-start gap-2 text-zinc-300"
         v-for="order in orderHistory"
         :key="order.orderId"
       >
@@ -118,7 +118,7 @@ const { data: orderHistory, isLoading } = useQuery({
         </div>
 
         <div
-          class="col-span-1 text-right capitalize flex justify-end items-center gap-2"
+          class="col-span-1 flex items-center justify-end gap-2 text-right capitalize"
           :class="[order.orderStateStr === 'canceled' && 'text-zinc-500']"
         >
           <div class="">
@@ -133,7 +133,7 @@ const { data: orderHistory, isLoading } = useQuery({
             rel="noopener noreferrer"
           >
             <ExternalLinkIcon
-              class="h-4 w-4 inline-block text-zinc-300 hover:text-primary"
+              class="inline-block h-4 w-4 text-zinc-300 hover:text-primary"
             />
           </a>
         </div>

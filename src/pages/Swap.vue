@@ -1,55 +1,242 @@
 <script lang="ts" setup>
-import { ref, watch, type Ref, computed } from 'vue'
-import { ArrowDownIcon } from 'lucide-vue-next'
+import { ref, watch, type Ref, computed, onMounted } from 'vue'
+import { ArrowDownIcon, ArrowUpDownIcon, Loader2Icon } from 'lucide-vue-next'
+import Decimal from 'decimal.js'
+import { ElMessage } from 'element-plus'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 import { useConnectionStore } from '@/stores/connection'
-import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { useNetworkStore } from '@/stores/network'
+import { useBtcJsStore } from '@/stores/btcjs'
 
-import SwapBlur from '@/components/swap/SwapBlur.vue'
-import ConnectionModal from '@/components/header/ConnectionModal.vue'
-import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
-import { ArrowUpDownIcon } from 'lucide-vue-next'
-import { SWAP_READY } from '@/data/constants'
+import { useConnectionModal } from '@/hooks/use-connection-modal'
+import { useSwapPool } from '@/hooks/use-swap-pool'
+import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { useOngoingTask } from '@/hooks/use-ongoing-task'
+
+import {
+  SwapType,
+  build2xSwap,
+  postTask,
+  previewSwap,
+  build1xSwap,
+  buildX2Swap,
+} from '@/queries/swap'
+import { exclusiveChange } from '@/lib/build-helpers'
+import { ERRORS } from '@/data/errors'
+import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import { sleep } from '@/lib/helpers'
+import { type InscriptionUtxo } from '@/queries/swap/types'
+import { useFeebStore } from '@/stores/feeb'
 
 const { openConnectionModal } = useConnectionModal()
+const connectionStore = useConnectionStore()
+const { openBuilding, closeBuilding } = useBuildingOverlay()
+const btcjsStore = useBtcJsStore()
+const networkStore = useNetworkStore()
 
-const fromSymbol = ref('RDEX')
-const toSymbol = ref('btc')
-// watch for changes to both symbols
-// the rule is when one changes from brc to btc, the other changes from btc to brc
-watch(fromSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && toSymbol.value === 'btc') {
-    toSymbol.value = ''
-  } else if (newSymbol !== 'btc' && toSymbol.value !== 'btc') {
-    toSymbol.value = 'btc'
+// symbol & amount
+const { token1, token2 } = useSwapPool()
+const token1Amount = ref<string>()
+const token2Amount = ref<string>()
+const token2InscriptionUtxos = ref<InscriptionUtxo[]>([])
+
+const ratio = ref<Decimal>(new Decimal(0))
+const poolRatio = ref<Decimal>(new Decimal(0))
+const priceImpact = ref<Decimal>(new Decimal(0))
+const hasImpactWarning = computed(() => {
+  // greater than 15%
+  return priceImpact.value.gte(15)
+})
+
+const calculatingPay = ref(false)
+const calculatingReceive = ref(false)
+const calculating = computed(
+  () => calculatingPay.value || calculatingReceive.value,
+)
+
+// swap & flip related
+const swapType = ref<SwapType>('1x')
+const flipped = computed(() => ['2x', 'x1'].includes(swapType.value))
+const flippedControl = ref(false)
+const sourceAmount = computed(() => {
+  if (swapType.value.includes('1')) {
+    return token1Amount.value
+  } else {
+    return token2Amount.value
   }
 })
-watch(toSymbol, (newSymbol) => {
-  if (newSymbol === 'btc' && fromSymbol.value === 'btc') {
-    fromSymbol.value = ''
-  } else if (newSymbol !== 'btc' && fromSymbol.value !== 'btc') {
-    fromSymbol.value = 'btc'
+
+// watch for swapType
+// if changed, calculate the other amount
+watch(swapType, async (newSwapType) => {
+  if (!sourceAmount.value) return
+
+  // if is flipping to x1 or 2x, clear every amounts and return (since arbitrary brc as input is not supported)
+  if (flipped.value) {
+    token1Amount.value = undefined
+    token2Amount.value = undefined
+    return
   }
+
+  // calculating
+  if (newSwapType.indexOf('x') === 0) {
+    calculatingPay.value = true
+  } else {
+    calculatingReceive.value = true
+  }
+
+  previewSwap({
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
+    swapType: newSwapType,
+    sourceAmount: sourceAmount.value,
+  })
+    .then((preview) => {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'insufficient-liquidity') {
+          c.met = true
+        }
+        return c
+      })
+
+      ratio.value = new Decimal(preview.ratio)
+      poolRatio.value = new Decimal(preview.poolRatio)
+      priceImpact.value = new Decimal(preview.priceImpact)
+
+      if (newSwapType.includes('1')) {
+        token2Amount.value = preview.targetAmount
+      } else {
+        token1Amount.value = preview.targetAmount
+      }
+    })
+    .catch((e) => {
+      if (e.message === ERRORS.INSUFFICIENT_LIQUIDITY) {
+        if (newSwapType.includes('1')) {
+          token2Amount.value = undefined
+        } else {
+          token1Amount.value = undefined
+        }
+
+        conditions.value = conditions.value.map((c) => {
+          if (c.condition === 'insufficient-liquidity') {
+            c.met = false
+          }
+          return c
+        })
+      }
+    })
+    .finally(() => {
+      calculatingPay.value = false
+      calculatingReceive.value = false
+    })
 })
 
-// amount
-const fromAmount = ref()
-const toAmount = ref()
+// watch for sourceAmount
+watch(
+  [token1Amount, token2Amount],
+  async (
+    [newToken1Amount, newToken2Amount],
+    [oldToken1Amount, oldToken2Amount],
+  ) => {
+    const sourceChanging = swapType.value.includes('1')
+      ? newToken1Amount !== oldToken1Amount
+      : newToken2Amount !== oldToken2Amount
+    if (!sourceChanging) return
+
+    if (!sourceAmount.value) return
+
+    if (Number(sourceAmount.value) === 0) {
+      token1Amount.value = undefined
+      token2Amount.value = undefined
+      return
+    }
+
+    // calculating
+    if (swapType.value.indexOf('x') === 0) {
+      calculatingPay.value = true
+    } else {
+      calculatingReceive.value = true
+    }
+
+    previewSwap({
+      token1: token1.value.toLowerCase(),
+      token2: token2.value.toLowerCase(),
+      swapType: swapType.value,
+      sourceAmount: sourceAmount.value,
+    })
+      .then((preview) => {
+        conditions.value = conditions.value.map((c) => {
+          if (c.condition === 'insufficient-liquidity') {
+            c.met = true
+          }
+          return c
+        })
+
+        ratio.value = new Decimal(preview.ratio)
+        poolRatio.value = new Decimal(preview.poolRatio)
+        priceImpact.value = new Decimal(preview.priceImpact)
+
+        if (swapType.value.includes('1')) {
+          token2Amount.value = preview.targetAmount
+        } else {
+          token1Amount.value = preview.targetAmount
+        }
+      })
+      .catch((e) => {
+        if (e.message === ERRORS.INSUFFICIENT_LIQUIDITY) {
+          if (swapType.value.includes('1')) {
+            token2Amount.value = undefined
+          } else {
+            token1Amount.value = undefined
+          }
+
+          conditions.value = conditions.value.map((c) => {
+            if (c.condition === 'insufficient-liquidity') {
+              c.met = false
+            }
+            return c
+          })
+        }
+      })
+      .finally(() => {
+        calculatingPay.value = false
+        calculatingReceive.value = false
+      })
+  },
+)
 
 // flip
-const flipAsset = () => {
-  const from = fromSymbol.value
-  const to = toSymbol.value
-  fromSymbol.value = to
-  toSymbol.value = from
+const flipAsset = async () => {
+  // flip characters of type
+  flippedControl.value = !flippedControl.value
 
-  const fromAmt = fromAmount.value
-  const toAmt = toAmount.value
-  fromAmount.value = toAmt
-  toAmount.value = fromAmt
+  await sleep(200)
+
+  switch (swapType.value) {
+    case '1x':
+      swapType.value = '2x'
+      break
+    case '2x':
+      swapType.value = '1x'
+      break
+    case 'x1':
+      swapType.value = '1x'
+      break
+    case 'x2':
+      swapType.value = '2x'
+      break
+  }
+
+  // clear amounts and reset conditions
+  token1Amount.value = undefined
+  token2Amount.value = undefined
+  hasAmount.value = false
+  moreThanThreshold.value = true
+
+  // clear token2InscriptionUtxos
+  token2InscriptionUtxos.value = []
 }
-
-const connectionStore = useConnectionStore()
 
 // unmet conditions for swap
 // if any of these conditions are not met, the swap button is disabled
@@ -76,15 +263,27 @@ const conditions: Ref<
     met: false,
   },
   {
+    condition: 'insufficient-liquidity',
+    message: 'Insufficient liquidity',
+    priority: 3,
+    met: true,
+  },
+  {
     condition: 'enter-amount',
     message: 'Enter an amount',
-    priority: 3,
+    priority: 4,
     met: false,
   },
   {
     condition: 'insufficient-balance',
     message: 'Insufficient balance',
-    priority: 4,
+    priority: 5,
+    met: false,
+  },
+  {
+    condition: 'more-than-threshold',
+    message: 'Amount too small',
+    priority: 6,
     met: false,
   },
 ])
@@ -124,11 +323,11 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
-  () => [fromSymbol.value, toSymbol.value],
+  () => [token1.value, token2.value],
   ([from, to]) => {
     if (from && to) {
       conditions.value = conditions.value.map((c) => {
@@ -146,7 +345,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 // third watcher: hasEnough
 const hasEnough = ref(true)
@@ -169,7 +368,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // fourth watcher: hasAmount
@@ -193,62 +392,233 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
+
+// 5th watcher: more-than-threshold
+const moreThanThreshold = ref(true)
+watch(
+  () => moreThanThreshold.value,
+  (moreThanThreshold) => {
+    if (moreThanThreshold) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'more-than-threshold') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true },
+)
+
+// mutations
+const { pushOngoing } = useOngoingTask()
+const queryClient = useQueryClient()
+const { mutate: mutatePostSwap } = useMutation({
+  mutationFn: postTask,
+  onSuccess: async ({ id: taskId }) => {
+    pushOngoing(taskId)
+  },
+  onError: (err: any) => {
+    ElMessage.error(err.message)
+    if (IS_DEV) throw err
+  },
+  onSettled: () => closeBuilding(),
+})
+const buildSwapFn = computed(() => {
+  switch (swapType.value) {
+    case '1x':
+      return build1xSwap
+    case '2x':
+      return build2xSwap
+    case 'x2':
+      return buildX2Swap
+  }
+})
+const afterBuildSwap = async ({
+  rawPsbt,
+  buildId,
+  type,
+  feeRate,
+}: {
+  rawPsbt: string
+  buildId: string
+  type: SwapType
+  feeRate: number
+}) => {
+  const btcjs = btcjsStore.get!
+  switch (type) {
+    case '1x':
+      // continue building and add change to the psbt
+      const psbt1x = btcjs.Psbt.fromHex(rawPsbt, {
+        network: networkStore.typedNetwork,
+      })
+      const { psbt: psbt1xFinished } = await exclusiveChange({
+        psbt: psbt1x,
+        maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+        sighashType: SIGHASH_ALL,
+        feeb: feeRate,
+      })
+      if (!psbt1xFinished) throw new Error('Failed to add change')
+
+      const signed1x = await connectionStore.adapter.signPsbt(
+        psbt1xFinished.toHex(),
+        {
+          autoFinalized: false,
+        },
+      )
+      if (!signed1x) return
+      if (!sourceAmount.value) return
+
+      mutatePostSwap({
+        rawPsbt: signed1x,
+        buildId,
+      })
+      break
+
+    case 'x2':
+      // continue building and add change to the psbt
+      const psbtX2 = btcjs.Psbt.fromHex(rawPsbt, {
+        network: networkStore.typedNetwork,
+      })
+      const { psbt: psbtX2Finished } = await exclusiveChange({
+        psbt: psbtX2,
+        maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+        sighashType: SIGHASH_ALL,
+        feeb: feeRate,
+      })
+      if (!psbtX2Finished) throw new Error('Failed to add change')
+
+      const signedX2 = await connectionStore.adapter.signPsbt(
+        psbtX2Finished.toHex(),
+        {
+          autoFinalized: false,
+        },
+      )
+      if (!signedX2) return
+      if (!sourceAmount.value) return
+
+      mutatePostSwap({
+        rawPsbt: signedX2,
+        buildId,
+      })
+      break
+
+    case '2x':
+      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt, {
+        autoFinalized: false,
+      })
+      if (!signed2x) return
+      if (!sourceAmount.value) return
+
+      mutatePostSwap({
+        rawPsbt: signed2x,
+        buildId,
+      })
+      break
+  }
+}
+const { mutate: mutateBuildSwap } = useMutation({
+  mutationFn: buildSwapFn,
+  onSuccess: afterBuildSwap,
+  onError: (err: any) => {
+    closeBuilding()
+    ElMessage.error(err.message)
+    if (IS_DEV) throw err
+  },
+})
+async function doSwap() {
+  openBuilding()
+  // all kinds of checks
+  if (!connectionStore.connected) {
+    openConnectionModal()
+    return
+  }
+  if (!hasEnough.value) return
+  if (!hasAmount.value) return
+  if (!sourceAmount.value) return
+  if (unmet.value) {
+    if (unmet.value.handler) {
+      unmet.value.handler()
+    }
+    return
+  }
+
+  // lock in fee rate we're using
+  const feeRate = useFeebStore().get
+  if (!feeRate) {
+    ElMessage.error(ERRORS.HAVE_NOT_CHOOSE_GAS_RATE)
+    return
+  }
+
+  // go for it!
+  mutateBuildSwap({
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
+    sourceAmount: sourceAmount.value,
+    inscriptionUtxos: token2InscriptionUtxos.value,
+    feeRate,
+  })
+}
 </script>
 
 <template>
-  <ConnectionModal />
-  <WalletMissingModal />
-
-  <div
-    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-125 xl:scale-150 origin-top w-96"
-  >
+  <SwapLayout>
     <div
-      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900 space-y-3"
+      class="swap-main-border h-full space-y-3 rounded-xl bg-zinc-900 p-2 lg:rounded-3xl lg:!pt-3"
     >
-      <!-- header -->
-      <div class="px-3 flex gap-4">
-        <router-link
-          to="/swap"
-          class="flex items-center space-x-1 text-zinc-200"
-        >
-          Swap
-        </router-link>
-
-        <router-link
-          to="/swap-pools/btc-rdex/add"
-          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
-        >
-          Pools
-        </router-link>
-      </div>
+      <SwapMainPanelHeader />
 
       <!-- body -->
-      <div class="text-sm space-y-0.5">
-        <SwapSide
+      <div class="text-sm">
+        <SwapSideBrc
           side="pay"
-          v-model:symbol="fromSymbol"
-          v-model:amount="fromAmount"
+          v-if="flipped"
+          v-model:symbol="token2"
+          v-model:amount="token2Amount"
+          v-model:inscription-utxos="token2InscriptionUtxos"
           @has-enough="hasEnough = true"
           @not-enough="hasEnough = false"
           @amount-entered="hasAmount = true"
           @amount-cleared="hasAmount = false"
+          @became-source="swapType = '2x'"
+        />
+        <SwapSideWithInput
+          side="pay"
+          v-else
+          v-model:symbol="token1"
+          v-model:amount="token1Amount"
+          :calculating="calculatingPay"
+          @has-enough="hasEnough = true"
+          @not-enough="hasEnough = false"
+          @more-than-threshold="moreThanThreshold = true"
+          @less-than-threshold="moreThanThreshold = false"
+          @amount-entered="hasAmount = true"
+          @amount-cleared="hasAmount = false"
+          @became-source="swapType = '1x'"
         />
 
         <!-- flip -->
-        <div class="h-0 relative flex justify-center">
+        <div class="relative z-30 my-0.5 flex h-0 justify-center">
           <div
-            class="absolute -translate-y-1/2 bg-zinc-900 p-1 rounded-xl group transition-all hover:scale-125 duration-150"
+            class="group absolute -translate-y-1/2 rounded-xl bg-zinc-900 p-1 transition-all duration-150 hover:scale-110"
           >
             <ArrowDownIcon
-              class="h-4 w-4 inline group-hover:hidden p-2 box-content bg-zinc-800 rounded-lg"
+              class="box-content inline h-4 w-4 rounded-lg bg-zinc-800 p-2 group-hover:hidden"
             />
 
             <button
-              class="hidden group-hover:inline p-2 box-content transition-all duration-300 bg-zinc-800 rounded-lg shadow-sm shadow-primary/80"
+              class="box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm shadow-primary/80 transition-all duration-200 group-hover:inline"
               :class="{
-                'rotate-180': fromSymbol === 'btc',
+                'rotate-180': flippedControl,
               }"
               @click="flipAsset"
             >
@@ -257,44 +627,60 @@ watch(
           </div>
         </div>
 
-        <SwapSide
+        <SwapSideBtc
           side="receive"
-          v-model:symbol="toSymbol"
-          v-model:amount="toAmount"
+          use-case="swap"
+          v-if="flipped"
+          v-model:symbol="token1"
+          v-model:amount="token1Amount"
+          @more-than-threshold="moreThanThreshold = true"
+          @less-than-threshold="moreThanThreshold = false"
+          :calculating="calculatingReceive"
+          @became-source="swapType = 'x1'"
         />
+        <SwapSideWithInput
+          side="receive"
+          v-else
+          v-model:symbol="token2"
+          v-model:amount="token2Amount"
+          @more-than-threshold="moreThanThreshold = true"
+          @less-than-threshold="moreThanThreshold = false"
+          :calculating="calculatingReceive"
+          @became-source="swapType = 'x2'"
+        />
+
+        <SwapPriceDisclosure
+          :token1-symbol="token1"
+          :token2-symbol="token2"
+          v-show="!!Number(sourceAmount)"
+          :price-impact="priceImpact"
+          :has-impact-warning="hasImpactWarning"
+          :ratio="ratio"
+          :pool-ratio="poolRatio"
+          :calculating="calculating"
+        />
+
+        <SwapGasStats v-show="!!Number(sourceAmount)" :task-type="'swap'" />
       </div>
 
-      <template v-if="SWAP_READY">
-        <!-- disabled button -->
-        <button
-          :class="[!!unmet && !unmet.handler && 'disabled', 'main-btn']"
-          v-if="unmet"
-          :disabled="!unmet.handler"
-          @click="!!unmet.handler && unmet.handler()"
-        >
-          {{ unmet.message || '' }}
-        </button>
+      <!-- disabled buttons: calculating or have unmets  -->
+      <MainBtn class="disabled" v-if="calculating" :disabled="true">
+        <Loader2Icon class="mx-auto animate-spin text-zinc-400" />
+      </MainBtn>
 
-        <!-- confirm button -->
-        <button class="main-btn" v-else>Swap</button>
-      </template>
+      <MainBtn
+        :class="[!!unmet && !unmet.handler && 'disabled']"
+        v-else-if="unmet"
+        :disabled="!unmet.handler"
+        @click="!!unmet.handler && unmet.handler()"
+      >
+        {{ unmet.message || '' }}
+      </MainBtn>
 
-      <button class="disabled main-btn" v-else :disabled="true" @click="">
-        Coming Soon!
-      </button>
+      <!-- confirm button -->
+      <MainBtn v-else @click="doSwap" :dangerous="hasImpactWarning">
+        {{ hasImpactWarning ? 'Swap Anyway' : 'Swap' }}
+      </MainBtn>
     </div>
-
-    <!-- background blur -->
-    <SwapBlur />
-  </div>
+  </SwapLayout>
 </template>
-
-<style scoped>
-.main-btn {
-  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
-}
-
-.main-btn.disabled {
-  @apply bg-zinc-800 text-zinc-300/50 cursor-not-allowed;
-}
-</style>

@@ -41,11 +41,11 @@ const isFreeOrder = computed(() => {
 
 <template>
   <div
-    class="text-xs grid grid-cols-3 gap-1 py-1 rounded-sm px-2"
+    class="grid grid-cols-3 gap-1 rounded-sm px-2 py-1 text-xs"
     :class="{
       '!bg-primary/20': isSelected(order.orderId) && !isMyOrder,
-      'opacity-60 cursor-default': isMyOrder,
-      'hover:bg-primary/15 cursor-pointer': !isMyOrder,
+      'cursor-default opacity-60': isMyOrder,
+      'cursor-pointer hover:bg-primary/15': !isMyOrder,
     }"
   >
     <div class="td">
@@ -63,7 +63,7 @@ const isFreeOrder = computed(() => {
         <TooltipProvider v-if="isMyOrder">
           <Tooltip>
             <TooltipTrigger as-child>
-              <UserIcon class="w-3 h-3 ml-1 cursor-default" />
+              <UserIcon class="ml-1 size-3 cursor-default" />
             </TooltipTrigger>
             <TooltipContent class="duration-500">
               <p>Your order</p>
@@ -94,7 +94,7 @@ const isFreeOrder = computed(() => {
         </div>
 
         <div
-          class="text-xs text-zinc-500 col-span-2"
+          class="col-span-2 text-xs text-zinc-500"
           v-if="isShowingFiat && fiatRate"
         >
           {{ getFiatPriceDisplay(order.amount, fiatRate) }}
@@ -106,10 +106,10 @@ const isFreeOrder = computed(() => {
 
 <style scoped>
 .td {
-  @apply text-left font-normal col-span-1;
+  @apply col-span-1 text-left font-normal;
 }
 
 .td-right {
-  @apply text-right font-normal col-span-1;
+  @apply col-span-1 text-right font-normal;
 }
 </style>

@@ -1,10 +1,8 @@
-<script lang="ts" setup>
-import OrderIndex from '@/components/orders/OrderIndex.vue'
-</script>
+<script lang="ts" setup></script>
 
 <template>
-  <div class="grow flex flex-col">
+  <div class="flex grow flex-col">
     <!-- <MobileIndex class="flex lg:hidden" /> -->
-    <OrderIndex />
+    <OrderbookLayout />
   </div>
 </template>

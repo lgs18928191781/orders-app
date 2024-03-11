@@ -5,7 +5,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
 import './style.css'
-import routes, { credentialGuard, geoGuard, maintenanceGuard } from '@/routes'
+import routes, { geoGuard, maintenanceGuard } from '@/routes'
 import App from './App.vue'
 
 import { Buffer } from 'buffer'
@@ -24,7 +24,7 @@ const pinia = createPinia()
 
 // wait until bitcoin is loaded then mount the app
 const launchInterval = setInterval(() => {
-  if (window.bitcoin && window.ecpair) {
+  if (window.bitcoinjs && window.ecpair) {
     const app = createApp(App)
     // @ts-ignore
     app.use(router).use(pinia).use(VueQueryPlugin).mount('#app')

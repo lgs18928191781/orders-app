@@ -36,7 +36,7 @@ const cancelButtonRef = ref<HTMLElement | null>(null)
 const adapter = connectionStore.adapter
 const { data: balance } = useExcludedBalanceQuery(
   computed(() => connectionStore.getAddress),
-  computed(() => !!connectionStore.connected)
+  computed(() => !!connectionStore.connected),
 )
 
 function getIconFromSymbol(symbol: string) {
@@ -59,7 +59,7 @@ async function submitBidOrder() {
     if (transactionInfo.value.secondaryOrder) {
       // 1. sign secondary order which is used to create the actual utxo to pay for the bid grant order
       const payPsbtSigned = await adapter.signPsbt(
-        transactionInfo.value.secondaryOrder.toHex()
+        transactionInfo.value.secondaryOrder.toHex(),
       )
       const payPsbt = btcjs.Psbt.fromHex(payPsbtSigned)
       // extract tx from signed payPsbt
@@ -302,7 +302,7 @@ async function submitOrder() {
                       {{
                         prettyCoinDisplay(
                           transactionInfo.fromValue,
-                          transactionInfo.fromSymbol
+                          transactionInfo.fromSymbol,
                         )
                       }}
                     </span>
@@ -322,7 +322,7 @@ async function submitOrder() {
                       {{
                         prettyCoinDisplay(
                           transactionInfo.toValue,
-                          transactionInfo.toSymbol
+                          transactionInfo.toSymbol,
                         )
                       }}
                     </span>

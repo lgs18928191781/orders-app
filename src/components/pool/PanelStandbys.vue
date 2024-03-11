@@ -156,19 +156,19 @@ const isModelOpen = ref(false)
 
     <!-- total -->
     <div class="mt-2 flex items-center gap-4">
-      <div class="flex items-baseline gap- text-primary">
-        <span class="font-bold text-lg">
+      <div class="gap- flex items-baseline text-primary">
+        <span class="text-lg font-bold">
           {{ isLoadingRewardsEssential ? '-' : standbyRewardsEssential?.total }}
         </span>
 
-        <span class="text-sm ml-1 uppercase">
+        <span class="ml-1 text-sm uppercase">
           ${{ EVENT_REWARDS_TICK.toUpperCase() }}
         </span>
       </div>
 
       <!-- claim button -->
       <button
-        class="rounded bg-primary text-orange-950 px-4 py-1 shadow-md shadow-primary/20 text-sm hover:shadow-primary/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
+        class="rounded bg-primary px-4 py-1 text-sm text-orange-950 shadow-md shadow-primary/20 hover:shadow-primary/50 disabled:opacity-30 disabled:shadow-none disabled:saturate-50"
         @click="onClaimReward"
         :disabled="
           !standbyRewardsEssential || standbyRewardsEssential.total === 0
@@ -211,49 +211,49 @@ const isModelOpen = ref(false)
       >
     </TabList>
     <TabPanels class="mt-8">
-      <TabPanel class="h-[40vh] overflow-y-auto nicer-scrollbar pr-2">
+      <TabPanel class="nicer-scrollbar h-[40vh] overflow-y-auto pr-2">
         <button
-          class="text-zinc-300 mb-2 underline hover:text-primary underline-offset-4 hover:underline-offset-2 text-sm"
+          class="mb-2 text-sm text-zinc-300 underline underline-offset-4 hover:text-primary hover:underline-offset-2"
           @click="isModelOpen = true"
         >
           What are these records?
         </button>
 
         <table
-          class="min-w-full text-center border-separate border-spacing-0"
+          class="min-w-full border-separate border-spacing-0 text-center"
           v-if="standbys?.length"
         >
           <thead>
             <tr>
               <th
                 scope="col"
-                class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-primary sm:pl-0 sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80 py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-primary sm:pl-0"
               >
                 Order ID
               </th>
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80 px-3 py-3.5 text-center text-sm font-semibold text-primary"
               >
                 Amount
               </th>
 
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80 px-3 py-3.5 text-center text-sm font-semibold text-primary"
               >
                 #Day
               </th>
 
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80 px-3 py-3.5 text-center text-sm font-semibold text-primary"
               >
                 Percentage
               </th>
               <th
                 scope="col"
-                class="px-3 py-3.5 text-center text-sm font-semibold text-primary sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80"
+                class="sticky top-0 z-10 border-b-2 border-zinc-500 bg-zinc-900/80 px-3 py-3.5 text-center text-sm font-semibold text-primary"
               >
                 Reward
               </th>
@@ -267,7 +267,7 @@ const isModelOpen = ref(false)
               v-if="standbys?.length"
             >
               <td
-                class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0 border-b border-zinc-700"
+                class="whitespace-nowrap border-b border-zinc-700 py-5 pl-4 pr-3 text-sm sm:pl-0"
               >
                 <div class="flex items-center justify-center gap-2">
                   <div class="font-medium text-zinc-100">
@@ -277,14 +277,12 @@ const isModelOpen = ref(false)
                     title="copy order id"
                     @click="onCopyOrderId(standby.orderId)"
                   >
-                    <CopyIcon
-                      class="w-4 h-4 text-zinc-500 hover:text-primary"
-                    />
+                    <CopyIcon class="size-4 text-zinc-500 hover:text-primary" />
                   </button>
                 </div>
               </td>
               <td
-                class="whitespace-nowrap px-3 py-5 text-sm border-b border-zinc-700"
+                class="whitespace-nowrap border-b border-zinc-700 px-3 py-5 text-sm"
               >
                 <div class="text-zinc-100">
                   {{
@@ -298,18 +296,18 @@ const isModelOpen = ref(false)
               </td>
 
               <td
-                class="whitespace-nowrap px-3 py-5 text-sm border-b border-zinc-700"
+                class="whitespace-nowrap border-b border-zinc-700 px-3 py-5 text-sm"
               >
                 {{ standby.calBigBlock }}
               </td>
 
               <td
-                class="whitespace-nowrap px-3 py-5 text-sm border-b border-zinc-700"
+                class="whitespace-nowrap border-b border-zinc-700 px-3 py-5 text-sm"
               >
                 {{ (standby.percentage / 100).toFixed(2) }}%
               </td>
               <td
-                class="whitespace-nowrap px-3 py-5 text-sm border-b border-zinc-700"
+                class="whitespace-nowrap border-b border-zinc-700 px-3 py-5 text-sm"
               >
                 {{ standby.rewardAmount }}
               </td>
@@ -318,14 +316,14 @@ const isModelOpen = ref(false)
         </table>
 
         <div
-          class="flex items-center justify-center text-zinc-500 mt-36"
+          class="mt-36 flex items-center justify-center text-zinc-500"
           v-else
         >
           No Records Currently.
         </div>
       </TabPanel>
 
-      <TabPanel class="h-[40vh] overflow-y-auto nicer-scrollbar pr-2">
+      <TabPanel class="nicer-scrollbar h-[40vh] overflow-y-auto pr-2">
         <!-- claim records -->
         <StandbyClaimRecords />
       </TabPanel>

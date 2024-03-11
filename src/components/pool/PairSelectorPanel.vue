@@ -16,8 +16,8 @@ import PoolPairSelect from '@/components/pool/PoolPairSelect.vue'
 const selectedPair = inject(selectedPoolPairKey, defaultPoolPair)
 
 // pair info
-const { data: pairInfo } = useQuery(
-  [
+const { data: pairInfo } = useQuery({
+  queryKey: [
     'pairInfo',
     {
       from: selectedPair.fromSymbol,
@@ -25,16 +25,14 @@ const { data: pairInfo } = useQuery(
       address: useConnectionStore().getAddress,
     },
   ],
-  () =>
+  queryFn: () =>
     getOnePoolPair({
       from: selectedPair.fromSymbol,
       to: selectedPair.toSymbol,
       address: useConnectionStore().getAddress,
     }),
-  {
-    enabled: !!selectedPair.fromSymbol && !!selectedPair.toSymbol,
-  }
-)
+  enabled: !!selectedPair.fromSymbol && !!selectedPair.toSymbol,
+})
 
 const infoMap = computed(() => {
   if (!pairInfo.value) {
@@ -46,28 +44,28 @@ const infoMap = computed(() => {
       label: 'Pooled $' + selectedPair.fromSymbol.toUpperCase(),
       value: prettyCoinDisplay(
         pairInfo.value.fromPoolSize,
-        '$' + selectedPair.fromSymbol.toUpperCase()
+        '$' + selectedPair.fromSymbol.toUpperCase(),
       ),
     },
     {
       label: 'Pooled ' + selectedPair.toSymbol.toUpperCase(),
       value: prettyCoinDisplay(
         pairInfo.value.toPoolSize,
-        selectedPair.toSymbol.toUpperCase()
+        selectedPair.toSymbol.toUpperCase(),
       ),
     },
     {
       label: `Your LP($${selectedPair.fromSymbol.toUpperCase()}-${selectedPair.toSymbol.toUpperCase()}) $${selectedPair.fromSymbol.toUpperCase()}`,
       value: prettyCoinDisplay(
         pairInfo.value.myFromPoolBalance,
-        '$' + selectedPair.fromSymbol.toUpperCase()
+        '$' + selectedPair.fromSymbol.toUpperCase(),
       ),
     },
     {
       label: `Your LP($${selectedPair.fromSymbol.toUpperCase()}-${selectedPair.toSymbol.toUpperCase()}) ${selectedPair.toSymbol.toUpperCase()}`,
       value: prettyCoinDisplay(
         pairInfo.value.myToPoolBalance,
-        selectedPair.toSymbol.toUpperCase()
+        selectedPair.toSymbol.toUpperCase(),
       ),
     },
     {
@@ -97,7 +95,7 @@ const infoMap = computed(() => {
 </script>
 
 <template>
-  <div class="border-2 border-primary/30 rounded-xl p-8">
+  <div class="rounded-xl border-2 border-primary/30 p-8">
     <PoolPairSelect />
 
     <!-- liquidity pair info -->
@@ -108,17 +106,17 @@ const infoMap = computed(() => {
           <img :src="selectedPair.toIcon" class="-ml-2 h-6 rounded-full" />
         </div>
 
-        <h3 class="uppercase text-xl">
+        <h3 class="text-xl uppercase">
           {{ `LP($${selectedPair.fromSymbol}-${selectedPair.toSymbol})` }}
         </h3>
       </div>
 
-      <div class="mt-4 border border-zinc-700 bg-zinc-800 rounded-md p-4">
+      <div class="mt-4 rounded-md border border-zinc-700 bg-zinc-800 p-4">
         <h3>Prices and pool share</h3>
 
-        <div class="text-sm mt-4" v-if="pairInfo">
+        <div class="mt-4 text-sm" v-if="pairInfo">
           <div
-            class="flex justify-between items-center py-3"
+            class="flex items-center justify-between py-3"
             v-for="info in infoMap"
           >
             <span class="text-zinc-500">

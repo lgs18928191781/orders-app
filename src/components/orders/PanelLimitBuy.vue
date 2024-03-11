@@ -54,7 +54,7 @@ watch(
 
     updatePrice(selectedBidOrder.price.toNumber())
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 async function buildOrder() {
@@ -116,7 +116,7 @@ const totalExchangePrice = computed(() => {
 })
 
 const hasEnoughPrice = computed(
-  () => IS_DEV || totalExchangePrice.value >= 10000
+  () => IS_DEV || totalExchangePrice.value >= 10000,
 )
 const canPlaceOrder = computed(() => {
   return price.value > 0 && amount.value > 0 && hasEnoughPrice.value
@@ -137,7 +137,7 @@ const cannotPlaceOrderReason = computed(() => {
 </script>
 
 <template>
-  <TabPanel class="h-full flex flex-col justify-between">
+  <TabPanel class="flex h-full flex-col justify-between">
     <div class="">
       <div class="rounded-md border border-zinc-500 p-2">
         <div class="flex items-center justify-between">
@@ -150,14 +150,17 @@ const cannotPlaceOrderReason = computed(() => {
             <div class="relative w-full">
               <input
                 type="text"
-                class="w-full bg-transparent py-2 pl-2 pr-16 text-right placeholder-zinc-500 quiet-input"
+                class="quiet-input w-full bg-transparent py-2 pl-2 pr-16 text-right placeholder-zinc-500"
                 :placeholder="unit"
                 :value="
                   useBtcUnit
                     ? new Decimal(price).dividedBy(1e8).toDP().toFixed()
                     : price
                 "
-                @input="(event: any) => updatePrice(event.target.value, useBtcUnit.value)"
+                @input="
+                  (event: any) =>
+                    updatePrice(event.target.value, useBtcUnit.value)
+                "
               />
               <span
                 class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-zinc-400"
@@ -167,7 +170,7 @@ const cannotPlaceOrderReason = computed(() => {
             </div>
 
             <div
-              class="text-sm text-zinc-500 text-right pr-2 -mt-2"
+              class="-mt-2 pr-2 text-right text-sm text-zinc-500"
               v-if="isShowingFiat && fiatRate && price"
             >
               {{ getFiatPriceDisplay(price, fiatRate) }}
@@ -225,7 +228,7 @@ const cannotPlaceOrderReason = computed(() => {
           </div>
 
           <div
-            class="text-sm text-zinc-500 text-right"
+            class="text-right text-sm text-zinc-500"
             v-if="isShowingFiat && fiatRate && totalExchangePrice"
           >
             {{ getFiatPriceDisplay(totalExchangePrice, fiatRate) }}
@@ -241,7 +244,7 @@ const cannotPlaceOrderReason = computed(() => {
         <div class="flex gap-2">
           <!-- <button class="hover:scale-125" @click="">
             <ArrowRightLeftIcon
-              class="w-4 h-4 text-zinc-500 hover:text-primary"
+              class="size-4 text-zinc-500 hover:text-primary"
             />
           </button> -->
 
@@ -259,7 +262,7 @@ const cannotPlaceOrderReason = computed(() => {
         <div class="">
           <div class="text-zinc-300">{{ prettyBuyFees }}</div>
           <div
-            class="text-sm text-zinc-500 text-right"
+            class="text-right text-sm text-zinc-500"
             v-if="isShowingFiat && fiatRate && buyFees"
           >
             {{ getFiatPriceDisplay(buyFees, fiatRate) }}

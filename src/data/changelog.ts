@@ -1,5 +1,16 @@
 const changelog = [
   {
+    version: '3.0.0',
+    emoji: '🏔️️',
+    date: '2024-2-09',
+    changes: [
+      '🧨🧨🧨 Happy Chinese New Year! 🧨🧨🧨',
+      'We are now officially in the 3.0 era! 🎉🎉🎉 What a ride!',
+      'Swap module V0 is now entering its testing phase. Users can now swap between BRC20 tokens on BTC Testnet network',
+      'Lots of bug fixes',
+    ],
+  },
+  {
     version: '2.1.0',
     emoji: '☄️',
     date: '2024-1-26',

@@ -6,6 +6,7 @@ export type SimpleUtxo = {
   satoshis: number
   outputIndex: number
   addressType: any
+  confirmed?: boolean
 }
 export const getUtxos = async (address: string) => {
   const network = useNetworkStore().network
@@ -13,20 +14,34 @@ export const getUtxos = async (address: string) => {
     return getUtxosFromYouKnowWhere(address)
   }
 
-  const url = `https://api2.orders.exchange/api/utxos2?address=${address}&network=${network}`
+  const url = `https://api2.orders.exchange/api/utxos3?address=${address}&network=${network}`
   const paymentUtxos: SimpleUtxo[] = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
     },
-  }).then((utxos) => {
-    return utxos.map((utxo: any) => {
-      return {
-        txId: utxo.txid,
-        satoshis: utxo.value,
-        outputIndex: utxo.vout,
-        addressType: utxo.addressType || 2,
-      }
-    })
+  }).then(({ data: utxos }) => {
+    return (
+      utxos
+        .map(
+          (utxo: {
+            confirmed: boolean
+            inscriptions: string
+            satoshi: number
+            txId: string
+            vout: number
+          }) => {
+            return {
+              txId: utxo.txId,
+              satoshis: utxo.satoshi,
+              outputIndex: utxo.vout,
+              confirmed: utxo.confirmed,
+              addressType: 2,
+            }
+          }
+        )
+        // filter out unconfirmed utxos
+        .filter((utxo: SimpleUtxo) => utxo.confirmed)
+    )
   })
 
   return paymentUtxos

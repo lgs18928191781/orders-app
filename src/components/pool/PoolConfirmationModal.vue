@@ -73,7 +73,7 @@ async function submitOrder() {
     // 1. sign
     const signedPsbts = await connectionStore.adapter.signPsbts(
       toSigns,
-      toSigns.map(() => {})
+      toSigns.map(() => {}),
     )
 
     let preTxRaw: string | undefined
@@ -87,7 +87,7 @@ async function submitOrder() {
     const bidirectional = !!props.builtBtcInfo
     if (bidirectional && signedPsbts.length < 2) {
       throw new Error(
-        'Invalid signed transaction. Please try again or contact customer service for assistance.'
+        'Invalid signed transaction. Please try again or contact customer service for assistance.',
       )
     }
     let btcTxOutputLocation: string = ''
@@ -95,7 +95,7 @@ async function submitOrder() {
       // needed when in custody and cascade mode
       const btcjs = useBtcJsStore().get!
       const btcTx = btcjs.Psbt.fromHex(
-        signedPsbts[signedPsbts.length - 1]
+        signedPsbts[signedPsbts.length - 1],
       ).extractTransaction()
       const btcTxid = btcTx.getId()
       btcTxOutputLocation = btcTxid + '_0'
@@ -207,13 +207,13 @@ async function submitOrder() {
                 :class="[
                   'mt-8',
                   builtBtcInfo &&
-                    'grid grid-cols-2 divide-x-2 divide-zinc-900 divide-dashed',
+                    'grid grid-cols-2 divide-x-2 divide-dashed divide-zinc-900',
                 ]"
               >
                 <!-- brc to btc side -->
                 <div :class="['space-y-2', builtBtcInfo && 'pr-4']">
                   <div
-                    class="flex items-center gap-2 mb-4 justify-center"
+                    class="mb-4 flex items-center justify-center gap-2"
                     v-if="builtBtcInfo"
                   >
                     <h3 class="text-center text-primary">
@@ -247,11 +247,11 @@ async function submitOrder() {
                         {{
                           prettyCoinDisplay(
                             builtInfo.fromValue,
-                            '$' + builtInfo.fromSymbol
+                            '$' + builtInfo.fromSymbol,
                           )
                         }}
                       </span>
-                      <span class="text-zinc-500 text-left">
+                      <span class="text-left text-zinc-500">
                         {{ prettyAddress(builtInfo.fromAddress) + ' (You)' }}
                       </span>
                     </div>
@@ -272,11 +272,11 @@ async function submitOrder() {
                         {{
                           prettyCoinDisplay(
                             builtInfo.toValue,
-                            builtInfo.toSymbol
+                            builtInfo.toSymbol,
                           )
                         }}
                       </span>
-                      <span class="text-zinc-500 text-left">
+                      <span class="text-left text-zinc-500">
                         {{ prettyAddress(builtInfo.toAddress) + ' (You)' }}
                       </span>
                     </div>
@@ -285,7 +285,7 @@ async function submitOrder() {
 
                 <!-- btc to brc side -->
                 <div class="space-y-2 pl-4" v-if="builtBtcInfo">
-                  <div class="flex items-center gap-2 mb-4 justify-center">
+                  <div class="mb-4 flex items-center justify-center gap-2">
                     <h3 class="text-center text-primary">
                       {{ 'BTC Liquidity' }}
                     </h3>
@@ -315,7 +315,7 @@ async function submitOrder() {
                       <span>
                         {{ prettyCoinDisplay(builtBtcInfo.totalAmount, 'btc') }}
                       </span>
-                      <span class="text-zinc-500 text-left">
+                      <span class="text-left text-zinc-500">
                         {{ prettyAddress(builtBtcInfo.fromAddress) + ' (You)' }}
                       </span>
                     </div>
@@ -336,11 +336,11 @@ async function submitOrder() {
                         {{
                           prettyCoinDisplay(
                             builtBtcInfo.amount,
-                            builtBtcInfo.toSymbol
+                            builtBtcInfo.toSymbol,
                           )
                         }}
                       </span>
-                      <span class="text-zinc-500 text-left">
+                      <span class="text-left text-zinc-500">
                         {{
                           prettyAddress(builtBtcInfo.toAddress) +
                           ' (Service Address)'

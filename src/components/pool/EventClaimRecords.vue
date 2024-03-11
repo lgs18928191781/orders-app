@@ -30,7 +30,7 @@ const { data: records, isLoading: isLoadingRecords } = useQuery({
 <template>
   <div class="">
     <div
-      class="mt-4 grow overflow-y-auto space-y-2"
+      class="mt-4 grow space-y-2 overflow-y-auto"
       :class="{ '-ml-4': records?.length }"
     >
       <template v-if="isLoadingRecords"> - </template>

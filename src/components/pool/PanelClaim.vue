@@ -125,14 +125,14 @@ async function onClaimReward() {
 </script>
 
 <template>
-  <div class="max-w-xl mx-auto h-[40vh] flex flex-col">
+  <div class="mx-auto flex h-[40vh] max-w-xl flex-col">
     <div class="">
       <!-- releasable alert -->
       <div
         v-if="hasReleasable"
-        class="text-sm bg-primary/10 rounded py-2 px-4 -mx-4 mb-4 flex items-center justify-between gap-4"
+        class="-mx-4 mb-4 flex items-center justify-between gap-4 rounded bg-primary/10 px-4 py-2 text-sm"
       >
-        <div class="text-primary text-xs">
+        <div class="text-xs text-primary">
           <p>
             Your liquidity reward has been generated. Please release promptly to
             claim.
@@ -144,7 +144,7 @@ async function onClaimReward() {
         </div>
 
         <button
-          class="bg-primary text-orange-950 rounded py-1 px-4"
+          class="rounded bg-primary px-4 py-1 text-orange-950"
           @click="$emit('goRelease')"
         >
           Release
@@ -169,19 +169,19 @@ async function onClaimReward() {
 
       <!-- total -->
       <div class="mt-2 flex items-center gap-4">
-        <div class="flex items-baseline gap- text-primary">
-          <span class="font-bold text-lg">
+        <div class="gap- flex items-baseline text-primary">
+          <span class="text-lg font-bold">
             {{ isLoadingRewardsEssential ? '-' : rewardsEssential?.total }}
           </span>
 
-          <span class="text-sm ml-1 uppercase">
+          <span class="ml-1 text-sm uppercase">
             ${{ POOL_REWARDS_TICK.toUpperCase() }}
           </span>
         </div>
 
         <!-- claim button -->
         <button
-          class="rounded bg-primary text-orange-950 px-4 py-1 shadow-md shadow-primary/20 text-sm hover:shadow-primary/50 disabled:opacity-30 disabled:saturate-50 disabled:shadow-none"
+          class="rounded bg-primary px-4 py-1 text-sm text-orange-950 shadow-md shadow-primary/20 hover:shadow-primary/50 disabled:opacity-30 disabled:shadow-none disabled:saturate-50"
           @click="onClaimReward"
           :disabled="!rewardsEssential || rewardsEssential.total === 0"
           v-if="rewardsEssential && rewardsEssential.total > 0"
@@ -192,6 +192,6 @@ async function onClaimReward() {
     </div>
 
     <!-- claim records -->
-    <ClaimRecords class="mt-8 overflow-y-scroll nicer-scrollbar" />
+    <ClaimRecords class="nicer-scrollbar mt-8 overflow-y-scroll" />
   </div>
 </template>

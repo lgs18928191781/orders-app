@@ -3,7 +3,7 @@ type BitcoinJs = typeof import('bitcoinjs-lib')
 type ECPairFactory = typeof import('ecpair')
 
 interface Window {
-  bitcoin: BitcoinJs
+  bitcoinjs: BitcoinJs
   ecpair: ECPairFactory
   unisat: any
   unisat: {
@@ -28,7 +28,7 @@ interface Window {
       getPublicKey: () => Promise<string>
       signMessage: (
         message: string,
-        { from }: { from: string }
+        { from }: { from: string },
       ) => Promise<string>
       send: ({
         from,
@@ -52,7 +52,7 @@ interface Window {
           type?: any
           autoFinalized?: boolean
           toSignInputs?: any[]
-        }
+        },
       ) => Promise<string>
       inscribe: ({
         type,
@@ -69,7 +69,7 @@ interface Window {
           signedTx: string
           type: 52 | 22 | 59 // 22: NFT, 52: BRC20, 59: BRC20-s
         }[],
-        from: string
+        from: string,
       ) => Promise<
         Record<
           string, // unique id
@@ -77,18 +77,35 @@ interface Window {
         >[]
       >
     }
-  },
+  }
   metaidwallet: {
-    on: (eventName: string, handler: ({ mvcAddress: string, btcAddress: string }) => void) => void
-    removeListener: (eventName: string, handler: ({ mvcAddress: string, btcAddress: string }) => void) => void
+    on: (
+      eventName: string,
+      handler: ({ mvcAddress: string, btcAddress: string }) => void,
+    ) => void
+    removeListener: (
+      eventName: string,
+      handler: ({ mvcAddress: string, btcAddress: string }) => void,
+    ) => void
+    getNetwork: () => Promise<'mainnet' | 'testnet'>
     btc: {
       getAddress: () => Promise<string>
       getPublicKey: () => Promise<string>
-      connect: () => Promise<{ address?: string, pubKey?: string, status?: string }>
+      connect: () => Promise<{
+        address?: string
+        pubKey?: string
+        status?: string
+      }>
       getBalance: (chain: string) => Promise<{ total: number }>
       inscribeTransfer: (tick: string) => Promise<string>
       signMessage: (message: string) => Promise<string>
-      signPsbt: ({ psbtHex, options }: { psbtHex: string, options?: any }) => Promise<string>
+      signPsbt: ({
+        psbtHex,
+        options,
+      }: {
+        psbtHex: string
+        options?: any
+      }) => Promise<string>
       pushPsbt: (psbt: string) => Promise<string>
       signPsbts: (psbtHexs: string[], options?: any[]) => Promise<string[]>
     }

@@ -123,13 +123,13 @@ async function submitReleaseRecord() {
 <template>
   <ReleasingOverlay v-if="releasing" />
 
-  <div class="py-4 mx-4 bg-zinc-950 rounded-lg px-4">
-    <h3 class="items-center flex justify-between">
+  <div class="mx-4 rounded-lg bg-zinc-950 px-4 py-4">
+    <h3 class="flex items-center justify-between">
       <span class="text-primary" v-if="record.poolType === 3">
         {{
           `${record.coinAmount} ${record.tick.toUpperCase()} / ${prettyBalance(
             record.amount,
-            useBtcUnit
+            useBtcUnit,
           )} ${unit}`
         }}
       </span>
@@ -137,15 +137,15 @@ async function submitReleaseRecord() {
         {{ `${record.coinAmount} ${record.tick.toUpperCase()}` }}
       </span>
 
-      <span class="text-zinc-500 text-sm">
+      <span class="text-sm text-zinc-500">
         {{ `${prettyTimestamp(record.dealTime)}` }}
       </span>
     </h3>
 
     <div class="mt-4 flex items-center justify-between">
-      <div class="text-sm space-y-2">
+      <div class="space-y-2 text-sm">
         <div class="flex items-center">
-          <span class="w-28 inline-block text-zinc-500">Type</span>
+          <span class="inline-block w-28 text-zinc-500">Type</span>
           <span>{{
             record.poolType === 3
               ? 'Bidirectional Liquidity'
@@ -154,14 +154,14 @@ async function submitReleaseRecord() {
         </div>
 
         <div class="flex items-center">
-          <span class="w-28 inline-block text-zinc-500">Assets</span>
+          <span class="inline-block w-28 text-zinc-500">Assets</span>
           <span v-if="record.poolType === 3">
             {{
               `${
                 record.coinAmount
               } ${record.tick.toUpperCase()} / ${prettyBalance(
                 record.amount,
-                useBtcUnit
+                useBtcUnit,
               )} ${unit}`
             }}
           </span>
@@ -171,7 +171,7 @@ async function submitReleaseRecord() {
         </div>
 
         <div class="flex items-center">
-          <span class="w-28 inline-block text-zinc-500">Tx Record</span>
+          <span class="inline-block w-28 text-zinc-500">Tx Record</span>
           <div class="space-y-1">
             <div
               class="flex items-center gap-2 hover:cursor-pointer"
@@ -179,15 +179,15 @@ async function submitReleaseRecord() {
               v-if="record.dealCoinTx"
             >
               <span
-                class="text-xs w-12 text-center py-0.5 bg-cyan-500/50 rounded"
+                class="w-12 rounded bg-cyan-500/50 py-0.5 text-center text-xs"
               >
                 {{ record.tick.toUpperCase() }}
               </span>
-              <span class="hover:text-primary underline">
+              <span class="underline hover:text-primary">
                 {{ prettyTxid(record.dealCoinTx, 4) }}
               </span>
 
-              <ExternalLinkIcon class="inline-block w-4 h-4" />
+              <ExternalLinkIcon class="inline-block size-4" />
             </div>
 
             <div
@@ -196,21 +196,21 @@ async function submitReleaseRecord() {
               v-if="record.dealTx"
             >
               <span
-                class="text-xs w-12 text-center py-0.5 bg-indigo-500/50 rounded"
+                class="w-12 rounded bg-indigo-500/50 py-0.5 text-center text-xs"
               >
                 BTC
               </span>
-              <span class="hover:text-primary underline">
+              <span class="underline hover:text-primary">
                 {{ prettyTxid(record.dealTx, 4) }}
               </span>
 
-              <ExternalLinkIcon class="inline-block w-4 h-4" />
+              <ExternalLinkIcon class="inline-block size-4" />
             </div>
           </div>
         </div>
 
         <div class="flex items-center" v-if="record.claimState === 'ready'">
-          <span class="w-28 inline-block text-zinc-500">Rewards</span>
+          <span class="inline-block w-28 text-zinc-500">Rewards</span>
 
           <Disclosure as="div" v-slot="{ open }" class="grow">
             <DisclosureButton class="flex items-center gap-2">
@@ -241,7 +241,7 @@ async function submitReleaseRecord() {
             </DisclosureButton>
 
             <DisclosurePanel
-              class="text-zinc-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5 text-xs"
+              class="mt-0.5 space-y-2 rounded-md bg-black px-2 py-2 text-xs text-zinc-500"
             >
               <div class="">
                 <div>Confirm Block Height</div>
@@ -261,9 +261,9 @@ async function submitReleaseRecord() {
         </div>
 
         <div class="flex items-center" v-if="record.decreasing">
-          <span class="w-28 inline-block text-zinc-500">Reward %</span>
+          <span class="inline-block w-28 text-zinc-500">Reward %</span>
 
-          <div class="text-red-400 flex items-center gap-1">
+          <div class="flex items-center gap-1 text-red-400">
             <span>{{ record.decreasing + '%' }}</span>
             <!-- <ArrowDownRightIcon class="h-4 w-4" /> -->
           </div>
@@ -278,7 +278,7 @@ async function submitReleaseRecord() {
           >
             <template #reference>
               <HelpCircleIcon
-                class="h-4 w-4 text-zinc-300 ml-2"
+                class="ml-2 h-4 w-4 text-zinc-300"
                 aria-hidden="true"
               />
             </template>
@@ -288,7 +288,7 @@ async function submitReleaseRecord() {
 
       <button
         :class="[
-          'rounded-md bg-primary text-orange-950 px-6 py-2 shadow-md shadow-primary/20',
+          'rounded-md bg-primary px-6 py-2 text-orange-950 shadow-md shadow-primary/20',
           { 'opacity-30 saturate-50': record.claimState !== 'ready' },
         ]"
         @click.prevent="submitReleaseRecord"
@@ -298,7 +298,7 @@ async function submitReleaseRecord() {
         {{ record.claimState === 'ready' ? 'Release' : 'Pending' }}
       </button>
 
-      <span class="text-zinc-500 text-xs" v-else>
+      <span class="text-xs text-zinc-500" v-else>
         Waiting for block confirm
       </span>
     </div>

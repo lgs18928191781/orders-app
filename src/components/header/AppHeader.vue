@@ -1,27 +1,34 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { MenuIcon } from 'lucide-vue-next'
 
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
-import whitelist from '@/lib/whitelist'
+import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
-import { isUnsupportedAddress } from '@/lib/helpers'
 
-import WalletMissingModal from './WalletMissingModal.vue'
-import AssetsDisplay from './AssetsDisplay.vue'
-import NetworkState from './NetworkState.vue'
-import Notifications from './Notifications.vue'
-import TheNavbar from './TheNavbar.vue'
-import AddressMenu from '@/components/header/AddressMenu.vue'
+import { isUnsupportedAddress } from '@/lib/helpers'
+import MobileAppHeaderMenu from '@/components/overlays/MobileAppHeaderMenu.vue'
 
 const networkStore = useNetworkStore()
 const queryClient = useQueryClient()
 const connectionStore = useConnectionStore()
+const credentialsStore = useCredentialsStore()
 
 const { openConnectionModal } = useConnectionModal()
+
+// login
+useQuery({
+  queryKey: ['address', { network: networkStore.network }],
+  queryFn: async () =>
+    credentialsStore
+      .login()
+      .then((credential) => (credential ? credential.address : null)),
+  retry: 0,
+  enabled: computed(() => connectionStore.connected),
+})
 
 const unisatAccountsChangedHandler = (accounts: string[]) => {
   if (connectionStore.last.wallet !== 'unisat') return
@@ -79,30 +86,6 @@ onMounted(async () => {
   if (window.unisat) {
     const unisat = window.unisat
     unisat.on('accountsChanged', unisatAccountsChangedHandler)
-
-    // getNetwork
-    // const network: Network = await unisat.getNetwork()
-    const network: Network = 'livenet'
-    const address = connectionStore.getAddress
-
-    // if not in whitelist, switch to mainnet
-    if (network !== 'livenet' && address && !whitelist.includes(address)) {
-      const switchRes = await unisat.switchNetwork('livenet').catch(() => false)
-      if (!switchRes) {
-        ElMessage({
-          message: 'Testnet is not available, please switch to livenet.',
-          type: 'error',
-          onClose: () => {
-            // redirect to a blank page
-            window.location.href = 'about:blank'
-          },
-        })
-      }
-
-      networkStore.set('livenet')
-      return
-    }
-    networkStore.set(network)
   }
 
   if (window.okxwallet) {
@@ -119,7 +102,7 @@ onBeforeUnmount(() => {
   window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
   window.metaidwallet?.removeListener(
     'accountsChanged',
-    metaletAccountsChangedHandler
+    metaletAccountsChangedHandler,
   )
 })
 </script>
@@ -127,40 +110,53 @@ onBeforeUnmount(() => {
 <template>
   <ConnectionModal />
   <WalletMissingModal />
+  <NetworkStateModal v-if="connectionStore.connected" />
 
   <header
-    class="py-2 lg:py-4 select-none bg-zinc-900 lg:mb-3 border-b border-zinc-800 lg:border-none"
+    class="select-none border-b border-zinc-800 bg-zinc-900 py-3 lg:mb-3 lg:border-none lg:py-4"
   >
-    <div class="max-w-9xl flex items-center justify-between mx-auto px-3">
-      <TheNavbar />
+    <div class="mx-auto flex max-w-9xl items-center justify-between gap-4 px-3">
+      <AppNavbar />
 
-      <div class="flex gap-2">
+      <div class="flex grow gap-2 lg:grow-0">
         <button
-          class="h-10 rounded-lg border-2 border-primary px-4 transition hover:text-orange-950 hover:bg-primary"
+          class="ml-auto rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:ml-0 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
           @click="openConnectionModal"
           v-if="!connectionStore.connected"
         >
           Connect Wallet
         </button>
 
+        <button
+          class="ml-auto rounded-lg border border-primary border-opacity-50 p-2 text-sm transition hover:bg-primary hover:text-orange-950 lg:ml-0 lg:h-10 lg:border-2 lg:border-opacity-100 lg:px-4 lg:py-0 lg:text-base"
+          @click="credentialsStore.login()"
+          v-else-if="!credentialsStore.get"
+        >
+          Authorize
+        </button>
+
         <template v-else>
-          <div class="items-center gap-2 hidden lg:flex">
+          <div class="hidden items-center gap-2 lg:flex">
             <div
               class="flex h-10 items-center divide-x divide-zinc-700 rounded-lg bg-black/90 pl-2 pr-1"
             >
               <AddressMenu />
               <AssetsDisplay />
-              <NetworkState />
+              <NetworkStateButton />
             </div>
 
-            <Notifications />
+            <AppNotifications />
           </div>
 
-          <button class="lg:hidden">
-            <MenuIcon class="h-6 w-6" />
-          </button>
+          <div class="flex grow items-center lg:hidden">
+            <MobileAppHeaderNavbar class="mr-auto" />
+            <MobileAppHeaderMenu />
+            <AppNotifications />
+          </div>
         </template>
       </div>
     </div>
+
+    <MobileAppHeaderSecondRow v-if="connectionStore.connected" />
   </header>
 </template>

@@ -23,13 +23,13 @@ const status = computed(() => {
 </script>
 
 <template>
-  <div class="py-4 mx-4 bg-zinc-950 rounded-lg px-4">
-    <h3 class="items-center flex justify-between">
+  <div class="mx-4 rounded-lg bg-zinc-950 px-4 py-4">
+    <h3 class="flex items-center justify-between">
       <span class="text-primary" v-if="record.poolType === 3">
         {{
           `${record.coinAmount} ${record.tick.toUpperCase()} / ${prettyBalance(
             record.amount,
-            useBtcUnit
+            useBtcUnit,
           )} ${unit}`
         }}
       </span>
@@ -37,15 +37,15 @@ const status = computed(() => {
         {{ `${record.coinAmount} ${record.tick.toUpperCase()}` }}
       </span>
 
-      <span class="text-zinc-500 text-sm">
+      <span class="text-sm text-zinc-500">
         {{ `${prettyTimestamp(record.dealTime)}` }}
       </span>
     </h3>
 
     <div class="mt-4 flex items-center justify-between">
-      <div class="text-sm space-y-2">
+      <div class="space-y-2 text-sm">
         <div class="flex items-center">
-          <span class="w-32 inline-block text-zinc-500">Type</span>
+          <span class="inline-block w-32 text-zinc-500">Type</span>
           <span>{{
             record.poolType === 3
               ? 'Bidirectional Liquidity'
@@ -54,14 +54,14 @@ const status = computed(() => {
         </div>
 
         <div class="flex items-center">
-          <span class="w-32 inline-block text-zinc-500">Assets</span>
+          <span class="inline-block w-32 text-zinc-500">Assets</span>
           <span v-if="record.poolType === 3">
             {{
               `${
                 record.coinAmount
               } ${record.tick.toUpperCase()} / ${prettyBalance(
                 record.amount,
-                useBtcUnit
+                useBtcUnit,
               )} ${unit}`
             }}
           </span>
@@ -71,46 +71,46 @@ const status = computed(() => {
         </div>
 
         <div class="flex items-center">
-          <span class="w-32 inline-block text-zinc-500">Released At</span>
+          <span class="inline-block w-32 text-zinc-500">Released At</span>
           <span>
             {{ prettyTimestamp(record.releaseTime) }}
           </span>
         </div>
 
         <div class="flex items-center">
-          <span class="w-32 inline-block text-zinc-500">Release Block</span>
+          <span class="inline-block w-32 text-zinc-500">Release Block</span>
           <div
             class="flex items-center gap-2 hover:cursor-pointer"
             @click="toBlock(record.releaseTxBlock)"
             v-if="record.releaseTxBlock"
           >
-            <span class="hover:text-primary underline">
+            <span class="underline hover:text-primary">
               {{ record.releaseTxBlock }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
           <span v-else>-</span>
         </div>
 
         <div class="flex items-center">
-          <span class="w-32 inline-block text-zinc-500">Deal Block</span>
+          <span class="inline-block w-32 text-zinc-500">Deal Block</span>
           <div
             class="flex items-center gap-2 hover:cursor-pointer"
             @click="toBlock(record.dealCoinTxBlock)"
             v-if="record.dealCoinTxBlock"
           >
-            <span class="hover:text-primary underline">
+            <span class="underline hover:text-primary">
               {{ record.dealCoinTxBlock }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
           <span v-else>-</span>
         </div>
 
         <div class="flex items-center">
-          <div class="w-32 inline-block text-zinc-500">
+          <div class="inline-block w-32 text-zinc-500">
             Distributing across Blocks
           </div>
           <div class="text-zinc-300">
@@ -119,21 +119,21 @@ const status = computed(() => {
         </div>
 
         <div class="flex items-center">
-          <span class="w-32 inline-block text-zinc-500">Release Tx</span>
+          <span class="inline-block w-32 text-zinc-500">Release Tx</span>
           <div
             class="flex items-center gap-2 hover:cursor-pointer"
             @click="toTx(record.releaseTx)"
           >
-            <span class="hover:text-primary underline">
+            <span class="underline hover:text-primary">
               {{ prettyTxid(record.releaseTx, 4) }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
         </div>
 
         <div class="flex items-baseline">
-          <span class="w-32 inline-block text-zinc-500 shrink-0">Rewards</span>
+          <span class="inline-block w-32 shrink-0 text-zinc-500">Rewards</span>
 
           <Disclosure
             v-if="record.rewardRealAmount"
@@ -157,14 +157,14 @@ const status = computed(() => {
             </DisclosureButton>
 
             <DisclosurePanel
-              class="text-zinc-500 bg-black rounded-md px-2 py-2 space-y-2 mt-0.5"
+              class="mt-0.5 space-y-2 rounded-md bg-black px-2 py-2 text-zinc-500"
             >
               <div class="">
                 <span>=</span>
-                <span class="inline-flex items-center gap-1 ml-1">
+                <span class="ml-1 inline-flex items-center gap-1">
                   <span>{{ record.rewardAmount }}</span>
                   <span
-                    class="text-xs bg-zinc-700/30 px-2 py-0.5 rounded text-primary"
+                    class="rounded bg-zinc-700/30 px-2 py-0.5 text-xs text-primary"
                   >
                     base amount
                   </span>
@@ -173,10 +173,10 @@ const status = computed(() => {
 
               <div class="">
                 <span>*</span>
-                <span class="inline-flex items-center gap-1 ml-1">
+                <span class="ml-1 inline-flex items-center gap-1">
                   <span>(100% - {{ record.decreasing }}%</span>
                   <span
-                    class="text-xs bg-red-900/30 px-2 py-0.5 rounded text-red-700"
+                    class="rounded bg-red-900/30 px-2 py-0.5 text-xs text-red-700"
                   >
                     decrease % over time
                   </span>
@@ -186,10 +186,10 @@ const status = computed(() => {
 
               <div class="">
                 <span>+</span>
-                <span class="inline-flex items-center gap-1 ml-1">
+                <span class="ml-1 inline-flex items-center gap-1">
                   <span>{{ record.rewardExtraAmount }}</span>
                   <span
-                    class="text-xs bg-cyan-900/30 px-2 py-0.5 rounded text-cyan-700"
+                    class="rounded bg-cyan-900/30 px-2 py-0.5 text-xs text-cyan-700"
                   >
                     long standby time bonus
                   </span>
@@ -202,9 +202,9 @@ const status = computed(() => {
         </div>
 
         <div class="flex items-center">
-          <span class="w-32 inline-block text-zinc-500">Status</span>
+          <span class="inline-block w-32 text-zinc-500">Status</span>
           <span
-            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-900 capitalize"
+            class="inline-flex items-center rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-medium capitalize"
             :class="[
               status === 'unconfirmed' ? 'text-primary' : 'text-green-500',
             ]"

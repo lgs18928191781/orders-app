@@ -5,7 +5,6 @@ export const VERSION = changelog[0].version
 export const CHARGE_SERVICE_FEES = false
 export const DEBUG = false
 export const IS_DEV = import.meta.env.VITE_ENVIRONMENT === 'development'
-export const SWAP_READY = false
 export const SHOWING_TRADE_STATS = false
 
 // all kinds of satoshis value
@@ -30,6 +29,8 @@ export const BUY_TX_SIZE = 500
 export const SELL_TX_SIZE = 673
 export const BID_TX_SIZE = 111 + 154 // pay + grant
 export const SEND_TX_SIZE = 140
+export const SWAP_TX_SIZE = 298
+export const SWAP_POOL_ADD_TX_SIZE = 255
 
 // Sighash types
 export const SIGHASH_DEFAULT = 0x00
@@ -66,3 +67,8 @@ export const OKX_TEMPLATE_PSBT =
 // All kinds of transactions' types and specifications
 export const BUY_PRICE_OUTPUT_INDEX = 2
 export const BUY_PAY_INPUT_INDEX = 4
+
+export const SIGNING_MESSAGE = 'orders.exchange'
+
+export const SWAP_THRESHOLD_AMOUNT = 10_000
+export const ADD_THRESHOLD_AMOUNT = 100_000

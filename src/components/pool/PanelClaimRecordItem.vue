@@ -11,42 +11,42 @@ const { record } = defineProps<{
 </script>
 
 <template>
-  <div class="py-4 mx-4 bg-zinc-950 rounded-lg px-4">
+  <div class="mx-4 rounded-lg bg-zinc-950 px-4 py-4">
     <!-- order id -->
-    <span class="text-zinc-500 text-xs"># {{ record.orderId }}</span>
+    <span class="text-xs text-zinc-500"># {{ record.orderId }}</span>
 
     <!-- order amount & timestamp -->
-    <div class="items-center flex justify-between mt-4">
+    <div class="mt-4 flex items-center justify-between">
       <div class="">
         <div class="flex items-center gap-2">
           <span class="text-primary">
             {{ `${record.rewardCoinAmount} ${record.tick.toUpperCase()}` }}
           </span>
 
-          <span class="text-zinc-500 text-xs">
+          <span class="text-xs text-zinc-500">
             {{ `${prettyTimestamp(record.timestamp)}` }}
           </span>
         </div>
 
-        <div class="flex mt-2 items-center gap-2" v-if="record.sendId">
-          <span class="text-zinc-500 text-xs">Claim Tx</span>
+        <div class="mt-2 flex items-center gap-2" v-if="record.sendId">
+          <span class="text-xs text-zinc-500">Claim Tx</span>
 
           <div
             class="flex items-center gap-2 hover:cursor-pointer"
             @click="toTx(record.sendId)"
           >
-            <span class="hover:text-primary underline">
+            <span class="underline hover:text-primary">
               {{ prettyTxid(record.sendId, 4) }}
             </span>
 
-            <ExternalLinkIcon class="inline-block w-4 h-4" />
+            <ExternalLinkIcon class="inline-block size-4" />
           </div>
         </div>
       </div>
 
       <!-- order state -->
       <span
-        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-900 capitalize"
+        class="inline-flex items-center rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-medium capitalize"
         :class="[
           record.rewardState === 'pending' ? 'text-zinc-500' : 'text-green-500',
         ]"

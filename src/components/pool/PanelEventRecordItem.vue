@@ -18,28 +18,28 @@ const onCopyOrderId = () => {
 </script>
 
 <template>
-  <div class="py-4 mx-4 bg-zinc-950 rounded-lg px-4">
-    <h3 class="items-center flex justify-between">
+  <div class="mx-4 rounded-lg bg-zinc-950 px-4 py-4">
+    <h3 class="flex items-center justify-between">
       <span class="text-primary">
         {{
           `${
             record.fromOrderCoinAmount
           } ${record.tick.toUpperCase()} / ${prettyBalance(
             record.fromOrderAmount,
-            useBtcUnit
+            useBtcUnit,
           )} ${unit}`
         }}
       </span>
 
-      <span class="text-zinc-500 text-sm">
+      <span class="text-sm text-zinc-500">
         {{ `${prettyTimestamp(record.fromOrderDealTime)}` }}
       </span>
     </h3>
 
     <div class="mt-4 flex items-center justify-between">
-      <div class="text-sm space-y-2">
+      <div class="space-y-2 text-sm">
         <div class="flex items-center">
-          <span class="w-40 shrink-0 inline-block text-zinc-500">Order ID</span>
+          <span class="inline-block w-40 shrink-0 text-zinc-500">Order ID</span>
 
           <div class="flex items-center gap-2">
             <div class="text-zinc-500">
@@ -48,14 +48,14 @@ const onCopyOrderId = () => {
 
             <button title="copy order id" @click="onCopyOrderId">
               <CopyIcon
-                class="w-4 h-4 text-zinc-500 cursor-pointer hover:text-primary"
+                class="size-4 cursor-pointer text-zinc-500 hover:text-primary"
               />
             </button>
           </div>
         </div>
 
         <div class="flex items-center">
-          <span class="w-40 shrink-0 inline-block text-zinc-500"
+          <span class="inline-block w-40 shrink-0 text-zinc-500"
             >Deal Block</span
           >
           <span>
@@ -64,7 +64,7 @@ const onCopyOrderId = () => {
         </div>
 
         <div class="flex items-center">
-          <span class="w-40 shrink-0 inline-block text-zinc-500"
+          <span class="inline-block w-40 shrink-0 text-zinc-500"
             >Reward Block Range</span
           >
           <span v-if="record.calStartBlock">
@@ -75,7 +75,7 @@ const onCopyOrderId = () => {
         </div>
 
         <div class="flex items-center">
-          <span class="w-40 shrink-0 inline-block text-zinc-500">Reward</span>
+          <span class="inline-block w-40 shrink-0 text-zinc-500">Reward</span>
           <span class="font-bold text-primary" v-if="record.rewardAmount">
             {{ record.rewardAmount }} {{ EVENT_REWARDS_TICK.toUpperCase() }}
           </span>
@@ -83,7 +83,7 @@ const onCopyOrderId = () => {
         </div>
 
         <div class="flex items-center">
-          <span class="w-40 shrink-0 inline-block text-zinc-500">Reward %</span>
+          <span class="inline-block w-40 shrink-0 text-zinc-500">Reward %</span>
           <span class="" v-if="record.percentage">
             {{ (record.percentage / 100).toFixed(2) }}%
           </span>

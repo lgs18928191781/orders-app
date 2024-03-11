@@ -28,7 +28,7 @@ const eventSymbol = defineModel('eventSymbol', {
 })
 const selectedEvent = computed(() => {
   const selected = events.find(
-    (e) => e.symbol.toUpperCase() === eventSymbol.value.toUpperCase()
+    (e) => e.symbol.toUpperCase() === eventSymbol.value.toUpperCase(),
   )
   if (!selected) {
     return null
@@ -49,14 +49,14 @@ const selectedEvent = computed(() => {
       <button
         :class="[
           open ? 'bg-zinc-700' : 'bg-zinc-900',
-          'rounded-full  p-2 px-4 text-xl flex items-center gap-1 border border-zinc-700 hover:bg-zinc-700',
+          'flex  items-center gap-1 rounded-full border border-zinc-700 p-2 px-4 text-xl hover:bg-zinc-700',
         ]"
       >
         <span v-if="selectedEvent"> {{ selectedEvent.id }}. </span>
         <div class="mr-1" v-if="selectedEvent">
           {{ selectedEvent.title }}
         </div>
-        <div v-else class="text-base pl-2 text-primary">Select Event</div>
+        <div v-else class="pl-2 text-base text-primary">Select Event</div>
         <ChevronDownIcon class="h-5 w-5" />
       </button>
     </ListboxButton>
@@ -70,7 +70,7 @@ const selectedEvent = computed(() => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute left-0 z-10 mt-2 origin-top-left rounded-md bg-zinc-900 ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar divide-y divide-zinc-800 border border-primary/10 shadow shadow-primary/30"
+        class="nicer-scrollbar absolute left-0 z-10 mt-2 max-h-[40vh] origin-top-left divide-y divide-zinc-800 overflow-auto rounded-md border border-primary/10 bg-zinc-900 shadow shadow-primary/30 ring-1 ring-black ring-opacity-5 focus:outline-none"
       >
         <ListboxOption
           v-slot="{ active, selected }"
@@ -80,7 +80,7 @@ const selectedEvent = computed(() => {
         >
           <button
             :class="[
-              'flex items-center p-4 text-sm w-max min-w-full gap-2 rounded',
+              'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm',
               active && 'bg-black',
             ]"
           >
@@ -92,7 +92,7 @@ const selectedEvent = computed(() => {
               {{ event.title }}
               <span
                 v-if="index === 0"
-                class="text-xs text-red-500 bg-red-500/20 py-1 rounded mr-4 px-2"
+                class="mr-4 rounded bg-red-500/20 px-2 py-1 text-xs text-red-500"
               >
                 LIVE
               </span>
@@ -100,7 +100,7 @@ const selectedEvent = computed(() => {
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-primary ml-auto"
+              class="ml-auto h-5 w-5 text-primary"
               aria-hidden="true"
             />
           </button>

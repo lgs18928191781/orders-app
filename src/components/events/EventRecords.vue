@@ -6,9 +6,6 @@ import { computed } from 'vue'
 import { getClaimHistory, getRewardHistory } from '@/queries/events'
 import { useConnectionStore } from '@/stores/connection'
 
-import RewardRecordItem from '@/components/events/RewardRecordItem.vue'
-import ClaimRecordItem from '@/components/events/ClaimRecordItem.vue'
-
 const connectionStore = useConnectionStore()
 
 const props = defineProps({
@@ -48,7 +45,7 @@ const { data: claimHistory } = useQuery({
     <TabList class="flex gap-2">
       <Tab as="template" v-slot="{ selected }">
         <button
-          class="text-lg font-bold py-1 px-2"
+          class="px-2 py-1 text-lg font-bold"
           :class="[selected ? 'text-primary underline' : 'text-zinc-300']"
         >
           Reward History
@@ -56,7 +53,7 @@ const { data: claimHistory } = useQuery({
       </Tab>
       <Tab as="template" v-slot="{ selected }">
         <button
-          class="text-lg font-bold py-1 px-2"
+          class="px-2 py-1 text-lg font-bold"
           :class="[selected ? 'text-primary underline' : 'text-zinc-300']"
         >
           Claim History
@@ -73,7 +70,7 @@ const { data: claimHistory } = useQuery({
             v-if="rewardHistory.length"
           />
 
-          <div class="text-lg font-bold text-center text-zinc-500" v-else>
+          <div class="text-center text-lg font-bold text-zinc-500" v-else>
             No reward history
           </div>
         </template>
@@ -86,7 +83,7 @@ const { data: claimHistory } = useQuery({
             v-if="claimHistory.length"
           />
 
-          <div class="text-lg font-bold text-center text-zinc-500" v-else>
+          <div class="text-center text-lg font-bold text-zinc-500" v-else>
             No claim history
           </div>
         </template>

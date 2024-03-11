@@ -27,13 +27,18 @@ const { data: marketPrice } = useQuery({
 
 <template>
   <div
-    class="px-4 py-2 bg-zinc-800 flex flex-col lg:flex-row gap-4 rounded-t-md"
+    class="flex flex-col gap-4 rounded-t-md bg-zinc-800 px-4 py-2 lg:flex-row"
   >
-    <div class="grid grid-cols-2 lg:flex items-center justify-start gap-4">
+    <div
+      class="grid grid-cols-5 items-center justify-start gap-4 lg:flex lg:grid-cols-2"
+    >
       <!-- pair select -->
-      <PairSelect class="col-span-1" />
+      <PairSelect class="col-span-3 lg:col-span-1" />
 
-      <div class="text-sm lg:text-base lg:flex lg:gap-2" v-if="marketPrice">
+      <div
+        class="col-span-2 text-sm lg:col-span-1 lg:flex lg:gap-2 lg:text-base"
+        v-if="marketPrice"
+      >
         <div class="text-zinc-300">
           {{ `1 ${prettySymbol(fromSymbol)} =` }}
         </div>
@@ -47,7 +52,7 @@ const { data: marketPrice } = useQuery({
       </div>
     </div>
     <div
-      class="grid grid-cols-2 text-xs lg:grid-cols-4 items-center gap-2"
+      class="grid grid-cols-2 items-center gap-2 text-xs lg:grid-cols-4"
       v-if="SHOWING_TRADE_STATS"
     >
       <div class="">24h High</div>

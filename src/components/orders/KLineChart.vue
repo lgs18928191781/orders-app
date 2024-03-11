@@ -25,7 +25,7 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 )
 
 const interval: Ref<KLineInterval> = ref('1d')
@@ -44,7 +44,7 @@ const { data: rawStats } = useQuery({
       limit: limit.value,
     }),
   placeholderData: [],
-  cacheTime: 1000 * 60 * 60, // 1 hour
+  staleTime: 1000 * 60 * 60, // 1 hour
 })
 
 const klineStats = computed(() => {
@@ -108,16 +108,16 @@ const klineOptions = ref({
 <template>
   <div class="">
     <div class="flex items-center justify-between pb-4">
-      <h3 class="font-bold text-base text-zinc-300">
+      <h3 class="text-base font-bold text-zinc-300">
         {{ prettySymbol(fromSymbol) }} Prices
       </h3>
 
       <TabGroup class="" as="div" @change="changeStatsLimit">
-        <TabList class="p-1 bg-black inline-flex rounded-md gap-2">
+        <TabList class="inline-flex gap-2 rounded-md bg-black p-1">
           <Tab as="template" v-slot="{ selected }">
             <button
               :class="[
-                ' px-4 py-1 rounded text-sm',
+                ' rounded px-4 py-1 text-sm',
                 selected ? 'bg-zinc-800 text-primary' : 'text-zinc-500',
               ]"
             >
@@ -128,7 +128,7 @@ const klineOptions = ref({
           <Tab as="template" v-slot="{ selected }">
             <button
               :class="[
-                ' px-4 py-1 rounded text-sm',
+                ' rounded px-4 py-1 text-sm',
                 selected ? 'bg-zinc-800 text-primary' : 'text-zinc-500',
               ]"
             >
@@ -139,7 +139,7 @@ const klineOptions = ref({
       </TabGroup>
     </div>
 
-    <div class="bg-black rounded-md flex items-center justify-center p-2">
+    <div class="flex items-center justify-center rounded-md bg-black p-2">
       <Line id="my-chart-id" :data="klineStats" :options="klineOptions" />
     </div>
   </div>

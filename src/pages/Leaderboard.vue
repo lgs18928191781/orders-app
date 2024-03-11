@@ -30,7 +30,7 @@ const activityAssetsInfo = computed(() => {
 
     return {
       ...tick,
-      info: asset,
+      ...asset,
     }
   })
 })
@@ -83,37 +83,46 @@ const currentLevelProgress = computed(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-zinc-900">
-    <h1 class="text-2xl font-semibold text-center mb-6 text-zinc-100">
-      Leaderboard
-    </h1>
+  <div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="mb-4 flex items-center justify-between">
+      <h1 class="text-left text-2xl font-semibold text-zinc-100">
+        Leaderboard
+      </h1>
+
+      <router-link
+        to="/events"
+        class="text-zinc-300 underline hover:text-primary"
+      >
+        Events & Rewards
+      </router-link>
+    </div>
 
     <section
-      class="mb-8 p-6 rounded-lg bg-zinc-900 shadow-md shadow-primary/30 border border-primary/20"
+      class="mb-8 rounded-lg border border-primary/20 bg-zinc-900 p-6 shadow-md shadow-primary/30"
     >
-      <div class="flex gap-8 items-center">
+      <div class="flex items-center gap-8">
         <span class="text-lg text-zinc-300">Tick</span>
 
-        <div class="flex gap-4 items-center">
+        <div class="flex items-center gap-4">
           <AssetSelect
             :asset-symbol="tick"
-            :use-assets="activityAssetsInfo"
+            :use-assets="activityAssetsInfo as any"
             @update:asset-symbol="tick = $event"
           />
 
           <Loader2Icon
-            class="w-6 h-6 text-zinc-300 animate-spin-slow"
+            class="size-6 animate-spin-slow text-zinc-300"
             v-if="isFetchingStats || isFetchingLeaderboard"
           />
         </div>
       </div>
 
       <!-- a border -->
-      <div class="col-span-3 border-b border-primary/20 pt-4 mb-4"></div>
+      <div class="col-span-3 mb-4 border-b border-primary/20 pt-4"></div>
 
       <div class="space-y-4" v-if="stats">
         <div class="grid grid-cols-6">
-          <div class="text-zinc-300 text-sm">Event Duration</div>
+          <div class="text-sm text-zinc-300">Event Duration</div>
           <div class="col-span-5" v-if="stats.eventStartTime">
             {{ prettyTimestamp(stats.eventStartTime) }} -
             {{ prettyTimestamp(stats.eventEndTime) }}
@@ -122,29 +131,29 @@ const currentLevelProgress = computed(() => {
         </div>
 
         <div class="grid grid-cols-4 gap-4">
-          <div class="text-zinc-300 text-sm">Trading Volume</div>
-          <div class="col-span-1 flex gap-4 items-center">
+          <div class="text-sm text-zinc-300">Trading Volume</div>
+          <div class="col-span-1 flex items-center gap-4">
             <span class="text-primary">{{
               prettyBtcDisplay(stats.totalAmount)
             }}</span>
           </div>
-          <div class="text-zinc-300 text-sm">Current Reward Pool</div>
+          <div class="text-sm text-zinc-300">Current Reward Pool</div>
           <div class="col-span-1 text-primary">
             {{ stats.tickCurrentLevelRewardAmount + ' $RDEX' }}
           </div>
         </div>
 
         <div class="grid grid-cols-4 gap-4">
-          <div class="text-zinc-300 text-sm">Progress Goal</div>
+          <div class="text-sm text-zinc-300">Progress Goal</div>
 
-          <div class="col-span-1 flex gap-4 items-center">
+          <div class="col-span-1 flex items-center gap-4">
             <div class="">
               <!-- progress bar -->
               <div
-                class="relative h-2 bg-zinc-700 rounded-full overflow-hidden w-48"
+                class="relative h-2 w-48 overflow-hidden rounded-full bg-zinc-700"
               >
                 <div
-                  class="absolute top-0 left-0 h-full bg-green-500 rounded-full"
+                  class="absolute left-0 top-0 h-full rounded-full bg-green-500"
                   :style="{ width: currentLevelProgress + '%' }"
                 ></div>
               </div>
@@ -156,7 +165,7 @@ const currentLevelProgress = computed(() => {
             </div>
           </div>
 
-          <div class="text-zinc-300 text-sm">Reward Pool for Next Goal</div>
+          <div class="text-sm text-zinc-300">Reward Pool for Next Goal</div>
           <div class="col-span-1 text-primary">
             {{ stats.tickNextLevelRewardAmount + ' $RDEX' }}
           </div>
@@ -164,32 +173,32 @@ const currentLevelProgress = computed(() => {
       </div>
 
       <!-- divider -->
-      <div class="col-span-3 border-b border-primary/20 pt-8 mb-8"></div>
+      <div class="col-span-3 mb-8 border-b border-primary/20 pt-8"></div>
 
       <div class="grid grid-cols-2 gap-x-4 gap-y-8" v-if="stats">
         <div>
-          <h3 class="text-lg font-semibold mb-2 text-zinc-100">Total Orders</h3>
+          <h3 class="mb-2 text-lg font-semibold text-zinc-100">Total Orders</h3>
           <p class="text-zinc-100">
             {{ stats.orderCount }}
           </p>
         </div>
 
         <div>
-          <h3 class="text-lg font-semibold mb-2 text-zinc-100">Total Amount</h3>
+          <h3 class="mb-2 text-lg font-semibold text-zinc-100">Total Amount</h3>
           <p class="text-zinc-100">
             {{ prettyBtcDisplay(stats.totalAmount) }}
           </p>
         </div>
 
         <div class="">
-          <h3 class="text-lg font-semibold mb-2 text-zinc-100">My Orders</h3>
+          <h3 class="mb-2 text-lg font-semibold text-zinc-100">My Orders</h3>
           <p class="text-zinc-100">
             {{ stats.addressOrderCount }}
           </p>
         </div>
 
         <div class="">
-          <h3 class="text-lg font-semibold mb-2 text-zinc-100">My Amount</h3>
+          <h3 class="mb-2 text-lg font-semibold text-zinc-100">My Amount</h3>
           <p class="text-zinc-100">
             {{ prettyBtcDisplay(stats.addressTotalAmount) }}
           </p>
@@ -197,28 +206,28 @@ const currentLevelProgress = computed(() => {
       </div>
     </section>
 
-    <div class="flex justify-center mt-16">
+    <div class="mt-16 flex justify-center">
       <div class="relative w-full overflow-auto">
         <table
-          class="caption-bottom text-sm w-full text-zinc-100"
+          class="w-full caption-bottom text-sm text-zinc-100"
           v-if="leaderboard && leaderboard.total > 0"
         >
           <thead class="[&amp;_tr]:border-b border-zinc-500">
             <tr
-              class="border-b border-zinc-500 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b border-zinc-500 transition-colors"
             >
               <th
-                class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-center"
+                class="text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 h-12 px-4 text-center align-middle font-medium"
               >
                 Rank
               </th>
               <th
-                class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-center"
+                class="text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 h-12 px-4 text-center align-middle font-medium"
               >
                 Address
               </th>
               <th
-                class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-center"
+                class="text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 h-12 px-4 text-center align-middle font-medium"
               >
                 Total Amount
               </th>
@@ -227,24 +236,24 @@ const currentLevelProgress = computed(() => {
 
           <tbody class="border-0">
             <tr
-              class="border-b border-zinc-500 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b border-zinc-500 transition-colors"
               v-for="(row, index) in leaderboard.results"
             >
               <td class="text-center">
                 <TrophyIcon
-                  :class="['w-6 h-6 mx-auto', trophyColor(index)]"
+                  :class="['mx-auto size-6', trophyColor(index)]"
                   v-if="index <= 2"
                 />
 
                 <span class="text-zinc-100" v-else>{{ index + 1 }}</span>
               </td>
               <td
-                :class="['p-4 align-middle text-center', , trophyColor(index)]"
+                :class="['p-4 text-center align-middle', , trophyColor(index)]"
               >
                 {{ row.address }}
               </td>
               <td
-                :class="['p-4 align-middle text-center', , trophyColor(index)]"
+                :class="['p-4 text-center align-middle', , trophyColor(index)]"
               >
                 {{ prettyBtcDisplay(row.totalValue) }}
               </td>

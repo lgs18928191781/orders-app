@@ -10,7 +10,10 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
+import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
+
+import { isMobile, isOKApp, getOkxLink } from '@/lib/helpers'
 
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
@@ -22,6 +25,7 @@ const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
 const firstButtonRef = ref<HTMLElement | null>(null)
 
 const connectionStore = useConnectionStore()
+const credentialsStore = useCredentialsStore()
 async function connectToUnisat() {
   if (!window.unisat) {
     setMissingWallet('unisat')
@@ -30,19 +34,26 @@ async function connectToUnisat() {
 
   const connection = await connectionStore.connect('unisat')
   if (connection.status === 'connected') {
+    await credentialsStore.login()
     closeConnectionModal()
   }
 }
 
 async function connectToOkx() {
-  if (!window.okxwallet) {
-    setMissingWallet('okx')
-    return
-  }
+  if (isMobile() && !isOKApp()) {
+    const encodedUrl = getOkxLink()
+    window.location.href = encodedUrl
+  } else {
+    if (!window.okxwallet) {
+      setMissingWallet('okx')
+      return
+    }
 
-  const connection = await connectionStore.connect('okx')
-  if (connection.status === 'connected') {
-    closeConnectionModal()
+    const connection = await connectionStore.connect('okx')
+    if (connection.status === 'connected') {
+      await credentialsStore.login()
+      closeConnectionModal()
+    }
   }
 }
 
@@ -59,6 +70,7 @@ async function connectToMetalet() {
     })
   })
   if (connection?.status === 'connected') {
+    await credentialsStore.login()
     closeConnectionModal()
   }
 }
@@ -100,9 +112,9 @@ async function connectToMetalet() {
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
-              class="relative transform overflow-hidden rounded-lg bg-zinc-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:px-8 sm:py-6 z-50"
+              class="relative z-50 transform overflow-hidden rounded-lg bg-zinc-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:px-8 sm:py-6"
             >
-              <div class="text-left my-4">
+              <div class="my-4 text-left">
                 <DialogTitle
                   class="text-xl font-semibold leading-6 text-zinc-100"
                 >
@@ -110,10 +122,11 @@ async function connectToMetalet() {
                 </DialogTitle>
 
                 <!-- wallet buttons -->
-                <div class="grid grid-cols-3 gap-4 mt-8 text-base">
+                <div
+                  class="mt-8 grid grid-cols-2 gap-4 text-base lg:grid-cols-3"
+                >
                   <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
-                    ref="firstButtonRef"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToOkx"
                   >
                     <img class="h-12 rounded" :src="OkxIcon" alt="Metamask" />
@@ -121,8 +134,10 @@ async function connectToMetalet() {
                   </button>
 
                   <button
-                    class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 hover:shadow-md hover:shadow-primary/30 hover:border-primary/30 hover:bg-primary hover:text-orange-950"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToUnisat"
+                    ref="firstButtonRef"
+                    v-if="!isMobile()"
                   >
                     <img
                       class="h-12 rounded"
@@ -132,26 +147,25 @@ async function connectToMetalet() {
                     <span class="">Unisat</span>
                   </button>
 
-                  <div class="relative">
-                    <button
-                      class="flex flex-col gap-2 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100 font-medium transition w-36 py-4 border border-zinc-500/50 enabled:hover:shadow-md enabled:hover:shadow-primary/30 enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 disabled:opacity-30"
-                      @click="connectToMetalet"
-                    >
-                      <img
-                        class="h-12 rounded"
-                        :src="MetaletIcon"
-                        alt="Metamask"
-                      />
-                      <span class="">Metalet</span>
-                    </button>
-                  </div>
+                  <button
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30 lg:w-36"
+                    @click="connectToMetalet"
+                    v-if="!isMobile()"
+                  >
+                    <img
+                      class="h-12 rounded"
+                      :src="MetaletIcon"
+                      alt="Metamask"
+                    />
+                    <span class="">Metalet</span>
+                  </button>
                 </div>
 
                 <!-- footer -->
-                <div class="mt-16 text-xs text-zinc-500 space-y-1">
+                <div class="mt-16 space-y-1 text-xs text-zinc-500">
                   <p>By connecting wallet,</p>
-                  <p class="flex gap-2">
-                    you agree to Orders.Exchange's
+                  <p class="">
+                    <span>you agree to Orders.Exchange's</span>
                     <a
                       href="https://orders-exchange.gitbook.io/orders/risks-and-disclaimer/risks-and-disclaimer"
                       target="_blank"

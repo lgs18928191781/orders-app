@@ -1,3 +1,4 @@
+import { useNetworkStore } from '@/stores/network'
 import { defineStore } from 'pinia'
 
 export const useFeebStore = defineStore('feeb', {

@@ -39,7 +39,7 @@ const choosePair = (pairId: number) => {
   >
     <div>
       <ListboxButton
-        class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-primary shadow-sm hover:bg-opacity-80 transition-all"
+        class="inline-flex w-full items-center justify-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-opacity-80"
         v-slot="{ open }"
       >
         <div class="flex">
@@ -52,7 +52,7 @@ const choosePair = (pairId: number) => {
         >
         <ChevronRightIcon
           :class="[
-            'h-5 w-5 text-zinc-400 transform duration-200',
+            'h-5 w-5 transform text-zinc-400 duration-200',
             open && 'rotate-90',
           ]"
           aria-hidden="true"
@@ -69,7 +69,7 @@ const choosePair = (pairId: number) => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute left-0 z-10 mt-2 origin-top rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto w-full"
+        class="absolute left-0 z-10 mt-2 w-full origin-top overflow-auto rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
       >
         <ListboxOption
           v-slot="{ active, selected }"
@@ -79,7 +79,7 @@ const choosePair = (pairId: number) => {
         >
           <button
             :class="[
-              'flex items-center justify-between p-4 text-sm w-full',
+              'flex w-full items-center justify-between p-4 text-sm',
               active && 'bg-black',
             ]"
           >
@@ -92,20 +92,20 @@ const choosePair = (pairId: number) => {
               <div class="relative">
                 <span
                   :class="[
-                    'font-bold ml-2 uppercase',
+                    'ml-2 font-bold uppercase',
                     selected && 'text-primary',
                   ]"
                 >
                   ${{ pair.fromSymbol }}-{{ pair.toSymbol }}
                 </span>
                 <span
-                  class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium text-red-500 -translate-y-2 -translate-x-1 absolute rotate-3"
+                  class="absolute inline-flex -translate-x-1 -translate-y-2 rotate-3 items-center rounded-md px-1.5 py-0.5 text-xs font-medium text-red-500"
                   v-if="pair.isNew"
                 >
                   New!
                 </span>
                 <span
-                  class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium text-red-500 -translate-y-2 -translate-x-4 absolute rotate-6 whitespace-nowrap"
+                  class="absolute inline-flex -translate-x-4 -translate-y-2 rotate-6 items-center whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium text-red-500"
                   v-if="pair.hasEvent"
                 >
                   EVENT!🔥
@@ -115,7 +115,7 @@ const choosePair = (pairId: number) => {
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-primary ml-4"
+              class="ml-4 h-5 w-5 text-primary"
               aria-hidden="true"
             />
           </button>

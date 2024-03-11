@@ -77,9 +77,9 @@ async function onRecover() {
 <template>
   <BuildingOverlay v-if="building" />
 
-  <div class="p-4 bg-black rounded-md">
+  <div class="rounded-md bg-black p-4">
     <!-- order id -->
-    <h3 class="text-zinc-500 text-xs">
+    <h3 class="text-xs text-zinc-500">
       {{ issue.orderId }}
     </h3>
 
@@ -96,7 +96,7 @@ async function onRecover() {
 
       <div class="">
         <button
-          class="text-primary border border-primary/30 px-4 py-1 rounded-md shadow-md shadow-primary/10 hover:shadow-primary/30 hover:bg-primary hover:text-orange-950 transition-all duration-200"
+          class="rounded-md border border-primary/30 px-4 py-1 text-primary shadow-md shadow-primary/10 transition-all duration-200 hover:bg-primary hover:text-orange-950 hover:shadow-primary/30"
           @click="onRecover"
         >
           Recover
@@ -104,7 +104,7 @@ async function onRecover() {
       </div>
     </div>
 
-    <div class="flex mt-4 text-xs gap-8">
+    <div class="mt-4 flex gap-8 text-xs">
       <div class="text-zinc-500">Issue Description</div>
       <ul class="list-disc space-y-1">
         <li class="">Sell transactions failed</li>

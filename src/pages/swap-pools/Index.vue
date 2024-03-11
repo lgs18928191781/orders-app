@@ -1,14 +1,11 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 
-import SwapBlur from '@/components/swap/SwapBlur.vue'
-import ConnectionModal from '@/components/header/ConnectionModal.vue'
-import WalletMissingModal from '@/components/header/WalletMissingModal.vue'
-import SwapPoolPairSelect from '@/components/swap/pools/SwapPoolPairSelect.vue'
-
-const { pairStr } = useSwapPoolPair()
+const { isEmpty } = useEmptyPoolSignal()
+const { pairStr } = useSwapPool()
 
 const route = useRoute()
 function isLinkActive(keyword: string) {
@@ -17,40 +14,18 @@ function isLinkActive(keyword: string) {
 </script>
 
 <template>
-  <ConnectionModal />
-  <WalletMissingModal />
-
-  <div
-    class="relative max-w-md mt-16 mx-auto rounded-3xl lg:scale-125 xl:scale-150 origin-top w-96"
-  >
+  <SwapLayout>
     <div
-      class="border border-primary/30 rounded-3xl shadow-md p-2 pt-3 bg-zinc-900"
+      class="h-full rounded-3xl border border-primary/30 bg-zinc-900 p-2 pt-3 shadow-md"
     >
-      <!-- header -->
-      <div class="px-3 flex gap-4 border-b border-zinc-800 pb-2">
-        <router-link
-          to="/swap"
-          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
-        >
-          Swap
-        </router-link>
-
-        <router-link
-          to="/swap-pools/btc-rdex/add"
-          class="flex items-center space-x-1 text-zinc-200"
-        >
-          Pools
-        </router-link>
-      </div>
+      <SwapMainPanelHeader />
 
       <!-- pair control -->
-      <div class="flex justify-between items-center mt-4">
-        <SwapPoolPairSelect />
-
+      <div class="mt-4 flex items-center justify-between">
         <!-- sub nav -->
         <div class="flex items-center gap-1 text-sm">
           <router-link
-            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary"
+            class="rounded-md px-4 py-1 text-sm font-medium transition-all hover:bg-black hover:text-primary"
             :class="
               isLinkActive('swap-pools-add')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
@@ -62,13 +37,14 @@ function isLinkActive(keyword: string) {
           </router-link>
 
           <router-link
-            class="px-3 py-1 text-sm font-medium rounded-md transition-all hover:bg-black hover:text-primary"
+            class="rounded-md px-4 py-1 text-sm font-medium transition-all hover:bg-black hover:text-primary"
             :class="
               isLinkActive('swap-pools-remove')
                 ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
                 : 'text-zinc-300'
             "
             :to="`/swap-pools/${pairStr}/remove`"
+            v-if="!isEmpty"
           >
             Remove
           </router-link>
@@ -78,10 +54,7 @@ function isLinkActive(keyword: string) {
       <!-- sub pages -->
       <router-view></router-view>
     </div>
-
-    <!-- background blur -->
-    <SwapBlur />
-  </div>
+  </SwapLayout>
 </template>
 
 <style scoped></style>
