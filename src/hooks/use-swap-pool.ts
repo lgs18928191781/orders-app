@@ -24,7 +24,6 @@ export function useSwapPool() {
   function selectPair(pairStr: string) {
     if (!pairStr) return
 
-    console.log('here')
     const route = router.currentRoute.value
     let nextRoutePath
     if (route.name === 'swap-pools-remove') {
