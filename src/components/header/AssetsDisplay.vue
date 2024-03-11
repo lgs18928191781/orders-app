@@ -140,7 +140,7 @@ const { data: myBrc20s } = useQuery({
           leave-to-class="transform opacity-0 scale-95"
         >
           <MenuItems
-            class="absolute left-0 top-0 z-50 mt-8 w-80 origin-top-right divide-y divide-zinc-700 overflow-hidden rounded-md bg-zinc-800 shadow-highlight ring-1 ring-black ring-opacity-5 focus:outline-none lg:left-auto lg:right-0"
+            class="absolute left-0 top-0 z-50 mt-8 w-screen origin-top-right divide-y divide-zinc-700 overflow-hidden bg-zinc-800 shadow-highlight ring-1 ring-black ring-opacity-5 focus:outline-none lg:left-auto lg:right-0 lg:w-80 lg:rounded-md"
           >
             <MenuItem v-slot="{ active }" disabled>
               <div

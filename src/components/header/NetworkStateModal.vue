@@ -19,6 +19,7 @@ import {
   BusIcon,
   SailboatIcon,
   PlaneIcon,
+  XIcon,
 } from 'lucide-vue-next'
 
 import { useNetworkStore } from '@/stores/network'
@@ -277,12 +278,19 @@ watch(isOpen, (open) => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <div class="fixed inset-0 overflow-y-auto text-zinc-300">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center lg:p-4">
           <DialogPanel
-            class="w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 px-4 shadow-lg shadow-primary/20 ring-1 ring-black ring-opacity-5 focus:outline-none"
+            class="h-svh w-svw origin-top-right overflow-hidden rounded-md bg-zinc-800 px-4 shadow-lg shadow-primary/20 ring-1 ring-black ring-opacity-5 focus:outline-none lg:h-auto lg:w-[720px]"
           >
             <div class="divide-y-2 divide-zinc-700">
               <div class="py-4">
+                <!-- mobile close button -->
+                <div class="flex justify-end pb-2 lg:hidden">
+                  <button @click="closeModal" class="">
+                    <XIcon class="size-8 rounded-full bg-zinc-700 p-1.5" />
+                  </button>
+                </div>
+
                 <div class="flex items-center justify-between">
                   <div class="item-label">BTC Network Traffic</div>
 
@@ -335,9 +343,11 @@ watch(isOpen, (open) => {
                 </div>
               </div>
 
-              <div class="grid grid-cols-5 divide-x-2 divide-zinc-700 py-4">
+              <div
+                class="grid grid-cols-2 divide-x-2 divide-zinc-700 py-4 lg:grid-cols-5"
+              >
                 <div
-                  class="col-span-2 flex flex-col items-stretch justify-between gap-4 pr-4"
+                  class="col-span-1 flex flex-col items-stretch justify-between gap-4 pr-2 lg:col-span-2 lg:pr-4"
                 >
                   <div class="item-label leading-none">Choose Gas Plan</div>
 
@@ -442,7 +452,7 @@ watch(isOpen, (open) => {
                   </div>
                 </div>
 
-                <div class="col-span-3 pl-4">
+                <div class="col-span-1 pl-2 lg:col-span-3 lg:pl-4">
                   <div class="item-label align-top leading-none">
                     Estimated Gas
                   </div>
