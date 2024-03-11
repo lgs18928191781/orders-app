@@ -22,6 +22,6 @@ const bitcoin3 = import('@/bitcoin-lib')
     <div class="">{{ bitcoin2 }}</div>
 
     <h3>bitcoin3</h3>
-    <div class="">{{ bitcoin3 }}
+    <div class="">{{ bitcoin3 }}</div>
   </div>
 </template>
