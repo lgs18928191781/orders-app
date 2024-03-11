@@ -10,7 +10,6 @@ import Toaster from '@/components/ui/toast/Toaster.vue'
 import AppHeader from '@/components/header/AppHeader.vue'
 import NotAvailableOverlay from '@/components/overlays/NotAvailable.vue'
 import BuildingOverlay from '@/components/overlays/Building.vue'
-import { isDefined } from '@vueuse/core'
 
 const btcJsStore = useBtcJsStore()
 const geoStore = useGeoStore()

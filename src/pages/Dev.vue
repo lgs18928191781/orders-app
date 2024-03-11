@@ -2,8 +2,11 @@
 import { useBtcJsStore } from '@/stores/btcjs'
 
 async function connectToOkx() {}
-
-const btcjs = useBtcJsStore().get
+const bitcoin1 = window.bitcoin
+// @ts-ignore
+import * as bitcoin2 from '@/bitcoin-lib'
+// @ts-ignore
+const bitcoin3 = import('@/bitcoin-lib')
 </script>
 
 <template>
@@ -11,10 +14,14 @@ const btcjs = useBtcJsStore().get
     <button class="rounded-md border p-2" @click="connectToOkx">
       connect to okx
     </button>
-    <img src="http://localhost:3001/icons" alt="okx logo" />
 
-    <div class="">
-      {{ btcjs }}
-    </div>
+    <h3>bitcoin1</h3>
+    <div class="">{{ bitcoin1 }}</div>
+
+    <h3>bitcoin2</h3>
+    <div class="">{{ bitcoin2 }}</div>
+
+    <h3>bitcoin3</h3>
+    <div class="">{{ bitcoin3 }}
   </div>
 </template>
