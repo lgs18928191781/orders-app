@@ -263,7 +263,7 @@ watch(isOpen, (open) => {
 
 <template>
   <Dialog
-    class="relative z-50 text-sm text-zinc-300"
+    class="relative z-50 text-xs text-zinc-300 lg:text-sm"
     :open="isOpen"
     @close="closeModal"
   >
@@ -280,7 +280,7 @@ watch(isOpen, (open) => {
       <div class="fixed inset-0 overflow-y-auto text-zinc-300">
         <div class="flex min-h-full items-center justify-center lg:p-4">
           <DialogPanel
-            class="h-svh w-svw origin-top-right overflow-hidden rounded-md bg-zinc-800 px-4 shadow-lg shadow-primary/20 ring-1 ring-black ring-opacity-5 focus:outline-none lg:h-auto lg:w-[720px]"
+            class="min-h-svh w-svw origin-top-right overflow-hidden rounded-md bg-zinc-800 px-4 shadow-lg shadow-primary/20 ring-1 ring-black ring-opacity-5 focus:outline-none lg:min-h-fit lg:w-[720px]"
           >
             <div class="divide-y-2 divide-zinc-700">
               <div class="py-4">
@@ -353,7 +353,7 @@ watch(isOpen, (open) => {
 
                   <div class="grow">
                     <RadioGroup name="feebPlan" v-model="selectedFeebPlanTitle">
-                      <div class="space-y-4">
+                      <div class="space-y-2 lg:space-y-4">
                         <RadioGroupOption
                           as="template"
                           v-for="plan in selectableFeebPlans"
@@ -370,13 +370,13 @@ watch(isOpen, (open) => {
                                 ? 'bg-primary/75 text-white '
                                 : 'bg-black ',
                             ]"
-                            class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
+                            class="lg:ph-4 relative flex cursor-pointer rounded-lg px-2 py-2 shadow-md focus:outline-none lg:px-5"
                           >
                             <div
                               class="flex w-full items-center justify-between"
                             >
                               <div class="flex items-center">
-                                <div class="text-sm">
+                                <div class="text-xs lg:text-sm">
                                   <div class="flex items-center gap-3">
                                     <component
                                       :is="getFeePlanIcon(plan.title)"
@@ -388,7 +388,7 @@ watch(isOpen, (open) => {
                                       :class="
                                         checked ? 'text-white' : 'text-zinc-300'
                                       "
-                                      class="text-lg font-medium"
+                                      class="text-sm font-medium lg:text-lg"
                                     >
                                       {{ plan.fullTitle || plan.title }}
                                     </RadioGroupLabel>
@@ -412,7 +412,7 @@ watch(isOpen, (open) => {
                                       >
                                         <input
                                           type="text"
-                                          class="w-8 rounded border-0 border-b !border-zinc-500 bg-transparent px-0 py-0.5 text-center text-sm outline-none focus:ring-0 focus:ring-transparent"
+                                          class="w-8 rounded border-0 border-b !border-zinc-500 bg-transparent px-0 py-0.5 text-center text-xs outline-none focus:ring-0 focus:ring-transparent lg:text-sm"
                                           autocomplete="off"
                                           :class="
                                             checked
