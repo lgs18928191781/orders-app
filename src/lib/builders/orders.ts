@@ -82,12 +82,12 @@ export async function buildAskLimit({
     }).then((brc20Info) => {
       // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
       return brc20Info.transferBalanceList.find(
-        (brc20) => Number(brc20.amount) === amount
+        (brc20) => Number(brc20.amount) === amount,
       )
     })
     if (!transferable) {
       throw new Error(
-        'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.'
+        'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.',
       )
     }
 
@@ -170,7 +170,7 @@ export async function buildBidLimit({
   const networkStore = useNetworkStore()
   const orderNetwork = networkStore.network
   const btcNetwork = networkStore.btcNetwork
-  const btcjs = window.bitcoin
+  const btcjs = useBtcJsStore().get!
   const address = useConnectionStore().getAddress
   const isPool = !!selectedPair.hasPool
 
@@ -224,7 +224,7 @@ export async function buildBidLimit({
   })
   if (!difference) {
     throw new Error(
-      'Change calculation failed, please contact customer service.'
+      'Change calculation failed, please contact customer service.',
     )
   }
 
@@ -313,7 +313,7 @@ export async function buildBuyTake({
   const dummyUtxos = dummiesStore.get!
   if (!dummyUtxos) {
     throw new Error(
-      'Your account does not have 2 dummy UTXOs to proceed the transaction. Please click the top-right shield button to do the preparation.'
+      'Your account does not have 2 dummy UTXOs to proceed the transaction. Please click the top-right shield button to do the preparation.',
     )
   }
   for (const dummyUtxo of dummyUtxos) {
@@ -371,7 +371,7 @@ export async function buildBuyTake({
           : SERVICE_LIVENET_ADDRESS
         : SERVICE_TESTNET_ADDRESS
     serviceFee = safeOutputValue(
-      Math.max(2000, askPsbt.txOutputs[0].value * 0.01)
+      Math.max(2000, askPsbt.txOutputs[0].value * 0.01),
     )
     buyPsbt.addOutput({
       address: serviceAddress,
@@ -446,12 +446,12 @@ export async function buildSellTake({
     // }
     // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
     return brc20Info.transferBalanceList.find(
-      (brc20) => Number(brc20.amount) === amount
+      (brc20) => Number(brc20.amount) === amount,
     )
   })
   if (!transferable) {
     throw new Error(
-      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.'
+      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.',
     )
   }
 
@@ -559,12 +559,12 @@ export async function buildSellTakeV2({
     // }
     // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
     return brc20Info.transferBalanceList.find(
-      (brc20) => Number(brc20.amount) === amount
+      (brc20) => Number(brc20.amount) === amount,
     )
   })
   if (!transferable) {
     throw new Error(
-      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.'
+      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.',
     )
   }
 
@@ -604,11 +604,11 @@ export async function buildSellTakeV2({
   const releaseInscriptionFeeIndex = 6
   raiseUnless(
     sell.txOutputs[platformFeeIndex].value === platformFee,
-    'Platform fee mismatch'
+    'Platform fee mismatch',
   )
   raiseUnless(
     sell.txOutputs[releaseInscriptionFeeIndex].value === releaseInscriptionFee,
-    'Release inscription fee mismatch'
+    'Release inscription fee mismatch',
   )
 
   console.log({ sell, order })
@@ -655,7 +655,7 @@ export async function buildClaimTake({
   // check if dummies is ready
   if (!dummiesStore.has) {
     throw new Error(
-      'Your account does not have 2 dummy UTXOs to proceed the transaction. Please click the top-right shield button to do the preparation.'
+      'Your account does not have 2 dummy UTXOs to proceed the transaction. Please click the top-right shield button to do the preparation.',
     )
   }
 
