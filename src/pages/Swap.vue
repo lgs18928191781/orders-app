@@ -27,6 +27,7 @@ import { ERRORS } from '@/data/errors'
 import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 import { sleep } from '@/lib/helpers'
 import { type InscriptionUtxo } from '@/queries/swap/types'
+import { useFeebStore } from '@/stores/feeb'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -446,10 +447,12 @@ const afterBuildSwap = async ({
   rawPsbt,
   buildId,
   type,
+  feeRate,
 }: {
   rawPsbt: string
   buildId: string
   type: SwapType
+  feeRate: number
 }) => {
   const btcjs = btcjsStore.get!
   switch (type) {
@@ -462,6 +465,7 @@ const afterBuildSwap = async ({
         psbt: psbt1x,
         maxUtxosCount: USE_UTXO_COUNT_LIMIT,
         sighashType: SIGHASH_ALL,
+        feeb: feeRate,
       })
       if (!psbt1xFinished) throw new Error('Failed to add change')
 
@@ -489,6 +493,7 @@ const afterBuildSwap = async ({
         psbt: psbtX2,
         maxUtxosCount: USE_UTXO_COUNT_LIMIT,
         sighashType: SIGHASH_ALL,
+        feeb: feeRate,
       })
       if (!psbtX2Finished) throw new Error('Failed to add change')
 
@@ -547,12 +552,20 @@ async function doSwap() {
     return
   }
 
+  // lock in fee rate we're using
+  const feeRate = useFeebStore().get
+  if (!feeRate) {
+    ElMessage.error(ERRORS.HAVE_NOT_CHOOSE_GAS_RATE)
+    return
+  }
+
   // go for it!
   mutateBuildSwap({
     token1: token1.value.toLowerCase(),
     token2: token2.value.toLowerCase(),
     sourceAmount: sourceAmount.value,
     inscriptionUtxos: token2InscriptionUtxos.value,
+    feeRate,
   })
 }
 </script>

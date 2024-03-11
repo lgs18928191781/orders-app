@@ -832,7 +832,7 @@ export const getListingUtxos: () => Promise<
     timestamp: number
   }[]
 > = async () => {
-  const network = 'livenet'
+  const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
 
   const utxos = await ordersApiFetch(

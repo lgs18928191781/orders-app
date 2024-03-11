@@ -178,16 +178,19 @@ export const buildInit = async ({
   token2,
   token1Amount,
   token2Amount,
+  feeRate,
   inscriptionUtxos,
 }: {
   token1: string
   token2: string
   token1Amount: string
   token2Amount: string
+  feeRate: number
   inscriptionUtxos: InscriptionUtxo[]
 }): Promise<{
   rawPsbt: string
   buildId: string
+  feeRate: number
 }> => {
   const address = useConnectionStore().getAddress
   const pubkey = useConnectionStore().getPubKey
@@ -200,6 +203,7 @@ export const buildInit = async ({
     token1Amount,
     token2Amount,
     inscriptionUtxos,
+    feeRate,
   }
 
   const res = await swapApiFetch('build/init', {
@@ -207,7 +211,10 @@ export const buildInit = async ({
     body: JSON.stringify(body),
     auth: true,
   })
-  return res
+  return {
+    ...res,
+    feeRate,
+  }
 }
 
 export const buildAdd = async ({
@@ -215,16 +222,19 @@ export const buildAdd = async ({
   token2,
   source,
   sourceAmount,
+  feeRate,
   inscriptionUtxos,
 }: {
   token1: string
   token2: string
   source: 'token1' | 'token2'
   sourceAmount: string
+  feeRate: number
   inscriptionUtxos: InscriptionUtxo[]
 }): Promise<{
   rawPsbt: string
   buildId: string
+  feeRate: number
 }> => {
   const address = useConnectionStore().getAddress
   const pubkey = useConnectionStore().getPubKey
@@ -236,6 +246,7 @@ export const buildAdd = async ({
     token2,
     source,
     sourceAmount,
+    feeRate,
     inscriptionUtxos,
   }
 
@@ -244,20 +255,26 @@ export const buildAdd = async ({
     body: JSON.stringify(body),
     auth: true,
   })
-  return res
+  return {
+    ...res,
+    feeRate,
+  }
 }
 
 export const buildRemove = async ({
   token1,
   token2,
   removeEquity,
+  feeRate,
 }: {
   token1: string
   token2: string
   removeEquity: string
+  feeRate: number
 }): Promise<{
   rawPsbt: string
   buildId: string
+  feeRate: number
 }> => {
   const address = useConnectionStore().getAddress
 
@@ -266,6 +283,7 @@ export const buildRemove = async ({
     token1,
     token2,
     removeEquity,
+    feeRate,
   }
 
   const res = await swapApiFetch('build/remove', {
@@ -273,21 +291,29 @@ export const buildRemove = async ({
     body: JSON.stringify(body),
     auth: true,
   })
-  return res
+  return {
+    ...res,
+    feeRate,
+  }
 }
 
 export const build1xSwap = async ({
   token1,
   token2,
   sourceAmount,
+  feeRate,
+  inscriptionUtxos,
 }: {
   token1: string
   token2: string
   sourceAmount: string
+  feeRate: number
+  inscriptionUtxos: InscriptionUtxo[]
 }): Promise<{
   rawPsbt: string
   buildId: string
   type: '1x'
+  feeRate: number
 }> => {
   const address = useConnectionStore().getAddress
   const pubkey = useConnectionStore().getPubKey
@@ -298,6 +324,7 @@ export const build1xSwap = async ({
     token1,
     token2,
     sourceAmount,
+    feeRate,
   }
 
   const res = await swapApiFetch('build/1x', {
@@ -305,21 +332,29 @@ export const build1xSwap = async ({
     body: JSON.stringify(body),
     auth: true,
   })
-  return res
+  return {
+    ...res,
+    feeRate,
+  }
 }
 
 export const buildX2Swap = async ({
   token1,
   token2,
   sourceAmount,
+  feeRate,
+  inscriptionUtxos,
 }: {
   token1: string
   token2: string
   sourceAmount: string
+  feeRate: number
+  inscriptionUtxos: InscriptionUtxo[]
 }): Promise<{
   rawPsbt: string
   buildId: string
   type: 'x2'
+  feeRate: number
 }> => {
   const address = useConnectionStore().getAddress
   const pubkey = useConnectionStore().getPubKey
@@ -330,6 +365,7 @@ export const buildX2Swap = async ({
     token1,
     token2,
     sourceAmount,
+    feeRate,
   }
 
   const res = await swapApiFetch('build/x2', {
@@ -337,23 +373,29 @@ export const buildX2Swap = async ({
     body: JSON.stringify(body),
     auth: true,
   })
-  return res
+  return {
+    ...res,
+    feeRate,
+  }
 }
 
 export const build2xSwap = async ({
   token1,
   token2,
   sourceAmount,
+  feeRate,
   inscriptionUtxos,
 }: {
   token1: string
   token2: string
   sourceAmount: string
+  feeRate: number
   inscriptionUtxos: InscriptionUtxo[]
 }): Promise<{
   rawPsbt: string
   buildId: string
   type: '2x'
+  feeRate: number
 }> => {
   const address = useConnectionStore().getAddress
   const pubkey = useConnectionStore().getPubKey
@@ -365,6 +407,7 @@ export const build2xSwap = async ({
     token2,
     sourceAmount,
     inscriptionUtxos,
+    feeRate,
   }
 
   const res = await swapApiFetch('build/2x', {
@@ -372,7 +415,10 @@ export const build2xSwap = async ({
     body: JSON.stringify(body),
     auth: true,
   })
-  return res
+  return {
+    ...res,
+    feeRate,
+  }
 }
 
 export const postTask = async ({

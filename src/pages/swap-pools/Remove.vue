@@ -16,6 +16,8 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
 import { buildRemove, postTask } from '@/queries/swap'
 import { IS_DEV, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
+import { useFeebStore } from '@/stores/feeb'
+import { ERRORS } from '@/data/errors'
 
 const { token1, token2 } = useSwapPool()
 const { openConnectionModal } = useConnectionModal()
@@ -246,11 +248,19 @@ async function doRemoveLiquidity() {
     return
   }
 
+  // lock in fee rate we're using
+  const feeRate = useFeebStore().get
+  if (!feeRate) {
+    ElMessage.error(ERRORS.HAVE_NOT_CHOOSE_GAS_RATE)
+    return
+  }
+
   // go for it!
   mutateBuildRemove({
     token1: token1.value.toLowerCase(),
     token2: token2.value.toLowerCase(),
     removeEquity: removeEquity.value,
+    feeRate,
   })
 }
 </script>

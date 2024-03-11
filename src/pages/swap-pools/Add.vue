@@ -19,6 +19,8 @@ import { exclusiveChange } from '@/lib/build-helpers'
 import { type InscriptionUtxo } from '@/queries/swap/types'
 import SwapSideWithInput from '@/components/swap/SwapSideWithInput.vue'
 import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
+import { useFeebStore } from '@/stores/feeb'
+import { ERRORS } from '@/data/errors'
 
 const { token1, token2 } = useSwapPool()
 const { openConnectionModal } = useConnectionModal()
@@ -282,9 +284,11 @@ const { mutate: mutatePostAdd } = useMutation({
 const afterBuildAdd = async ({
   rawPsbt,
   buildId,
+  feeRate,
 }: {
   rawPsbt: string
   buildId: string
+  feeRate: number
 }) => {
   const btcjs = btcjsStore.get!
   // continue building and add change to the psbt
@@ -295,6 +299,7 @@ const afterBuildAdd = async ({
     psbt: psbtAdd,
     maxUtxosCount: USE_UTXO_COUNT_LIMIT,
     sighashType: SIGHASH_ALL,
+    feeb: feeRate,
   })
   if (!psbtAddFinished) throw new Error('Failed to add change')
 
@@ -345,6 +350,12 @@ async function doAddLiquidity() {
     }
     return
   }
+  // lock in fee rate we're using
+  const feeRate = useFeebStore().get
+  if (!feeRate) {
+    ElMessage.error(ERRORS.HAVE_NOT_CHOOSE_GAS_RATE)
+    return
+  }
 
   // go for it!
   if (isEmpty.value) {
@@ -354,6 +365,7 @@ async function doAddLiquidity() {
       token1Amount: token1Amount.value,
       token2Amount: token2Amount.value,
       inscriptionUtxos: token2InscriptionUtxos.value,
+      feeRate,
     })
   } else {
     mutateBuildAdd({
@@ -362,6 +374,7 @@ async function doAddLiquidity() {
       source: 'token2',
       sourceAmount: token2Amount.value,
       inscriptionUtxos: token2InscriptionUtxos.value,
+      feeRate,
     })
   }
 }
