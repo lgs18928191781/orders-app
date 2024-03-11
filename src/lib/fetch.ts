@@ -187,7 +187,8 @@ export async function swapApiFetch(url: string, options?: ApiOptions) {
 
 export async function bridgeApiFetch(
   url: string,
-  options?: { headers?: HeadersInit } & RequestInit
+  options?: { headers?: HeadersInit } & RequestInit,
+  returnRaw: boolean = false
 ) {
   const ordersApiUrl = `https://www.orders.exchange/api-bridge-testnet${url}`
   if (!options)

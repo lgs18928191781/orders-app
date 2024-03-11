@@ -1,6 +1,27 @@
 /// <reference types="chrome" />
 type BitcoinJs = typeof import('bitcoinjs-lib')
 type ECPairFactory = typeof import('ecpair')
+type TransferOutput = {
+  genesis?: string
+  codehash?: string
+  type: 'token' | 'space' | string
+  receivers: {
+    address: string
+    amount: string
+  }[]
+}
+type TaskResponse = {
+  id: number
+  txid: string
+  txHex: string
+  routeCheckTxid?: string
+  routeCheckTxHex?: string
+}
+type TransferResponse = {
+  res: TaskResponse[]
+  txids: string[]
+  broadcasted: boolean
+}
 
 interface Window {
   bitcoin: BitcoinJs
@@ -111,5 +132,9 @@ interface Window {
       pushPsbt: (psbt: string) => Promise<string>
       signPsbts: (psbtHexs: string[], options?: any[]) => Promise<string[]>
     }
+    transfer: (params: {
+      tasks: TransferOutput[]
+      broadcast: boolean
+    }) => Promise<TransferResponse>
   }
 }
