@@ -168,7 +168,11 @@ import { useRoute } from 'vue-router'
 import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { determineAddressInfo } from '@/lib/utils'
-import { useBridgeRedeem } from '@/hooks/use-bridge-redeem'
+import {
+  SupportRedeemAddressType,
+  supportRedeemAddressType,
+  useBridgeRedeem,
+} from '@/hooks/use-bridge-redeem'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -417,12 +421,25 @@ function BtnOperate() {
 }
 async function redeem() {
   //TODO 限定metalet 钱包
+  const addressInfo = determineAddressInfo(
+    await connectionStore.adapter.getAddress()
+  )
+  const addressType: SupportRedeemAddressType =
+    addressInfo.type.toLocaleUpperCase() as SupportRedeemAddressType
+
   try {
+    if (!supportRedeemAddressType.includes(addressType)) {
+      throw new Error('unsupport address tyep')
+    }
     if (currentAssetInfo.val.network === 'BTC') {
-      await BridgeRedeem.redeemBtc(10000, currentAssetInfo.val)
+      await BridgeRedeem.redeemBtc(10000, currentAssetInfo.val, addressType)
     }
     if (currentAssetInfo.val.network === 'BRC20') {
-      await BridgeRedeem.redeemBrc20(1000000000, currentAssetInfo.val)
+      await BridgeRedeem.redeemBrc20(
+        1000000000,
+        currentAssetInfo.val,
+        addressType
+      )
     }
   } catch (err) {
     console.log(err)
