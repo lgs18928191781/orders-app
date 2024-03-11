@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import { useBtcJsStore } from '@/stores/btcjs'
+import { Ref, ref } from 'vue'
 
 async function connectToOkx() {}
+const w = window
 const bitcoin1 = window.bitcoin
 // @ts-ignore
-import * as bitcoin2 from '@/bitcoin-lib'
+// import * as bitcoin2 from '@/bitcoin-lib'
+const bitcoin3: Ref<any> = ref()
 // @ts-ignore
-const bitcoin3 = import('@/bitcoin-lib')
+// import('@/bitcoin-lib').then((module) => {
+//   bitcoin3.value = module
+// })
 </script>
 
 <template>
@@ -17,9 +22,10 @@ const bitcoin3 = import('@/bitcoin-lib')
 
     <h3>bitcoin1</h3>
     <div class="">{{ bitcoin1 }}</div>
+    <div class="">{{ w.bitcoin }}</div>
 
     <h3>bitcoin2</h3>
-    <div class="">{{ bitcoin2 }}</div>
+    <!-- <div class="">{{ bitcoin2 }}</div> -->
 
     <h3>bitcoin3</h3>
     <div class="">{{ bitcoin3 }}</div>
