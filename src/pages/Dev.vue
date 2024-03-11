@@ -1,5 +1,9 @@
 <script lang="ts" setup>
+import { useBtcJsStore } from '@/stores/btcjs'
+
 async function connectToOkx() {}
+
+const btcjs = useBtcJsStore().get
 </script>
 
 <template>
@@ -8,5 +12,9 @@ async function connectToOkx() {}
       connect to okx
     </button>
     <img src="http://localhost:3001/icons" alt="okx logo" />
+
+    <div class="">
+      {{ btcjs }}
+    </div>
   </div>
 </template>
