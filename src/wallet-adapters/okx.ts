@@ -33,6 +33,14 @@ export const getMvcAddress = async () => {
   return 'undefined'
 }
 
+export const signMvcMessage = async (Message: { message: string }) => {
+  return 'undefined'
+}
+
+export const getMvcPublickey = async () => {
+  return 'undefined'
+}
+
 export function finishPsbt(psbtStr: string): string {
   return psbtStr
   const btcjs = useBtcJsStore().get ?? raise('btcjs not initialized')

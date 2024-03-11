@@ -56,7 +56,12 @@ export const createPrepayOrderMintBtcReq = async (data: any) => {
   })
 }
 
-export const submitPrepayOrderMintBtcReq = async (data: any) => {
+export const submitPrepayOrderMintBtcReq = async (
+  data: any
+): Promise<{
+  msg: string
+  success: boolean
+}> => {
   return await bridgeApiFetch(`/submitPrepayOrderMintBtc`, {
     method: 'POST',
     body: JSON.stringify(data),

@@ -86,6 +86,8 @@ export const useConnectionStore = defineStore('connection', {
         finishPsbt: (psbt: string) => string
         getAddress: () => Promise<string>
         getMvcAddress: () => Promise<string>
+        signMvcMessage: (message: any) => Promise<any>
+        getMvcPublickey: () => Promise<string>
         getPubKey: () => Promise<string>
         connect: () => Promise<{
           address: string

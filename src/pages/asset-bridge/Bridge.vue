@@ -151,7 +151,11 @@ import {
   type bridgeAssetPairReturnType,
 } from '@/queries/bridge-api'
 import SwapBlur from '@/components/swap/SwapBlur.vue'
-import { useBridgeTools, AddressType } from '@/hooks/use-bridge-tool'
+import {
+  useBridgeTools,
+  AddressType,
+  AssetBridgeNetwork,
+} from '@/hooks/use-bridge-tool'
 import Decimal from 'decimal.js'
 import CheckMetaletProvider from '@/components/bridge/CheckMetaletProvider.vue'
 import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
@@ -162,6 +166,7 @@ import { getOneBrc20 } from '@/queries/orders-api'
 import { useRoute } from 'vue-router'
 import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import { useBtcJsStore } from '@/stores/btcjs'
+import { determineAddressInfo } from '@/lib/utils'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -170,19 +175,14 @@ enum BtnColor {
   unLogin = 'unLogin',
 }
 
-enum AssetBridgeNetwork {
-  BRC20 = 'BRC20',
-  BTC = 'BTC',
-  MVC = 'MVC',
-}
-
 const { openConnectionModal, closeConnectionModal } =
   useCheckMetaletLoginModal()
 const connectionStore = useConnectionStore()
+console.log('connectionStore1111', connectionStore)
 const btcJsStore = useBtcJsStore()
 const route = useRoute()
 const BridgeTools = useBridgeTools()
-
+onMounted(() => {})
 const swapFromAmount = ref(0)
 const feeInfo = reactive({
   val: {
@@ -256,6 +256,7 @@ async function getAssetInfo() {
           })
       } else if (network == AssetBridgeNetwork.BTC) {
         const fromBalance = await connectionStore.adapter.getBalance()
+
         fromAsset.val.balance = new Decimal(fromBalance)
           .div(10 ** decimals)
           .toNumber()
@@ -365,9 +366,12 @@ const swapToAmount = computed(() => {
     lastThanMaxLimited.value = false
     try {
       console.log('swapFromAmount', swapFromAmount)
+      console.log('currentAssetInfo.val', currentAssetInfo.val)
+
       const { confirmNumber, receiveAmount } = BridgeTools.calcReceiveInfo(
         formatUnitToSats(swapFromAmount.value, currentAssetInfo.val.decimal),
-        assetInfo.val
+        assetInfo.val,
+        currentAssetInfo.val
       )
       feeInfo.val.comfirmation = confirmNumber
       return formatUnitToBtc(receiveAmount, currentAssetInfo.val.decimal)
@@ -417,23 +421,33 @@ async function confrimSwap() {
   if (swapFromAmount.value <= 0) {
     return
   }
-  // console.log(' assetInfo.val.originTokenId', currentAssetInfo.val)
 
-  // const publicKey = await connectionStore.adapter.getPubKey()
-  // const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
+  const publicKey = await connectionStore.adapter.getPubKey()
+  const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
+  const publicKeyReceive = await connectionStore.adapter.getMvcPublickey()
+  const publicKeyReceiveSign = await connectionStore.adapter.signMvcMessage({
+    message: publicKeyReceive,
+  })
+  console.log('publicKeyReceiveSign', publicKeyReceiveSign)
 
-  // BridgeTools.sumitBridgeOrder({
-  //   amount: formatUnitToSats(
-  //     swapFromAmount.value,
-  //     currentAssetInfo.val.decimal
-  //   ),
-  //   originTokenId: currentAssetInfo.val.originTokenId,
-  //   addressType: AddressType.P2WPKH,
-  //   publicKey: publicKey,
-  //   publicKeySign: publicKeySign,
-  // })
-  //return
+  const addressType = determineAddressInfo(
+    await connectionStore.adapter.getAddress()
+  )
+  console.log('addressType', addressType)
 
+  await BridgeTools.sumitBridgeOrderForBtc({
+    amount: formatUnitToSats(
+      swapFromAmount.value,
+      currentAssetInfo.val.decimal
+    ),
+    originTokenId: currentAssetInfo.val.originTokenId,
+    addressType: addressType.type.toUpperCase(),
+    publicKey: publicKey,
+    publicKeySign: publicKeySign,
+    publicKeyReceive,
+    publicKeyReceiveSign: publicKeyReceiveSign,
+    feeBtc: assetInfo.val.feeBtc,
+  })
   successInfo.send.amount = swapFromAmount.value
   successInfo.send.desc =
     fromAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
@@ -444,7 +458,6 @@ async function confrimSwap() {
   successInfo.receive.symbol = toAsset.val.symbol
   successInfo.networkFee.symbol = fromAsset.val.symbol
   successInfo.time.amount = prettyTimestamp(Date.now())
-
   swapSuccess.value = true
 }
 

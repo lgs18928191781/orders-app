@@ -229,7 +229,7 @@ export async function bridgeApiFetch(
     throw new Error(jsoned.message)
   }
 
-  return jsoned.data
+  return jsoned.data ?? jsoned
 }
 
 export async function originalFetch(url: string, options?: RequestInit) {

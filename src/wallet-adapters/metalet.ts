@@ -30,6 +30,25 @@ export const getMvcAddress = async () => {
   return address
 }
 
+export const signMvcMessage = async (Message: { message: string }) => {
+  checkMetalet()
+  const { message } = Message
+  const { signature } = await window.metaidwallet.signMessage({
+    message: message,
+  })
+  const buffer = Buffer.from(signature.signature, 'hex')
+  const base64 = buffer.toString('base64')
+
+  return base64
+}
+
+export const getMvcPublickey = async () => {
+  checkMetalet()
+  const MvcPubkey = await window.metaidwallet.getPublicKey()
+  const publickey = checkMetaletStatus(MvcPubkey, 'get mvc publickey')
+  return publickey
+}
+
 export const getAddress = async () => {
   checkMetalet()
   const addressRes = await window.metaidwallet.btc.getAddress()

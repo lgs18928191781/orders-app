@@ -80,6 +80,8 @@ interface Window {
   }
   metaidwallet: {
     getAddress: () => Promise<string>
+    getPublicKey: () => Promise<string>
+    signMessage: (message: any) => Promise<any>
     on: (
       eventName: string,
       handler: ({ mvcAddress: string, btcAddress: string }) => void
