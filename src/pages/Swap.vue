@@ -44,6 +44,7 @@ const token2InscriptionUtxos = ref<InscriptionUtxo[]>([])
 const ratio = ref<Decimal>(new Decimal(0))
 const poolRatio = ref<Decimal>(new Decimal(0))
 const priceImpact = ref<Decimal>(new Decimal(0))
+const serviceFee = ref<Decimal>(new Decimal(0))
 const hasImpactWarning = computed(() => {
   // greater than 15%
   return priceImpact.value.gte(15)
@@ -176,6 +177,7 @@ watch(
         ratio.value = new Decimal(preview.ratio)
         poolRatio.value = new Decimal(preview.poolRatio)
         priceImpact.value = new Decimal(preview.priceImpact)
+        serviceFee.value = new Decimal(preview.serviceFee)
 
         if (swapType.value.includes('1')) {
           token2Amount.value = preview.targetAmount
@@ -609,14 +611,14 @@ async function doSwap() {
         <!-- flip -->
         <div class="relative z-30 my-0.5 flex h-0 justify-center">
           <div
-            class="group absolute -translate-y-1/2 rounded-xl bg-zinc-900 p-1 transition-all duration-150 hover:scale-110"
+            class="group absolute -translate-y-1/2 rounded-xl bg-zinc-900 p-1 transition-all duration-500 hover:scale-110 lg:duration-150"
           >
             <ArrowDownIcon
               class="box-content inline h-4 w-4 rounded-lg bg-zinc-800 p-2 group-hover:hidden"
             />
 
             <button
-              class="box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm shadow-primary/80 transition-all duration-200 group-hover:inline"
+              class="box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm shadow-primary/80 transition-all duration-500 group-hover:inline lg:duration-200"
               :class="{
                 'rotate-180': flippedControl,
               }"
@@ -658,9 +660,10 @@ async function doSwap() {
           :ratio="ratio"
           :pool-ratio="poolRatio"
           :calculating="calculating"
+          :service-fee="serviceFee"
         />
 
-        <SwapGasStats v-show="!!Number(sourceAmount)" :task-type="'swap'" />
+        <SwapGasStats v-show="!!Number(sourceAmount)" :task-type="swapType" />
       </div>
 
       <!-- disabled buttons: calculating or have unmets  -->

@@ -30,7 +30,10 @@ export const SELL_TX_SIZE = 673
 export const BID_TX_SIZE = 111 + 154 // pay + grant
 export const SEND_TX_SIZE = 140
 export const SWAP_TX_SIZE = 298
+export const SWAP_2X_TX_SIZE = 212
 export const SWAP_POOL_ADD_TX_SIZE = 255
+export const INSCRIBE_TX_SIZE_FACTOR = 380
+export const TX_BASE_SIZE = 300
 
 // Sighash types
 export const SIGHASH_DEFAULT = 0x00

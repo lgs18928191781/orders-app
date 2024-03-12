@@ -39,11 +39,20 @@ const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
     computed(() => !!address),
   ),
 )
-const hasPending = computed(
-  () =>
-    poolStatus.value?.poolSharePending !== '0' &&
-    poolStatus.value?.poolSharePending !== '0%',
-)
+const hasPending = computed(() => {
+  if (!poolStatus.value) return false
+  if (!poolStatus.value.poolSharePending) return false
+
+  try {
+    const poolSharePending = new Decimal(
+      poolStatus.value.poolSharePending.replace('%', ''),
+    )
+
+    return poolSharePending.gt(0)
+  } catch (e) {
+    return false
+  }
+})
 
 const tvl = computed(() => {
   if (!poolStatus.value || !fiatRate.value) return '0'

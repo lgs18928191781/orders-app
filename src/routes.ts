@@ -13,7 +13,6 @@ const Events = () => import('./pages/Events.vue')
 const Leaderboard = () => import('./pages/Leaderboard.vue')
 const Changelog = () => import('./pages/Changelog.vue')
 const Dev = () => import('./pages/Dev.vue')
-const Pool = () => import('./pages/Pool.vue')
 const NoService = () => import('./pages/NoService.vue')
 const Maintaining = () => import('./pages/Maintaining.vue')
 

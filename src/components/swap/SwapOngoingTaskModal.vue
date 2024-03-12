@@ -226,7 +226,7 @@ function copyFailedReason() {
           >
             <IconImage
               :src="extendedTask.fromIcon"
-              class="size-6"
+              class="size-6 rounded-full"
               v-if="extendedTask.fromIcon"
             />
             <span>{{
@@ -237,7 +237,7 @@ function copyFailedReason() {
 
             <IconImage
               :src="extendedTask.toIcon"
-              class="size-6"
+              class="size-6 rounded-full"
               v-if="extendedTask.toIcon"
             />
             <span>{{
@@ -249,7 +249,7 @@ function copyFailedReason() {
             <div class="flex items-center gap-2 text-sm">
               <IconImage
                 :src="extendedTask.fromIcon"
-                class="size-6"
+                class="size-6 rounded-full"
                 v-if="extendedTask.fromIcon"
               />
               <span>{{
@@ -263,7 +263,7 @@ function copyFailedReason() {
 
               <IconImage
                 :src="extendedTask.toIcon"
-                class="size-6"
+                class="size-6 rounded-full"
                 v-if="extendedTask.toIcon"
               />
               <span>{{

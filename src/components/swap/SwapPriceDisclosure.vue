@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
   TooltipArrow,
 } from '@/components/ui/tooltip'
+import { useFiat } from '@/hooks/use-fiat'
 
 const props = defineProps({
   token1Symbol: {
@@ -40,7 +41,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  serviceFee: {
+    required: true,
+  },
 })
+
+const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
+const { data: fiatRate } = useFiatRateQuery()
 
 const ratioDisplay = computed(() => {
   const radioRawNumber = (props.ratio as Decimal).div(1e8)
@@ -61,6 +68,14 @@ const impactColor = computed(() => {
 
   return 'text-zinc-300'
 })
+
+const serviceFeeDisplay = computed(() => {
+  const serviceFee = props.serviceFee as Decimal
+
+  if (serviceFee.eq(2000)) return '0.00002000 BTC'
+
+  return serviceFee.div(1e8).toFixed(8) + ' BTC (1%)'
+})
 </script>
 
 <template>
@@ -69,7 +84,7 @@ const impactColor = computed(() => {
     <TooltipProvider v-if="hasImpactWarning">
       <Tooltip>
         <TooltipTrigger
-          class="mt-2 flex cursor-pointer items-center justify-between rounded-2xl border border-red-500/30 p-3 text-sm"
+          class="mt-2 flex cursor-pointer items-center justify-between rounded-2xl border border-red-500/30 p-3 text-xs lg:text-sm"
           as="div"
         >
           <div>Price Impact Warning</div>
@@ -92,12 +107,13 @@ const impactColor = computed(() => {
     <Disclosure
       v-slot="{ open }"
       as="div"
+      :default-open="true"
       class="mt-2 rounded-2xl border border-zinc-700 p-4"
     >
       <div class="text-zinc-500" v-if="calculating">Calculating...</div>
       <template v-else>
         <DisclosureButton
-          class="flex w-full items-center justify-between text-sm text-zinc-300 focus:outline-none"
+          class="flex w-full items-center justify-between text-xs text-zinc-300 focus:outline-none lg:text-sm"
         >
           <div class="space-y-1">
             <div class="flex items-center gap-2">
@@ -132,7 +148,7 @@ const impactColor = computed(() => {
             leave-to-class="translate-y-1 opacity-0 "
           >
             <DisclosurePanel
-              class="mt-4 flex flex-col gap-2 border-t border-zinc-700 pt-4 text-sm"
+              class="mt-4 flex flex-col gap-2 border-t border-zinc-700 pt-4 text-xs lg:text-sm"
               static
             >
               <div class="flex w-full items-center justify-between">
@@ -142,14 +158,18 @@ const impactColor = computed(() => {
 
               <div class="flex w-full items-center justify-start gap-2">
                 <span class="label">Service fee</span>
-                <span class="ml-auto text-zinc-500 line-through decoration-2">
-                  1.5%
-                </span>
-                <span
-                  class="rounded bg-green-700/30 px-2 text-xs font-bold text-green-500"
+                <span class="ml-auto">{{ serviceFeeDisplay }}</span>
+                <div
+                  class="text-right text-xs text-zinc-500 lg:text-sm"
+                  v-if="isShowingFiat && fiatRate && serviceFee"
                 >
-                  FREE
-                </span>
+                  {{
+                    getFiatPriceDisplay(
+                      (serviceFee as Decimal).toNumber(),
+                      fiatRate,
+                    )
+                  }}
+                </div>
               </div>
             </DisclosurePanel>
           </transition>
