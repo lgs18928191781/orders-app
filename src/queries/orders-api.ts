@@ -546,6 +546,12 @@ export const getOneBrc20 = async ({
       }
     })
 
+    // filter out unconfirmed (inscriptionNumber is -1)
+    const filtered = brc20.transferBalanceList.filter(
+      (brc) => brc.inscriptionNumber !== '-1',
+    )
+    brc20.transferBalanceList = filtered
+
     // copy 10 times
     // const copied = [...brc20.transferBalanceList]
     // for (let i = 0; i < 10; i++) {

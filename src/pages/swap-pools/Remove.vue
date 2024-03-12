@@ -202,8 +202,8 @@ watch(
 const { pushOngoing } = useOngoingTask()
 const { mutate: mutatePostRemove } = useMutation({
   mutationFn: postTask,
-  onSuccess: async ({ id: taskId }) => {
-    pushOngoing(taskId)
+  onSuccess: async ({ buildId }) => {
+    pushOngoing(buildId)
   },
   onError: (err: any) => {
     ElMessage.error(err.message)

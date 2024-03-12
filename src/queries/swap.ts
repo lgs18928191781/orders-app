@@ -428,7 +428,7 @@ export const postTask = async ({
   buildId: string
   rawPsbt: string
 }): Promise<{
-  id: string
+  buildId: string
 }> => {
   const address = useConnectionStore().getAddress
   const body = { buildId, rawPsbt, address }

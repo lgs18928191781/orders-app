@@ -27,7 +27,7 @@ const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const address = connectionStore.getAddress
 const network = networkStore.network
-const { hasOngoing, taskId, clearOngoing } = useOngoingTask()
+const { hasOngoing, buildId, clearOngoing } = useOngoingTask()
 
 const taskStatus = ref('running')
 const { data: task } = useQuery(
@@ -35,7 +35,7 @@ const { data: task } = useQuery(
     {
       address,
       network,
-      taskId,
+      buildId,
     },
     hasOngoing,
     () => (taskStatus.value === 'running' ? 1000 : false),

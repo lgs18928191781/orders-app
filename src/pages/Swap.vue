@@ -426,8 +426,8 @@ const { pushOngoing } = useOngoingTask()
 const queryClient = useQueryClient()
 const { mutate: mutatePostSwap } = useMutation({
   mutationFn: postTask,
-  onSuccess: async ({ id: taskId }) => {
-    pushOngoing(taskId)
+  onSuccess: async ({ buildId }) => {
+    pushOngoing(buildId)
   },
   onError: (err: any) => {
     ElMessage.error(err.message)

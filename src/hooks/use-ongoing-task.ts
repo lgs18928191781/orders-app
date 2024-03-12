@@ -1,23 +1,23 @@
-import { createGlobalState } from '@vueuse/core'
+import { createGlobalState, useStorage } from '@vueuse/core'
 import { computed, ref } from 'vue'
 
 export const useOngoingTask = createGlobalState(() => {
   // state
-  const taskId = ref('')
+  const buildId = useStorage('ongoing-task-build-id', '')
 
-  const hasOngoing = computed(() => !!taskId.value)
+  const hasOngoing = computed(() => !!buildId.value)
 
   // actions
   const pushOngoing = (id: string) => {
-    taskId.value = id
+    buildId.value = id
   }
 
   const clearOngoing = () => {
-    taskId.value = ''
+    buildId.value = ''
   }
 
   return {
-    taskId,
+    buildId,
     hasOngoing,
     pushOngoing,
     clearOngoing,

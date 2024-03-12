@@ -212,7 +212,11 @@ async function goInscribe() {
           class="text-xs text-zinc-300 hover:text-primary hover:underline"
           @click="toggleSelectAll"
         >
-          Select all
+          {{
+            myOneBrc20.transferBalanceList.length > 10
+              ? 'Select first 10'
+              : 'Select all'
+          }}
         </button>
       </div>
       <button
