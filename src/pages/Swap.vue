@@ -288,6 +288,12 @@ const conditions: Ref<
     priority: 6,
     met: false,
   },
+  {
+    condition: 'return-is-positive',
+    message: 'Negative return',
+    priority: 7,
+    met: true,
+  },
 ])
 const hasUnmet = computed(() => {
   return conditions.value.some((c) => !c.met)
@@ -412,6 +418,30 @@ watch(
     } else {
       conditions.value = conditions.value.map((c) => {
         if (c.condition === 'more-than-threshold') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true },
+)
+
+// 6th watcher: positiveReturn
+const returnIsPositive = ref(true)
+watch(
+  () => returnIsPositive.value,
+  (returnIsPositive) => {
+    if (returnIsPositive) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'return-is-positive') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'return-is-positive') {
           c.met = false
         }
         return c
@@ -663,7 +693,14 @@ async function doSwap() {
           :service-fee="serviceFee"
         />
 
-        <SwapGasStats v-show="!!Number(sourceAmount)" :task-type="swapType" />
+        <SwapGasStats
+          v-show="!!Number(sourceAmount)"
+          :task-type="swapType"
+          :token-1-amount="token1Amount"
+          :service-fee="serviceFee"
+          @return-became-negative="returnIsPositive = false"
+          @return-became-positive="returnIsPositive = true"
+        />
       </div>
 
       <!-- disabled buttons: calculating or have unmets  -->

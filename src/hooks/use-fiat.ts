@@ -20,16 +20,16 @@ export const useFiat = createGlobalState(() => {
   function getFiatPriceDisplay(
     price: number | string,
     rate: number,
-    showFiatSign = true
+    showFiatSign = true,
   ): string {
     const fiatPrice = new Decimal(price).times(rate)
 
     // if it's less than 0.0001, use fixed(8)
-    if (fiatPrice.lt(0.0001))
+    if (fiatPrice.lt(0.0001) && fiatPrice.gt(0))
       return `${showFiatSign ? '$' : ''}${fiatPrice.toFixed(8)}`
 
     // if it's less than 0.01, use fixed(4)
-    if (fiatPrice.lt(0.01))
+    if (fiatPrice.lt(0.01) && fiatPrice.gt(0))
       return `${showFiatSign ? '$' : ''}${fiatPrice.toFixed(4)}`
 
     return `${showFiatSign ? '$' : ''}${fiatPrice.toFixed(2)}`

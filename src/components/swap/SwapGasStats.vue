@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { get } from '@vueuse/core'
 import { ArrowDownUpIcon } from 'lucide-vue-next'
 
@@ -9,18 +9,21 @@ import { useNetworkStateModal } from '@/hooks/use-network-state-modal'
 
 import { prettyBalance } from '@/lib/formatters'
 import {
+  DUST_UTXO_VALUE,
   SWAP_2X_TX_SIZE,
   SWAP_POOL_ADD_TX_SIZE,
   SWAP_TX_SIZE,
 } from '@/data/constants'
 import { unit, useBtcUnit } from '@/lib/helpers'
+import Decimal from 'decimal.js'
 
 const feebStore = useFeebStore()
 const { isShowingFiat, useFiatRateQuery, getFiatPriceDisplay } = useFiat()
 const { openModal } = useNetworkStateModal()
 const { data: fiatRate } = useFiatRateQuery()
 
-const props = defineProps(['taskType'])
+const props = defineProps(['taskType', 'token1Amount', 'serviceFee'])
+const emit = defineEmits(['returnBecameNegative', 'returnBecamePositive'])
 
 const taskGas = computed(() => {
   if (!feebStore.get) return 0
@@ -58,6 +61,41 @@ const prettyInscriptionGas = computed(() => {
 const showInscriptionGas = computed(() => {
   return ['1x', 'x2', 'remove'].includes(props.taskType)
 })
+
+const showFinal = computed(() => {
+  return ['2x'].includes(props.taskType)
+})
+const finalToken1Amount = computed(() => {
+  if (!props.token1Amount) return 0
+
+  const finalAmount = new Decimal(props.token1Amount)
+    .minus(props.serviceFee)
+    .minus(taskGas.value)
+
+  return finalAmount.toNumber()
+})
+
+const prettyFinalToken1Amount = computed(() => {
+  if (!finalToken1Amount.value) return '0'
+
+  return `${prettyBalance(finalToken1Amount.value, get(useBtcUnit))} ${get(unit)}`
+})
+
+const negativeReturn = computed(() => {
+  return finalToken1Amount.value <= DUST_UTXO_VALUE
+})
+
+watch(
+  () => negativeReturn.value,
+  (n) => {
+    if (n) {
+      emit('returnBecameNegative')
+    } else {
+      emit('returnBecamePositive')
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -99,6 +137,26 @@ const showInscriptionGas = computed(() => {
           v-if="isShowingFiat && fiatRate && taskGas"
         >
           {{ getFiatPriceDisplay(feebStore.inscriptionFee, fiatRate) }}
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="flex items-center justify-between text-xs lg:text-sm"
+      v-if="showFinal"
+    >
+      <span class="text-zinc-500">Finally Receive</span>
+      <div class="flex items-center gap-3">
+        <div
+          :class="negativeReturn ? 'font-bold text-red-500' : 'text-zinc-300'"
+        >
+          {{ prettyFinalToken1Amount }}
+        </div>
+        <div
+          class="text-right text-xs text-zinc-500 lg:text-sm"
+          v-if="isShowingFiat && fiatRate && taskGas && !negativeReturn"
+        >
+          {{ getFiatPriceDisplay(finalToken1Amount, fiatRate) }}
         </div>
       </div>
     </div>

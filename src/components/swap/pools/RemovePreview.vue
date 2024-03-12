@@ -6,7 +6,7 @@ import Decimal from 'decimal.js'
 import { useSwapPool } from '@/hooks/use-swap-pool'
 
 import { prettySymbol } from '@/lib/formatters'
-import { SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
+import { REMOVE_THRESHOLD_AMOUNT } from '@/data/constants'
 
 defineProps([
   'preview',
@@ -19,7 +19,7 @@ defineProps([
 const { token1, token2, token1Icon, token2Icon } = useSwapPool()
 
 const thresholdInBtc = computed(() =>
-  new Decimal(SWAP_THRESHOLD_AMOUNT).div(1e8),
+  new Decimal(REMOVE_THRESHOLD_AMOUNT).div(1e8),
 )
 </script>
 

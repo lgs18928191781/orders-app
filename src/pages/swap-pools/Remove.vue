@@ -15,7 +15,7 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 
 import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
 import { buildRemove, postTask } from '@/queries/swap'
-import { IS_DEV, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
+import { IS_DEV, REMOVE_THRESHOLD_AMOUNT } from '@/data/constants'
 import { useFeebStore } from '@/stores/feeb'
 import { ERRORS } from '@/data/errors'
 
@@ -175,7 +175,7 @@ watch(
 const moreThanThreshold = computed(() => {
   if (!preview.value) return false
 
-  return token1Amount.value.gte(SWAP_THRESHOLD_AMOUNT)
+  return token1Amount.value.gte(REMOVE_THRESHOLD_AMOUNT)
 })
 watch(
   () => moreThanThreshold.value,

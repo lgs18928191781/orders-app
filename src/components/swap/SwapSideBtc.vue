@@ -224,7 +224,8 @@ watch(
 
 <template>
   <div class="swap-sub-control-panel">
-    <div class="text-zinc-400" v-if="!!side">You {{ side }}</div>
+    <div class="text-zinc-400" v-if="side === 'pay'">You pay</div>
+    <div class="text-zinc-400" v-if="side === 'receive'">Should receive</div>
 
     <!-- main control -->
     <div class="flex h-16 items-center justify-between space-x-2">
