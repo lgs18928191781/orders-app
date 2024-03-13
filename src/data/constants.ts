@@ -2,7 +2,6 @@ import changelog from './changelog'
 
 // Environments
 export const VERSION = changelog[0].version
-export const CHARGE_SERVICE_FEES = false
 export const DEBUG = false
 export const IS_DEV = import.meta.env.VITE_ENVIRONMENT === 'development'
 export const SHOWING_TRADE_STATS = false

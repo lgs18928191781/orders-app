@@ -63,7 +63,7 @@ const showInscriptionGas = computed(() => {
 })
 
 const showFinal = computed(() => {
-  return ['2x'].includes(props.taskType)
+  return ['2x'].includes(props.taskType) && props.token1Amount
 })
 const finalToken1Amount = computed(() => {
   if (!props.token1Amount) return 0

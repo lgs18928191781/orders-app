@@ -433,7 +433,7 @@ async function doAddLiquidity() {
     :pool-equity="poolEquity"
   />
 
-  <SwapGasStats v-show="ratio" :task-type="'add'" />
+  <SwapFrictionStats v-show="ratio" :task-type="'add'" />
 
   <!-- disabled button -->
   <MainBtn class="disabled" v-if="calculatingToken1" :disabled="true">

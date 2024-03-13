@@ -21,12 +21,12 @@ const links: {
   //   path: '/pool',
   //   // new: true,
   // },
-  // {
-  //   name: 'Swap',
-  //   path: '/swap/',
-  //   version: 0,
-  //   // testing: true,
-  // },
+  {
+    name: 'Swap',
+    path: '/swap/',
+    version: 0,
+    // testing: true,
+  },
   {
     name: 'Events',
     path: '/events',

@@ -18,6 +18,7 @@ import { buildRemove, postTask } from '@/queries/swap'
 import { IS_DEV, REMOVE_THRESHOLD_AMOUNT } from '@/data/constants'
 import { useFeebStore } from '@/stores/feeb'
 import { ERRORS } from '@/data/errors'
+import { useModalConfirmRemoveLiquidity } from '@/hooks/use-modal-confirm-remove-liquidity'
 
 const { token1, token2 } = useSwapPool()
 const { openConnectionModal } = useConnectionModal()
@@ -263,6 +264,8 @@ async function doRemoveLiquidity() {
     feeRate,
   })
 }
+
+const { openModal } = useModalConfirmRemoveLiquidity()
 </script>
 
 <template>
@@ -281,7 +284,7 @@ async function doRemoveLiquidity() {
       :more-than-threshold="moreThanThreshold"
     />
 
-    <SwapGasStats v-show="token1Amount.gt(0)" :task-type="'remove'" />
+    <SwapFrictionStats v-show="token1Amount.gt(0)" :task-type="'remove'" />
 
     <!-- disabled button -->
     <MainBtn
@@ -294,12 +297,16 @@ async function doRemoveLiquidity() {
     </MainBtn>
 
     <!-- confirm button -->
-    <MainBtn @click="doRemoveLiquidity" v-else>Remove Liquidity</MainBtn>
+    <MainBtn @click="openModal" v-else>Remove Liquidity</MainBtn>
 
     <RemovePoolPosition
       v-if="poolStatus"
       :pool-status="poolStatus"
       class="mt-8"
     />
+
+    <!-- confirm modal -->
+
+    <ModalConfirmRemoveLiquidity />
   </div>
 </template>

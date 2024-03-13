@@ -16,11 +16,11 @@ const links: {
     path: '/',
     version: 2,
   },
-  // {
-  //   name: 'Swap',
-  //   path: '/swap/',
-  //   version: 0,
-  // },
+  {
+    name: 'Swap',
+    path: '/swap/',
+    version: 0,
+  },
 ]
 
 function isLinkActive(path: string) {

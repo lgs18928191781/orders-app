@@ -693,7 +693,7 @@ async function doSwap() {
           :service-fee="serviceFee"
         />
 
-        <SwapGasStats
+        <SwapFrictionStats
           v-show="!!Number(sourceAmount)"
           :task-type="swapType"
           :token-1-amount="token1Amount"

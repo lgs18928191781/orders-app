@@ -8,7 +8,7 @@ import {
 } from '@headlessui/vue'
 import { useQuery } from '@tanstack/vue-query'
 
-import { useTokenSelectModal } from '@/hooks/use-token-select-modal'
+import { useModalTokenSelect } from '@/hooks/use-modal-token-select'
 
 import { useNetworkStore } from '@/stores/network'
 
@@ -22,7 +22,7 @@ const { data: poolPairs } = useQuery(getPoolsQuery({ network }))
 
 const { pairStr, selectPair, token1, token2, token1Icon, token2Icon } =
   useSwapPool()
-const { openModal } = useTokenSelectModal()
+const { openModal } = useModalTokenSelect()
 </script>
 
 <template>
@@ -109,3 +109,4 @@ const { openModal } = useTokenSelectModal()
     </transition>
   </Listbox>
 </template>
+@/hooks/use-modal-token-select

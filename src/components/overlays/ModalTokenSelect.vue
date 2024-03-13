@@ -14,9 +14,9 @@ import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { getBrc20s } from '@/queries/orders-api'
 
-import { useTokenSelectModal } from '@/hooks/use-token-select-modal'
+import { useModalTokenSelect } from '@/hooks/use-modal-token-select'
 
-const { isOpen, closeModal } = useTokenSelectModal()
+const { isOpen, closeModal } = useModalTokenSelect()
 const router = useRouter()
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
@@ -91,3 +91,4 @@ function selectToken(token: string) {
     </Dialog>
   </Teleport>
 </template>
+@/hooks/use-modal-token-select
