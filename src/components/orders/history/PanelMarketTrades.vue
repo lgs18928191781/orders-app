@@ -53,7 +53,7 @@ const { data: marketTrades, isLoading } = useQuery({
     </div>
 
     <div
-      class="nicer-scrollbar -mr-3 flex h-1 flex-auto flex-col gap-2 overflow-y-auto py-4 pr-3"
+      class="nicer-scrollbar -mr-3 flex h-1 flex-auto grow flex-col gap-2 overflow-y-auto py-4 pr-3"
       v-else
     >
       <div

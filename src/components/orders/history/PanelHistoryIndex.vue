@@ -32,7 +32,7 @@ onMounted(() => {
 <template>
   <TabGroup
     as="div"
-    class="primary-panel flex grow flex-col rounded-lg"
+    class="primary-panel flex grow flex-col rounded-lg bg-green-300"
     :selected-index="selectedTab"
     @change="changeTab"
   >
@@ -76,7 +76,7 @@ onMounted(() => {
       </Tab>
     </TabList>
 
-    <TabPanels class="h-[50vh] grow p-3 lg:h-auto">
+    <TabPanels class="h-[50vh] p-3 lg:h-[30vh]">
       <PanelOpenOrders v-model:open-orders-count="openOrdersCount" />
       <PanelOrderHistory />
       <PanelMarketTrades />

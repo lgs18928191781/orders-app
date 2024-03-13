@@ -34,6 +34,7 @@ const { data: marketPrice } = useQuery({
     >
       <!-- pair select -->
       <PairSelect class="col-span-3 lg:col-span-1" />
+      <ModalTokenSelect2 />
 
       <div
         class="col-span-2 text-sm lg:col-span-1 lg:flex lg:gap-2 lg:text-base"
