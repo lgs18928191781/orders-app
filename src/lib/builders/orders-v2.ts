@@ -41,7 +41,7 @@ export async function buildBidOffer({
 }) {
   const networkStore = useNetworkStore()
   const btcNetwork = networkStore.btcNetwork
-  const btcjs = window.bitcoin
+  const btcjs = useBtcJsStore().get!
   const address = useConnectionStore().getAddress
 
   // 1. get the platform public key
@@ -77,7 +77,7 @@ export async function buildBidOffer({
   const foundUtxo = excludedUtxos.find(
     (utxo) =>
       utxo.satoshis >= bidGrantInputValue &&
-      utxo.satoshis <= bidGrantInputValue + 1000
+      utxo.satoshis <= bidGrantInputValue + 1000,
   )
   console.log({ foundUtxo })
 
@@ -93,7 +93,7 @@ export async function buildBidOffer({
           value: foundUtxo.satoshis,
         },
         sighashType: SIGHASH_ALL,
-      })
+      }),
     )
   } else {
     // 4. build pay transaction in order to generate such a UTXO
@@ -232,12 +232,12 @@ export async function buildSellTake({
   }).then((brc20Info) => {
     // choose a real ordinal with the right amount, not the white amount (Heil Uncle Roger!)
     return brc20Info.transferBalanceList.find(
-      (brc20) => Number(brc20.amount) === amount
+      (brc20) => Number(brc20.amount) === amount,
     )
   })
   if (!transferable) {
     throw new Error(
-      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.'
+      'No suitable BRC20 tokens. Please ensure that you have enough of the inscribed BRC20 tokens.',
     )
   }
 

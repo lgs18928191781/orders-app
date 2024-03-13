@@ -19,6 +19,7 @@ import {
   BusIcon,
   SailboatIcon,
   PlaneIcon,
+  XIcon,
 } from 'lucide-vue-next'
 
 import { useNetworkStore } from '@/stores/network'
@@ -262,7 +263,7 @@ watch(isOpen, (open) => {
 
 <template>
   <Dialog
-    class="relative z-50 text-sm text-zinc-300"
+    class="relative z-50 text-xs text-zinc-300 lg:text-sm"
     :open="isOpen"
     @close="closeModal"
   >
@@ -277,12 +278,19 @@ watch(isOpen, (open) => {
       leave-to-class="transform opacity-0 scale-95"
     >
       <div class="fixed inset-0 overflow-y-auto text-zinc-300">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center lg:p-4">
           <DialogPanel
-            class="w-[720px] origin-top-right overflow-hidden rounded-md bg-zinc-800 px-4 shadow-lg shadow-primary/20 ring-1 ring-black ring-opacity-5 focus:outline-none"
+            class="min-h-svh w-svw origin-top-right overflow-hidden rounded-md bg-zinc-800 px-4 shadow-lg shadow-primary/20 ring-1 ring-black ring-opacity-5 focus:outline-none lg:min-h-fit lg:w-[720px]"
           >
             <div class="divide-y-2 divide-zinc-700">
               <div class="py-4">
+                <!-- mobile close button -->
+                <div class="flex justify-end pb-2 lg:hidden">
+                  <button @click="closeModal" class="">
+                    <XIcon class="size-8 rounded-full bg-zinc-700 p-1.5" />
+                  </button>
+                </div>
+
                 <div class="flex items-center justify-between">
                   <div class="item-label">BTC Network Traffic</div>
 
@@ -335,15 +343,17 @@ watch(isOpen, (open) => {
                 </div>
               </div>
 
-              <div class="grid grid-cols-5 divide-x-2 divide-zinc-700 py-4">
+              <div
+                class="grid grid-cols-2 divide-x-2 divide-zinc-700 py-4 lg:grid-cols-5"
+              >
                 <div
-                  class="col-span-2 flex flex-col items-stretch justify-between gap-4 pr-4"
+                  class="col-span-1 flex flex-col items-stretch justify-between gap-4 pr-2 lg:col-span-2 lg:pr-4"
                 >
                   <div class="item-label leading-none">Choose Gas Plan</div>
 
                   <div class="grow">
                     <RadioGroup name="feebPlan" v-model="selectedFeebPlanTitle">
-                      <div class="space-y-4">
+                      <div class="space-y-2 lg:space-y-4">
                         <RadioGroupOption
                           as="template"
                           v-for="plan in selectableFeebPlans"
@@ -360,13 +370,13 @@ watch(isOpen, (open) => {
                                 ? 'bg-primary/75 text-white '
                                 : 'bg-black ',
                             ]"
-                            class="relative flex cursor-pointer rounded-lg px-5 py-4 shadow-md focus:outline-none"
+                            class="lg:ph-4 relative flex cursor-pointer rounded-lg px-2 py-2 shadow-md focus:outline-none lg:px-5"
                           >
                             <div
                               class="flex w-full items-center justify-between"
                             >
                               <div class="flex items-center">
-                                <div class="text-sm">
+                                <div class="text-xs lg:text-sm">
                                   <div class="flex items-center gap-3">
                                     <component
                                       :is="getFeePlanIcon(plan.title)"
@@ -378,7 +388,7 @@ watch(isOpen, (open) => {
                                       :class="
                                         checked ? 'text-white' : 'text-zinc-300'
                                       "
-                                      class="text-lg font-medium"
+                                      class="text-sm font-medium lg:text-lg"
                                     >
                                       {{ plan.fullTitle || plan.title }}
                                     </RadioGroupLabel>
@@ -402,7 +412,7 @@ watch(isOpen, (open) => {
                                       >
                                         <input
                                           type="text"
-                                          class="w-8 rounded border-0 border-b !border-zinc-500 bg-transparent px-0 py-0.5 text-center text-sm outline-none focus:ring-0 focus:ring-transparent"
+                                          class="w-8 rounded border-0 border-b !border-zinc-500 bg-transparent px-0 py-0.5 text-center text-xs outline-none focus:ring-0 focus:ring-transparent lg:text-sm"
                                           autocomplete="off"
                                           :class="
                                             checked
@@ -442,7 +452,7 @@ watch(isOpen, (open) => {
                   </div>
                 </div>
 
-                <div class="col-span-3 pl-4">
+                <div class="col-span-1 pl-2 lg:col-span-3 lg:pl-4">
                   <div class="item-label align-top leading-none">
                     Estimated Gas
                   </div>

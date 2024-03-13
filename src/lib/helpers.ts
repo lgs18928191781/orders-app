@@ -100,7 +100,7 @@ export const isRestrictedRegion = (geo: string) => {
 
 export const getOkxLink = () => {
   const dappUrl = IS_DEV
-    ? 'https://preview-ywsm.orders.exchange/'
+    ? 'https://app.orders.exchange/'
     : 'https://' + window.location.host + '/'
   const encodedDappUrl = encodeURIComponent(dappUrl)
   const deepLink = 'okx://wallet/dapp/url?dappUrl=' + encodedDappUrl

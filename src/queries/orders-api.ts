@@ -361,7 +361,7 @@ export const getOrders = async ({
     net: network,
     orderType: String(orderType),
     orderState: '1',
-    sortKey: 'coinPrice',
+    sortKey: 'coinRatePrice',
     sortType: String(sortType),
     tick,
     address,

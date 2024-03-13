@@ -58,7 +58,7 @@ export const getOrders = async ({
     net: network,
     orderType: String(orderType),
     orderState: '1',
-    sortKey: 'coinPrice',
+    sortKey: 'coinRatePrice',
     sortType: String(sortType),
     tick,
   })
@@ -71,7 +71,7 @@ export const getOrders = async ({
       // order's coinRatePrice is incorrect, so we need to calculate it
       orders.forEach((order: Order) => {
         order.coinRatePrice = new Decimal(
-          order.amount / order.coinAmount
+          order.amount / order.coinAmount,
         ).toNumber()
 
         // add price and orderTypeStr
@@ -96,7 +96,7 @@ export const getMyOpenOrders = async ({ address }: { address: string }) => {
 
   const orders: Order[] = await ordersV2Fetch(
     `orders/user/${address}?${params}`,
-    { auth: true }
+    { auth: true },
   )
     .then(({ results }) => results)
     .then((orders) => {
@@ -106,7 +106,7 @@ export const getMyOpenOrders = async ({ address }: { address: string }) => {
       // order's coinRatePrice is incorrect, so we need to calculate it
       orders.forEach((order: Order) => {
         order.coinRatePrice = new Decimal(
-          order.amount / order.coinAmount
+          order.amount / order.coinAmount,
         ).toNumber()
 
         // add price and orderTypeStr
@@ -144,7 +144,7 @@ export const getMyOrderHistory = async ({ address }: { address: string }) => {
 
   const orders: OrderHistory[] = await ordersV2Fetch(
     `orders/user/${address}?${params}`,
-    { auth: true }
+    { auth: true },
   )
     .then(({ results }) => results)
     .then((orders) => {
@@ -154,7 +154,7 @@ export const getMyOrderHistory = async ({ address }: { address: string }) => {
       // order's coinRatePrice is incorrect, so we need to calculate it
       orders.forEach((order: OrderHistory) => {
         order.coinRatePrice = new Decimal(
-          order.amount / order.coinAmount
+          order.amount / order.coinAmount,
         ).toNumber()
 
         // add price and orderTypeStr
@@ -226,7 +226,7 @@ export const getMarketTrades = async ({ tick = 'rdex' }: { tick: string }) => {
       // order's coinRatePrice is incorrect, so we need to calculate it
       orders.forEach((order: Order) => {
         order.coinRatePrice = new Decimal(
-          order.amount / order.coinAmount
+          order.amount / order.coinAmount,
         ).toNumber()
 
         // add price and orderTypeStr

@@ -62,7 +62,7 @@ const { data: orderHistory, isLoading } = useQuery({
     </div>
 
     <div
-      class="flex grow flex-col items-center justify-center gap-2 text-base text-zinc-500"
+      class="flex grow flex-col items-center justify-center gap-2 py-20 text-base text-zinc-500"
       v-else-if="orderHistory && orderHistory.length === 0"
     >
       <CalendarSearchIcon class="h-10 w-10 text-zinc-500" />

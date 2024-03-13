@@ -4,6 +4,7 @@ import { ComputedRef, computed, ref } from 'vue'
 import { type Order } from '@/queries/orders-v2'
 import { useConnectionStore } from '@/stores/connection'
 import Decimal from 'decimal.js'
+import { isMobile } from '@/lib/helpers'
 
 export const useSelectOrder = createGlobalState(() => {
   const selectedOrder = ref<Order>()
@@ -28,13 +29,13 @@ export const useSelectOrder = createGlobalState(() => {
       if (!selectedOrder.value) return
 
       return selectedOrder.value?.orderType === 1 ? 'ask' : 'bid'
-    }
+    },
   )
 
   function select(
     order: Order & {
       price: Decimal
-    }
+    },
   ) {
     const address = useConnectionStore().getAddress
     const makerAddress =
@@ -46,6 +47,12 @@ export const useSelectOrder = createGlobalState(() => {
     selectedOrder.value = {
       ...order,
       price: order.price,
+    }
+
+    // if we are in mobile, we want to scroll to the trade panel
+    if (isMobile()) {
+      const tradePanelEl = document.getElementById('tradePanel')
+      tradePanelEl?.scrollIntoView({ behavior: 'smooth' })
     }
   }
 

@@ -280,7 +280,7 @@ const cannotPlaceOrderReason = computed(() => {
         @click="buildOrder"
         :disabled="!canPlaceOrder"
       >
-        {{ cannotPlaceOrderReason || 'Place Limit Sell Order' }}
+        {{ cannotPlaceOrderReason || 'Place Limit Buy Order' }}
       </button>
     </div>
   </TabPanel>

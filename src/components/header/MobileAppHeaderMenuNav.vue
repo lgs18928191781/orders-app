@@ -18,15 +18,15 @@ const links: {
     path: '/',
     version: 2,
   },
-  {
-    name: 'Swap',
-    path: '/swap/',
-    version: 0,
-  },
-  {
-    name: 'Events',
-    path: '/events',
-  },
+  // {
+  //   name: 'Swap',
+  //   path: '/swap/',
+  //   version: 0,
+  // },
+  // {
+  //   name: 'Events',
+  //   path: '/events',
+  // },
 ]
 
 function isLinkActive(path: string) {

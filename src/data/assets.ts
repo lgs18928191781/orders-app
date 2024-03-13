@@ -13,6 +13,9 @@ import btcsLogo from '@/assets/btcs.jpg?url'
 import ibtcLogo from '@/assets/ibtc.jpg?url'
 import biliLogo from '@/assets/bili.jpg?url'
 import ratsLogo from '@/assets/rats.jpg?url'
+import eorbLogo from '@/assets/eorb.jpg?url'
+import newuLogo from '@/assets/newu.jpg?url'
+
 import { IS_DEV } from '@/data/constants'
 
 const assets = [
@@ -91,6 +94,16 @@ const assets = [
     id: 17,
     symbol: 'rats',
     icon: ratsLogo,
+  },
+  {
+    id: 1.1,
+    symbol: 'eorb',
+    icon: eorbLogo,
+  },
+  {
+    id: 1.2,
+    symbol: 'newu',
+    icon: newuLogo,
   },
 ]
 
