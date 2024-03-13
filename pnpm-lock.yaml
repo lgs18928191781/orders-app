@@ -63,8 +63,8 @@ dependencies:
     specifier: ^3.12.5
     version: 3.12.5
   lucide-vue-next:
-    specifier: ^0.236.0
-    version: 0.236.0(vue@3.4.14)
+    specifier: ^0.356.0
+    version: 0.356.0(vue@3.4.14)
   mini-svg-data-uri:
     specifier: ^1.4.4
     version: 1.4.4
@@ -2315,8 +2315,8 @@ packages:
       yallist: 4.0.0
     dev: true
 
-  /lucide-vue-next@0.236.0(vue@3.4.14):
-    resolution: {integrity: sha512-hkrBT6qSWtWDuJd+qxl9ZEi+Fa5zm6FuKE5Yy5BezCxh5JMPE5ooTl6iOVPQbwhEApK8r4GOpt8kwOVJL0npWQ==}
+  /lucide-vue-next@0.356.0(vue@3.4.14):
+    resolution: {integrity: sha512-giWqqnnqAVCfgGXFzsrKaHC4cwxnX8ySB/5UMy0t2ZUBmOXYRo+0JI+bYHWTdqOEW5nfgjcSUUObt/M8s9HodQ==}
     peerDependencies:
       vue: '>=3.0.1'
     dependencies:

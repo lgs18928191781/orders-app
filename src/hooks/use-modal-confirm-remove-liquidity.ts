@@ -7,7 +7,6 @@ export const useModalConfirmRemoveLiquidity = createGlobalState(() => {
 
   // actions
   function openModal() {
-    console.log('ok')
     isOpen.value = true
   }
 
