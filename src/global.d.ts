@@ -87,7 +87,7 @@ interface Window {
       eventName: string,
       handler: ({ mvcAddress: string, btcAddress: string }) => void,
     ) => void
-    getNetwork: () => Promise<'mainnet' | 'testnet'>
+    getNetwork: () => Promise<{ network: 'mainnet' | 'testnet' }>
     btc: {
       getAddress: () => Promise<string>
       getPublicKey: () => Promise<string>

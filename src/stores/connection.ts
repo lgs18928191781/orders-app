@@ -158,8 +158,8 @@ export const useConnectionStore = defineStore('connection', {
       } else if (this.last.wallet === 'metalet') {
         const network: Network = await window.metaidwallet
           .getNetwork()
-          .then((n: 'mainnet' | 'testnet') => {
-            if (n === 'mainnet') return 'livenet'
+          .then(({ network }: { network: 'mainnet' | 'testnet' }) => {
+            if (network === 'mainnet') return 'livenet'
 
             return 'testnet'
           })
