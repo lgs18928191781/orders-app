@@ -10,7 +10,10 @@ import { SHOWING_TRADE_STATS } from '@/data/constants'
 
 import PairSelect from './PairSelect.vue'
 import { computed } from 'vue'
-import { testnetOrderbookTokens } from '@/data/pinned-tokens'
+import {
+  testnetOrderbookTokens,
+  livenetOrderbookTokens,
+} from '@/data/pinned-tokens'
 
 defineProps(['isLimitExchangeMode'])
 defineEmits(['update:isLimitExchangeMode'])
@@ -28,6 +31,8 @@ const { data: marketPrice } = useQuery({
 
 const pinnedTokens = computed(() => {
   if (networkStore.isTestnet) return testnetOrderbookTokens
+
+  return livenetOrderbookTokens
 })
 </script>
 
@@ -40,7 +45,11 @@ const pinnedTokens = computed(() => {
     >
       <!-- pair select -->
       <PairSelect class="col-span-3 lg:col-span-1" />
-      <ModalTokenSelect2 :pinned-tokens="pinnedTokens" />
+      <!-- <ModalTokenSelect2
+        :pinned-tokens="pinnedTokens"
+        @select-token="(token: string) => $router.push(`/orders/${token}-btc`)"
+        class="col-span-3 lg:col-span-1"
+      /> -->
 
       <div
         class="col-span-2 text-sm lg:col-span-1 lg:flex lg:gap-2 lg:text-base"

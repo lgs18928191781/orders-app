@@ -7,6 +7,7 @@ export const useModalTokenSelect = createGlobalState(() => {
 
   // actions
   function openModal() {
+    console.log('open')
     isOpen.value = true
   }
 

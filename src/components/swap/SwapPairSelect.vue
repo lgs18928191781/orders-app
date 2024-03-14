@@ -15,6 +15,8 @@ import { useNetworkStore } from '@/stores/network'
 import { prettySymbol } from '@/lib/formatters'
 import { getPoolsQuery } from '@/queries/swap/pools.query'
 import { useSwapPool } from '@/hooks/use-swap-pool'
+import { computed } from 'vue'
+import { livenetSwapTokens, testnetSwapTokens } from '@/data/pinned-tokens'
 
 const network = useNetworkStore().network
 
@@ -23,6 +25,14 @@ const { data: poolPairs } = useQuery(getPoolsQuery({ network }))
 const { pairStr, selectPair, token1, token2, token1Icon, token2Icon } =
   useSwapPool()
 const { openModal } = useModalTokenSelect()
+
+const networkStore = useNetworkStore()
+
+const pinnedTokens = computed(() => {
+  if (networkStore.isTestnet) return testnetSwapTokens
+
+  return livenetSwapTokens
+})
 </script>
 
 <template>
@@ -32,6 +42,10 @@ const { openModal } = useModalTokenSelect()
     :default-value="pairStr"
     @update:model-value="selectPair"
   >
+    <ModalTokenSelect
+      :pinned-tokens="pinnedTokens"
+      @select-token="(token: string) => $router.push(`/swap/btc-${token}`)"
+    />
     <ListboxButton v-slot="{ open }" as="template">
       <button
         :class="[
