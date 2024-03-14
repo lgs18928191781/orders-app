@@ -9,6 +9,8 @@ import {
   Trash2Icon,
   UnplugIcon,
   FuelIcon,
+  ChevronsUpDownIcon,
+  ChevronsDownUpIcon,
 } from 'lucide-vue-next'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
@@ -21,8 +23,6 @@ import { prettyAddress } from '@/lib/formatters'
 import unisatIcon from '@/assets/unisat-icon.png?url'
 import okxIcon from '@/assets/okx-icon.png?url'
 import metaletIcon from '@/assets/metalet-icon.png?url'
-import { ChevronsUpDownIcon } from 'lucide-vue-next'
-import { ChevronsDownUpIcon } from 'lucide-vue-next'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
