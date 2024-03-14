@@ -56,6 +56,13 @@ export const createPrepayOrderMintBtcReq = async (data: any) => {
   })
 }
 
+export const createPrepayOrderMintBrc20Req = async (data: any) => {
+  return await bridgeApiFetch(`/createPrepayOrderMintBrc20`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
 export const submitPrepayOrderMintBtcReq = async (
   data: any
 ): Promise<{
@@ -63,6 +70,18 @@ export const submitPrepayOrderMintBtcReq = async (
   success: boolean
 }> => {
   return await bridgeApiFetch(`/submitPrepayOrderMintBtc`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const submitPrepayOrderMintBrc20Req = async (
+  data: any
+): Promise<{
+  msg: string
+  success: boolean
+}> => {
+  return await bridgeApiFetch(`/submitPrepayOrderMintBrc20`, {
     method: 'POST',
     body: JSON.stringify(data),
   })

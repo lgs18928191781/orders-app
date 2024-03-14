@@ -169,6 +169,9 @@ import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { determineAddressInfo } from '@/lib/utils'
 import { useBridgeRedeem } from '@/hooks/use-bridge-redeem'
+import { GetMvcTokenDetail } from '@/queries/metasv-api'
+import { Payment, Transaction, Psbt, address as Address } from 'bitcoinjs-lib'
+import { useNetworkStore } from '@/stores/network'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -186,11 +189,21 @@ const route = useRoute()
 const BridgeTools = useBridgeTools()
 const BridgeRedeem = useBridgeRedeem()
 
+onMounted(() => {
+  const network = useNetworkStore()
+  const hex = `70736274ff01009a020000000297f45a11493bf73abe0a4312987f9699ef1efe8fe3d00cae9267a4db581f25900000000000ffffffff0238a298f0742927a107063fe18579689c81ff91a56ad2ee4b132bcaa231427d0100000000ffffffff02140000000000000016001427f47faf8191d338e0550beeba38d98c5b405fad3dde0000000000001600142153b6c9d77d1596de652cb45a7225305271a6f2000000000001011f14000000000000001600142153b6c9d77d1596de652cb45a7225305271a6f201086c02483045022100ed888b709f6e7b3a93565c4e40dd3e4ad9ac930faf8d525aaddea22c4c68d18202205358a6910834b2b929eca828a108bdf609ac4c36bf83b7431b584dbcb60b62e1012103699cfa8eeae59ef3e607e1e4d90efe9156110bb21234cff6bbd9fe47afcc40e10001011f1de30000000000001600142153b6c9d77d1596de652cb45a7225305271a6f201086b02473044022031c08c8e6cc1f7cb042f88536b2e8afd2b66a86f0d5f73283125a0906a32ae8e02207b4230e005d5a071699049ed7a5ef4e12dd7327512250272f7f1172ef22f462f012103699cfa8eeae59ef3e607e1e4d90efe9156110bb21234cff6bbd9fe47afcc40e1000000`
+  const psbt = Psbt.fromHex(hex, {
+    network: network.typedNetwork,
+  })
+  console.log('psbt', psbt)
+  debugger
+})
+
 const swapFromAmount = ref(0)
 const feeInfo = reactive({
   val: {
     feeRate: '--',
-    comfirmation: 1,
+    comfirmation: 0,
   },
 })
 const swapSuccess = ref(false)
@@ -205,7 +218,8 @@ const currentAssetInfo = reactive<{ val: assetReqReturnType }>({
 const fromAsset = reactive({
   val: {
     network: AssetNetwork.BTC,
-    balance: 120000000,
+    balance: 0,
+    availableBalance: 0,
     symbol: '--',
     decimal: 0,
   },
@@ -213,11 +227,22 @@ const fromAsset = reactive({
 const toAsset = reactive({
   val: {
     network: AssetNetwork.MVC,
-    balance: 120000000,
+    balance: 0,
+    availableBalance: 0,
     symbol: '--',
     decimal: 0,
   },
 })
+
+async function publickeyToAddress() {
+  const publicKey = await connectionStore.adapter.getMvcPublickey()
+  const publicKeyBuffer = Buffer.from(publicKey, 'hex')
+  const { address } = btcJsStore.btcjs!.payments.p2pkh({
+    pubkey: publicKeyBuffer,
+    network: btcJsStore.btcjs!.networks.bitcoin,
+  })
+  return address
+}
 
 async function getAssetInfo() {
   try {
@@ -234,7 +259,7 @@ async function getAssetInfo() {
     const { decimals, originSymbol, targetSymbol, network } = currentPairs[0]
     console.log('assetInfo.val', currentPairs[0])
     currentAssetInfo.val = currentPairs[0]
-
+    const mvcAddress = await publickeyToAddress()
     if (connectionStore.connected) {
       if (fromAsset.val.network == AssetNetwork.BTC) {
         queryAddress = connectionStore.last.address
@@ -242,27 +267,61 @@ async function getAssetInfo() {
         queryAddress = await connectionStore.adapter.getMvcAddress()
       }
       if (network == AssetBridgeNetwork.BRC20) {
+        debugger
         Promise.all([
           getOneBrc20({
             tick: originSymbol,
             address: queryAddress,
           }),
+          GetMvcTokenDetail(mvcAddress!, {
+            codeHash: currentAssetInfo.val.targetTokenCodeHash,
+            genesis: currentAssetInfo.val.targetTokenGenesis,
+          }),
         ])
           .then((res) => {
-            console.log('res', res)
+            debugger
+            const fromBalance = res[0]
             fromAsset.val.balance = new Decimal(
-              res[0].transferBalance
+              fromBalance.transferBalance
             ).toNumber()
+            fromAsset.val.availableBalance = new Decimal(
+              fromBalance.availableBalance
+            ).toNumber()
+            if (res[1].length) {
+              const toAssetInfo = res[1][0]
+              toAsset.val.balance = new Decimal(toAssetInfo.confirmed)
+                .add(toAssetInfo.unconfirmed)
+                .div(10 ** toAssetInfo.decimal)
+                .toNumber()
+            }
           })
           .catch((err) => {
             ElMessage.error(err.message)
           })
       } else if (network == AssetBridgeNetwork.BTC) {
-        const fromBalance = await connectionStore.adapter.getBalance()
-
-        fromAsset.val.balance = new Decimal(fromBalance)
-          .div(10 ** decimals)
-          .toNumber()
+        Promise.all([
+          connectionStore.adapter.getBalance(),
+          GetMvcTokenDetail(mvcAddress!, {
+            codeHash: currentAssetInfo.val.targetTokenCodeHash,
+            genesis: currentAssetInfo.val.targetTokenGenesis,
+          }),
+        ])
+          .then((res) => {
+            const fromBalance = res[0]
+            fromAsset.val.balance = new Decimal(fromBalance)
+              .div(10 ** decimals)
+              .toNumber()
+            if (res[1].length) {
+              const toAssetInfo = res[1][0]
+              toAsset.val.balance = new Decimal(toAssetInfo.confirmed)
+                .add(toAssetInfo.unconfirmed)
+                .div(10 ** toAssetInfo.decimal)
+                .toNumber()
+            }
+          })
+          .catch((e) => {
+            ElMessage.error(e.message)
+          })
       }
     }
 
@@ -367,35 +426,64 @@ const swapToAmount = computed(() => {
   } else {
     lessThanMinLimited.value = false
     lastThanMaxLimited.value = false
-    try {
-      console.log('swapFromAmount', swapFromAmount)
-      console.log('currentAssetInfo.val', currentAssetInfo.val)
+    if (currentAssetInfo.val.symbol == AssetBridgeNetwork.BTC) {
+      try {
+        console.log('swapFromAmount', swapFromAmount)
+        console.log('currentAssetInfo.val', currentAssetInfo.val)
 
-      const { confirmNumber, receiveAmount } = BridgeTools.calcReceiveInfo(
-        formatUnitToSats(swapFromAmount.value, currentAssetInfo.val.decimal),
-        assetInfo.val,
-        currentAssetInfo.val
-      )
-      feeInfo.val.comfirmation = confirmNumber
-      return formatUnitToBtc(receiveAmount, currentAssetInfo.val.decimal)
-    } catch (error) {
-      if ((error as any).message) {
-        if (
-          +swapFromAmount.value <
-          formatUnitToBtc(
-            JSON.parse((error as any).message).amountLimitMinimum,
-            currentAssetInfo.val.decimal
-          )
-        ) {
-          lessThanMinLimited.value = true
-        } else if (
-          +swapFromAmount.value >
-          formatUnitToBtc(
-            JSON.parse((error as any).message).amountLimitMaximum,
-            currentAssetInfo.val.decimal
-          )
-        ) {
-          lastThanMaxLimited.value = true
+        const { confirmNumber, receiveAmount } = BridgeTools.calcReceiveInfo(
+          formatUnitToSats(swapFromAmount.value, currentAssetInfo.val.decimal),
+          assetInfo.val,
+          currentAssetInfo.val
+        )
+        feeInfo.val.comfirmation = confirmNumber
+        return formatUnitToBtc(receiveAmount, currentAssetInfo.val.decimal)
+      } catch (error) {
+        if ((error as any).message) {
+          if (
+            +swapFromAmount.value <
+            formatUnitToBtc(
+              JSON.parse((error as any).message).amountLimitMinimum,
+              currentAssetInfo.val.decimal
+            )
+          ) {
+            lessThanMinLimited.value = true
+          } else if (
+            +swapFromAmount.value >
+            formatUnitToBtc(
+              JSON.parse((error as any).message).amountLimitMaximum,
+              currentAssetInfo.val.decimal
+            )
+          ) {
+            lastThanMaxLimited.value = true
+          }
+        }
+      }
+    } else {
+      try {
+        console.log('swapFromAmount', swapFromAmount)
+        console.log('currentAssetInfo.val', currentAssetInfo.val)
+
+        const { confirmNumber, receiveAmount } = BridgeTools.calcReceiveInfo(
+          swapFromAmount.value,
+          assetInfo.val,
+          currentAssetInfo.val
+        )
+        feeInfo.val.comfirmation = confirmNumber
+        return receiveAmount
+      } catch (error) {
+        if ((error as any).message) {
+          if (
+            +swapFromAmount.value <
+            JSON.parse((error as any).message).amountLimitMinimum
+          ) {
+            lessThanMinLimited.value = true
+          } else if (
+            +swapFromAmount.value >
+            JSON.parse((error as any).message).amountLimitMaximum
+          ) {
+            lastThanMaxLimited.value = true
+          }
         }
       }
     }
@@ -450,6 +538,26 @@ async function confrimSwap() {
     await connectionStore.adapter.getAddress()
   )
   console.log('addressType', addressType)
+
+  await BridgeTools.sumitBridgeOrderForBrc20({
+    amount: swapFromAmount.value,
+    originTokenId: currentAssetInfo.val.originTokenId,
+    addressType: addressType.type.toUpperCase(),
+    publicKey: publicKey,
+    publicKeySign: publicKeySign,
+    publicKeyReceive,
+    publicKeyReceiveSign: publicKeyReceiveSign,
+    feeBtc: assetInfo.val.feeBtc,
+    inscription: {
+      amount: `${swapFromAmount.value}`,
+      inscriptionId:
+        '90251f58dba46792ae0cd0e38ffe1eef99967f9812430abe3af73b49115af497i0',
+      inscriptionNumber: '2460758',
+      outValue: 546,
+    },
+  })
+
+  return
 
   await BridgeTools.sumitBridgeOrderForBtc({
     amount: formatUnitToSats(

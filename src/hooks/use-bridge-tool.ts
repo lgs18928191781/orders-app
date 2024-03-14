@@ -2,7 +2,9 @@ import { type Ref, computed, ref } from 'vue'
 import {
   getAssetPairList,
   createPrepayOrderMintBtcReq,
+  createPrepayOrderMintBrc20Req,
   submitPrepayOrderMintBtcReq,
+  submitPrepayOrderMintBrc20Req,
   type assetReqReturnType,
   type bridgeAssetPairReturnType,
 } from '@/queries/bridge-api'
@@ -13,7 +15,9 @@ import { useNetworkStore } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
 import { getRawTx } from '@/queries/orders-api'
 import { Payment, Transaction, Psbt, address as Address } from 'bitcoinjs-lib'
-
+import { determineAddressInfo, formatSat } from '@/lib/utils'
+import { exclusiveChange } from '@/lib/build-helpers'
+import { SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
 export enum AssetBridgeNetwork {
   BRC20 = 'BRC20',
   BTC = 'BTC',
@@ -39,6 +43,13 @@ export interface UTXO {
     | null
 }
 
+type inscriptionInfo = {
+  amount: string
+  inscriptionId: string
+  inscriptionNumber: string
+  outValue: number
+}
+
 type prepayOrderReturnType = {
   bridgeAddress: string
   confirmNumber: number
@@ -57,6 +68,7 @@ type prepayOrderParams = {
   publicKeyReceive: string
   publicKeyReceiveSign: string
   feeBtc?: number
+  inscription?: inscriptionInfo
 }
 
 export function useBridgeTools() {
@@ -107,40 +119,54 @@ export function useBridgeTools() {
     return res
   }
 
+  async function createPrepayOrderMintBRC20(
+    data: prepayOrderParams
+  ): Promise<prepayOrderReturnType> {
+    const res = await createPrepayOrderMintBrc20Req(data)
+
+    return res
+  }
+
   async function submitPrepayOrderMintBtc(data: any) {
     const res = await submitPrepayOrderMintBtcReq(data)
     return res
   }
 
-  // async function createPayment() {
-  //   const btcJsStore = useBtcJsStore().get!
-  //   const networkStore = useNetworkStore()
-  //   const pubkey = await getPublicKey()
-  //   const addressType = 'P2WPKH'
+  async function submitPrepayOrderMintBrc20(data: any) {
+    const res = await submitPrepayOrderMintBrc20Req(data)
+    return res
+  }
 
-  //   switch (addressType) {
-  //     case AddressType.P2PKH:
-  //       return btcJsStore.payments.p2pkh({
-  //         pubkey: pubkey,
-  //         network: networkStore.typedNetwork,
-  //       })
-  //     case AddressType.P2WPKH:
-  //       return btcJsStore.payments.p2wpkh({
-  //         pubkey: pubkey,
-  //         network: networkStore.typedNetwork,
-  //       })
-  //     case AddressType.P2TR:
-  //       return btcJsStore.payments.p2tr({
-  //         internalPubkey: pubkey.subarray(1),
-  //         network: networkStore.typedNetwork,
-  //       })
-  //     default:
-  //       return btcJsStore.payments.p2pkh({
-  //         pubkey: pubkey,
-  //         network: networkStore.typedNetwork,
-  //       })
-  //   }
-  // }
+  async function createPayment() {
+    const btcJsStore = useBtcJsStore().get!
+    const networkStore = useNetworkStore()
+    const connectionStore = useConnectionStore()
+    const pubkey = await getPublicKey()
+    const address = await connectionStore.adapter.getAddress()
+    const addressType = determineAddressInfo(address)
+    switch (addressType.type.toUpperCase()) {
+      case AddressType.P2PKH:
+        return btcJsStore.payments.p2pkh({
+          pubkey: pubkey,
+          network: networkStore.typedNetwork,
+        })
+      case AddressType.P2WPKH:
+        return btcJsStore.payments.p2wpkh({
+          pubkey: pubkey,
+          network: networkStore.typedNetwork,
+        })
+      case AddressType.P2TR:
+        return btcJsStore.payments.p2tr({
+          internalPubkey: pubkey.subarray(1),
+          network: networkStore.typedNetwork,
+        })
+      default:
+        return btcJsStore.payments.p2pkh({
+          pubkey: pubkey,
+          network: networkStore.typedNetwork,
+        })
+    }
+  }
 
   function addressToScript(address: string) {
     const networkStore = useNetworkStore()
@@ -163,6 +189,39 @@ export function useBridgeTools() {
     return txHex
   }
 
+  async function sendBRC(recipient: string, utxo: UTXO, feeRate: number) {
+    const networkStore = useNetworkStore()
+    const connectionStore = useConnectionStore()
+
+    const address = await connectionStore.adapter.getAddress()
+    const payment = await createPayment()
+    const utxos = await connectionStore.provider.btc.getUtxos(address)
+    if (!utxos.length) {
+      throw new Error('your account currently has no available UTXO.')
+    }
+
+    const psbt = new Psbt({ network: networkStore.typedNetwork })
+
+    const payInput = await createPayInput({ utxo, payment })
+    psbt.addInput(payInput)
+    psbt.addOutput({
+      value: utxo.satoshi,
+      address: recipient,
+    })
+    const { psbt: psbt1xFinished } = await exclusiveChange({
+      psbt: psbt,
+      maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+      sighashType: SIGHASH_ALL,
+      feeb: feeRate,
+    })
+
+    const signPsbt = await connectionStore.adapter.signPsbt(
+      psbt1xFinished!.toHex()
+    )
+
+    return Psbt.fromHex(signPsbt)
+  }
+
   async function createPayInput({
     utxo,
     payment,
@@ -177,7 +236,8 @@ export function useBridgeTools() {
       sequence: 0xffffffff, // These are defaults. This line is not needed.
     }
     const pubkey = await getPublicKey()
-    const addressType = 'P2WPKH'
+
+    const addressType = payment.name!.toUpperCase()
     if (['P2TR'].includes(addressType)) {
       payInput['tapInternalKey'] = pubkey.subarray(1)
       payInput['witnessUtxo'] = { value: utxo.satoshi, script: payment.output }
@@ -191,6 +251,54 @@ export function useBridgeTools() {
       payInput['nonWitnessUtxo'] = tx.toBuffer()
     }
     return payInput
+  }
+  //
+  async function sumitBridgeOrderForBrc20(orderParams: prepayOrderParams) {
+    const {
+      amount,
+      originTokenId,
+      addressType,
+      publicKey,
+      publicKeySign,
+      publicKeyReceive,
+      publicKeyReceiveSign,
+      feeBtc,
+      inscription,
+    } = orderParams
+
+    const createPrepayOrderDto = {
+      amount,
+      originTokenId,
+      addressType,
+      publicKey,
+      publicKeySign,
+      publicKeyReceive,
+      publicKeyReceiveSign,
+    }
+
+    try {
+      const createResp = await createPrepayOrderMintBRC20(createPrepayOrderDto)
+
+      const { orderId, bridgeAddress } = createResp
+      const inscriptionUtxo = {
+        txId: inscription!.inscriptionId?.slice(0, -2),
+        vout: +inscription!.inscriptionId?.split('i')[1],
+        satoshi: +inscription!.outValue,
+        confirmed: true,
+        inscriptions: null,
+      }
+
+      const psbt = await sendBRC(bridgeAddress, inscriptionUtxo, feeBtc!)
+
+      const submitPrepayOrderMintDto = {
+        orderId,
+        txHex: psbt!.extractTransaction().toHex(),
+      }
+      await submitPrepayOrderMintBrc20(submitPrepayOrderMintDto)
+      //成功
+    } catch (error) {
+      throw new Error((error as any).message)
+    }
   }
 
   async function sumitBridgeOrderForBtc(orderParams: prepayOrderParams) {
@@ -235,10 +343,22 @@ export function useBridgeTools() {
     }
   }
 
-  async function sumitBridgeOrderForBrc20(orderParams: prepayOrderParams) {}
-
   const selectUTXOs = (utxos: UTXO[], targetAmount: Decimal): UTXO[] => {
-    return utxos
+    let totalAmount = new Decimal(0)
+    const selectedUtxos: typeof utxos = []
+    for (const utxo of utxos) {
+      selectedUtxos.push(utxo)
+      totalAmount = totalAmount.add(utxo.satoshi)
+
+      if (totalAmount.gte(targetAmount)) {
+        break
+      }
+    }
+    if (totalAmount.lt(targetAmount)) {
+      throw new Error('Insufficient funds to reach the target amount')
+    }
+
+    return selectedUtxos
   }
 
   function getTotalSatoshi(utxos: UTXO[]): Decimal {
@@ -261,6 +381,7 @@ export function useBridgeTools() {
     assetInfo: bridgeAssetPairReturnType,
     currentAssetInfo: assetReqReturnType
   ) {
+    console.log('mintAmount', mintAmount, assetInfo)
     const {
       btcPrice,
       mvcPrice,
@@ -274,7 +395,10 @@ export function useBridgeTools() {
     let mintBrc20EqualBtcAmount = 0
 
     if (currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC) {
-      if (mintAmount < amountLimitMinimum || mintAmount > amountLimitMaximum) {
+      if (
+        formatSat(mintAmount, currentAssetInfo.decimals) < amountLimitMinimum ||
+        formatSat(mintAmount, currentAssetInfo.decimals) > amountLimitMaximum
+      ) {
         const error = JSON.stringify({
           amountLimitMinimum,
           amountLimitMaximum,
@@ -282,11 +406,16 @@ export function useBridgeTools() {
         throw Error(error)
       }
     } else {
-      mintBrc20EqualBtcAmount = new Decimal(currentAssetInfo.price)
-        .mul(mintAmount)
-        .div(btcPrice)
-        .mul(10 ** 8)
-        .toNumber()
+      mintBrc20EqualBtcAmount =
+        // ((currentAssetInfo.price * Number(mintAmount)) / btcPrice) * 10 ** 8
+        mintBrc20EqualBtcAmount = new Decimal(currentAssetInfo.price)
+
+          .mul(mintAmount)
+
+          .div(btcPrice)
+          .mul(10 ** 8)
+          .toNumber()
+
       if (
         mintBrc20EqualBtcAmount < amountLimitMinimum ||
         mintBrc20EqualBtcAmount > amountLimitMaximum
@@ -338,14 +467,16 @@ export function useBridgeTools() {
       currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
         ? Math.floor(bridgeFee + minerFee)
         : bridgeFee + minerFee
-    const receiveAmount = finallyMintAmount - totalFee
+    const receiveAmount = mintAmount - totalFee
     const receiveAmountFixed = receiveAmount.toFixed(
       currentAssetInfo.decimals - currentAssetInfo.trimDecimals
     )
+
     return {
       receiveAmount:
-        currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC ??
-        receiveAmountFixed,
+        currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
+          ? receiveAmount
+          : receiveAmountFixed,
       confirmNumber,
     }
   }
@@ -353,6 +484,7 @@ export function useBridgeTools() {
   return {
     calcReceiveInfo,
     sumitBridgeOrderForBtc,
+    sumitBridgeOrderForBrc20,
     getPublicKey,
     buildTx,
   }

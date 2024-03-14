@@ -2,11 +2,17 @@
   <div class="item-center grid">
     <div class="flex items-center justify-between">
       <div class="textGray text-sm">{{ opName }}</div>
+
       <div class="flex text-sm">
-        <span class="textGray">Balance:</span>
-        <div class="text-primary">
-          <span class="mr-1">{{ formatNum(assetInfo.balance) }}</span
-          ><span>{{ assetInfo.symbol }}</span>
+        <span class="textGray mr-1">Balance:</span>
+        <div class="flex">
+          <div class="text-primary">
+            <span class="mr-1">{{ formatNum(assetInfo.balance) }} </span
+            ><span class="textGray mr-1" v-if="assetInfo.availableBalance"
+              ><span class="mr-1">+</span>{{ assetInfo.availableBalance }}</span
+            >
+            <span>{{ assetInfo.symbol }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -130,7 +136,15 @@ const curretnNetwork = ref('BTC')
 
 const useNetwork = reactive(['BTC', 'MVC'])
 const inputColorDanger = computed(() => {
-  console.log('props.modelValue', props.modelValue, props.assetInfo.balance)
+  console.log(
+    'props.modelValue',
+    props,
+    props.modelValue,
+    props.assetInfo.balance
+  )
+  if (props.opName == 'To') {
+    return
+  }
   if (
     formatUnitToBtc(props.modelValue, props.assetInfo.decimal) >
     formatUnitToBtc(props.assetInfo.balance, props.assetInfo.decimal)
