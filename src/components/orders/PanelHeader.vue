@@ -9,6 +9,8 @@ import { unit, useBtcUnit } from '@/lib/helpers'
 import { SHOWING_TRADE_STATS } from '@/data/constants'
 
 import PairSelect from './PairSelect.vue'
+import { computed } from 'vue'
+import { testnetOrderbookTokens } from '@/data/pinned-tokens'
 
 defineProps(['isLimitExchangeMode'])
 defineEmits(['update:isLimitExchangeMode'])
@@ -23,6 +25,10 @@ const { data: marketPrice } = useQuery({
   ],
   queryFn: () => getMarketPrice({ tick: fromSymbol.value }),
 })
+
+const pinnedTokens = computed(() => {
+  if (networkStore.isTestnet) return testnetOrderbookTokens
+})
 </script>
 
 <template>
@@ -34,7 +40,7 @@ const { data: marketPrice } = useQuery({
     >
       <!-- pair select -->
       <PairSelect class="col-span-3 lg:col-span-1" />
-      <ModalTokenSelect2 />
+      <ModalTokenSelect2 :pinned-tokens="pinnedTokens" />
 
       <div
         class="col-span-2 text-sm lg:col-span-1 lg:flex lg:gap-2 lg:text-base"

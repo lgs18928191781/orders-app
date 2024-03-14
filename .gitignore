@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 project-overview.md
+.vercel
+.env*.local

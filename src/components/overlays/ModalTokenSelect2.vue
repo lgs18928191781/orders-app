@@ -27,6 +27,8 @@ function selectToken(token: string) {
 
 const keyword = ref('')
 const keywordDebounced = refDebounced(keyword, 300)
+
+const popularTokens = useNetworkStore().isTestnet ? [] : []
 </script>
 
 <template>
