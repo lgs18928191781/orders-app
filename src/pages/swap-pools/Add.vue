@@ -309,12 +309,20 @@ const afterBuildAdd = async ({
   if (!psbtAddFinished) throw new Error('Failed to add change')
 
   const token2Count = token2InscriptionUtxos.value.length
+  const allInputsCount = psbtAddFinished.data.inputs.length
   const address = connectionStore.getAddress
   const toSignInputs = []
   for (let i = 0; i < token2Count; i++) {
     toSignInputs.push({
       index: i,
       sighashTypes: [SIGHASH_ALL_ANYONECANPAY],
+      address,
+    })
+  }
+  for (let i = token2Count; i < allInputsCount; i++) {
+    toSignInputs.push({
+      index: i,
+      sighashTypes: [SIGHASH_ALL],
       address,
     })
   }
