@@ -122,7 +122,7 @@ const pinnedTokens = computed(() => {
         </ListboxOption>
 
         <!-- add pool button -->
-        <ListboxOption v-slot="{ active, selected }">
+        <!-- <ListboxOption v-slot="{ active, selected }">
           <button
             :class="[
               'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm',
@@ -134,7 +134,7 @@ const pinnedTokens = computed(() => {
 
             <div class="text-base font-bold">Create Pool</div>
           </button>
-        </ListboxOption>
+        </ListboxOption> -->
       </ListboxOptions>
     </transition>
   </Listbox>

@@ -13,14 +13,14 @@ const swapPairs = [
     token1Icon: btcLogo,
     token2Icon: rdexLogo,
   },
-  // {
-  //   id: 2,
-  //   exactName: 'ordi',
-  //   token1Symbol: 'btc',
-  //   token2Symbol: 'ordi',
-  //   token1Icon: btcLogo,
-  //   token2Icon: ordiLogo,
-  // },
+  {
+    id: 2,
+    exactName: 'ordi',
+    token1Symbol: 'btc',
+    token2Symbol: 'ordi',
+    token1Icon: btcLogo,
+    token2Icon: ordiLogo,
+  },
   // {
   //   id: 4,
   //   exactName: 'sats',
@@ -39,17 +39,6 @@ const swapPairs = [
   token2Icon: string
   useDecimals?: number
 }[]
-
-if (IS_DEV) {
-  swapPairs.unshift({
-    id: 15,
-    exactName: 'ORXC',
-    token1Symbol: 'btc',
-    token2Symbol: 'orxc',
-    token1Icon: btcLogo,
-    token2Icon: rdexLogo,
-  })
-}
 
 export const testnetSwapPairs = [
   {
