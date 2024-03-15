@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import {
   ArrowRightIcon,
@@ -8,19 +8,21 @@ import {
   XIcon,
   PlusIcon,
   Loader2Icon,
+  TimerResetIcon,
 } from 'lucide-vue-next'
+import { computedEager } from '@vueuse/core'
+import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useOngoingTask } from '@/hooks/use-ongoing-task'
-import { getOngoingTaskQuery } from '@/queries/swap/ongoing-task.query'
-import { useSwapPool } from '@/hooks/use-swap-pool'
 
+import { useOngoingTask } from '@/hooks/use-ongoing-task'
+import { useTokenIcon } from '@/hooks/use-token-icon'
+
+import { getOngoingTaskQuery } from '@/queries/swap/ongoing-task.query'
 import { prettyCoinDisplay } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
-import { ElMessage } from 'element-plus'
-import { useTokenIcon } from '@/hooks/use-token-icon'
-import { computedEager } from '@vueuse/core'
+
 import IconImage from '@/components/IconImage.vue'
 
 const connectionStore = useConnectionStore()
@@ -206,6 +208,17 @@ function copyFailedReason() {
                 {{ task.failedReason }}
               </p>
             </div>
+          </div>
+        </template>
+
+        <template v-else-if="taskStatus === 'timeout'">
+          <TimerResetIcon class="size-24 text-red-500" />
+          <div class="self-stretch">
+            <p class="text-center text-lg capitalize">Timeout</p>
+
+            <p class="mt-4 text-center text-zinc-500">
+              Your transaction has timed out. Please try again later.
+            </p>
           </div>
         </template>
       </div>

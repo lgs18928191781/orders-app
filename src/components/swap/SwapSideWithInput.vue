@@ -328,7 +328,7 @@ watch(
       v-if="hasEnough && !calculating && !amountMoreThanThreshold"
     >
       <AlertCircleIcon class="size-4" />
-      Amount should be at least 0.0001 BTC
+      Amount should be at least {{ SWAP_THRESHOLD_AMOUNT / 1e8 }} BTC
     </div>
 
     <!-- data footer -->
