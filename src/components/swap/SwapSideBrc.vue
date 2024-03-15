@@ -26,7 +26,7 @@ import { type InscriptionUtxo } from '@/queries/swap/types'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { token2, token2Icon } = useSwapPool()
+const { token2 } = useSwapPool()
 
 const props = defineProps({
   side: {
@@ -170,7 +170,7 @@ async function goInscribe() {
           'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-base',
         ]"
       >
-        <img :src="token2Icon" class="size-5 rounded-full" v-if="token2Icon" />
+        <TokenIcon :token="token2" class="size-5 rounded-full" v-if="token2" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>

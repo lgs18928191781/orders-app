@@ -111,6 +111,7 @@ declare module '@vue/runtime-core' {
     ToastProvider: typeof import('./src/components/ui/toast/ToastProvider.vue')['default']
     ToastTitle: typeof import('./src/components/ui/toast/ToastTitle.vue')['default']
     ToastViewport: typeof import('./src/components/ui/toast/ToastViewport.vue')['default']
+    TokenIcon: typeof import('./src/components/TokenIcon.vue')['default']
     TokenSelectModal: typeof import('./src/components/overlays/TokenSelectModal.vue')['default']
     Tooltip: typeof import('./src/components/ui/tooltip/Tooltip.vue')['default']
     TooltipArrow: typeof import('./src/components/ui/tooltip/TooltipArrow.vue')['default']

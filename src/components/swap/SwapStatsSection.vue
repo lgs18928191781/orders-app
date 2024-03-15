@@ -79,16 +79,8 @@ function toSwap() {
       <div class="flex flex-col items-start gap-6">
         <!-- title -->
         <div class="flex items-center text-2xl">
-          <img
-            :src="token1Icon"
-            class="size-6 rounded-full"
-            v-if="token1Icon"
-          />
-          <img
-            :src="token2Icon"
-            class="-ml-2 size-6 rounded-full"
-            v-if="token2Icon"
-          />
+          <TokenIcon :token="token1" class="size-6 rounded-full" />
+          <TokenIcon :token="token2" class="-ml-2 size-6 rounded-full" />
           <div class="ml-2">
             <p
               className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 "
@@ -107,11 +99,7 @@ function toSwap() {
           <div
             class="flex items-center gap-2 rounded-xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-300 xl:text-base"
           >
-            <img
-              :src="token1Icon"
-              class="size-6 rounded-full"
-              v-if="token1Icon"
-            />
+            <TokenIcon :token="token1" class="size-6 rounded-full" />
 
             <div class="">
               {{
@@ -125,11 +113,7 @@ function toSwap() {
           <div
             class="flex items-center gap-2 rounded-xl bg-zinc-800/80 px-4 py-2 text-sm text-zinc-300 xl:text-base"
           >
-            <img
-              :src="token2Icon"
-              class="size-6 rounded-full"
-              v-if="token2Icon"
-            />
+            <TokenIcon :token="token2" class="size-6 rounded-full" />
 
             <div class="">
               {{
@@ -173,11 +157,7 @@ function toSwap() {
           <div class="label">Total Tokens Locked</div>
 
           <div class="mt-6 flex items-center gap-2 text-zinc-300">
-            <img
-              :src="token1Icon"
-              class="size-6 rounded-full"
-              v-if="token1Icon"
-            />
+            <TokenIcon :token="token1" class="size-6 rounded-full" />
 
             <div class="">
               {{ `${prettySymbol(token1)}` }}
@@ -189,11 +169,7 @@ function toSwap() {
           </div>
 
           <div class="mt-3 flex items-center gap-2 text-zinc-300">
-            <img
-              :src="token2Icon"
-              class="size-6 rounded-full"
-              v-if="token2Icon"
-            />
+            <TokenIcon :token="token2" class="size-6 rounded-full" />
 
             <div class="">
               {{ `${prettySymbol(token2)}` }}

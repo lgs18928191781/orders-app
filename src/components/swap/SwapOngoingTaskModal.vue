@@ -17,13 +17,10 @@ import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 
 import { useOngoingTask } from '@/hooks/use-ongoing-task'
-import { useTokenIcon } from '@/hooks/use-token-icon'
 
 import { getOngoingTaskQuery } from '@/queries/swap/ongoing-task.query'
 import { prettyCoinDisplay } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
-
-import IconImage from '@/components/IconImage.vue'
 
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
@@ -56,18 +53,6 @@ watch(
   { immediate: true },
 )
 
-const token1 = computedEager(() => {
-  if (!task.value) return ''
-  return task.value.token1
-})
-
-const token2 = computedEager(() => {
-  if (!task.value) return ''
-  return task.value.token2
-})
-const { iconUrl: token1Icon } = useTokenIcon(token1)
-const { iconUrl: token2Icon } = useTokenIcon(token2)
-
 const extendedTask = computedEager(() => {
   if (!task.value) {
     return null
@@ -83,8 +68,6 @@ const extendedTask = computedEager(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: token1Icon,
-        toIcon: token2Icon,
       }
     case '2x':
     case 'x1':
@@ -95,8 +78,6 @@ const extendedTask = computedEager(() => {
         toToken: task.value.token1,
         fromAmount: task.value.amount2,
         toAmount: task.value.amount1,
-        fromIcon: token2Icon,
-        toIcon: token1Icon,
       }
     case 'add':
       return {
@@ -106,8 +87,6 @@ const extendedTask = computedEager(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: token1Icon,
-        toIcon: token2Icon,
       }
 
     case 'remove':
@@ -118,8 +97,6 @@ const extendedTask = computedEager(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: token1Icon,
-        toIcon: token2Icon,
       }
     default:
       return null
@@ -237,10 +214,10 @@ function copyFailedReason() {
             class="flex items-center gap-2 text-sm"
             v-if="extendedTask.type === 'swap'"
           >
-            <IconImage
-              :src="extendedTask.fromIcon"
+            <TokenIcon
+              :token="extendedTask.fromToken"
               class="size-6 rounded-full"
-              v-if="extendedTask.fromIcon"
+              v-if="extendedTask.fromToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
@@ -248,10 +225,10 @@ function copyFailedReason() {
 
             <ArrowRightIcon class="mx-2 size-4" />
 
-            <IconImage
-              :src="extendedTask.toIcon"
+            <TokenIcon
+              :token="extendedTask.toToken"
               class="size-6 rounded-full"
-              v-if="extendedTask.toIcon"
+              v-if="extendedTask.toToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -260,10 +237,10 @@ function copyFailedReason() {
 
           <div class="" v-else-if="extendedTask.type === 'add'">
             <div class="flex items-center gap-2 text-sm">
-              <IconImage
-                :src="extendedTask.fromIcon"
+              <TokenIcon
+                :token="extendedTask.fromToken"
                 class="size-6 rounded-full"
-                v-if="extendedTask.fromIcon"
+                v-if="extendedTask.fromToken"
               />
               <span>{{
                 prettyCoinDisplay(
@@ -274,10 +251,10 @@ function copyFailedReason() {
 
               <PlusIcon class="mx-2 size-4" />
 
-              <IconImage
-                :src="extendedTask.toIcon"
+              <TokenIcon
+                :token="extendedTask.toToken"
                 class="size-6 rounded-full"
-                v-if="extendedTask.toIcon"
+                v-if="extendedTask.toToken"
               />
               <span>{{
                 prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -289,10 +266,10 @@ function copyFailedReason() {
             class="flex items-center gap-2 text-sm"
             v-else-if="extendedTask.type === 'remove'"
           >
-            <IconImage
-              :src="extendedTask.fromIcon"
+            <TokenIcon
+              :token="extendedTask.fromToken"
               class="size-6 rounded-full"
-              v-if="extendedTask.fromIcon"
+              v-if="extendedTask.fromToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
@@ -300,10 +277,10 @@ function copyFailedReason() {
 
             <PlusIcon class="mx-2 size-4" />
 
-            <IconImage
-              :src="extendedTask.toIcon"
+            <TokenIcon
+              :token="extendedTask.toToken"
               class="size-6 rounded-full"
-              v-if="extendedTask.toIcon"
+              v-if="extendedTask.toToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)

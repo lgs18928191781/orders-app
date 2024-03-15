@@ -54,8 +54,16 @@ const pinnedTokens = computed(() => {
         ]"
       >
         <div class="flex" v-if="pairStr">
-          <IconImage :src="token1Icon" class="size-6 rounded-full" />
-          <IconImage :src="token2Icon" class="-ml-2 size-6 rounded-full" />
+          <TokenIcon
+            :token="token1"
+            class="size-6 rounded-full"
+            v-if="token1"
+          />
+          <TokenIcon
+            :token="token2"
+            class="-ml-2 size-6 rounded-full"
+            v-if="token2"
+          />
         </div>
         <div class="mr-1" v-if="pairStr">
           {{ prettySymbol(token1) + '-' + prettySymbol(token2) }}
@@ -89,8 +97,16 @@ const pinnedTokens = computed(() => {
             ]"
           >
             <div class="flex">
-              <IconImage :src="token1Icon" class="size-6 rounded-full" />
-              <IconImage :src="token2Icon" class="-ml-2 size-6 rounded-full" />
+              <TokenIcon
+                :token="token1"
+                class="size-6 rounded-full"
+                v-if="token1"
+              />
+              <TokenIcon
+                :token="token2"
+                class="-ml-2 size-6 rounded-full"
+                v-if="token2"
+              />
             </div>
 
             <div class="text-base font-bold">

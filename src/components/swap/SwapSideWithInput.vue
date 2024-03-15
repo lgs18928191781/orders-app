@@ -16,7 +16,6 @@ import { SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { pairStr, token1Icon, token2Icon, token1 } = useSwapPool()
 
 const props = defineProps({
   side: {
@@ -30,17 +29,6 @@ const props = defineProps({
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
-const icon = computed(() => {
-  if (!pairStr.value) {
-    return null
-  }
-
-  if (symbol.value === token1.value) {
-    return token1Icon.value
-  }
-
-  return token2Icon.value
-})
 
 // amount
 const amount = defineModel('amount', { type: String })
@@ -315,7 +303,7 @@ watch(
           'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-xl',
         ]"
       >
-        <img :src="icon" class="size-6 rounded-full" v-if="icon" />
+        <TokenIcon :token="symbol" class="size-6 rounded-full" v-if="symbol" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>

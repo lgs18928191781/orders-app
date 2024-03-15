@@ -7,7 +7,6 @@ import gsap from 'gsap'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
@@ -18,7 +17,6 @@ import { ADD_THRESHOLD_AMOUNT, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { token1Icon } = useSwapPool()
 
 const props = defineProps({
   side: {
@@ -253,7 +251,7 @@ watch(
           'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-base',
         ]"
       >
-        <img :src="token1Icon" class="size-5 rounded-full" v-if="token1Icon" />
+        <TokenIcon :token="'btc'" class="size-5 rounded-full" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>
