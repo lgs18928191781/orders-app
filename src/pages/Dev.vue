@@ -1,4 +1,13 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { useBtcJsStore } from '../stores/btcjs'
+
+const bitcoinjs = useBtcJsStore().btcjs
+const psbt = bitcoinjs?.Psbt.fromHex(
+  '70736274ff01007d02000000019e75b7a2293d6cbc401232bab6f6f1809dc59baa7ee65b05c7f00466368e69020000000000ffffffff022202000000000000160014c3162fce4b01515971b38a75116555ddb7a4c221b9390300000000002251202b8002fefbdccf80803809193a2b1dc112b65d4e83041a986bfb2ef66cbb43ee000000000001012b22020000000000002251202b8002fefbdccf80803809193a2b1dc112b65d4e83041a986bfb2ef66cbb43ee01030481000000011720329473498627a0314e276e490e7dc9041eb10e5bba3598ba844620d8e5f34d4b000000',
+)
+
+console.log({ psbt })
+</script>
 
 <template>
   <div class="p-8"></div>
