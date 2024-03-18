@@ -167,7 +167,7 @@ import { getOneBrc20 } from '@/queries/orders-api'
 import { useRoute } from 'vue-router'
 import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import { useBtcJsStore } from '@/stores/btcjs'
-import { determineAddressInfo } from '@/lib/utils'
+import { determineAddressInfo, formatSat } from '@/lib/utils'
 
 import { GetMvcTokenDetail } from '@/queries/metasv-api'
 import { Payment, Transaction, Psbt, address as Address } from 'bitcoinjs-lib'
@@ -194,15 +194,7 @@ const route = useRoute()
 const BridgeTools = useBridgeTools()
 const BridgeRedeem = useBridgeRedeem()
 
-onMounted(() => {
-  const network = useNetworkStore()
-  const hex = `70736274ff01009a020000000297f45a11493bf73abe0a4312987f9699ef1efe8fe3d00cae9267a4db581f25900000000000ffffffff0238a298f0742927a107063fe18579689c81ff91a56ad2ee4b132bcaa231427d0100000000ffffffff02140000000000000016001427f47faf8191d338e0550beeba38d98c5b405fad3dde0000000000001600142153b6c9d77d1596de652cb45a7225305271a6f2000000000001011f14000000000000001600142153b6c9d77d1596de652cb45a7225305271a6f201086c02483045022100ed888b709f6e7b3a93565c4e40dd3e4ad9ac930faf8d525aaddea22c4c68d18202205358a6910834b2b929eca828a108bdf609ac4c36bf83b7431b584dbcb60b62e1012103699cfa8eeae59ef3e607e1e4d90efe9156110bb21234cff6bbd9fe47afcc40e10001011f1de30000000000001600142153b6c9d77d1596de652cb45a7225305271a6f201086b02473044022031c08c8e6cc1f7cb042f88536b2e8afd2b66a86f0d5f73283125a0906a32ae8e02207b4230e005d5a071699049ed7a5ef4e12dd7327512250272f7f1172ef22f462f012103699cfa8eeae59ef3e607e1e4d90efe9156110bb21234cff6bbd9fe47afcc40e1000000`
-  const psbt = Psbt.fromHex(hex, {
-    network: network.typedNetwork,
-  })
-  console.log('psbt', psbt)
-  debugger
-})
+
 
 const swapFromAmount = ref(0)
 const feeInfo = reactive({
@@ -262,8 +254,10 @@ async function getAssetInfo() {
     })
 
     const { decimals, originSymbol, targetSymbol, network } = currentPairs[0]
-    console.log('assetInfo.val', currentPairs[0])
+   
     currentAssetInfo.val = currentPairs[0]
+    console.log('assetInfo.val', currentAssetInfo.val)
+    debugger
     const mvcAddress = await publickeyToAddress()
     if (connectionStore.connected) {
       if (fromAsset.val.network == AssetNetwork.BTC) {
@@ -284,7 +278,6 @@ async function getAssetInfo() {
           }),
         ])
           .then((res) => {
-            debugger
             const fromBalance = res[0]
             fromAsset.val.balance = new Decimal(
               fromBalance.transferBalance
@@ -312,6 +305,9 @@ async function getAssetInfo() {
           }),
         ])
           .then((res) => {
+            
+            console.log("res1231231231231",res)
+            debugger
             const fromBalance = res[0]
             fromAsset.val.balance = new Decimal(fromBalance)
               .div(10 ** decimals)
@@ -499,6 +495,8 @@ function converSwapItem() {
   const temp = toRaw(fromAsset.val)
   fromAsset.val = toAsset.val
   toAsset.val = temp
+  console.log('assetInfo.val', currentAssetInfo.val)
+    debugger
 }
 
 function BtnOperate() {
@@ -509,7 +507,7 @@ function BtnOperate() {
   }
 }
 async function redeem() {
-  //TODO 限定metalet 钱包
+  debugger
   const addressInfo = determineAddressInfo(
     await connectionStore.adapter.getAddress()
   )
@@ -520,18 +518,20 @@ async function redeem() {
     if (!supportRedeemAddressType.includes(addressType)) {
       throw new Error('unsupport address tyep')
     }
-    if (currentAssetInfo.val.network === 'BTC') {
-      await BridgeRedeem.redeemBtc(10000, currentAssetInfo.val, addressType)
+    if (currentAssetInfo.val.network === AssetBridgeNetwork.BTC) {
+      console.log("111111",currentAssetInfo.val)
+      debugger
+      await BridgeRedeem.redeemBtc(formatSat(swapFromAmount.value,currentAssetInfo.val.decimals), currentAssetInfo.val, addressType)
     }
-    if (currentAssetInfo.val.network === 'BRC20') {
+    if (currentAssetInfo.val.network === AssetBridgeNetwork.BRC20) {
       await BridgeRedeem.redeemBrc20(
-        1000000000,
+        formatSat(swapFromAmount.value,currentAssetInfo.val.decimals),
         currentAssetInfo.val,
         addressType
       )
     }
   } catch (err) {
-    console.log(err)
+    throw new Error(err as any)
   }
 }
 
@@ -544,7 +544,9 @@ async function confrimSwap() {
     return
   }
 
-  const publicKey = await connectionStore.adapter.getPubKey()
+  if(fromAsset.val.network === AssetNetwork.BTC){
+    try {
+      const publicKey = await connectionStore.adapter.getPubKey()
   const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
   const publicKeyReceive = await connectionStore.adapter.getMvcPublickey()
   const publicKeyReceiveSign = await connectionStore.adapter.signMvcMessage({
@@ -590,9 +592,23 @@ async function confrimSwap() {
     publicKeyReceiveSign: publicKeyReceiveSign,
     feeBtc: assetInfo.val.feeBtc,
   })
+    } catch (error) {
+      return ElMessage.error((error as any).message)
+    }
+    
+  }else if(fromAsset.val.network === AssetNetwork.MVC){
+    try {
+      debugger
+      await redeem()
+    } catch (error) {
+     return ElMessage.error((error as any).message)
+    }
+  }
+
+  
   successInfo.send.amount = swapFromAmount.value
   successInfo.send.desc =
-    fromAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
+    (fromAsset.val.network as AssetNetwork) == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
   successInfo.send.symbol = fromAsset.val.symbol
   successInfo.receive.amount = +swapToAmount.value!
   successInfo.receive.desc =

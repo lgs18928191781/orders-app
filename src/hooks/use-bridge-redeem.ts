@@ -137,6 +137,9 @@ export function useBridgeRedeem() {
     btcAsset: Asset,
     addressType: SupportRedeemAddressType
   ): Promise<{ orderId: string; txid: string }> {
+    console.log('redeemAmount',redeemAmount)
+    debugger
+    debugger
     const { publicKey, publicKeySign, publicKeyReceiveSign, publicKeyReceive } =
       await signPublicKey()
 
@@ -275,6 +278,7 @@ export function useBridgeRedeem() {
     asset: Asset,
     addressType: SupportRedeemAddressType
   ): Promise<{ orderId: string; txid: string }> {
+   
     const { publicKey, publicKeySign, publicKeyReceiveSign, publicKeyReceive } =
       await signPublicKey()
     const createPrepayOrderDto = {
