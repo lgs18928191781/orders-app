@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
 import { DropletsIcon } from 'lucide-vue-next'
-import { computed, watch } from 'vue'
+import { computed, watchEffect } from 'vue'
 
 import { useExpandSwap } from '@/hooks/use-expand-swap'
 import { useSwapPool } from '@/hooks/use-swap-pool'
@@ -32,19 +32,15 @@ const { data: poolStatus } = useQuery(
   ),
 )
 
-// watch if the pool is empty
-watch(
-  () => poolStatus.value,
-  (poolStatus) => {
-    if (poolStatus) {
-      if (Number(poolStatus.poolEquity) === 0) {
-        setEmpty()
-      } else {
-        reset()
-      }
+watchEffect(() => {
+  if (poolStatus.value) {
+    if (Number(poolStatus.value.poolEquity) === 0) {
+      setEmpty()
+    } else {
+      reset()
     }
-  },
-)
+  }
+})
 </script>
 
 <template>
