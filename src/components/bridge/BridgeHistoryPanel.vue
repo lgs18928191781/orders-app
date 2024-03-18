@@ -111,7 +111,7 @@ async function fetchBridgeHistory() {
       cursor: page.value,
       size: size,
       order: 'desc',
-      address: address,
+      address: '1AkCkdHBv3hedT1gPyDpZmBa7tkLmVM7b3',
     })
     if (txList.length < size) {
       isEnd.value = true
@@ -130,7 +130,7 @@ async function fetchBridgeHistory() {
         item.timestamp = prettyTimestamp(Number(item.timestamp), true)
         item.amount=String(formatUnitToBtc(
                 Number(item.amount),
-                item.originNetwork==='BTC'||(item.originNetwork==='MVC'&&item.decimals > 8) ? item.decimals - 8 : item.decimals
+                (item.originNetwork === 'BTC')||(item.originNetwork === 'MVC'&&item.decimals <= 8)?item.decimals:  item.decimals - 8 
               ))
         return item
       }),
