@@ -46,10 +46,7 @@
         >
           <div>
             {{
-              formatUnitToBtc(
-                Number(tx.amount),
-                tx.originNetwork==='MVC'&&tx.decimals > 8 ? tx.decimals - 8 : tx.decimals
-              )
+              tx.amount
             }}
             {{ tx.symbol }}
           </div>
@@ -127,10 +124,14 @@ async function fetchBridgeHistory() {
           item.targetNetwork = 'MVC'
         }
         if (txType === 'mvcToBtc' || txType === 'mvcToBrc20') {
-          item.originNetwork = 'BTC'
-          item.targetNetwork = 'MVC'
+          item.originNetwork = 'MVC'
+          item.targetNetwork = 'BTC'
         }
         item.timestamp = prettyTimestamp(Number(item.timestamp), true)
+        item.amount=String(formatUnitToBtc(
+                Number(item.amount),
+                item.originNetwork==='BTC'||(item.originNetwork==='MVC'&&item.decimals > 8) ? item.decimals - 8 : item.decimals
+              ))
         return item
       }),
     ]
