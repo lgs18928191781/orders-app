@@ -12,8 +12,9 @@ import { useFiat } from '@/hooks/use-fiat'
 import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
 
 import { getPoolStatusQuery } from '@/queries/swap.query'
-import { prettyBalance, prettySymbol } from '@/lib/formatters'
+import { prettyBalance, prettyBtcDisplay, prettySymbol } from '@/lib/formatters'
 import { Loader2Icon } from 'lucide-vue-next'
+import { getPoolStatsQuery } from '@/queries/swap/pool-stats.query'
 
 const { token1, token2, token1Icon, token2Icon, pairStr } = useSwapPool()
 
@@ -28,14 +29,13 @@ const router = useRouter()
 const address = connectionStore.getAddress
 const network = networkStore.network
 
+const { data: poolStats, isLoading: isLoadingPoolStats } = useQuery(
+  getPoolStatsQuery({ token1, token2 }),
+)
+
 const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
   getPoolStatusQuery(
-    {
-      token1: token1,
-      token2: token2,
-      address,
-      network,
-    },
+    { token1, token2, address, network },
     computed(() => !!address),
   ),
 )
@@ -60,6 +60,20 @@ const tvl = computed(() => {
   const token1Pool = poolStatus.value.token1Pool
   const valueInFiat = getFiatPrice(token1Pool, get(fiatRate))
   return '≈ $' + new Decimal(valueInFiat).mul(2).toDP(2).toString()
+})
+
+const volume24h = computed(() => {
+  if (!poolStats.value) return '-'
+
+  const volume = poolStats.value.volume24h
+  return prettyBtcDisplay(volume)
+})
+
+const fees24h = computed(() => {
+  if (!poolStats.value) return '-'
+
+  const fees = poolStats.value.fees24h
+  return prettyBtcDisplay(fees)
 })
 
 function toAdd() {
@@ -195,10 +209,10 @@ function toSwap() {
           </div>
 
           <div class="">
-            <div class="label">Volume 24h</div>
+            <div class="label">24h Volume</div>
 
             <div class="value">
-              {{ '-' }}
+              {{ volume24h }}
             </div>
           </div>
 
@@ -206,7 +220,7 @@ function toSwap() {
             <div class="label">24h Fees</div>
 
             <div class="value">
-              {{ '-' }}
+              {{ fees24h }}
             </div>
           </div>
 
