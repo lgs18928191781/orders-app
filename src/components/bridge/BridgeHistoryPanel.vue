@@ -111,7 +111,7 @@ async function fetchBridgeHistory() {
       cursor: page.value,
       size: size,
       order: 'desc',
-      address: '1AkCkdHBv3hedT1gPyDpZmBa7tkLmVM7b3',
+      address: address,
     })
     if (txList.length < size) {
       isEnd.value = true
