@@ -1,4 +1,5 @@
 import { bridgeApiFetch } from '@/lib/fetch'
+import { number } from 'bitcoinjs-lib/src/script'
 
 export type assetReqReturnType =
   | {
@@ -117,4 +118,47 @@ export const submitPrepayOrderRedeemBrc20 = async (
     method: 'POST',
     body: JSON.stringify(data),
   })
+}
+
+export type TxType = 'btcToMvc' | 'brc20ToMvc' | 'mvcToBtc' | 'mvcToBrc20'
+export type HistoryParams = {
+  type: TxType
+  cursor: number
+  size: number
+  order: 'asc' | 'desc'
+  address: string
+}
+
+export enum PrepayOrderStatus {
+  doing = 'doing',
+  success = 'success',
+  cancel = 'cancel',
+  failed = 'failed',
+}
+export type HsitoryDetail = {
+  amount: string
+  timestamp: string
+  status: PrepayOrderStatus
+  symbol: string;
+  originTxid:string;
+  originNetwork:'BTC'|'MVC';
+  targetNetwork:'BTC'|'MVC';
+  decimals:number
+}
+export const getBridgeHistory = async ({
+  type,
+  cursor,
+  size,
+  order,
+  address,
+}: HistoryParams): Promise<{
+  totalCount: number
+  txList: HsitoryDetail[]
+}> => {
+  return await bridgeApiFetch(
+    `/queryTransactionsByAddress?type=${type}&cursor=${cursor}&size=${size}&order=${order}&address=${address}`,
+    {
+      method: 'GET',
+    }
+  )
 }

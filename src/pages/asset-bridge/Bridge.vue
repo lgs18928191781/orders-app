@@ -7,10 +7,13 @@
       class="bridge-container flex flex-col space-y-3 rounded-3xl border border-primary/30 bg-zinc-900 py-3 shadow-md"
     >
       <div
-        class="container-header grid grid-cols-2 items-center justify-between gap-4 px-3.5 pb-2 text-sm text-zinc-300 lg:flex"
+        class="ontainer-header flex  items-center justify-between gap-4 px-3.5 pb-2 text-sm text-zinc-300 lg:flex"
       >
         <span>Select Asset:</span>
         <BridgePairSelect class="col-span-1"></BridgePairSelect>
+        <div  class="w-7 h-7 flex items-center justify-center rounded bg-black cursor-pointer" @click="handleHistoryVisible(true)">
+          <MenuSquare :size="20" />
+        </div>
       </div>
       <div class="grid p-6 pt-3">
         <div>
@@ -134,6 +137,7 @@
     <SwapBlur />
 
     <CheckMetaletProvider></CheckMetaletProvider>
+    <BridgeHistory :isOpen="historyVisible" @handleHistoryVisible="handleHistoryVisible" />
   </div>
 </template>
 
@@ -142,8 +146,9 @@ import { computed, ref, reactive, toRaw, onMounted, watch } from 'vue'
 import BridgePairSelect from '@/components/bridge/BridgeSelectPairs.vue'
 import swap from '@/assets/icon_swap.svg?url'
 import BridgeSwapItem from '@/components/bridge/BridgeSwapItem.vue'
+import BridgeHistory from '@/components/bridge/BridgeHistory.vue'
 import { useConnectionStore } from '@/stores/connection'
-import { Loader2Icon } from 'lucide-vue-next'
+import { Loader2Icon,MenuSquare } from 'lucide-vue-next'
 import { CheckCircle2 } from 'lucide-vue-next'
 import { AssetNetwork } from '@/data/constants'
 import {
@@ -257,7 +262,7 @@ async function getAssetInfo() {
    
     currentAssetInfo.val = currentPairs[0]
     console.log('assetInfo.val', currentAssetInfo.val)
-    debugger
+    // debugger
     const mvcAddress = await publickeyToAddress()
     if (connectionStore.connected) {
       if (fromAsset.val.network == AssetNetwork.BTC) {
@@ -266,7 +271,7 @@ async function getAssetInfo() {
         queryAddress = await connectionStore.adapter.getMvcAddress()
       }
       if (network == AssetBridgeNetwork.BRC20) {
-        debugger
+        // debugger
         Promise.all([
           getOneBrc20({
             tick: originSymbol,
@@ -307,7 +312,7 @@ async function getAssetInfo() {
           .then((res) => {
             
             console.log("res1231231231231",res)
-            debugger
+            // debugger
             const fromBalance = res[0]
             fromAsset.val.balance = new Decimal(fromBalance)
               .div(10 ** decimals)
@@ -624,6 +629,12 @@ function Done() {
 }
 
 getAssetInfo()
+
+// history
+const historyVisible = ref<boolean>(false)
+const handleHistoryVisible = (visible: boolean) => {
+  historyVisible.value = visible
+}
 </script>
 <style scoped lang="scss">
 .bridge-wrap {

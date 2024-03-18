@@ -16,6 +16,8 @@ declare module '@vue/runtime-core' {
     AppNotifications: typeof import('./src/components/header/AppNotifications.vue')['default']
     AssetsDisplay: typeof import('./src/components/header/AssetsDisplay.vue')['default']
     AssetSelect: typeof import('./src/components/AssetSelect.vue')['default']
+    BridgeHistory: typeof import('./src/components/bridge/BridgeHistory.vue')['default']
+    BridgeHistoryPanel: typeof import('./src/components/bridge/BridgeHistoryPanel.vue')['default']
     BridgeSelectPairs: typeof import('./src/components/bridge/BridgeSelectPairs.vue')['default']
     BridgeSwapItem: typeof import('./src/components/bridge/BridgeSwapItem.vue')['default']
     Building: typeof import('./src/components/overlays/Building.vue')['default']
