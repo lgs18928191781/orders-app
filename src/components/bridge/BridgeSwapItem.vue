@@ -83,7 +83,19 @@
         </Listbox>
 
         <div class="relative flex w-full items-center">
+          <div v-if="opName == 'From'">
+            <InscribeItem
+              v-model:initAmount="assetInfo.initAmount"
+              v-model:symbol="assetInfo.symbol"
+              v-model:amount="assetInfo.balance"
+              v-model:inscription-utxos="InscriptionUtxos"
+              @amount-entered="onAmountChange"
+              @amount-cleared="onAmountCleared"
+            ></InscribeItem>
+          </div>
+
           <input
+            v-else
             :value="props.modelValue"
             @input="emit('update:modelValue', ($event as any).target!.value)"
             type="number"
@@ -107,18 +119,22 @@ import {
   ListboxOption,
   ListboxOptions,
 } from '@headlessui/vue'
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, watch, toRaw } from 'vue'
 import BtcIcon from '@/assets/btc.svg?url'
 import MVC from '@/assets/mvc_logo.png?url'
 import { ChevronDownIcon, CheckIcon } from 'lucide-vue-next'
 import { formatNum } from '@/lib/formatters'
 import { AssetNetwork } from '@/data/constants'
 import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
+import InscribeItem from './InscribeItem.vue'
+import { type InscriptionUtxo } from '@/queries/swap/types'
+import Decimal from 'decimal.js'
 interface AssetInfo {
   network: AssetNetwork
   balance: number
   symbol: string
   decimal: number
+  initAmount?: number
 }
 
 interface Props {
@@ -133,15 +149,18 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['update:modelValue'])
 
 const curretnNetwork = ref('BTC')
+const InscriptionUtxos = ref<InscriptionUtxo[]>([])
 
 const useNetwork = reactive(['BTC', 'MVC'])
+
+function onAmountChange() {
+  const totalValue = InscriptionUtxos.value.reduce((pre: any, cur: any) => {
+    return new Decimal(pre).add(cur.amount!).toNumber()
+  }, new Decimal(0))
+  emit('update:modelValue', totalValue)
+}
+
 const inputColorDanger = computed(() => {
-  console.log(
-    'props.modelValue',
-    props,
-    props.modelValue,
-    props.assetInfo.balance
-  )
   if (props.opName == 'To') {
     return
   }
@@ -164,6 +183,14 @@ const selectNetwork = computed(() => {
   }
 
   return selected
+})
+
+function onAmountCleared() {
+  InscriptionUtxos.value = []
+}
+
+defineExpose({
+  InscriptionUtxos,
 })
 </script>
 <style scoped>

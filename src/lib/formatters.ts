@@ -122,6 +122,6 @@ export function formatNum(num: any) {
   return res
 }
 
-export const prettyInscriptionId = (id: string) => {
-  return `#${id.slice(0, 8)}`
+export const prettyInscriptionId = (id: string, len: number = 8) => {
+  return `#${id.slice(0, len)}`
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="swap-sub-control-panel">
+  <div>
     <div v-if="isLoading" class="flex justify-center py-8">
       <Loader2Icon class="size-6 animate-spin text-zinc-500" />
     </div>
@@ -21,7 +21,7 @@
     </div>
 
     <div
-      class="nicer-scrollbar -mr-2 mb-4 mt-2 grid max-h-[20vh] grid-cols-3 items-center gap-2 overflow-auto pr-2 pt-2"
+      class="nicer-scrollbar -mr-2 mb-4 mt-2 grid max-h-[20vh] grid-cols-2 items-center gap-2 overflow-auto pr-2 pt-2"
       v-else
     >
       <div
@@ -68,6 +68,8 @@
       </button>
 
       <!-- inscribe button -->
+
+      <!-- inscribe button -->
       <button
         @click="goInscribe"
         class="relative flex h-16 flex-col items-center justify-center gap-0.5 rounded-md border border-zinc-700 p-2 text-xs text-zinc-300 hover:border-primary/60 hover:bg-primary/5 hover:text-primary"
@@ -105,16 +107,23 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, toRaw, onMounted } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { getOneBrc20Query } from '@/queries/orders-api.query'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { prettyInscriptionId, prettySymbol } from '@/lib/formatters'
-
+import {
+  CheckCircleIcon,
+  Loader2Icon,
+  PackagePlusIcon,
+  CircleIcon,
+} from 'lucide-vue-next'
 import Decimal from 'decimal.js'
 import { type Brc20Transferable } from '@/queries/orders-api'
 import { type InscriptionUtxo } from '@/queries/swap/types'
+
+const isOpen = ref(false)
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
 const selecteds = ref<Brc20Transferable[]>([])
@@ -127,8 +136,9 @@ const emit = defineEmits([
   'becameSource',
 ])
 const symbol = defineModel('symbol', { required: true, type: String })
+const initAmount = defineModel('initAmount', { required: false, type: Number })
+const amount = defineModel('amount')
 
-const amount = defineModel('amount', { type: String })
 const inscriptionUtxos = defineModel('inscriptionUtxos', {
   required: true,
   type: Array as () => InscriptionUtxo[],
@@ -138,15 +148,17 @@ watch(
   selecteds,
   (newSelecteds) => {
     // update amount and inscriptionUtxos when selecteds changed
-    amount.value = newSelecteds
+    const minusValue = newSelecteds
       .reduce((prev, curr) => {
         return prev.add(new Decimal(curr.amount))
       }, new Decimal(0))
       .toFixed(0)
+    amount.value = new Decimal(initAmount.value!).minus(minusValue).toString()
     inscriptionUtxos.value = newSelecteds.map((t) => {
       return {
         id: t.inscriptionId,
         satoshis: t.outValue,
+        amount: t.amount,
       }
     })
 
@@ -170,6 +182,14 @@ const { data: myOneBrc20, isLoading } = useQuery(
     computed(() => connectionStore.connected)
   )
 )
+
+function selectMore() {
+  isOpen.value = true
+}
+
+function closeModal() {
+  isOpen.value = false
+}
 
 function isSelected(transferable: Brc20Transferable) {
   return selecteds.value.includes(transferable)

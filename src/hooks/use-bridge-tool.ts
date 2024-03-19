@@ -43,7 +43,7 @@ export interface UTXO {
     | null
 }
 
-type inscriptionInfo = {
+export type inscriptionInfo = {
   amount: string
   inscriptionId: string
   inscriptionNumber: string
@@ -68,7 +68,7 @@ type prepayOrderParams = {
   publicKeyReceive: string
   publicKeyReceiveSign: string
   feeBtc?: number
-  inscription?: inscriptionInfo
+  inscription?: inscriptionInfo[] | inscriptionInfo
 }
 
 export function useBridgeTools() {
@@ -189,37 +189,43 @@ export function useBridgeTools() {
     return txHex
   }
 
-  async function sendBRC(recipient: string, utxo: UTXO, feeRate: number) {
+  async function sendBRC(recipient: string, utxoList: UTXO[], feeRate: number) {
     const networkStore = useNetworkStore()
     const connectionStore = useConnectionStore()
+    try {
+      const address = await connectionStore.adapter.getAddress()
+      const payment = await createPayment()
+      const utxos = await connectionStore.provider.btc.getUtxos(address)
+      if (!utxos.length) {
+        throw new Error('your account currently has no available UTXO.')
+      }
+      const psbt = new Psbt({ network: networkStore.typedNetwork })
+      if (utxoList.length) {
+        for (let utxo of utxoList) {
+          const payInput = await createPayInput({ utxo, payment })
+          psbt.addInput(payInput)
+          psbt.addOutput({
+            value: utxo.satoshi,
+            address: recipient,
+          })
+        }
+      }
+      const { psbt: psbt1xFinished } = await exclusiveChange({
+        psbt: psbt,
+        maxUtxosCount: USE_UTXO_COUNT_LIMIT,
+        sighashType: SIGHASH_ALL,
+        feeb: feeRate,
+      })
+      console.log('psbt1xFinished', psbt1xFinished)
+      debugger
+      const signPsbt = await connectionStore.adapter.signPsbt(
+        psbt1xFinished!.toHex()
+      )
 
-    const address = await connectionStore.adapter.getAddress()
-    const payment = await createPayment()
-    const utxos = await connectionStore.provider.btc.getUtxos(address)
-    if (!utxos.length) {
-      throw new Error('your account currently has no available UTXO.')
+      return Psbt.fromHex(signPsbt)
+    } catch (error) {
+      throw new Error((error as any).message)
     }
-
-    const psbt = new Psbt({ network: networkStore.typedNetwork })
-
-    const payInput = await createPayInput({ utxo, payment })
-    psbt.addInput(payInput)
-    psbt.addOutput({
-      value: utxo.satoshi,
-      address: recipient,
-    })
-    const { psbt: psbt1xFinished } = await exclusiveChange({
-      psbt: psbt,
-      maxUtxosCount: USE_UTXO_COUNT_LIMIT,
-      sighashType: SIGHASH_ALL,
-      feeb: feeRate,
-    })
-
-    const signPsbt = await connectionStore.adapter.signPsbt(
-      psbt1xFinished!.toHex()
-    )
-
-    return Psbt.fromHex(signPsbt)
   }
 
   async function createPayInput({
@@ -278,14 +284,18 @@ export function useBridgeTools() {
 
     try {
       const createResp = await createPrepayOrderMintBRC20(createPrepayOrderDto)
-
+      const inscriptionUtxo: UTXO[] = []
       const { orderId, bridgeAddress } = createResp
-      const inscriptionUtxo = {
-        txId: inscription!.inscriptionId?.slice(0, -2),
-        vout: +inscription!.inscriptionId?.split('i')[1],
-        satoshi: +inscription!.outValue,
-        confirmed: true,
-        inscriptions: null,
+      if ((inscription as inscriptionInfo[])!.length) {
+        ;(inscription as inscriptionInfo[])?.forEach((item) => {
+          inscriptionUtxo.push({
+            txId: item!.inscriptionId?.slice(0, -2),
+            vout: +item!.inscriptionId?.split('i')[1],
+            satoshi: +item!.outValue,
+            confirmed: true,
+            inscriptions: null,
+          })
+        })
       }
 
       const psbt = await sendBRC(bridgeAddress, inscriptionUtxo, feeBtc!)
