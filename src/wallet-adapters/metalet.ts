@@ -1,5 +1,6 @@
 import { ElMessage } from 'element-plus'
 import { useBtcJsStore } from '@/stores/btcjs'
+import { Buffer } from 'buffer'
 
 // Add into life circle
 
