@@ -368,6 +368,7 @@ import {
   TabPanels,
   TabPanel,
 } from '@headlessui/vue'
+import { Buffer } from 'buffer'
 
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
