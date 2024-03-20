@@ -76,3 +76,8 @@ export const SIGNING_MESSAGE = 'orders.exchange'
 
 export const SWAP_THRESHOLD_AMOUNT = 10_000
 export const ADD_THRESHOLD_AMOUNT = 100_000
+export const BRIDGE_CONST_FEE = 0.0005
+export const BTC_CONST_FEE = 0.000001
+export const MVC_CONST_FEE = 0.0002
+export const BTC_CONST_REDEEM_FEE = 0.0005
+export const MVC_PRICE = 20

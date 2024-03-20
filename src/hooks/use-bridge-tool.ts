@@ -18,10 +18,18 @@ import { Payment, Transaction, Psbt, address as Address } from 'bitcoinjs-lib'
 import { determineAddressInfo, formatSat } from '@/lib/utils'
 import { exclusiveChange } from '@/lib/build-helpers'
 import { SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+const XEDR_PRICE = 400
 export enum AssetBridgeNetwork {
   BRC20 = 'BRC20',
   BTC = 'BTC',
   MVC = 'MVC',
+}
+
+export enum BridgeOp {
+  BtcToMvcByBtc = 1,
+  MVCToBtcByBtc = 2,
+  BtcToMvcByBrc20 = 3,
+  MvcToBtcByBrc20 = 4,
 }
 
 export enum AddressType {
@@ -60,7 +68,7 @@ type prepayOrderReturnType = {
 }
 
 type prepayOrderParams = {
-  amount: number
+  amount: string
   originTokenId: string
   addressType: string
   publicKey: string
@@ -68,7 +76,7 @@ type prepayOrderParams = {
   publicKeyReceive: string
   publicKeyReceiveSign: string
   feeBtc?: number
-  inscription?: inscriptionInfo[] | inscriptionInfo
+  inscription?: inscriptionInfo
 }
 
 export function useBridgeTools() {
@@ -189,7 +197,7 @@ export function useBridgeTools() {
     return txHex
   }
 
-  async function sendBRC(recipient: string, utxoList: UTXO[], feeRate: number) {
+  async function sendBRC(recipient: string, utxo: UTXO, feeRate: number) {
     const networkStore = useNetworkStore()
     const connectionStore = useConnectionStore()
     try {
@@ -200,24 +208,20 @@ export function useBridgeTools() {
         throw new Error('your account currently has no available UTXO.')
       }
       const psbt = new Psbt({ network: networkStore.typedNetwork })
-      if (utxoList.length) {
-        for (let utxo of utxoList) {
-          const payInput = await createPayInput({ utxo, payment })
-          psbt.addInput(payInput)
-          psbt.addOutput({
-            value: utxo.satoshi,
-            address: recipient,
-          })
-        }
-      }
+
+      const payInput = await createPayInput({ utxo, payment })
+      psbt.addInput(payInput)
+      psbt.addOutput({
+        value: utxo.satoshi,
+        address: recipient,
+      })
       const { psbt: psbt1xFinished } = await exclusiveChange({
         psbt: psbt,
         maxUtxosCount: USE_UTXO_COUNT_LIMIT,
         sighashType: SIGHASH_ALL,
         feeb: feeRate,
       })
-      console.log('psbt1xFinished', psbt1xFinished)
-      debugger
+
       const signPsbt = await connectionStore.adapter.signPsbt(
         psbt1xFinished!.toHex()
       )
@@ -284,18 +288,14 @@ export function useBridgeTools() {
 
     try {
       const createResp = await createPrepayOrderMintBRC20(createPrepayOrderDto)
-      const inscriptionUtxo: UTXO[] = []
+
       const { orderId, bridgeAddress } = createResp
-      if ((inscription as inscriptionInfo[])!.length) {
-        ;(inscription as inscriptionInfo[])?.forEach((item) => {
-          inscriptionUtxo.push({
-            txId: item!.inscriptionId?.slice(0, -2),
-            vout: +item!.inscriptionId?.split('i')[1],
-            satoshi: +item!.outValue,
-            confirmed: true,
-            inscriptions: null,
-          })
-        })
+      const inscriptionUtxo = {
+        txId: inscription!.inscriptionId?.slice(0, -2),
+        vout: +inscription!.inscriptionId?.split('i')[1],
+        satoshi: +inscription!.outValue,
+        confirmed: true,
+        inscriptions: null,
       }
 
       const psbt = await sendBRC(bridgeAddress, inscriptionUtxo, feeBtc!)
@@ -336,7 +336,7 @@ export function useBridgeTools() {
       const { orderId, bridgeAddress } = createResp
       const txHex = await buildTx({
         toAddress: bridgeAddress,
-        satoshis: amount,
+        satoshis: Number(amount),
         options: {
           noBroadcast: true,
           feeRate: feeBtc!,
@@ -389,9 +389,9 @@ export function useBridgeTools() {
   function calcReceiveInfo(
     mintAmount: number,
     assetInfo: bridgeAssetPairReturnType,
-    currentAssetInfo: assetReqReturnType
+    currentAssetInfo: assetReqReturnType,
+    op: BridgeOp
   ) {
-    console.log('mintAmount', mintAmount, assetInfo)
     const {
       btcPrice,
       mvcPrice,
@@ -404,11 +404,8 @@ export function useBridgeTools() {
     } = assetInfo
     let mintBrc20EqualBtcAmount = 0
 
-    if (currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC) {
-      if (
-        formatSat(mintAmount, currentAssetInfo.decimals) < amountLimitMinimum ||
-        formatSat(mintAmount, currentAssetInfo.decimals) > amountLimitMaximum
-      ) {
+    if (op == BridgeOp.BtcToMvcByBtc || op == BridgeOp.MVCToBtcByBtc) {
+      if (mintAmount < amountLimitMinimum || mintAmount > amountLimitMaximum) {
         const error = JSON.stringify({
           amountLimitMinimum,
           amountLimitMaximum,
@@ -416,7 +413,27 @@ export function useBridgeTools() {
         throw Error(error)
       }
     } else {
-      mintBrc20EqualBtcAmount =
+      if (op == BridgeOp.MvcToBtcByBrc20) {
+        mintAmount = new Decimal(mintAmount)
+          .mul(
+            10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals)
+          )
+          .toNumber()
+        const brcAmount = new Decimal(mintAmount)
+          .div(
+            10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals)
+          )
+          .toNumber()
+
+        // ((currentAssetInfo.price * Number(mintAmount)) / btcPrice) * 10 ** 8
+        mintBrc20EqualBtcAmount = new Decimal(currentAssetInfo.price)
+
+          .mul(brcAmount)
+
+          .div(btcPrice)
+          .mul(10 ** 8)
+          .toNumber()
+      } else {
         // ((currentAssetInfo.price * Number(mintAmount)) / btcPrice) * 10 ** 8
         mintBrc20EqualBtcAmount = new Decimal(currentAssetInfo.price)
 
@@ -425,6 +442,7 @@ export function useBridgeTools() {
           .div(btcPrice)
           .mul(10 ** 8)
           .toNumber()
+      }
 
       if (
         mintBrc20EqualBtcAmount < amountLimitMinimum ||
@@ -438,7 +456,7 @@ export function useBridgeTools() {
       }
     }
     const finallyMintAmount =
-      currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
+      op == BridgeOp.BtcToMvcByBtc || op == BridgeOp.MVCToBtcByBtc
         ? mintAmount
         : mintBrc20EqualBtcAmount
 
@@ -446,48 +464,89 @@ export function useBridgeTools() {
       finallyMintAmount,
       confirmSequence,
       // mint btc -> mvc, get mvc confirm number
-      currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
+      op == BridgeOp.BtcToMvcByBtc
         ? AssetBridgeNetwork.BTC
-        : AssetBridgeNetwork.BRC20
+        : op == BridgeOp.BtcToMvcByBrc20
+        ? AssetBridgeNetwork.BRC20
+        : AssetBridgeNetwork.MVC
     )
 
-    let bridgeFee: number = 0
-    let minerFee: number = 0
-    if (
-      currentAssetInfo.feeRateNumeratorMint > 0 ||
-      currentAssetInfo.feeRateConstMint > 0
-    ) {
+    let bridgeFee = 0
+    let minerFee = 0
+    let totalFee = 0
+    let receiveAmount = 0
+    let receiveAmountFixed = '0'
+    if (op == BridgeOp.BtcToMvcByBtc) {
+      bridgeFee = (mintAmount * currentAssetInfo.feeRateNumeratorMint) / 10000
+      minerFee = (transactionSize.BTC_MINT * feeMvc * mvcPrice) / btcPrice
+      totalFee = Math.floor(bridgeFee + minerFee)
+      receiveAmount = mintAmount - totalFee
+      return {
+        receiveAmount,
+        confirmNumber,
+      }
+    } else if (op == BridgeOp.BtcToMvcByBrc20) {
       bridgeFee =
-        currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
-          ? (finallyMintAmount * currentAssetInfo.feeRateNumeratorMint) /
-              10000 +
-            currentAssetInfo.feeRateConstMint
-          : (finallyMintAmount * currentAssetInfo.feeRateNumeratorMint) /
-              10000 +
-            ((currentAssetInfo.feeRateConstMint / 10 ** 8) * btcPrice) /
-              currentAssetInfo.price
+        (finallyMintAmount * currentAssetInfo.feeRateNumeratorMint) / 10000 +
+        ((currentAssetInfo.feeRateConstMint / 10 ** 8) * btcPrice) /
+          currentAssetInfo.price
       minerFee =
-        currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
-          ? (transactionSize.BTC_MINT * feeMvc * mvcPrice) / btcPrice
-          : (transactionSize.BTC_MINT * feeMvc * mvcPrice) /
-            10 ** 8 /
-            currentAssetInfo.price
-    }
-    const totalFee =
-      currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
-        ? Math.floor(bridgeFee + minerFee)
-        : bridgeFee + minerFee
-    const receiveAmount = mintAmount - totalFee
-    const receiveAmountFixed = receiveAmount.toFixed(
-      currentAssetInfo.decimals - currentAssetInfo.trimDecimals
-    )
+        (transactionSize.BTC_MINT * feeMvc * mvcPrice) /
+        10 ** 8 /
+        currentAssetInfo.price
+      totalFee = bridgeFee + minerFee
+      receiveAmount = mintAmount - totalFee
+      receiveAmountFixed = receiveAmount.toFixed(
+        currentAssetInfo.decimals - currentAssetInfo.trimDecimals
+      )
+      return {
+        receiveAmount: receiveAmountFixed,
+        confirmNumber,
+      }
+    } else if (op == BridgeOp.MVCToBtcByBtc) {
+      bridgeFee =
+        (mintAmount * currentAssetInfo.feeRateNumeratorRedeem) / 10000 +
+        currentAssetInfo.feeRateConstRedeem
+      minerFee = transactionSize.BTC_REDEEM * feeBtc
+      totalFee = Math.floor(bridgeFee + minerFee)
+      receiveAmount = mintAmount - totalFee
+      return {
+        receiveAmount,
+        confirmNumber,
+      }
+    } else if (op == BridgeOp.MvcToBtcByBrc20) {
+      const bridgeFeeConst = new Decimal(
+        ((currentAssetInfo.feeRateConstRedeem / 10 ** 8) * btcPrice) /
+          currentAssetInfo.price
+      ).toNumber()
 
-    return {
-      receiveAmount:
-        currentAssetInfo.originTokenId == AssetBridgeNetwork.BTC
-          ? receiveAmount
-          : receiveAmountFixed,
-      confirmNumber,
+      const bridgeFeePercent = new Decimal(mintAmount)
+        .mul(currentAssetInfo.feeRateNumeratorRedeem)
+        .div(10000)
+        .toNumber()
+      bridgeFee = bridgeFeeConst + bridgeFeePercent
+      minerFee = Math.floor(
+        ((transactionSize.BRC20_REDEEM / 10 ** 8) * feeBtc * btcPrice) /
+          currentAssetInfo.price
+      )
+      totalFee = bridgeFee + minerFee
+      receiveAmount = new Decimal(mintAmount - totalFee)
+        .div(10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals))
+        .toNumber()
+
+      return {
+        receiveAmount: Number(
+          receiveAmount.toFixed(
+            currentAssetInfo.decimals - currentAssetInfo.trimDecimals
+          )
+        ),
+        confirmNumber,
+      }
+    } else {
+      return {
+        receiveAmount: 0,
+        confirmNumber: 0,
+      }
     }
   }
 

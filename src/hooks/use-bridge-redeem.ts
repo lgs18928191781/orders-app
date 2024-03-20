@@ -83,19 +83,26 @@ export function useBridgeRedeem() {
     targetTokenCodeHash: string,
     targetTokenGenesis: string
   ): Promise<string> {
-    const res = await window.metaidwallet.transfer({
-      broadcast: true,
-      tasks: [
-        {
-          type: 'token',
-          codehash: targetTokenCodeHash,
-          genesis: targetTokenGenesis,
-          receivers: [{ address, amount }],
-        },
-      ],
-    })
-    console.log(res)
-    return res.res[0].txid
+    const res = await window.metaidwallet
+      .transfer({
+        broadcast: true,
+        tasks: [
+          {
+            type: 'token',
+            codehash: targetTokenCodeHash,
+            genesis: targetTokenGenesis,
+            receivers: [{ address, amount }],
+          },
+        ],
+      })
+      .catch((e) => {
+        throw new Error(e as any)
+      })
+    if (res.res[0].txid) {
+      return res.res[0].txid
+    } else {
+      return ''
+    }
   }
 
   async function signPublicKey(): Promise<{
@@ -137,39 +144,48 @@ export function useBridgeRedeem() {
     btcAsset: Asset,
     addressType: SupportRedeemAddressType
   ): Promise<{ orderId: string; txid: string }> {
-    const { publicKey, publicKeySign, publicKeyReceiveSign, publicKeyReceive } =
-      await signPublicKey()
+    try {
+      const {
+        publicKey,
+        publicKeySign,
+        publicKeyReceiveSign,
+        publicKeyReceive,
+      } = await signPublicKey()
 
-    const createPrepayOrderDto = {
-      amount: redeemAmount,
-      originTokenId: btcAsset.originTokenId,
-      addressType,
-      publicKey,
-      publicKeySign,
-      publicKeyReceive,
-      publicKeyReceiveSign,
-    }
-    const createResp = await createPrepayOrderRedeemBtc(createPrepayOrderDto)
-    const { orderId, bridgeAddress } = createResp
-    const { targetTokenCodeHash, targetTokenGenesis } = btcAsset
-    const txid = await sendToken(
-      String(redeemAmount),
-      bridgeAddress,
-      targetTokenCodeHash,
-      targetTokenGenesis
-    )
-    const submitPrepayOrderRedeemDto = {
-      orderId,
-      txid: txid,
-    }
-    await sleep(3000)
-    const ret = await submitPrepayOrderRedeemBtc(submitPrepayOrderRedeemDto)
-    if (!ret.success) {
-      throw new Error(ret.msg)
-    }
-    return {
-      orderId,
-      txid,
+      const createPrepayOrderDto = {
+        amount: redeemAmount,
+        originTokenId: btcAsset.originTokenId,
+        addressType,
+        publicKey,
+        publicKeySign,
+        publicKeyReceive,
+        publicKeyReceiveSign,
+      }
+      const createResp = await createPrepayOrderRedeemBtc(createPrepayOrderDto)
+      const { orderId, bridgeAddress } = createResp
+      const { targetTokenCodeHash, targetTokenGenesis } = btcAsset
+      const txid = await sendToken(
+        String(redeemAmount),
+        bridgeAddress,
+        targetTokenCodeHash,
+        targetTokenGenesis
+      )
+
+      const submitPrepayOrderRedeemDto = {
+        orderId,
+        txid: txid,
+      }
+      await sleep(3000)
+      const ret = await submitPrepayOrderRedeemBtc(submitPrepayOrderRedeemDto)
+      if (!ret.success) {
+        throw new Error(ret.msg)
+      }
+      return {
+        orderId,
+        txid,
+      }
+    } catch (error) {
+      throw new Error(error as any)
     }
   }
 
@@ -275,38 +291,48 @@ export function useBridgeRedeem() {
     asset: Asset,
     addressType: SupportRedeemAddressType
   ): Promise<{ orderId: string; txid: string }> {
-    const { publicKey, publicKeySign, publicKeyReceiveSign, publicKeyReceive } =
-      await signPublicKey()
-    const createPrepayOrderDto = {
-      amount: redeemAmount,
-      originTokenId: asset.originTokenId,
-      addressType,
-      publicKey,
-      publicKeySign,
-      publicKeyReceive,
-      publicKeyReceiveSign,
-    }
-    const createResp = await createPrepayOrderRedeemBrc20(createPrepayOrderDto)
-    const { orderId, bridgeAddress } = createResp
-    const { targetTokenCodeHash, targetTokenGenesis } = asset
-    const txid = await sendToken(
-      String(redeemAmount),
-      bridgeAddress,
-      targetTokenCodeHash,
-      targetTokenGenesis
-    )
-    const submitPrepayOrderRedeemDto = {
-      orderId,
-      txid: txid,
-    }
-    await sleep(3000)
-    const ret = await submitPrepayOrderRedeemBrc20(submitPrepayOrderRedeemDto)
-    if (!ret.success) {
-      throw new Error(ret.msg)
-    }
-    return {
-      orderId,
-      txid,
+    try {
+      const {
+        publicKey,
+        publicKeySign,
+        publicKeyReceiveSign,
+        publicKeyReceive,
+      } = await signPublicKey()
+      const createPrepayOrderDto = {
+        amount: redeemAmount,
+        originTokenId: asset.originTokenId,
+        addressType,
+        publicKey,
+        publicKeySign,
+        publicKeyReceive,
+        publicKeyReceiveSign,
+      }
+      const createResp = await createPrepayOrderRedeemBrc20(
+        createPrepayOrderDto
+      )
+      const { orderId, bridgeAddress } = createResp
+      const { targetTokenCodeHash, targetTokenGenesis } = asset
+      const txid = await sendToken(
+        String(redeemAmount),
+        bridgeAddress,
+        targetTokenCodeHash,
+        targetTokenGenesis
+      )
+      const submitPrepayOrderRedeemDto = {
+        orderId,
+        txid: txid,
+      }
+      await sleep(3000)
+      const ret = await submitPrepayOrderRedeemBrc20(submitPrepayOrderRedeemDto)
+      if (!ret.success) {
+        throw new Error(ret.msg)
+      }
+      return {
+        orderId,
+        txid,
+      }
+    } catch (error) {
+      throw new Error(error as any)
     }
   }
 

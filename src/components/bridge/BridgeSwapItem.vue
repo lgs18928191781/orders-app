@@ -1,15 +1,18 @@
 <template>
   <div class="item-center grid">
     <div class="flex items-center justify-between">
-      <div class="textGray text-sm">{{ opName }}</div>
+      <div class="textGray text-base">{{ opName }}</div>
 
-      <div class="flex text-sm">
-        <span class="textGray mr-1">Balance:</span>
+      <div class="flex items-center text-base">
+        <div class="textGray mr-1">
+          <img :src="walletIcon" alt="" />
+        </div>
         <div class="flex">
           <div class="text-primary">
             <span class="mr-1">{{ formatNum(assetInfo.balance) }} </span
-            ><span class="textGray mr-1" v-if="assetInfo.availableBalance"
-              ><span class="mr-1">+</span>{{ assetInfo.availableBalance }}</span
+            ><span class="textGray mr-1" v-if="assetInfo?.availableBalance"
+              ><span class="mr-1">+</span
+              >{{ assetInfo?.availableBalance }}</span
             >
             <span>{{ assetInfo.symbol }}</span>
           </div>
@@ -17,73 +20,28 @@
       </div>
     </div>
     <div>
-      <div class="item-wrap mt-2.5 grid grid-cols-2 rounded-lg">
-        <Listbox
-          as="div"
-          class="relative inline-block text-left"
-          :model-value="assetInfo.network"
-        >
-          <ListboxButton v-slot="{ open }" as="template">
-            <button
-              :class="[
-                open ? 'bg-zinc-700' : 'bg-zinc-900',
-                'mx-2.5 flex items-center px-2 py-3 text-sm hover:bg-zinc-700',
-              ]"
-            >
-              <img
-                :src="assetInfo.network == AssetNetwork.BTC ? BtcIcon : MVC"
-                class="h-6 w-6 rounded-full"
-              />
-              <!-- <div class="mr-1" v-if="selectNetwork">
-                {{ selectNetwork }}
-              </div> -->
-              <div class="flex pl-2 text-sm">
-                {{ assetInfo.network }}<span class="ml-1.5">Network</span>
-              </div>
-              <ChevronDownIcon class="h-5 w-5" color="#71717A" />
-            </button>
-          </ListboxButton>
-
-          <transition
-            enter-active-class="transition ease-out duration-100"
-            enter-from-class="transform opacity-0 scale-95"
-            enter-to-class="transform opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-75"
-            leave-from-class="transform opacity-100 scale-100"
-            leave-to-class="transform opacity-0 scale-95"
+      <div class="item-wrap mt-2.5 grid grid-cols-2 rounded-xl">
+        <div class="flex items-center py-4 text-left">
+          <button
+            :class="[
+              'bg-zinc-800',
+              'mx-2.5 flex items-center rounded-lg px-2 py-3 text-sm hover:bg-zinc-700',
+            ]"
           >
-            <ListboxOptions
-              class="nicer-scrollbar absolute right-0 z-10 mt-2 max-h-[40vh] w-48 origin-top-left divide-y divide-zinc-800 overflow-auto rounded-md border border-primary/10 bg-zinc-900 shadow shadow-primary/30 ring-1 ring-black ring-opacity-5 focus:outline-none"
-            >
-              <ListboxOption
-                v-slot="{ active, selected }"
-                v-for="asset in useNetwork"
-              >
-                <button
-                  :class="[
-                    'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm',
-                    active && 'bg-black',
-                  ]"
-                >
-                  <!-- <img :src="asset.info.icon" class="h-6 rounded-full" /> -->
+            <img
+              :src="assetInfo.network == AssetNetwork.BTC ? BtcIcon : MVC"
+              class="h-6 w-6 rounded-full"
+            />
 
-                  <div class="text-base font-bold">
-                    <!-- {{ prettySymbol(asset.tick) }} -->
-                  </div>
-
-                  <CheckIcon
-                    v-if="selected"
-                    class="ml-auto h-5 w-5 text-primary"
-                    aria-hidden="true"
-                  />
-                </button>
-              </ListboxOption>
-            </ListboxOptions>
-          </transition>
-        </Listbox>
+            <div class="flex pl-2 text-sm">
+              {{ assetInfo.network }}<span class="ml-1.5">Network</span>
+            </div>
+            <ChevronDownIcon class="h-5 w-5" color="#71717A" />
+          </button>
+        </div>
 
         <div class="relative flex w-full items-center">
-          <div v-if="opName == 'From'">
+          <div v-if="showInscription">
             <InscribeItem
               v-model:initAmount="assetInfo.initAmount"
               v-model:symbol="assetInfo.symbol"
@@ -97,6 +55,7 @@
           <input
             v-else
             :value="props.modelValue"
+            placeholder="0"
             @input="emit('update:modelValue', ($event as any).target!.value)"
             type="number"
             :readonly="disableInput"
@@ -129,12 +88,14 @@ import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import InscribeItem from './InscribeItem.vue'
 import { type InscriptionUtxo } from '@/queries/swap/types'
 import Decimal from 'decimal.js'
+import walletIcon from '@/assets/wallet-icon.svg?url'
 interface AssetInfo {
   network: AssetNetwork
   balance: number
   symbol: string
   decimal: number
   initAmount?: number
+  availableBalance?: number
 }
 
 interface Props {
@@ -142,9 +103,12 @@ interface Props {
   assetInfo: AssetInfo
   modelValue: number
 }
+
 const props = withDefaults(defineProps<Props>(), {
   modelValue: 0,
 })
+
+console.log('assetInfo12313212', props.assetInfo)
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -152,7 +116,13 @@ const curretnNetwork = ref('BTC')
 const InscriptionUtxos = ref<InscriptionUtxo[]>([])
 
 const useNetwork = reactive(['BTC', 'MVC'])
-
+const showInscription = computed(() => {
+  return (
+    props.opName == 'From' &&
+    props.assetInfo.network == AssetNetwork.BTC &&
+    props.assetInfo.symbol !== 'BTC'
+  )
+})
 function onAmountChange() {
   const totalValue = InscriptionUtxos.value.reduce((pre: any, cur: any) => {
     return new Decimal(pre).add(cur.amount!).toNumber()
@@ -198,14 +168,17 @@ defineExpose({
   color: #71717a;
 }
 .item-wrap {
-  border: 1px solid #71717a;
+  border: 1px solid #6f6f6f;
+  &:hover {
+    box-shadow: 0 0 0px 0.5px #71717a;
+  }
 }
 /* .text-color-primary {
   color: #fdba74;
 } */
 
 .input-wrap {
-  background: #3f3f45;
+  background: transparent;
 }
 
 .danger {

@@ -24,7 +24,7 @@
       class="nicer-scrollbar -mr-2 mb-4 mt-2 grid max-h-[20vh] grid-cols-2 items-center gap-2 overflow-auto pr-2 pt-2"
       v-else
     >
-      <div
+      <!-- <div
         v-if="
           myOneBrc20?.transferBalanceList &&
           myOneBrc20?.transferBalanceList.length > 3
@@ -37,7 +37,7 @@
         >
           Select all
         </button>
-      </div>
+      </div> -->
       <button
         class="group relative flex h-16 flex-col items-center justify-center gap-0.5 rounded-md border p-2 hover:border-primary/60"
         :class="[
@@ -122,6 +122,7 @@ import {
 import Decimal from 'decimal.js'
 import { type Brc20Transferable } from '@/queries/orders-api'
 import { type InscriptionUtxo } from '@/queries/swap/types'
+import { ElMessage } from 'element-plus'
 
 const isOpen = ref(false)
 const networkStore = useNetworkStore()
@@ -196,9 +197,16 @@ function isSelected(transferable: Brc20Transferable) {
 }
 
 const toggleSelect = (transferable: Brc20Transferable) => {
+  if (+transferable.inscriptionNumber < 0) {
+    return ElMessage.error(
+      'selected BRC20 is unconfirmed,Not available for trading'
+    )
+  }
+
   if (isSelected(transferable)) {
     selecteds.value = selecteds.value.filter((t) => t !== transferable)
   } else {
+    selecteds.value = []
     selecteds.value.push(transferable)
   }
 }

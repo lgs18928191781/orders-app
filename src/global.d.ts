@@ -101,9 +101,12 @@ interface Window {
   }
   metaidwallet: {
     getAddress: () => Promise<string>
-    getPublicKey:()=>Promise<string>
-    signMessage:(params:{message:string,encoding:string})=>Promise<{signature:{signature:string}}>
-    verifySignature:(params:any)=>Promise<any>
+    getPublicKey: () => Promise<string>
+    signMessage: (params: {
+      message: string
+      encoding?: string
+    }) => Promise<{ signature: { signature: string } }>
+    verifySignature: (params: any) => Promise<any>
     on: (
       eventName: string,
       handler: ({ mvcAddress: string, btcAddress: string }) => void
