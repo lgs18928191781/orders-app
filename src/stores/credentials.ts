@@ -11,7 +11,7 @@ export const useCredentialsStore = defineStore('credentials', {
     return {
       credentials: useLocalStorage(
         'credentials',
-        [] as { publicKey: string; signature: string; address: string }[]
+        [] as { publicKey: string; signature: string; address: string }[],
       ) as RemovableRef<
         { publicKey: string; signature: string; address: string }[]
       >,
@@ -123,7 +123,6 @@ export const useCredentialsStore = defineStore('credentials', {
           default:
             throw new Error(`Unsupported wallet: ${connection.wallet}`)
         }
-        console.log('here')
 
         this.add({ publicKey, signature, address })
 

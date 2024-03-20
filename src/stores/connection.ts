@@ -8,6 +8,7 @@ import * as metaletAdapter from '@/wallet-adapters/metalet'
 import { login } from '@/queries/orders-api'
 import { ElMessage } from 'element-plus'
 import { IS_DEV } from '@/data/constants'
+import { Network, useNetworkStore } from './network'
 
 function getWalletAdapter(wallet: Wallet) {
   switch (wallet) {
@@ -63,7 +64,7 @@ export const useConnectionStore = defineStore('connection', {
       if (IS_DEV && import.meta.env.VITE_TESTING_ADDRESS) {
         console.log(
           'Using testing address',
-          import.meta.env.VITE_TESTING_ADDRESS
+          import.meta.env.VITE_TESTING_ADDRESS,
         )
         return import.meta.env.VITE_TESTING_ADDRESS as string
       }
@@ -83,6 +84,7 @@ export const useConnectionStore = defineStore('connection', {
 
       const adapter: {
         initPsbt: () => Psbt
+        getMvcAddress?: () => Promise<string>
         finishPsbt: (psbt: string) => string
         getAddress: () => Promise<string>
         getMvcAddress: () => Promise<string>
@@ -95,7 +97,7 @@ export const useConnectionStore = defineStore('connection', {
         }>
         disconnect: () => Promise<void>
         getBalance: () => Promise<number>
-        inscribe: (tick: string) => Promise<string>
+        inscribe: (tick: string) => Promise<string | undefined>
         signPsbt: (psbt: string, options?: any) => Promise<string>
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
@@ -149,6 +151,24 @@ export const useConnectionStore = defineStore('connection', {
       this.last.address = await this.adapter.getAddress()
       this.last.pubKey = await this.adapter.getPubKey()
 
+      // sync network
+      const networkStore = useNetworkStore()
+      if (this.last.wallet === 'okx') {
+        networkStore.set('livenet')
+      } else if (this.last.wallet === 'unisat') {
+        const network: Network = await window.unisat.getNetwork()
+        networkStore.set(network)
+      } else if (this.last.wallet === 'metalet') {
+        const network: Network = await window.metaidwallet
+          .getNetwork()
+          .then(({ network }: { network: 'mainnet' | 'testnet' }) => {
+            if (network === 'mainnet') return 'livenet'
+
+            return 'testnet'
+          })
+        networkStore.set(network)
+      }
+
       return this.last
     },
 
@@ -162,6 +182,10 @@ export const useConnectionStore = defineStore('connection', {
       this.last.status = 'disconnected'
       this.last.address = ''
       this.last.pubKey = ''
+
+      // reset network
+      const networkStore = useNetworkStore()
+      networkStore.set('livenet')
     },
   },
 })

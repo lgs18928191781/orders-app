@@ -80,12 +80,12 @@ function outputBytes(output: PsbtTxOutput) {
     (output.script
       ? output.script.length
       : output.address?.startsWith('bc1') || output.address?.startsWith('tb1')
-      ? output.address?.length === 42
-        ? TX_OUTPUT_SEGWIT
-        : TX_OUTPUT_SEGWIT_SCRIPTHASH
-      : output.address?.startsWith('3') || output.address?.startsWith('2')
-      ? TX_OUTPUT_SCRIPTHASH
-      : TX_OUTPUT_PUBKEYHASH)
+        ? output.address?.length === 42 // TODO: looks like something wrong here
+          ? TX_OUTPUT_SEGWIT
+          : TX_OUTPUT_SEGWIT_SCRIPTHASH
+        : output.address?.startsWith('3') || output.address?.startsWith('2')
+          ? TX_OUTPUT_SCRIPTHASH
+          : TX_OUTPUT_PUBKEYHASH)
   )
 }
 
@@ -108,7 +108,7 @@ function transactionBytes(inputs: PsbtInput[], outputs: PsbtTxOutput[]) {
 export function calcFee(
   psbt: Psbt,
   feeRate: number,
-  extraSize: number = 31 // 31 is the size of the segwit change output
+  extraSize: number = 31, // 31 is the size of the segwit change output
   // extraInputValue?: number
 ) {
   const inputs = psbt.data.inputs
@@ -165,7 +165,7 @@ export function calculatePsbtFee(psbt: Psbt, feeRate: number, isMs?: boolean) {
 }
 
 export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
-  input: T
+  input: T,
 ): T {
   // check if the input is mine, and address is Taproot
   // if so, fill in the internal key
@@ -178,7 +178,7 @@ export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
 
   if (isP2TR && lostInternalPubkey) {
     const tapInternalKey = toXOnly(
-      Buffer.from(useConnectionStore().getPubKey, 'hex')
+      Buffer.from(useConnectionStore().getPubKey, 'hex'),
     )
     const { output } = useBtcJsStore().get!.payments.p2tr({
       internalPubkey: tapInternalKey,
@@ -258,7 +258,7 @@ export async function exclusiveChange({
 
   if (!paymentUtxos.length) {
     throw new Error(
-      'You have no usable BTC UTXO. Please deposit more BTC into your address to receive additional UTXO. utxo'
+      'You have no usable BTC UTXO. Please deposit more BTC into your address to receive additional UTXO. utxo',
     )
   }
 
@@ -267,7 +267,7 @@ export async function exclusiveChange({
   const networkStore = useNetworkStore()
   const paymentPrevOutputScript = btcjs.address.toOutputScript(
     address,
-    networkStore.typedNetwork
+    networkStore.typedNetwork,
   )
 
   if (estimate) {
@@ -316,9 +316,9 @@ export async function exclusiveChange({
           input.witnessUtxo ||
           input.nonWitnessUtxo ||
           raise(
-            'Input invalid. Please try again or contact customer service for assistance.'
-          )
-      ) as any
+            'Input invalid. Please try again or contact customer service for assistance.',
+          ),
+      ) as any,
     )
     const changeValue = totalInput - totalOutput - fee + (extraInputValue || 0)
     console.log({
@@ -330,7 +330,7 @@ export async function exclusiveChange({
 
     if (changeValue < 0) {
       throw new Error(
-        'Insufficient balance. Please ensure that the address has a sufficient balance and try again.'
+        'Insufficient balance. Please ensure that the address has a sufficient balance and try again.',
       )
     }
 
@@ -380,9 +380,9 @@ export async function exclusiveChange({
               input.witnessUtxo ||
               input.nonWitnessUtxo ||
               raise(
-                'Input invalid. Please try again or contact customer service for assistance.'
-              )
-          ) as any
+                'Input invalid. Please try again or contact customer service for assistance.',
+              ),
+          ) as any,
       )
     } else {
       // we pay for the whole transaction
@@ -393,9 +393,9 @@ export async function exclusiveChange({
             input.witnessUtxo ||
             input.nonWitnessUtxo ||
             raise(
-              'Input invalid. Please try again or contact customer service for assistance.'
-            )
-        ) as any
+              'Input invalid. Please try again or contact customer service for assistance.',
+            ),
+        ) as any,
       )
     }
 
@@ -405,7 +405,7 @@ export async function exclusiveChange({
       // if we run out of utxos, throw an error
       if (paymentUtxo === paymentUtxos[paymentUtxos.length - 1]) {
         throw new Error(
-          'Insufficient balance. Please ensure that the address has a sufficient balance and try again.'
+          'Insufficient balance. Please ensure that the address has a sufficient balance and try again.',
         )
       }
 
@@ -434,7 +434,7 @@ export async function exclusiveChange({
   }
 
   throw new Error(
-    'Insufficient balance. Please ensure that the address has a sufficient balance and try again.'
+    'Insufficient balance. Please ensure that the address has a sufficient balance and try again.',
   )
 }
 
@@ -445,13 +445,13 @@ export function safeOutputValue(value: number | Decimal, isMs = false): number {
   if (typeof value === 'number') {
     if (value < threshold) {
       throw new Error(
-        `The amount you are trying is too small. Maybe try a larger amount.`
+        `The amount you are trying is too small. Maybe try a larger amount.`,
       )
     }
   } else {
     if (value.lessThan(threshold)) {
       throw new Error(
-        `The amount you are trying is too small. Maybe try a larger amount.`
+        `The amount you are trying is too small. Maybe try a larger amount.`,
       )
     }
   }

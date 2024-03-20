@@ -6,18 +6,21 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 import Decimal from 'decimal.js'
 import { ElMessage } from 'element-plus'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 import { useOngoingTask } from '@/hooks/use-ongoing-task'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+import { useModalConfirmRemoveLiquidity } from '@/hooks/use-modal-confirm-remove-liquidity'
 
 import { getPoolStatusQuery, getPreviewRemoveQuery } from '@/queries/swap.query'
 import { buildRemove, postTask } from '@/queries/swap'
-import { IS_DEV, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
+import { IS_DEV, REMOVE_THRESHOLD_AMOUNT } from '@/data/constants'
+import { useFeebStore } from '@/stores/feeb'
+import { ERRORS } from '@/data/errors'
 
-const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { token1, token2 } = useSwapPool()
 const { openConnectionModal } = useConnectionModal()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const connectionStore = useConnectionStore()
@@ -28,25 +31,14 @@ const network = networkStore.network
 const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
   getPoolStatusQuery(
     {
-      token1: token1Symbol,
-      token2: token2Symbol,
+      token1: token1,
+      token2: token2,
       address,
       network,
     },
-    computed(() => !!address)
-  )
+    computed(() => !!address),
+  ),
 )
-const poolShare = computed(() => {
-  if (!poolStatus.value) return '0%'
-
-  return (
-    new Decimal(poolStatus.value.addressEquity)
-      .div(poolStatus.value.poolEquity)
-      .mul(100)
-      .toDP(4)
-      .toFixed() + '%'
-  )
-})
 
 const removePercentage = ref([0])
 const debouncedPercentage = refDebounced(removePercentage, 300)
@@ -54,23 +46,27 @@ const debouncedPercentage = refDebounced(removePercentage, 300)
 const removeEquity = computed(() => {
   if (!poolStatus.value) return '0'
 
+  if (debouncedPercentage.value[0] === 0) return '0'
+  if (debouncedPercentage.value[0] === 100)
+    return poolStatus.value.addressEquityAvailable
+
   return new Decimal(debouncedPercentage.value[0])
     .div(100)
-    .mul(poolStatus.value.addressEquity || 0)
+    .mul(poolStatus.value.addressEquityAvailable || 0)
     .toFixed(4)
 })
 
 const { data: preview, isFetching: isFetchingPreview } = useQuery(
   getPreviewRemoveQuery(
     {
-      token1: token1Symbol,
-      token2: token2Symbol,
+      token1: token1,
+      token2: token2,
       removeEquity,
       address,
       network,
     },
-    computed(() => !!address)
-  )
+    computed(() => !!address),
+  ),
 )
 const token1Amount = computed(() => {
   if (!preview.value) return new Decimal('0')
@@ -151,7 +147,7 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // fourth watcher: hasAmount
@@ -177,14 +173,14 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 5th watcher: more-than-threshold
 const moreThanThreshold = computed(() => {
   if (!preview.value) return false
 
-  return token1Amount.value.gte(SWAP_THRESHOLD_AMOUNT)
+  return token1Amount.value.gte(REMOVE_THRESHOLD_AMOUNT)
 })
 watch(
   () => moreThanThreshold.value,
@@ -205,14 +201,14 @@ watch(
       })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const { pushOngoing } = useOngoingTask()
 const { mutate: mutatePostRemove } = useMutation({
   mutationFn: postTask,
-  onSuccess: async ({ id: taskId }) => {
-    pushOngoing(taskId)
+  onSuccess: async ({ buildId }) => {
+    pushOngoing(buildId)
   },
   onError: (err: any) => {
     ElMessage.error(err.message)
@@ -257,13 +253,23 @@ async function doRemoveLiquidity() {
     return
   }
 
+  // lock in fee rate we're using
+  const feeRate = useFeebStore().get
+  if (!feeRate) {
+    ElMessage.error(ERRORS.HAVE_NOT_CHOOSE_GAS_RATE)
+    return
+  }
+
   // go for it!
   mutateBuildRemove({
-    token1: token1Symbol.value.toLowerCase(),
-    token2: token2Symbol.value.toLowerCase(),
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
     removeEquity: removeEquity.value,
+    feeRate,
   })
 }
+
+const { openModal } = useModalConfirmRemoveLiquidity()
 </script>
 
 <template>
@@ -282,7 +288,7 @@ async function doRemoveLiquidity() {
       :more-than-threshold="moreThanThreshold"
     />
 
-    <SwapGasStats v-show="token1Amount.gt(0)" :task-type="'remove'" />
+    <SwapFrictionStats v-show="token1Amount.gt(0)" :task-type="'remove'" />
 
     <!-- disabled button -->
     <MainBtn
@@ -295,13 +301,16 @@ async function doRemoveLiquidity() {
     </MainBtn>
 
     <!-- confirm button -->
-    <MainBtn @click="doRemoveLiquidity" v-else>Remove Liquidity</MainBtn>
+    <MainBtn @click="openModal" v-else> Remove Liquidity </MainBtn>
 
     <RemovePoolPosition
       v-if="poolStatus"
       :pool-status="poolStatus"
-      :pool-share="poolShare"
       class="mt-8"
     />
+
+    <!-- confirm modal -->
+
+    <ModalConfirmRemoveLiquidity @confirm="doRemoveLiquidity" />
   </div>
 </template>

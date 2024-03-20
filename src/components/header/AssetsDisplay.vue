@@ -6,6 +6,7 @@ import {
   ChevronsUpDownIcon,
   Loader2Icon,
   HelpCircleIcon,
+  WalletIcon,
 } from 'lucide-vue-next'
 import {
   Menu,
@@ -17,12 +18,13 @@ import {
   DisclosurePanel,
 } from '@headlessui/vue'
 
-import { prettyBalance, prettyCoinDisplay } from '@/lib/formatters'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { getBrc20s } from '@/queries/orders-api'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
+
+import { getBrc20s } from '@/queries/orders-api'
 import { unit, useBtcUnit } from '@/lib/helpers'
+import { prettyBalance, prettyCoinDisplay } from '@/lib/formatters'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -38,7 +40,8 @@ const { data: balance } = useQuery({
   enabled,
 })
 
-const { data: excludedBalance } = useExcludedBalanceQuery(address, enabled)
+const { data: excludedBalance, isLoading: isLoadingExcludedBalance } =
+  useExcludedBalanceQuery(address, enabled)
 
 const availableBalanceRatioColor = computed(() => {
   if (excludedBalance.value === undefined || balance.value === undefined) {
@@ -70,10 +73,10 @@ watch(
       //     'Your BTC balance is not enough to start a transaction. Please deposit some BTC to your address.',
       // })
       ElMessage.warning(
-        'Your BTC balance is not enough to start a transaction. Please deposit some BTC to your address.'
+        'Your BTC balance is not enough to start a transaction. Please deposit some BTC to your address.',
       )
     }
-  }
+  },
 )
 
 const { data: myBrc20s } = useQuery({
@@ -91,7 +94,7 @@ const { data: myBrc20s } = useQuery({
     }),
 
   enabled: computed(
-    () => networkStore.network !== 'testnet' && !!connectionStore.getAddress
+    () => networkStore.network !== 'testnet' && !!connectionStore.getAddress,
   ),
 })
 </script>
@@ -102,29 +105,31 @@ const { data: myBrc20s } = useQuery({
       v-if="excludedBalance !== undefined && balance !== undefined"
       class="group flex items-center gap-1"
     >
-      <Menu as="div" class="relative inline-block text-left">
-        <div>
-          <MenuButton
-            class="inline-flex w-full items-center justify-center gap-x-1 rounded-md px-3 shadow-sm"
+      <Menu
+        as="div"
+        class="relative inline-flex items-center self-stretch text-left"
+      >
+        <MenuButton
+          class="inline-flex w-full items-center justify-center gap-x-1 rounded-md px-3 shadow-sm"
+        >
+          <WalletIcon class="inline size-4 lg:hidden" />
+          <span>
+            {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
+          </span>
+          <span
+            class="hidden text-xs lg:inline"
+            :class="availableBalanceRatioColor"
+            v-if="balance"
           >
-            <span>
-              {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
-            </span>
-            <span
-              class="text-xs"
-              :class="availableBalanceRatioColor"
-              v-if="balance"
-            >
-              ({{ ((excludedBalance / balance) * 100).toFixed(0) }}%)
-            </span>
+            ({{ ((excludedBalance / balance) * 100).toFixed(0) }}%)
+          </span>
 
-            <div class="flex h-4 w-4 items-center justify-center">
-              <ChevronsUpDownIcon
-                class="h-3 w-3 transition-all duration-200 ease-in-out group-hover:h-4 group-hover:w-4"
-              />
-            </div>
-          </MenuButton>
-        </div>
+          <div class="hidden h-4 w-4 items-center justify-center lg:flex">
+            <ChevronsUpDownIcon
+              class="h-3 w-3 transition-all duration-200 ease-in-out group-hover:h-4 group-hover:w-4"
+            />
+          </div>
+        </MenuButton>
 
         <transition
           enter-active-class="transition ease-out duration-100"
@@ -135,7 +140,7 @@ const { data: myBrc20s } = useQuery({
           leave-to-class="transform opacity-0 scale-95"
         >
           <MenuItems
-            class="absolute right-0 z-50 mt-4 w-80 origin-top-right divide-y divide-zinc-700 overflow-hidden rounded-md bg-zinc-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            class="absolute left-0 top-0 z-50 mt-8 w-screen origin-top-right divide-y divide-zinc-700 overflow-hidden bg-zinc-800 shadow-highlight ring-1 ring-black ring-opacity-5 focus:outline-none lg:left-auto lg:right-0 lg:w-80 lg:rounded-md"
           >
             <MenuItem v-slot="{ active }" disabled>
               <div
@@ -145,14 +150,14 @@ const { data: myBrc20s } = useQuery({
                 ]"
               >
                 <div class="text-primary">BTC</div>
-                <div class="flex items-center mt-2 justify-between">
+                <div class="mt-2 flex items-center justify-between">
                   <div class="text-xs text-zinc-500">Available Balance</div>
                   <div class="text-xs">
                     {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
                   </div>
                 </div>
 
-                <div class="flex items-center mt-1 justify-between">
+                <div class="mt-1 flex items-center justify-between">
                   <div class="text-xs text-zinc-500">Total Balance</div>
                   <div class="text-xs">
                     {{ prettyBalance(balance, useBtcUnit) }} {{ unit }}
@@ -160,7 +165,7 @@ const { data: myBrc20s } = useQuery({
                 </div>
 
                 <!-- usable % -->
-                <div class="flex items-center mt-1 justify-between">
+                <div class="mt-1 flex items-center justify-between">
                   <div class="text-xs text-zinc-500">Available BTC %</div>
                   <div
                     class="text-xs"
@@ -174,7 +179,7 @@ const { data: myBrc20s } = useQuery({
 
                 <Disclosure>
                   <DisclosureButton
-                    class="py-2 text-xs mt-2 underline inline-flex items-center gap-1"
+                    class="mt-2 inline-flex items-center gap-1 py-2 text-xs underline"
                   >
                     <HelpCircleIcon class="h-4 w-4 text-primary" />
                     Why can I only use part of my BTC?
@@ -188,7 +193,7 @@ const { data: myBrc20s } = useQuery({
                     leave-to-class="transform scale-95 opacity-0"
                   >
                     <DisclosurePanel
-                      class="text-zinc-300 text-xs bg-black rounded-md p-2 -mx-2"
+                      class="-mx-2 rounded-md bg-black p-2 text-xs text-zinc-300"
                     >
                       <p class="">
                         There are 2 parts of your overall BTC balance that you
@@ -224,7 +229,7 @@ const { data: myBrc20s } = useQuery({
                   active && 'bg-zinc-950',
                 ]"
               >
-                <div class="text-primary uppercase">${{ brc20.token }}</div>
+                <div class="uppercase text-primary">${{ brc20.token }}</div>
                 <div class="mt-2 space-y-1 text-xs">
                   <div class="flex items-center justify-between gap-1">
                     <span class="text-zinc-500">Available</span>
@@ -232,7 +237,7 @@ const { data: myBrc20s } = useQuery({
                       {{
                         prettyCoinDisplay(
                           brc20.availableBalance,
-                          '$' + brc20.token
+                          '$' + brc20.token,
                         )
                       }}
                     </span>
@@ -243,7 +248,7 @@ const { data: myBrc20s } = useQuery({
                       {{
                         prettyCoinDisplay(
                           brc20.transferBalance,
-                          '$' + brc20.token
+                          '$' + brc20.token,
                         )
                       }}
                     </span>
@@ -256,8 +261,9 @@ const { data: myBrc20s } = useQuery({
       </Menu>
     </div>
 
-    <span v-else>
-      <Loader2Icon class="h-5 animate-spin" />
-    </span>
+    <Loader2Icon
+      class="ml-3 h-5 animate-spin"
+      v-else-if="isLoadingExcludedBalance"
+    />
   </div>
 </template>

@@ -6,7 +6,7 @@ import { Loader2Icon, EraserIcon, AlertCircleIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrcFiatRate, getFiatRate, getBrc20s } from '@/queries/orders-api'
@@ -16,7 +16,6 @@ import { SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { selectedPair } = useSwapPoolPair()
 
 const props = defineProps({
   side: {
@@ -30,17 +29,6 @@ const props = defineProps({
   },
 })
 const symbol = defineModel('symbol', { required: true, type: String })
-const icon = computed(() => {
-  if (!selectedPair.value) {
-    return null
-  }
-
-  if (symbol.value === selectedPair.value.token1Symbol) {
-    return selectedPair.value.token1Icon
-  }
-
-  return selectedPair.value.token2Icon
-})
 
 // amount
 const amount = defineModel('amount', { type: String })
@@ -141,7 +129,7 @@ const fiatPrice = computed(() => {
 // balance
 const { data: btcBalance } = useExcludedBalanceQuery(
   computed(() => connectionStore.getAddress),
-  computed(() => !!connectionStore.connected)
+  computed(() => !!connectionStore.connected),
 )
 const { data: myBrc20s } = useQuery({
   queryKey: [
@@ -162,7 +150,7 @@ const balance = computed(() => {
   if (symbol.value !== 'btc') {
     // find symbol's balance
     const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
+      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase(),
     )
 
     if (!brc20) {
@@ -196,7 +184,7 @@ const useTotalBalance = () => {
   if (symbol.value !== 'btc') {
     // find symbol's balance
     const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
+      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase(),
     )
 
     if (!brc20) {
@@ -254,7 +242,7 @@ watch(
     } else {
       emit('notEnough')
     }
-  }
+  },
 )
 watch(
   () => amountMoreThanThreshold.value,
@@ -264,7 +252,7 @@ watch(
     } else {
       emit('lessThanThreshold')
     }
-  }
+  },
 )
 
 // watch for change of amount; emit event
@@ -276,7 +264,7 @@ watch(
     } else {
       emit('amountCleared')
     }
-  }
+  },
 )
 </script>
 
@@ -284,17 +272,17 @@ watch(
   <div class="swap-sub-control-panel">
     <div class="text-zinc-400">You {{ side }}</div>
 
-    <div class="flex items-center space-x-2 justify-between h-16">
+    <div class="flex h-16 items-center justify-between space-x-2">
       <input
-        class="bg-transparent quiet-input flex-1 w-12 p-0 leading-loose"
+        class="quiet-input w-12 flex-1 bg-transparent p-0 leading-loose"
         :class="[
           hasEnough
             ? calculating
               ? 'text-zinc-500'
               : 'text-zinc-100 caret-primary'
             : calculating
-            ? 'text-red-900/50 caret-red-900/50'
-            : 'text-red-500 caret-red-500',
+              ? 'text-red-900/50 caret-red-900/50'
+              : 'text-red-500 caret-red-500',
           // if too long, make it smaller
           amountTextSize,
         ]"
@@ -312,10 +300,10 @@ watch(
 
       <div
         :class="[
-          'rounded-full p-1 px-4 text-xl flex items-center gap-1 bg-zinc-900',
+          'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-xl',
         ]"
       >
-        <img :src="icon" class="size-6 rounded-full" v-if="icon" />
+        <TokenIcon :token="symbol" class="size-6 rounded-full" v-if="symbol" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>
@@ -324,11 +312,11 @@ watch(
 
     <!-- warning -->
     <div
-      class="text-red-500 text-sm -mt-2 mb-2 flex items-center gap-2"
+      class="-mt-2 mb-2 flex items-center gap-2 text-sm text-red-500"
       v-if="hasEnough && !calculating && !amountMoreThanThreshold"
     >
       <AlertCircleIcon class="size-4" />
-      Amount should be at least 0.0001 BTC
+      Amount should be at least {{ SWAP_THRESHOLD_AMOUNT / 1e8 }} BTC
     </div>
 
     <!-- data footer -->
@@ -344,7 +332,7 @@ watch(
 
       <!-- balance -->
       <button
-        class="text-xs text-zinc-400 hover:underline hover:text-primary"
+        class="text-xs text-zinc-400 hover:text-primary hover:underline"
         v-if="side === 'pay'"
         v-show="!!symbol"
         @click="useTotalBalance"

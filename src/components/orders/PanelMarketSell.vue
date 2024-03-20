@@ -39,7 +39,7 @@ const totalPrice = computed(() => {
     }
 
   const total = selectedBidOrder.value.price.times(
-    selectedBidOrder.value.coinAmount
+    selectedBidOrder.value.coinAmount,
   )
 
   return {
@@ -135,7 +135,7 @@ const cannotTakeOrderReason = computed(() => {
           <span class="ml-2 text-zinc-500">Price</span>
         </div>
 
-        <div class="grow max-w-[67%]">
+        <div class="max-w-[67%] grow">
           <div class="flex items-center justify-end">
             <div class="w-full p-2 text-right outline-none">
               {{ prettyBalance(selectedBidOrder?.price, useBtcUnit) }}
@@ -148,7 +148,7 @@ const cannotTakeOrderReason = computed(() => {
           </div>
 
           <div
-            class="text-sm text-zinc-500 text-right pr-2 -mt-2"
+            class="-mt-2 pr-2 text-right text-sm text-zinc-500"
             v-if="isShowingFiat && fiatRate && selectedBidOrder"
           >
             {{
@@ -171,26 +171,26 @@ const cannotTakeOrderReason = computed(() => {
           <span class="ml-2 text-zinc-500">Amount</span>
         </div>
 
-        <div class="max-w-[67%] grow flex items-center" v-if="selectedBidOrder">
+        <div class="flex max-w-[67%] grow items-center" v-if="selectedBidOrder">
           <div class="w-full p-2 text-right outline-none">
             {{ selectedBidOrder.coinAmount }}
           </div>
           <div
-            class="pointer-events-none flex items-center pr-2 text-zinc-400 uppercase"
+            class="pointer-events-none flex items-center pr-2 uppercase text-zinc-400"
           >
             ${{ selectedPair.fromSymbol }}
           </div>
         </div>
 
-        <div class="max-w-[67%] grow text-right text-primary py-1" v-else>
+        <div class="max-w-[67%] grow py-1 text-right text-primary" v-else>
           <button
-            class="text-primary/80 w-full group flex items-center justify-end gap-2"
+            class="group flex w-full items-center justify-end gap-2 text-primary/80"
             @click="highlight('bidOrdersList')"
           >
             <span class="group-hover:underline">Select an</span>
 
             <span
-              class="text-green-500 font-bold bg-green-500/20 py-0.5 px-1 rounded-md"
+              class="rounded-md bg-green-500/20 px-1 py-0.5 font-bold text-green-500"
             >
               BID Order
             </span>
@@ -205,7 +205,7 @@ const cannotTakeOrderReason = computed(() => {
         <div class="">
           <div class="text-zinc-300">{{ totalPrice.display }}</div>
           <div
-            class="text-sm text-zinc-500 text-right"
+            class="text-right text-sm text-zinc-500"
             v-if="isShowingFiat && fiatRate && totalPrice.value"
           >
             {{ getFiatPriceDisplay(totalPrice.value, fiatRate) }}
@@ -239,7 +239,7 @@ const cannotTakeOrderReason = computed(() => {
         <div class="">
           <div class="text-zinc-300">{{ prettySellFees }}</div>
           <div
-            class="text-sm text-zinc-500 text-right"
+            class="text-right text-sm text-zinc-500"
             v-if="isShowingFiat && fiatRate && sellFees"
           >
             {{ getFiatPriceDisplay(sellFees, fiatRate) }}

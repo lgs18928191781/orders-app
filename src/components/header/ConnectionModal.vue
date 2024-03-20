@@ -6,18 +6,19 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { computed, ref } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useRoute } from 'vue-router'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
+import { isMobile, isOKApp, getOkxLink } from '@/lib/helpers'
+
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
-
+import { useRoute } from 'vue-router'
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
 
@@ -39,15 +40,20 @@ async function connectToUnisat() {
 }
 
 async function connectToOkx() {
-  if (!window.okxwallet) {
-    setMissingWallet('okx')
-    return
-  }
+  if (isMobile() && !isOKApp()) {
+    const encodedUrl = getOkxLink()
+    window.location.href = encodedUrl
+  } else {
+    if (!window.okxwallet) {
+      setMissingWallet('okx')
+      return
+    }
 
-  const connection = await connectionStore.connect('okx')
-  if (connection.status === 'connected') {
-    await credentialsStore.login()
-    closeConnectionModal()
+    const connection = await connectionStore.connect('okx')
+    if (connection.status === 'connected') {
+      await credentialsStore.login()
+      closeConnectionModal()
+    }
   }
 }
 
@@ -124,18 +130,19 @@ const isBridgePage = computed(() => {
                 </DialogTitle>
 
                 <!-- wallet buttons -->
-                <div class="mt-8 grid grid-cols-3 gap-4 text-base">
+                <div
+                  class="mt-8 grid grid-cols-2 gap-4 text-base lg:grid-cols-3"
+                >
                   <button
-                    class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToOkx"
-                    v-if="!isSwapPage && !isBridgePage"
                   >
                     <img class="h-12 rounded" :src="OkxIcon" alt="Metamask" />
                     <span class="">OKX</span>
                   </button>
 
                   <button
-                    v-if="!isBridgePage"
+                    v-if="!isBridgePage && !isMobile()"
                     class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
                     @click="connectToUnisat"
                     ref="firstButtonRef"
@@ -148,19 +155,18 @@ const isBridgePage = computed(() => {
                     <span class="">Unisat</span>
                   </button>
 
-                  <div class="relative" v-if="!isSwapPage">
-                    <button
-                      class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30"
-                      @click="connectToMetalet"
-                    >
-                      <img
-                        class="h-12 rounded"
-                        :src="MetaletIcon"
-                        alt="Metamask"
-                      />
-                      <span class="">Metalet</span>
-                    </button>
-                  </div>
+                  <button
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30 lg:w-36"
+                    @click="connectToMetalet"
+                    v-if="!isMobile()"
+                  >
+                    <img
+                      class="h-12 rounded"
+                      :src="MetaletIcon"
+                      alt="Metamask"
+                    />
+                    <span class="">Metalet</span>
+                  </button>
                 </div>
 
                 <!-- footer -->
@@ -174,8 +180,8 @@ const isBridgePage = computed(() => {
                     and Testnet environment.
                   </p>
                   <p>By connecting wallet,</p>
-                  <p class="flex gap-2">
-                    you agree to Orders.Exchange's
+                  <p class="">
+                    <span>you agree to Orders.Exchange's</span>
                     <a
                       href="https://orders-exchange.gitbook.io/orders/risks-and-disclaimer/risks-and-disclaimer"
                       target="_blank"

@@ -32,14 +32,14 @@ const { data: records, isLoading: isLoadingRecords } = useQuery({
 <template>
   <div class="">
     <Disclosure v-slot="{ open }" :default-open="true">
-      <DisclosureButton class="py-1 flex items-center gap-4">
+      <DisclosureButton class="flex items-center gap-4 py-1">
         <span class="text-sm font-medium leading-6 text-zinc-300">
           Claim Records {{ records?.length ? `(${records.length})` : '' }}
         </span>
 
         <ChevronRightIcon
-          class="h-4 w-4 text-zinc-500 ml-auto"
-          :class="{ 'transform rotate-90': open }"
+          class="ml-auto h-4 w-4 text-zinc-500"
+          :class="{ 'rotate-90 transform': open }"
           aria-hidden="true"
         />
       </DisclosureButton>
@@ -53,7 +53,7 @@ const { data: records, isLoading: isLoadingRecords } = useQuery({
         leave-to-class="transform scale-95 opacity-0"
       >
         <DisclosurePanel
-          class="mt-4 grow overflow-y-auto space-y-2"
+          class="mt-4 grow space-y-2 overflow-y-auto"
           :class="{ '-ml-4': records?.length }"
         >
           <template v-if="isLoadingRecords"> - </template>

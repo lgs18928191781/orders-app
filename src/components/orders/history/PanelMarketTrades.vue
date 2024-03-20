@@ -23,10 +23,10 @@ const { data: marketTrades, isLoading } = useQuery({
 </script>
 
 <template>
-  <TabPanel class="text-sm h-full flex flex-col">
+  <TabPanel class="flex h-full flex-col text-sm">
     <!-- table header -->
     <div
-      class="grid grid-cols-12 gap-2 text-zinc-500 border-b border-zinc-700 pb-4"
+      class="grid grid-cols-12 gap-2 border-b border-zinc-700 pb-4 text-zinc-500"
     >
       <div class="col-span-2">Order Time</div>
       <div class="col-span-2">Pair</div>
@@ -38,14 +38,14 @@ const { data: marketTrades, isLoading } = useQuery({
 
     <!-- table body -->
     <div
-      class="grow flex items-center justify-center text-zinc-500 text-sm"
+      class="flex grow items-center justify-center text-sm text-zinc-500"
       v-if="isLoading"
     >
-      <Loader2Icon class="animate-spin h-8 w-8 text-zinc-500" />
+      <Loader2Icon class="h-8 w-8 animate-spin text-zinc-500" />
     </div>
 
     <div
-      class="grow flex flex-col gap-2 items-center justify-center text-zinc-500 text-base"
+      class="flex grow flex-col items-center justify-center gap-2 py-20 text-base text-zinc-500"
       v-else-if="marketTrades && marketTrades.length === 0"
     >
       <CalendarSearchIcon class="h-10 w-10 text-zinc-500" />
@@ -53,11 +53,11 @@ const { data: marketTrades, isLoading } = useQuery({
     </div>
 
     <div
-      class="py-4 flex flex-col gap-2 overflow-y-auto h-1 flex-auto nicer-scrollbar pr-3 -mr-3"
+      class="nicer-scrollbar -mr-3 flex h-1 flex-auto grow flex-col gap-2 overflow-y-auto py-4 pr-3"
       v-else
     >
       <div
-        class="grid grid-cols-12 gap-2 text-zinc-300 items-start"
+        class="grid grid-cols-12 items-start gap-2 text-zinc-300"
         v-for="order in marketTrades"
         :key="order.orderId"
       >

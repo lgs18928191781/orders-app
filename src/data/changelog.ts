@@ -1,5 +1,11 @@
 const changelog = [
   {
+    version: '3.1.0',
+    emoji: '🦋',
+    date: '2024-3-12',
+    changes: ['Add OKX mobile wallet support'],
+  },
+  {
     version: '3.0.0',
     emoji: '🏔️️',
     date: '2024-2-09',

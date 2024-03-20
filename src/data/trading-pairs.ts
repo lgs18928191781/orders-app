@@ -146,7 +146,6 @@ const tradingPairs = [
     toSymbol: 'btc',
     fromIcon: eorbLogo,
     toIcon: btcLogo,
-    isNew: true,
   },
   {
     id: 1.2,
@@ -155,7 +154,6 @@ const tradingPairs = [
     toSymbol: 'btc',
     fromIcon: newuLogo,
     toIcon: btcLogo,
-    isNew: true,
   },
 ] as {
   id: number

@@ -15,6 +15,7 @@ export const useNetworkStore = defineStore('network', {
       state.network === 'livenet' ? 'bitcoin' : 'testnet',
     typedNetwork: (state) => (state.network === 'livenet' ? bitcoin : testnet),
     ordersNetwork: (state) => state.network,
+    isTestnet: (state) => state.network === 'testnet',
   },
 
   actions: {

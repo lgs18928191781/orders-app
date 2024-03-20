@@ -60,14 +60,14 @@ const { data: poolableBrc20s } = useQuery({
       // filter out pooled brc20s
       const poolableBrc20s = allBrc20s.transferBalanceList.filter((brc20) => {
         return !pooledBrc20s.some(
-          (pooledBrc20) => pooledBrc20.inscriptionId === brc20.inscriptionId
+          (pooledBrc20) => pooledBrc20.inscriptionId === brc20.inscriptionId,
         )
       })
 
       return poolableBrc20s
     }),
   enabled: computed(
-    () => networkStore.network !== 'testnet' && connectionStore.connected
+    () => networkStore.network !== 'testnet' && connectionStore.connected,
   ),
 })
 const selected: Ref<undefined | Brc20Transferable> = ref()
@@ -91,7 +91,7 @@ watch(
   (val) => {
     defaultSelectIndex.value = multipliers.indexOf(val)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const providesBtc = useStorage('provides-btc', true)
@@ -184,15 +184,15 @@ async function onConfirm() {
 </script>
 
 <template>
-  <div class="max-w-md mx-auto">
-    <form action="" class="flex flex-col min-h-[40vh]">
+  <div class="mx-auto max-w-md">
+    <form action="" class="flex min-h-[40vh] flex-col">
       <Listbox
         as="div"
         v-model="selected"
-        class="grid items-center gap-x-6 justify-center grid-cols-6"
+        class="grid grid-cols-6 items-center justify-center gap-x-6"
       >
         <ListboxLabel
-          class="block text-base font-medium leading-6 text-zinc-300 uppercase col-span-1"
+          class="col-span-1 block text-base font-medium uppercase leading-6 text-zinc-300"
         >
           ${{ selectedPair.fromSymbol }}
         </ListboxLabel>
@@ -220,13 +220,13 @@ async function onConfirm() {
             leave-to-class="opacity-0"
           >
             <ListboxOptions
-              class="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-zinc-800 py-1 text-base shadow-lg ring-1 ring-zinc-700 ring-inset focus:outline-none sm:text-sm"
+              class="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-zinc-800 py-1 text-base shadow-lg ring-1 ring-inset ring-zinc-700 focus:outline-none sm:text-sm"
               v-if="typeof poolableBrc20s === 'object'"
             >
               <ListboxOption
                 v-if="poolableBrc20s.length === 0"
                 :disabled="true"
-                class="text-right text-zinc-500 text-sm py-2 px-4"
+                class="px-4 py-2 text-right text-sm text-zinc-500"
               >
                 No poolable ${{ selectedPair.fromSymbol.toUpperCase() }}
               </ListboxOption>
@@ -269,12 +269,12 @@ async function onConfirm() {
       </Listbox>
 
       <SwitchGroup>
-        <div class="flex items-center mt-8">
+        <div class="mt-8 flex items-center">
           <Switch
             v-model="providesBtc"
             :class="[
               providesBtc ? 'bg-primary' : 'bg-primary/10',
-              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ring-offset-zinc-900',
+              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent ring-offset-zinc-900 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
             ]"
           >
             <span class="sr-only">Also Provide BTC Liquidity</span>
@@ -300,7 +300,7 @@ async function onConfirm() {
             </span>
           </Switch>
 
-          <SwitchLabel class="text-zinc-300 text-sm ml-4">
+          <SwitchLabel class="ml-4 text-sm text-zinc-300">
             Also Provide BTC Liquidity
           </SwitchLabel>
 
@@ -314,7 +314,7 @@ async function onConfirm() {
           >
             <template #reference>
               <HelpCircleIcon
-                class="h-4 w-4 text-zinc-300 ml-2"
+                class="ml-2 h-4 w-4 text-zinc-300"
                 aria-hidden="true"
               />
             </template>
@@ -328,11 +328,11 @@ async function onConfirm() {
         leave-to-class="opacity-0"
       >
         <div class="mt-4 grow" v-show="providesBtc">
-          <div class="items-center gap-x-4 gap-y-2 grid grid-cols-6 grow">
-            <div class="text-zinc-300 col-span-1">{{ unit }}</div>
+          <div class="grid grow grid-cols-6 items-center gap-x-4 gap-y-2">
+            <div class="col-span-1 text-zinc-300">{{ unit }}</div>
 
             <div
-              class="flex items-center justify-between col-span-5 rounded-md border px-4 py-2 border-zinc-700 text-zinc-300 shadow-sm sm:text-sm sm:leading-6 bg-zinc-800"
+              class="col-span-5 flex items-center justify-between rounded-md border border-zinc-700 bg-zinc-800 px-4 py-2 text-zinc-300 shadow-sm sm:text-sm sm:leading-6"
             >
               <div class="flex flex-col items-start gap-1">
                 <span class="font-bold text-zinc-100">
@@ -343,7 +343,7 @@ async function onConfirm() {
               <Listbox as="div" v-model="selectedMultiplier">
                 <div class="relative w-20">
                   <ListboxButton
-                    class="relative w-full pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-zinc-950 focus:outline-none focus:ring-2 focus:ring-primary sm:text-sm sm:leading-6 inline-flex items-center rounded px-2 text-xs text-zinc-400 bg-black py-1.5 font-bold"
+                    class="relative inline-flex w-full items-center rounded bg-black px-2 py-1.5 pl-3 pr-10 text-left text-xs font-bold text-zinc-400 shadow-sm ring-1 ring-inset ring-zinc-950 focus:outline-none focus:ring-2 focus:ring-primary sm:text-sm sm:leading-6"
                   >
                     <span class="block truncate">{{ selectedMultiplier }}</span>
                     <span
@@ -404,7 +404,7 @@ async function onConfirm() {
 
                   <img
                     :src="funArrowSvg"
-                    class="object-fill size-16 absolute right-0 top-0 translate-y-[50%] translate-x-[80%] -rotate-[60deg] pointer-events-none"
+                    class="pointer-events-none absolute right-0 top-0 size-16 translate-x-[80%] translate-y-[50%] -rotate-[60deg] object-fill"
                   />
                 </div>
               </Listbox>
@@ -412,7 +412,7 @@ async function onConfirm() {
 
             <div class="col-span-1"></div>
             <div
-              class="flex text-zinc-400 gap-2 text-xs col-span-5 pl-2 items-center"
+              class="col-span-5 flex items-center gap-2 pl-2 text-xs text-zinc-400"
             >
               <span>{{ '=' }}</span>
               <el-popover
@@ -428,7 +428,7 @@ async function onConfirm() {
               >
                 <template #reference>
                   <span
-                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-primary transition"
+                    class="cursor-pointer rounded bg-black px-2 py-1 text-zinc-300 transition hover:text-primary"
                   >
                     Market Price
                   </span>
@@ -444,7 +444,7 @@ async function onConfirm() {
               >
                 <template #reference>
                   <span
-                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-primary transition"
+                    class="cursor-pointer rounded bg-black px-2 py-1 text-zinc-300 transition hover:text-primary"
                   >
                     Quantity
                   </span>
@@ -462,7 +462,7 @@ async function onConfirm() {
               >
                 <template #reference>
                   <span
-                    class="px-2 py-1 bg-black rounded cursor-pointer text-zinc-300 hover:text-primary transition"
+                    class="cursor-pointer rounded bg-black px-2 py-1 text-zinc-300 transition hover:text-primary"
                   >
                     Multiplier
                   </span>
@@ -471,7 +471,7 @@ async function onConfirm() {
             </div>
           </div>
 
-          <p class="text-sm mt-4 mb-8 text-primary">
+          <p class="mb-8 mt-4 text-sm text-primary">
             Friendly reminder: In the continuously rising market conditions, we
             strongly recommend choosing higher leverage to ensure the
             effectiveness of liquidity. Of course, once liquidity is utilized,
@@ -480,9 +480,9 @@ async function onConfirm() {
         </div>
       </transition>
 
-      <div class="flex justify-center grow items-end">
+      <div class="flex grow items-end justify-center">
         <button
-          class="mx-auto bg-primary w-full py-3 text-orange-950 rounded-md disabled:cursor-not-allowed disabled:opacity-30"
+          class="mx-auto w-full rounded-md bg-primary py-3 text-orange-950 disabled:cursor-not-allowed disabled:opacity-30"
           @click.prevent="submitAdd"
           :disabled="!selected"
         >

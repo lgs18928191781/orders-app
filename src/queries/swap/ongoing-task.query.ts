@@ -11,13 +11,13 @@ const credentialsStore = useCredentialsStore()
 export const getOngoingTask = async ({
   address,
   network,
-  taskId,
+  buildId,
 }: {
   address: string
   network: Network
-  taskId: string
+  buildId: string
 }): Promise<{
-  id: string
+  buildId: string
   type: TaskType
   status: 'failed' | 'completed' | 'built'
   address: string
@@ -38,7 +38,7 @@ export const getOngoingTask = async ({
   const params = new URLSearchParams({
     net: network,
     address,
-    task_id: taskId,
+    build_id: buildId,
   })
   const res = await swapApiFetch(`ongoing-task?${params}`, { auth: true }).then(
     (res) => {
@@ -59,7 +59,7 @@ export const getOngoingTaskQuery = (
   filters: {
     address: string
     network: Network
-    taskId: Ref<string>
+    buildId: Ref<string>
   },
   enabled: ComputedRef<boolean> = computed(() => true),
   refetchInterval: any,
@@ -70,7 +70,7 @@ export const getOngoingTaskQuery = (
       getOngoingTask({
         address: filters.address,
         network: filters.network,
-        taskId: filters.taskId.value,
+        buildId: filters.buildId.value,
       }),
 
     enabled: computed(() => credentialsStore.ready && enabled.value),

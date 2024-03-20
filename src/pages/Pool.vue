@@ -19,7 +19,7 @@ provide(selectedPoolPairKey, selectedPair)
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto h-full mt-[10vh] grid grid-cols-5 gap-8 w-96">
+  <div class="mx-auto mt-[10vh] grid h-full w-96 max-w-7xl grid-cols-5 gap-8">
     <PoolPairSelectorPanel class="col-span-2" />
     <PoolOperationPanel class="col-span-3" />
   </div>

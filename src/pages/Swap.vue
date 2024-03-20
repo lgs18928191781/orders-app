@@ -10,7 +10,7 @@ import { useNetworkStore } from '@/stores/network'
 import { useBtcJsStore } from '@/stores/btcjs'
 
 import { useConnectionModal } from '@/hooks/use-connection-modal'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useOngoingTask } from '@/hooks/use-ongoing-task'
 
@@ -24,9 +24,15 @@ import {
 } from '@/queries/swap'
 import { exclusiveChange } from '@/lib/build-helpers'
 import { ERRORS } from '@/data/errors'
-import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import {
+  IS_DEV,
+  SIGHASH_ALL,
+  SIGHASH_ALL_ANYONECANPAY,
+  USE_UTXO_COUNT_LIMIT,
+} from '@/data/constants'
 import { sleep } from '@/lib/helpers'
 import { type InscriptionUtxo } from '@/queries/swap/types'
+import { useFeebStore } from '@/stores/feeb'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
@@ -35,7 +41,7 @@ const btcjsStore = useBtcJsStore()
 const networkStore = useNetworkStore()
 
 // symbol & amount
-const { token1Symbol, token2Symbol } = useSwapPoolPair()
+const { token1, token2 } = useSwapPool()
 const token1Amount = ref<string>()
 const token2Amount = ref<string>()
 const token2InscriptionUtxos = ref<InscriptionUtxo[]>([])
@@ -43,6 +49,7 @@ const token2InscriptionUtxos = ref<InscriptionUtxo[]>([])
 const ratio = ref<Decimal>(new Decimal(0))
 const poolRatio = ref<Decimal>(new Decimal(0))
 const priceImpact = ref<Decimal>(new Decimal(0))
+const serviceFee = ref<Decimal>(new Decimal(0))
 const hasImpactWarning = computed(() => {
   // greater than 15%
   return priceImpact.value.gte(15)
@@ -86,8 +93,8 @@ watch(swapType, async (newSwapType) => {
   }
 
   previewSwap({
-    token1: token1Symbol.value.toLowerCase(),
-    token2: token2Symbol.value.toLowerCase(),
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
     swapType: newSwapType,
     sourceAmount: sourceAmount.value,
   })
@@ -159,8 +166,8 @@ watch(
     }
 
     previewSwap({
-      token1: token1Symbol.value.toLowerCase(),
-      token2: token2Symbol.value.toLowerCase(),
+      token1: token1.value.toLowerCase(),
+      token2: token2.value.toLowerCase(),
       swapType: swapType.value,
       sourceAmount: sourceAmount.value,
     })
@@ -175,6 +182,7 @@ watch(
         ratio.value = new Decimal(preview.ratio)
         poolRatio.value = new Decimal(preview.poolRatio)
         priceImpact.value = new Decimal(preview.priceImpact)
+        serviceFee.value = new Decimal(preview.serviceFee)
 
         if (swapType.value.includes('1')) {
           token2Amount.value = preview.targetAmount
@@ -285,6 +293,12 @@ const conditions: Ref<
     priority: 6,
     met: false,
   },
+  {
+    condition: 'return-is-positive',
+    message: 'Negative return',
+    priority: 7,
+    met: true,
+  },
 ])
 const hasUnmet = computed(() => {
   return conditions.value.some((c) => !c.met)
@@ -326,7 +340,7 @@ watch(
 )
 
 watch(
-  () => [token1Symbol.value, token2Symbol.value],
+  () => [token1.value, token2.value],
   ([from, to]) => {
     if (from && to) {
       conditions.value = conditions.value.map((c) => {
@@ -418,13 +432,37 @@ watch(
   { immediate: true },
 )
 
+// 6th watcher: positiveReturn
+const returnIsPositive = ref(true)
+watch(
+  () => returnIsPositive.value,
+  (returnIsPositive) => {
+    if (returnIsPositive) {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'return-is-positive') {
+          c.met = true
+        }
+        return c
+      })
+    } else {
+      conditions.value = conditions.value.map((c) => {
+        if (c.condition === 'return-is-positive') {
+          c.met = false
+        }
+        return c
+      })
+    }
+  },
+  { immediate: true },
+)
+
 // mutations
 const { pushOngoing } = useOngoingTask()
 const queryClient = useQueryClient()
 const { mutate: mutatePostSwap } = useMutation({
   mutationFn: postTask,
-  onSuccess: async ({ id: taskId }) => {
-    pushOngoing(taskId)
+  onSuccess: async ({ buildId }) => {
+    pushOngoing(buildId)
   },
   onError: (err: any) => {
     ElMessage.error(err.message)
@@ -446,10 +484,12 @@ const afterBuildSwap = async ({
   rawPsbt,
   buildId,
   type,
+  feeRate,
 }: {
   rawPsbt: string
   buildId: string
   type: SwapType
+  feeRate: number
 }) => {
   const btcjs = btcjsStore.get!
   switch (type) {
@@ -462,6 +502,7 @@ const afterBuildSwap = async ({
         psbt: psbt1x,
         maxUtxosCount: USE_UTXO_COUNT_LIMIT,
         sighashType: SIGHASH_ALL,
+        feeb: feeRate,
       })
       if (!psbt1xFinished) throw new Error('Failed to add change')
 
@@ -489,6 +530,7 @@ const afterBuildSwap = async ({
         psbt: psbtX2,
         maxUtxosCount: USE_UTXO_COUNT_LIMIT,
         sighashType: SIGHASH_ALL,
+        feeb: feeRate,
       })
       if (!psbtX2Finished) throw new Error('Failed to add change')
 
@@ -508,9 +550,24 @@ const afterBuildSwap = async ({
       break
 
     case '2x':
-      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt, {
+      const token2Count = token2InscriptionUtxos.value.length
+      const address = connectionStore.getAddress
+      const toSignInputs = []
+      for (let i = 0; i < token2Count; i++) {
+        toSignInputs.push({
+          index: i,
+          sighashTypes: [SIGHASH_ALL_ANYONECANPAY],
+          address,
+        })
+      }
+      let options: any = {
         autoFinalized: false,
-      })
+      }
+      const isOkWallet = connectionStore.last.wallet === 'okx'
+      if (isOkWallet) {
+        options['toSignInputs'] = toSignInputs
+      }
+      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt, options)
       if (!signed2x) return
       if (!sourceAmount.value) return
 
@@ -547,12 +604,20 @@ async function doSwap() {
     return
   }
 
+  // lock in fee rate we're using
+  const feeRate = useFeebStore().get
+  if (!feeRate) {
+    ElMessage.error(ERRORS.HAVE_NOT_CHOOSE_GAS_RATE)
+    return
+  }
+
   // go for it!
   mutateBuildSwap({
-    token1: token1Symbol.value.toLowerCase(),
-    token2: token2Symbol.value.toLowerCase(),
+    token1: token1.value.toLowerCase(),
+    token2: token2.value.toLowerCase(),
     sourceAmount: sourceAmount.value,
     inscriptionUtxos: token2InscriptionUtxos.value,
+    feeRate,
   })
 }
 </script>
@@ -560,33 +625,16 @@ async function doSwap() {
 <template>
   <SwapLayout>
     <div
-      class="swap-main-border h-full space-y-3 rounded-3xl bg-zinc-900 p-2 !pt-3"
+      class="swap-main-border h-full space-y-3 rounded-xl bg-zinc-900 p-2 lg:rounded-3xl lg:!pt-3"
     >
-      <!-- header -->
-      <div class="flex gap-4 px-3">
-        <router-link
-          to="/swap"
-          class="flex items-center space-x-1 text-zinc-200"
-        >
-          Swap
-        </router-link>
-
-        <router-link
-          to="/swap-pools"
-          class="flex items-center space-x-1 text-zinc-400 hover:text-zinc-600"
-        >
-          Pools
-        </router-link>
-
-        <SwapPairSelect class="ml-auto" />
-      </div>
+      <SwapMainPanelHeader />
 
       <!-- body -->
       <div class="text-sm">
         <SwapSideBrc
           side="pay"
           v-if="flipped"
-          v-model:symbol="token2Symbol"
+          v-model:symbol="token2"
           v-model:amount="token2Amount"
           v-model:inscription-utxos="token2InscriptionUtxos"
           @has-enough="hasEnough = true"
@@ -598,7 +646,7 @@ async function doSwap() {
         <SwapSideWithInput
           side="pay"
           v-else
-          v-model:symbol="token1Symbol"
+          v-model:symbol="token1"
           v-model:amount="token1Amount"
           :calculating="calculatingPay"
           @has-enough="hasEnough = true"
@@ -613,14 +661,14 @@ async function doSwap() {
         <!-- flip -->
         <div class="relative z-30 my-0.5 flex h-0 justify-center">
           <div
-            class="group absolute -translate-y-1/2 rounded-xl bg-zinc-900 p-1 transition-all duration-150 hover:scale-110"
+            class="group absolute -translate-y-1/2 rounded-xl bg-zinc-900 p-1 transition-all duration-500 hover:scale-110 lg:duration-150"
           >
             <ArrowDownIcon
               class="box-content inline h-4 w-4 rounded-lg bg-zinc-800 p-2 group-hover:hidden"
             />
 
             <button
-              class="box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm shadow-primary/80 transition-all duration-200 group-hover:inline"
+              class="box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm shadow-primary/80 transition-all duration-500 group-hover:inline lg:duration-200"
               :class="{
                 'rotate-180': flippedControl,
               }"
@@ -635,7 +683,7 @@ async function doSwap() {
           side="receive"
           use-case="swap"
           v-if="flipped"
-          v-model:symbol="token1Symbol"
+          v-model:symbol="token1"
           v-model:amount="token1Amount"
           @more-than-threshold="moreThanThreshold = true"
           @less-than-threshold="moreThanThreshold = false"
@@ -645,7 +693,7 @@ async function doSwap() {
         <SwapSideWithInput
           side="receive"
           v-else
-          v-model:symbol="token2Symbol"
+          v-model:symbol="token2"
           v-model:amount="token2Amount"
           @more-than-threshold="moreThanThreshold = true"
           @less-than-threshold="moreThanThreshold = false"
@@ -654,17 +702,25 @@ async function doSwap() {
         />
 
         <SwapPriceDisclosure
-          :token1-symbol="token1Symbol"
-          :token2-symbol="token2Symbol"
+          :token1-symbol="token1"
+          :token2-symbol="token2"
           v-show="!!Number(sourceAmount)"
           :price-impact="priceImpact"
           :has-impact-warning="hasImpactWarning"
           :ratio="ratio"
           :pool-ratio="poolRatio"
           :calculating="calculating"
+          :service-fee="serviceFee"
         />
 
-        <SwapGasStats v-show="!!Number(sourceAmount)" :task-type="'swap'" />
+        <SwapFrictionStats
+          v-show="!!Number(sourceAmount)"
+          :task-type="swapType"
+          :token-1-amount="token1Amount"
+          :service-fee="serviceFee"
+          @return-became-negative="returnIsPositive = false"
+          @return-became-positive="returnIsPositive = true"
+        />
       </div>
 
       <!-- disabled buttons: calculating or have unmets  -->

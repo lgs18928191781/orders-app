@@ -1,49 +1,74 @@
 <script setup lang="ts">
-import { ChevronDownIcon, CheckIcon } from 'lucide-vue-next'
+import { ChevronDownIcon, CheckIcon, PackagePlus } from 'lucide-vue-next'
 import {
   Listbox,
   ListboxButton,
   ListboxOption,
   ListboxOptions,
 } from '@headlessui/vue'
+import { useQuery } from '@tanstack/vue-query'
 
-import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
-import { prettySymbol } from '@/lib/formatters'
+import { useModalTokenSelect } from '@/hooks/use-modal-token-select'
+
 import { useNetworkStore } from '@/stores/network'
 
-const network = useNetworkStore().network
-const usingSwapPairs = network === 'testnet' ? testnetSwapPairs : swapPairs
+import { prettySymbol } from '@/lib/formatters'
+import { getPoolsQuery } from '@/queries/swap/pools.query'
+import { useSwapPool } from '@/hooks/use-swap-pool'
+import { computed } from 'vue'
+import { livenetSwapTokens, testnetSwapTokens } from '@/data/pinned-tokens'
 
-const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
+const network = useNetworkStore().network
+
+const { data: poolPairs } = useQuery(getPoolsQuery({ network }))
+
+const { pairStr, selectPair, token1, token2, token1Icon, token2Icon } =
+  useSwapPool()
+const { openModal } = useModalTokenSelect()
+
+const networkStore = useNetworkStore()
+
+const pinnedTokens = computed(() => {
+  if (networkStore.isTestnet) return testnetSwapTokens
+
+  return livenetSwapTokens
+})
 </script>
 
 <template>
   <Listbox
     as="div"
     class="relative inline-block text-left"
-    v-model="selectedPairId"
+    :default-value="pairStr"
     @update:model-value="selectPair"
   >
+    <ModalTokenSelect
+      :pinned-tokens="pinnedTokens"
+      @select-token="(token: string) => $router.push(`/swap/btc-${token}`)"
+    />
     <ListboxButton v-slot="{ open }" as="template">
       <button
         :class="[
           open ? 'bg-black' : 'bg-zinc-900',
-          'rounded-full  p-1 px-2 flex items-center gap-1 border border-zinc-700 hover:bg-black text-base hover:border-black',
+          'flex items-center gap-1 rounded-full border border-zinc-700 p-1 px-2 text-base hover:border-black hover:bg-black',
         ]"
       >
-        <div class="flex" v-if="selectedPair">
-          <img :src="selectedPair.token1Icon" class="h-6 rounded-full" />
-          <img :src="selectedPair.token2Icon" class="-ml-2 h-6 rounded-full" />
+        <div class="flex" v-if="pairStr">
+          <TokenIcon
+            :token="token1"
+            class="size-6 rounded-full"
+            v-if="token1"
+          />
+          <TokenIcon
+            :token="token2"
+            class="-ml-2 size-6 rounded-full"
+            v-if="token2"
+          />
         </div>
-        <div class="mr-1" v-if="selectedPair">
-          {{
-            prettySymbol(selectedPair.token1Symbol) +
-            '-' +
-            prettySymbol(selectedPair.token2Symbol)
-          }}
+        <div class="mr-1" v-if="pairStr">
+          {{ prettySymbol(token1) + '-' + prettySymbol(token2) }}
         </div>
-        <div v-else class="text-base pl-2 text-primary">Select token</div>
+        <div v-else class="pl-2 text-base text-primary">Select token</div>
         <ChevronDownIcon class="h-5 w-5" />
       </button>
     </ListboxButton>
@@ -57,41 +82,61 @@ const { selectPair, selectedPairId, selectedPair } = useSwapPoolPair()
       leave-to-class="transform opacity-0 scale-95"
     >
       <ListboxOptions
-        class="absolute right-0 z-50 mt-2 origin-top-right rounded-md bg-black shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto max-h-[40vh] nicer-scrollbar w-56 divide-y divide-zinc-900 shadow-primary/10"
+        class="nicer-scrollbar absolute right-0 z-50 mt-2 max-h-[40vh] w-56 origin-top-right divide-y divide-zinc-900 overflow-auto rounded-md bg-black shadow-lg shadow-primary/10 ring-1 ring-black ring-opacity-5 focus:outline-none"
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="pair in usingSwapPairs"
+          v-for="pair in poolPairs"
           :key="pair.id"
           :value="pair.id"
         >
           <button
             :class="[
-              'flex items-center p-4 text-sm w-max min-w-full gap-2 rounded',
+              'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm',
               active ? 'bg-primary/70' : 'bg-black',
             ]"
           >
             <div class="flex">
-              <img :src="pair.token1Icon" class="h-6 rounded-full" />
-              <img :src="pair.token2Icon" class="-ml-2 h-6 rounded-full" />
+              <TokenIcon
+                :token="token1"
+                class="size-6 rounded-full"
+                v-if="token1"
+              />
+              <TokenIcon
+                :token="token2"
+                class="-ml-2 size-6 rounded-full"
+                v-if="token2"
+              />
             </div>
 
             <div class="text-base font-bold">
-              {{
-                prettySymbol(pair.token1Symbol) +
-                '-' +
-                prettySymbol(pair.token2Symbol)
-              }}
+              {{ prettySymbol(pair.token1) + '-' + prettySymbol(pair.token2) }}
             </div>
 
             <CheckIcon
               v-if="selected"
-              class="h-5 w-5 text-primary ml-auto"
+              class="ml-auto h-5 w-5 text-primary"
               aria-hidden="true"
             />
           </button>
         </ListboxOption>
+
+        <!-- add pool button -->
+        <!-- <ListboxOption v-slot="{ active, selected }">
+          <button
+            :class="[
+              'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm',
+              active ? 'bg-primary/70' : 'bg-black',
+            ]"
+            @click="openModal"
+          >
+            <PackagePlus class="h-6 w-6 text-primary" />
+
+            <div class="text-base font-bold">Create Pool</div>
+          </button>
+        </ListboxOption> -->
       </ListboxOptions>
     </transition>
   </Listbox>
 </template>
+@/hooks/use-modal-token-select

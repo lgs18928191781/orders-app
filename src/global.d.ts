@@ -24,7 +24,7 @@ type TransferResponse = {
 }
 
 interface Window {
-  bitcoin: BitcoinJs
+  bitcoinjs: BitcoinJs
   ecpair: ECPairFactory
   unisat: any
   unisat: {
@@ -100,21 +100,15 @@ interface Window {
     }
   }
   metaidwallet: {
-    getAddress: () => Promise<string>
-    getPublicKey: () => Promise<string>
-    signMessage: (params: {
-      message: string
-      encoding?: string
-    }) => Promise<{ signature: { signature: string } }>
-    verifySignature: (params: any) => Promise<any>
     on: (
       eventName: string,
       handler: { mvcAddress: string; btcAddress: string } | any
-    ) => any
+    ) => void
     removeListener: (
       eventName: string,
       handler: { mvcAddress: string; btcAddress: string } | any
-    ) => any
+    ) => void
+    getNetwork: () => Promise<{ network: 'mainnet' | 'testnet' }>
     btc: {
       getAddress: () => Promise<string>
       getPublicKey: () => Promise<string>

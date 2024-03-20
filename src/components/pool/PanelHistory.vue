@@ -8,22 +8,22 @@ import { getMyReleasedRecords } from '@/queries/pool'
 import PanelReleaseHistoryItem from './PanelReleaseHistoryItem.vue'
 import { useConnectionStore } from '@/stores/connection'
 
-const connnectionStore = useConnectionStore()
+const connectionStore = useConnectionStore()
 
 const selectedPair = inject(selectedPoolPairKey, defaultPoolPair)
-const enabled = computed(() => connnectionStore.connected)
+const enabled = computed(() => connectionStore.connected)
 
 const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
   queryKey: [
     'poolReleaseHistory',
     {
-      address: connnectionStore.getAddress,
+      address: connectionStore.getAddress,
       tick: selectedPair.fromSymbol,
     },
   ],
   queryFn: () =>
     getMyReleasedRecords({
-      address: connnectionStore.getAddress,
+      address: connectionStore.getAddress,
       tick: selectedPair.fromSymbol,
     }),
   enabled,
@@ -31,22 +31,22 @@ const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
 </script>
 
 <template>
-  <div class="max-w-xl mx-auto flex flex-col">
+  <div class="mx-auto flex max-w-xl flex-col">
     <h3>
       <span class="text-zinc-500">Liquidity Usage History</span>
-      <span class="text-sm text-zinc-300 pl-4"
+      <span class="pl-4 text-sm text-zinc-300"
         >({{ releaseHistory ? releaseHistory.length : 0 }})</span
       >
     </h3>
     <div
-      class="rounded grow overflow-y-auto -mx-4 space-y-2 h-[40vh] nicer-scrollbar mt-4"
+      class="nicer-scrollbar -mx-4 mt-4 h-[40vh] grow space-y-2 overflow-y-auto rounded"
     >
-      <p v-if="isLoadingReleaseHistory" class="text-center pt-4 text-zinc-500">
+      <p v-if="isLoadingReleaseHistory" class="pt-4 text-center text-zinc-500">
         Loading...
       </p>
 
       <div
-        class="flex items-center justify-center h-full text-zinc-500"
+        class="flex h-full items-center justify-center text-zinc-500"
         v-else-if="!releaseHistory || releaseHistory.length === 0"
       >
         No release history.

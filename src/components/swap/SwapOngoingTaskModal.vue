@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import {
   ArrowRightIcon,
@@ -8,24 +8,25 @@ import {
   XIcon,
   PlusIcon,
   Loader2Icon,
+  TimerResetIcon,
 } from 'lucide-vue-next'
+import { computedEager } from '@vueuse/core'
+import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useOngoingTask } from '@/hooks/use-ongoing-task'
-import { getOngoingTaskQuery } from '@/queries/swap/ongoing-task.query'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 
+import { useOngoingTask } from '@/hooks/use-ongoing-task'
+
+import { getOngoingTaskQuery } from '@/queries/swap/ongoing-task.query'
 import { prettyCoinDisplay } from '@/lib/formatters'
 import { toTx } from '@/lib/helpers'
-import { ElMessage } from 'element-plus'
 
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const address = connectionStore.getAddress
 const network = networkStore.network
-const { hasOngoing, taskId, clearOngoing } = useOngoingTask()
-const { selectedPair } = useSwapPoolPair()
+const { hasOngoing, buildId, clearOngoing } = useOngoingTask()
 
 const taskStatus = ref('running')
 const { data: task } = useQuery(
@@ -33,11 +34,11 @@ const { data: task } = useQuery(
     {
       address,
       network,
-      taskId,
+      buildId,
     },
     hasOngoing,
-    () => (taskStatus.value === 'running' ? 1000 : false)
-  )
+    () => (taskStatus.value === 'running' ? 1000 : false),
+  ),
 )
 watch(
   task,
@@ -49,11 +50,11 @@ watch(
       taskStatus.value = newTask.status
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
-const extendedTask = computed(() => {
-  if (!task.value || !selectedPair.value) {
+const extendedTask = computedEager(() => {
+  if (!task.value) {
     return null
   }
 
@@ -67,8 +68,6 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value.token1Icon,
-        toIcon: selectedPair.value.token2Icon,
       }
     case '2x':
     case 'x1':
@@ -79,8 +78,6 @@ const extendedTask = computed(() => {
         toToken: task.value.token1,
         fromAmount: task.value.amount2,
         toAmount: task.value.amount1,
-        fromIcon: selectedPair.value.token2Icon,
-        toIcon: selectedPair.value.token1Icon,
       }
     case 'add':
       return {
@@ -90,9 +87,8 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value.token1Icon,
-        toIcon: selectedPair.value.token2Icon,
       }
+
     case 'remove':
       return {
         type: 'remove',
@@ -101,8 +97,6 @@ const extendedTask = computed(() => {
         toToken: task.value.token2,
         fromAmount: task.value.amount1,
         toAmount: task.value.amount2,
-        fromIcon: selectedPair.value.token1Icon,
-        toIcon: selectedPair.value.token2Icon,
       }
     default:
       return null
@@ -133,10 +127,12 @@ function copyFailedReason() {
 
 <template>
   <div
-    class="fixed inset-0 bg-black/40 backdrop-blur flex flex-col items-center justify-center gap-8 px-8 z-[100]"
+    class="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-black/40 px-8 backdrop-blur"
     v-show="hasOngoing"
   >
-    <div class="text-zinc-300 bg-zinc-800 rounded-xl min-w-96 px-8 py-6">
+    <div
+      class="min-w-96 max-w-md rounded-xl bg-zinc-800 px-8 py-6 text-zinc-300"
+    >
       <div class="flex items-center justify-between">
         <h3>Ongoing Task</h3>
         <button
@@ -149,20 +145,20 @@ function copyFailedReason() {
       </div>
 
       <!-- body -->
-      <div class="mt-8 flex justify-center flex-col items-center gap-8">
+      <div class="mt-8 flex flex-col items-center justify-center gap-8">
         <template v-if="taskStatus === 'running'">
           <Loader2Icon class="size-24 animate-spin text-zinc-500" />
-          <p class="capitalize text-lg">Running...</p>
+          <p class="text-lg capitalize">Running...</p>
         </template>
 
         <template v-else-if="taskStatus === 'completed'">
           <CheckIcon
-            class="size-24 text-zinc-800 bg-green-500 rounded-full p-2"
+            class="size-24 rounded-full bg-green-500 p-2 text-zinc-800"
             :stroke-width="3"
           />
 
           <div class="flex items-center justify-between self-stretch">
-            <p class="capitalize text-lg mr-auto">Success!</p>
+            <p class="mr-auto text-lg capitalize">Success!</p>
 
             <button
               @click="toExplorer"
@@ -176,52 +172,63 @@ function copyFailedReason() {
         <template v-else-if="taskStatus === 'failed'">
           <FrownIcon class="size-24 text-red-500" />
           <div class="self-stretch">
-            <p class="capitalize text-lg text-center">Failed</p>
+            <p class="text-center text-lg capitalize">Failed</p>
             <div
-              class="bg-zinc-900 rounded-lg p-2 mt-2 text-sm cursor-pointer group"
+              class="group mt-2 cursor-pointer rounded-lg bg-zinc-900 p-2 text-sm"
               v-if="task?.failedReason"
               @click="copyFailedReason"
             >
               <h5 class="text-zinc-500">Error Message:</h5>
               <p
-                class="mt-1 group-hover:bg-primary/10 group-hover:text-white rounded p-1 -m-1"
+                class="-m-1 mt-1 text-wrap break-all rounded p-1 group-hover:bg-primary/10 group-hover:text-white"
               >
                 {{ task.failedReason }}
               </p>
             </div>
           </div>
         </template>
+
+        <template v-else-if="taskStatus === 'timeout'">
+          <TimerResetIcon class="size-24 text-red-500" />
+          <div class="self-stretch">
+            <p class="text-center text-lg capitalize">Timeout</p>
+
+            <p class="mt-4 text-center text-zinc-500">
+              Your transaction has timed out. Please try again later.
+            </p>
+          </div>
+        </template>
       </div>
 
-      <div class="border border-zinc-700 rounded-3xl mt-4 p-2">
-        <div class="flex items-center justify-center my-2 gap-2">
+      <div class="mt-4 rounded-3xl border border-zinc-700 p-2">
+        <div class="my-2 flex items-center justify-center gap-2">
           <h5
-            class="font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 text-lg leading-none"
+            class="bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text text-lg font-bold leading-none text-transparent"
           >
             {{ extendedTask?.typeDisplay }}
           </h5>
         </div>
 
-        <div class="bg-black px-4 py-2 rounded-2xl" v-if="extendedTask">
+        <div class="rounded-2xl bg-black px-4 py-2" v-if="extendedTask">
           <div
             class="flex items-center gap-2 text-sm"
             v-if="extendedTask.type === 'swap'"
           >
-            <img
-              :src="extendedTask.fromIcon"
-              :alt="extendedTask.fromToken"
-              class="size-6"
+            <TokenIcon
+              :token="extendedTask.fromToken"
+              class="size-6 rounded-full"
+              v-if="extendedTask.fromToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
             }}</span>
 
-            <ArrowRightIcon class="size-4 mx-2" />
+            <ArrowRightIcon class="mx-2 size-4" />
 
-            <img
-              :src="extendedTask.toIcon"
-              :alt="extendedTask.toToken"
-              class="size-6"
+            <TokenIcon
+              :token="extendedTask.toToken"
+              class="size-6 rounded-full"
+              v-if="extendedTask.toToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -230,24 +237,24 @@ function copyFailedReason() {
 
           <div class="" v-else-if="extendedTask.type === 'add'">
             <div class="flex items-center gap-2 text-sm">
-              <img
-                :src="extendedTask.fromIcon"
-                :alt="extendedTask.fromToken"
-                class="size-6"
+              <TokenIcon
+                :token="extendedTask.fromToken"
+                class="size-6 rounded-full"
+                v-if="extendedTask.fromToken"
               />
               <span>{{
                 prettyCoinDisplay(
                   extendedTask.fromAmount,
-                  extendedTask.fromToken
+                  extendedTask.fromToken,
                 )
               }}</span>
 
-              <PlusIcon class="size-4 mx-2" />
+              <PlusIcon class="mx-2 size-4" />
 
-              <img
-                :src="extendedTask.toIcon"
-                :alt="extendedTask.toToken"
-                class="size-6"
+              <TokenIcon
+                :token="extendedTask.toToken"
+                class="size-6 rounded-full"
+                v-if="extendedTask.toToken"
               />
               <span>{{
                 prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -259,21 +266,21 @@ function copyFailedReason() {
             class="flex items-center gap-2 text-sm"
             v-else-if="extendedTask.type === 'remove'"
           >
-            <img
-              :src="extendedTask.fromIcon"
-              :alt="extendedTask.fromToken"
-              class="size-6"
+            <TokenIcon
+              :token="extendedTask.fromToken"
+              class="size-6 rounded-full"
+              v-if="extendedTask.fromToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.fromAmount, extendedTask.fromToken)
             }}</span>
 
-            <PlusIcon class="size-4 mx-2" />
+            <PlusIcon class="mx-2 size-4" />
 
-            <img
-              :src="extendedTask.toIcon"
-              :alt="extendedTask.toToken"
-              class="size-6"
+            <TokenIcon
+              :token="extendedTask.toToken"
+              class="size-6 rounded-full"
+              v-if="extendedTask.toToken"
             />
             <span>{{
               prettyCoinDisplay(extendedTask.toAmount, extendedTask.toToken)
@@ -281,7 +288,7 @@ function copyFailedReason() {
           </div>
         </div>
 
-        <div class="bg-black px-4 py-2 rounded-full text-center" v-else>
+        <div class="rounded-full bg-black px-4 py-2 text-center" v-else>
           ...
         </div>
       </div>

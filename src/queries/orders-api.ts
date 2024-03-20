@@ -367,7 +367,7 @@ export const getOrders = async ({
     net: network,
     orderType: String(orderType),
     orderState: '1',
-    sortKey: 'coinPrice',
+    sortKey: 'coinRatePrice',
     sortType: String(sortType),
     tick,
     address,
@@ -551,6 +551,12 @@ export const getOneBrc20 = async ({
         outValue,
       }
     })
+
+    // filter out unconfirmed (inscriptionNumber is -1)
+    const filtered = brc20.transferBalanceList.filter(
+      (brc) => brc.inscriptionNumber !== '-1',
+    )
+    brc20.transferBalanceList = filtered
 
     // copy 10 times
     // const copied = [...brc20.transferBalanceList]
@@ -838,7 +844,7 @@ export const getListingUtxos: () => Promise<
     timestamp: number
   }[]
 > = async () => {
-  const network = 'livenet'
+  const network = useNetworkStore().network
   const address = useConnectionStore().getAddress
 
   const utxos = await ordersApiFetch(

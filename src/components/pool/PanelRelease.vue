@@ -48,7 +48,7 @@ const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
 </script>
 
 <template>
-  <div class="max-w-xl mx-auto flex flex-col">
+  <div class="mx-auto flex max-w-xl flex-col">
     <TabGroup :default-index="0">
       <TabList class="flex items-center gap-8" v-slot="{ selectedIndex }">
         <Tab
@@ -75,14 +75,14 @@ const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
 
       <TabPanels class="mt-8">
         <TabPanel
-          class="rounded grow overflow-y-auto -mx-4 space-y-2 h-[40vh] nicer-scrollbar"
+          class="nicer-scrollbar -mx-4 h-[40vh] grow space-y-2 overflow-y-auto rounded"
         >
-          <p v-if="isLoadingPoolRecords" class="text-center pt-4 text-zinc-500">
+          <p v-if="isLoadingPoolRecords" class="pt-4 text-center text-zinc-500">
             Loading...
           </p>
 
           <div
-            class="flex items-center justify-center h-full text-zinc-500"
+            class="flex h-full items-center justify-center text-zinc-500"
             v-else-if="!poolRecords || poolRecords.length === 0"
           >
             No Records Currently.
@@ -96,17 +96,17 @@ const { data: releaseHistory, isLoading: isLoadingReleaseHistory } = useQuery({
         </TabPanel>
 
         <TabPanel
-          class="rounded grow overflow-y-auto -mx-4 space-y-2 h-[40vh] nicer-scrollbar"
+          class="nicer-scrollbar -mx-4 h-[40vh] grow space-y-2 overflow-y-auto rounded"
         >
           <p
             v-if="isLoadingReleaseHistory"
-            class="text-center pt-4 text-zinc-500"
+            class="pt-4 text-center text-zinc-500"
           >
             Loading...
           </p>
 
           <div
-            class="flex items-center justify-center h-full text-zinc-500"
+            class="flex h-full items-center justify-center text-zinc-500"
             v-else-if="!releaseHistory || releaseHistory.length === 0"
           >
             No release history.

@@ -2,7 +2,6 @@ import changelog from './changelog'
 
 // Environments
 export const VERSION = changelog[0].version
-export const CHARGE_SERVICE_FEES = false
 export const DEBUG = false
 export const IS_DEV = import.meta.env.VITE_ENVIRONMENT === 'development'
 export const SHOWING_TRADE_STATS = false
@@ -30,7 +29,10 @@ export const SELL_TX_SIZE = 673
 export const BID_TX_SIZE = 111 + 154 // pay + grant
 export const SEND_TX_SIZE = 140
 export const SWAP_TX_SIZE = 298
+export const SWAP_2X_TX_SIZE = 212 + 240 // 3 inputs
 export const SWAP_POOL_ADD_TX_SIZE = 255
+export const INSCRIBE_TX_SIZE_FACTOR = 380
+export const TX_BASE_SIZE = 300
 
 // Sighash types
 export const SIGHASH_DEFAULT = 0x00
@@ -74,7 +76,8 @@ export enum AssetNetwork {
 }
 export const SIGNING_MESSAGE = 'orders.exchange'
 
-export const SWAP_THRESHOLD_AMOUNT = 10_000
+export const SWAP_THRESHOLD_AMOUNT = 20_000
+export const REMOVE_THRESHOLD_AMOUNT = 50_000
 export const ADD_THRESHOLD_AMOUNT = 100_000
 export const BRIDGE_CONST_FEE = 0.0005
 export const BTC_CONST_FEE = 0.000001

@@ -68,7 +68,7 @@ const hasReleasable = computed(() => {
 </script>
 
 <template>
-  <div class="border-2 border-primary/30 rounded-xl p-8">
+  <div class="rounded-xl border-2 border-primary/30 p-8">
     <TabGroup
       v-if="loggedIn"
       :default-index="selectedTab"
@@ -81,7 +81,7 @@ const hasReleasable = computed(() => {
       >
         <Tab
           :class="[
-            'px-4 py-1 outline-none border-b-2 font-bold',
+            'border-b-2 px-4 py-1 font-bold outline-none',
             selectedIndex === index
               ? 'border-primary text-zinc-100'
               : 'border-transparent text-zinc-500',
@@ -91,7 +91,7 @@ const hasReleasable = computed(() => {
           <span>{{ label }}</span>
           <span
             v-if="label === 'Release' && hasReleasable"
-            class="inline-flex items-center rounded-md bg-primary/30 px-1.5 py-0.5 text-xs font-medium text-primary -translate-y-2 -translate-x-1 absolute"
+            class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-primary/30 px-1.5 py-0.5 text-xs font-medium text-primary"
           >
             {{ rewardsEssential?.hasReleasePoolOrderCount }}
           </span>
@@ -128,13 +128,13 @@ const hasReleasable = computed(() => {
       </TabPanels>
     </TabGroup>
 
-    <div class="flex flex-col items-center justify-center h-full gap-8" v-else>
+    <div class="flex h-full flex-col items-center justify-center gap-8" v-else>
       <p class="text-zinc-300">
         Please connect your wallet first to use the pool.
       </p>
 
       <button
-        class="py-2 rounded-lg border-2 border-primary px-4 transition hover:border-primary hover:bg-primary"
+        class="rounded-lg border-2 border-primary px-4 py-2 transition hover:border-primary hover:bg-primary"
         @click="connectWallet"
       >
         Connect Wallet

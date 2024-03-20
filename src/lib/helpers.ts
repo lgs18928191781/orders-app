@@ -1,5 +1,8 @@
 import { computedEager, useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
+import terminal from 'virtual:terminal'
+
+import { IS_DEV } from '@/data/constants'
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -33,7 +36,7 @@ export const generateRandomString = (length: number = 32) => {
 
   for (let i = 0; i < length; i++) {
     randomString += characters.charAt(
-      Math.floor(Math.random() * characters.length)
+      Math.floor(Math.random() * characters.length),
     )
   }
 
@@ -65,7 +68,7 @@ export type BidTxSpec = {
 
 export const toTx = (
   txid: string,
-  network: 'livenet' | 'testnet' = 'livenet'
+  network: 'livenet' | 'testnet' = 'livenet',
 ) => {
   if (network === 'livenet') {
     window.open(`https://mempool.space/tx/${txid}`, '_blank')
@@ -93,4 +96,36 @@ export const calcFiatPrice = (price: number | string, rate: number) => {
 
 export const isRestrictedRegion = (geo: string) => {
   return geo === 'CN'
+}
+
+export const getOkxLink = () => {
+  const dappUrl = IS_DEV
+    ? 'https://app.orders.exchange/'
+    : 'https://' + window.location.host + '/'
+  const encodedDappUrl = encodeURIComponent(dappUrl)
+  const deepLink = 'okx://wallet/dapp/url?dappUrl=' + encodedDappUrl
+  const encodedUrl =
+    'https://www.okx.com/download?deeplink=' + encodeURIComponent(deepLink)
+
+  return encodedUrl
+}
+
+export const isMobile = () => {
+  const ua = navigator.userAgent
+  const isIOS = /iphone|ipad|ipod|ios/i.test(ua)
+  const isAndroid = /android|XiaoMi|MiuiBrowser/i.test(ua)
+  return isIOS || isAndroid
+}
+
+export const isOKApp = () => {
+  const ua = navigator.userAgent
+  return /OKApp/i.test(ua)
+}
+
+export const log = (msg: any) => {
+  if (isMobile()) {
+    return terminal.log(msg)
+  }
+
+  return console.log(msg)
 }

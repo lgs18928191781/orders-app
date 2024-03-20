@@ -7,7 +7,6 @@ import gsap from 'gsap'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
 import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
@@ -18,7 +17,6 @@ import { ADD_THRESHOLD_AMOUNT, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const { selectedPair } = useSwapPoolPair()
 
 const props = defineProps({
   side: {
@@ -38,17 +36,6 @@ const props = defineProps({
 })
 
 const symbol = defineModel('symbol', { required: true, type: String })
-const icon = computed(() => {
-  if (!selectedPair.value) {
-    return null
-  }
-
-  if (symbol.value === selectedPair.value.token1Symbol) {
-    return selectedPair.value.token1Icon
-  }
-
-  return selectedPair.value.token2Icon
-})
 
 // amount
 const amount = defineModel('amount', { type: String })
@@ -138,7 +125,7 @@ const fiatPrice = computed(() => {
 // balance
 const { data: btcBalance } = useExcludedBalanceQuery(
   computed(() => connectionStore.getAddress),
-  computed(() => !!connectionStore.connected)
+  computed(() => !!connectionStore.connected),
 )
 const { data: myBrc20s } = useQuery({
   queryKey: [
@@ -159,7 +146,7 @@ const balance = computed(() => {
   if (symbol.value !== 'btc') {
     // find symbol's balance
     const brc20 = myBrc20s.value?.find(
-      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase()
+      (brc20) => brc20.token.toLowerCase() === symbol.value.toLowerCase(),
     )
 
     if (!brc20) {
@@ -207,11 +194,11 @@ watch(
     } else {
       emit('notEnough')
     }
-  }
+  },
 )
 
 const threshold = computed(() =>
-  props.useCase === 'add' ? ADD_THRESHOLD_AMOUNT : SWAP_THRESHOLD_AMOUNT
+  props.useCase === 'add' ? ADD_THRESHOLD_AMOUNT : SWAP_THRESHOLD_AMOUNT,
 )
 const thresholdInBtc = computed(() => new Decimal(threshold.value).div(1e8))
 const amountMoreThanThreshold = computed(() => {
@@ -229,26 +216,27 @@ watch(
     } else {
       emit('lessThanThreshold')
     }
-  }
+  },
 )
 </script>
 
 <template>
   <div class="swap-sub-control-panel">
-    <div class="text-zinc-400" v-if="!!side">You {{ side }}</div>
+    <div class="text-zinc-400" v-if="side === 'pay'">You pay</div>
+    <div class="text-zinc-400" v-if="side === 'receive'">Should receive</div>
 
     <!-- main control -->
-    <div class="flex items-center space-x-2 justify-between h-16">
+    <div class="flex h-16 items-center justify-between space-x-2">
       <div
-        class="bg-transparent flex-1 w-12 p-0 leading-loose"
+        class="w-12 flex-1 bg-transparent p-0 leading-loose"
         :class="[
           hasEnough
             ? calculating
               ? 'text-zinc-500'
               : 'text-zinc-100 caret-primary'
             : calculating
-            ? 'text-red-900/50 caret-red-900/50'
-            : 'text-red-500 caret-red-500',
+              ? 'text-red-900/50 caret-red-900/50'
+              : 'text-red-500 caret-red-500',
           // if too long, make it smaller
           amountTextSize,
         ]"
@@ -260,10 +248,10 @@ watch(
 
       <div
         :class="[
-          'rounded-full p-1 px-4 text-base flex items-center gap-1 bg-zinc-900',
+          'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-base',
         ]"
       >
-        <img :src="icon" class="size-5 rounded-full" v-if="icon" />
+        <TokenIcon :token="'btc'" class="size-5 rounded-full" />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>
@@ -272,7 +260,7 @@ watch(
 
     <!-- warning -->
     <div
-      class="text-red-500 text-sm -mt-2 mb-2 flex items-center gap-2"
+      class="-mt-2 mb-2 flex items-center gap-2 text-sm text-red-500"
       v-if="hasEnough && !calculating && !amountMoreThanThreshold"
     >
       <AlertCircleIcon class="size-4" />

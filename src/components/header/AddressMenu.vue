@@ -9,6 +9,8 @@ import {
   Trash2Icon,
   UnplugIcon,
   FuelIcon,
+  ChevronsUpDownIcon,
+  ChevronsDownUpIcon,
 } from 'lucide-vue-next'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
@@ -101,8 +103,8 @@ async function onGetGasFromFaucet() {
 </script>
 
 <template>
-  <Menu as="div" class="relative inline-block">
-    <MenuButton class="group flex items-center gap-2 pr-3">
+  <Menu as="div" class="relative inline-block" v-slot="{ open }">
+    <MenuButton class="group flex w-full items-center gap-2 lg:pr-3">
       <img class="h-5" :src="walletIcon" alt="wallet icon" v-if="walletIcon" />
       <span class="text-sm text-primary">
         {{ address ? prettyAddress(address, 4) : '-' }}
@@ -114,8 +116,13 @@ async function onGetGasFromFaucet() {
         (Testnet)
       </span>
 
+      <ChevronsDownUpIcon
+        class="ml-auto h-5 text-zinc-300 lg:hidden"
+        v-if="open"
+      />
+      <ChevronsUpDownIcon class="ml-auto h-5 text-zinc-300 lg:hidden" v-else />
       <MenuIcon
-        class="h-5 text-zinc-300 group-hover:scale-125 group-hover:text-primary"
+        class="hidden h-5 text-zinc-300 group-hover:scale-125 group-hover:text-primary lg:inline"
       />
     </MenuButton>
 
@@ -128,10 +135,10 @@ async function onGetGasFromFaucet() {
       leave-to-class="transform opacity-0 scale-95"
     >
       <MenuItems
-        class="absolute right-0 z-50 mt-4 flex w-screen max-w-min origin-top-right"
+        class="absolute right-0 z-50 mt-10 flex w-full origin-top-right lg:mt-4 lg:w-auto"
       >
         <div
-          class="w-56 shrink divide-y divide-zinc-700 overflow-hidden rounded-xl bg-zinc-800 text-sm font-semibold leading-6 text-zinc-300 shadow-lg shadow-primary/20 ring-1 ring-zinc-900/5"
+          class="w-full shrink divide-y divide-zinc-700 overflow-hidden rounded-xl bg-zinc-950 text-sm font-semibold leading-6 text-zinc-300 shadow-lg shadow-primary/20 ring-1 ring-zinc-900/5 lg:w-56 lg:bg-zinc-800"
         >
           <MenuItem v-slot="{ active }">
             <button

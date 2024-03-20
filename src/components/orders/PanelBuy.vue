@@ -24,19 +24,19 @@ watch(
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 
 <template>
-  <TabPanel class="h-full flex flex-col">
+  <TabPanel class="flex h-full flex-col">
     <TabGroup as="template" :selected-index="modeTab" @change="changeModeTab">
-      <TabList class="text-base flex gap-2 -ml-2 pb-2">
+      <TabList class="-ml-2 flex gap-2 pb-2 text-base">
         <Tab as="template" v-slot="{ selected }">
           <button
             :class="[
               selected ? 'text-primary underline' : 'text-zinc-300',
-              'font-bold py-1 px-2 outline-none',
+              'px-2 py-1 font-bold outline-none',
             ]"
           >
             Limit
@@ -46,7 +46,7 @@ watch(
           <button
             :class="[
               selected ? 'text-primary underline' : 'text-zinc-300',
-              'font-bold py-1 px-2 outline-none',
+              'px-2 py-1 font-bold outline-none',
             ]"
           >
             Market
@@ -55,8 +55,8 @@ watch(
       </TabList>
 
       <TabPanels as="template">
-        <PanelLimitBuy class="flex flex-col justify-between grow" />
-        <PanelMarketBuy class="flex flex-col justify-between grow" />
+        <PanelLimitBuy class="flex grow flex-col justify-between" />
+        <PanelMarketBuy class="flex grow flex-col justify-between" />
       </TabPanels>
     </TabGroup>
   </TabPanel>

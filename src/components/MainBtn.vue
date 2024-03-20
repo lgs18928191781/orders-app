@@ -9,13 +9,13 @@ const props = defineProps({
 
 <template>
   <button
-    class="relative inline-flex overflow-hidden rounded-2xl group w-full cursor-pointer z-30"
+    class="group relative z-30 inline-flex w-full cursor-pointer overflow-hidden rounded-2xl"
   >
     <span
-      class="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] group-enabled:bg-[conic-gradient(from_90deg_at_50%_50%,#FFA02A_0%,#dff7cc_30%,#FFA02A_100%)] group-disabled:bg-zinc-800!"
+      class="group-disabled:bg-zinc-800! absolute inset-[-1000%] animate-[spin_2s_linear_infinite] group-enabled:bg-[conic-gradient(from_90deg_at_50%_50%,#FFA02A_0%,#dff7cc_30%,#FFA02A_100%)]"
     ></span>
     <span
-      class="inline-flex h-full w-full cursor-pointer items-center justify-center bg-black px-3 py-4 font-medium backdrop-blur-3xl text-xl rounded-2xl group-disabled:text-zinc-300/50 group-disabled:bg-zinc-800 group-disabled:cursor-not-allowed m-px bg-opacity-90 group-hover:bg-opacity-70 transition-all duration-200"
+      class="m-0.5 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-2xl bg-black bg-opacity-80 px-3 py-4 text-xl font-medium backdrop-blur-3xl transition-all duration-200 group-hover:bg-opacity-70 group-disabled:cursor-not-allowed group-disabled:bg-zinc-800 group-disabled:text-zinc-300/50 lg:m-px lg:bg-opacity-90"
       :class="[
         dangerous ? 'text-red-500' : 'text-primary group-hover:text-orange-100',
       ]"

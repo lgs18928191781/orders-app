@@ -2,29 +2,19 @@
 import Decimal from 'decimal.js'
 import { computed } from 'vue'
 
-import { useSwapPoolPair } from '@/hooks/use-swap-pool-pair'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 import { prettySymbol } from '@/lib/formatters'
+import { Loader2Icon } from 'lucide-vue-next'
 
-const { token1Symbol, token2Symbol, selectedPair } = useSwapPoolPair()
-const token1Icon = computed(() => selectedPair.value?.token1Icon)
-const token2Icon = computed(() => selectedPair.value?.token2Icon)
+const { token1, token2, token1Icon, token2Icon } = useSwapPool()
 
-const props = defineProps(['poolStatus', 'poolShare'])
+const props = defineProps(['poolStatus'])
 
-const token1AddressAmount = computed(() => {
-  if (!props.poolStatus) return new Decimal(0)
-
-  return new Decimal(props.poolStatus.addressEquity)
-    .mul(props.poolStatus.token1Pool)
-    .div(props.poolStatus.poolEquity)
-})
-const token2AddressAmount = computed(() => {
-  if (!props.poolStatus) return new Decimal(0)
-
-  return new Decimal(props.poolStatus.addressEquity)
-    .mul(props.poolStatus.token2Pool)
-    .div(props.poolStatus.poolEquity)
-})
+const hasPending = computed(
+  () =>
+    props.poolStatus.poolSharePending !== '0' &&
+    props.poolStatus.poolSharePending !== '0%',
+)
 </script>
 
 <template>
@@ -35,39 +25,60 @@ const token2AddressAmount = computed(() => {
       <img :src="token1Icon" class="size-6 rounded-full" v-if="token1Icon" />
       <img
         :src="token2Icon"
-        class="size-6 rounded-full -ml-2"
+        class="-ml-2 size-6 rounded-full"
         v-if="token2Icon"
       />
       <div class="ml-2">
-        {{ prettySymbol(token1Symbol) }}/{{ prettySymbol(token2Symbol) }}
+        {{ prettySymbol(token1) }}/{{ prettySymbol(token2) }}
       </div>
 
       <div class="ml-auto">
-        {{ new Decimal(poolStatus.addressEquity).toDP() }}
+        {{ new Decimal(poolStatus.addressEquityAvailable).toDP() }}
       </div>
     </div>
 
-    <div class="flex items-center text-sm">
+    <div class="flex items-start text-sm">
       <div class="ml-2">Your pool share:</div>
 
-      <div class="ml-auto">
-        {{ poolShare }}
+      <div class="ml-auto flex flex-col items-end">
+        <div class="">
+          {{ poolStatus.poolShareAvailable }}
+        </div>
+
+        <div class="flex items-center gap-2 text-zinc-500" v-if="hasPending">
+          {{ '+ ' + poolStatus.poolSharePending }}
+          <Loader2Icon class="size-3 animate-spin" />
+        </div>
       </div>
     </div>
 
-    <div class="flex items-center text-sm">
-      <div class="ml-2">{{ prettySymbol(token1Symbol) }}:</div>
+    <div class="flex items-start text-sm">
+      <div class="ml-2">{{ prettySymbol(token1) }}:</div>
 
-      <div class="ml-auto">
-        {{ poolStatus?.token1AmountUsingBtcUnit || '-' }}
+      <div class="ml-auto flex flex-col items-end">
+        <div class="">
+          {{ poolStatus?.token1AmountUsingBtcUnitAvailable || '-' }}
+        </div>
+
+        <div class="flex items-center gap-2 text-zinc-500" v-if="hasPending">
+          {{ '+ ' + poolStatus.token1AmountUsingBtcUnitPending || '-' }}
+          <Loader2Icon class="size-3 animate-spin" />
+        </div>
       </div>
     </div>
 
-    <div class="flex items-center text-sm">
-      <div class="ml-2">{{ prettySymbol(token2Symbol) }}:</div>
+    <div class="flex items-start text-sm">
+      <div class="ml-2">{{ prettySymbol(token2) }}:</div>
 
-      <div class="ml-auto">
-        {{ poolStatus?.token2Amount || '-' }}
+      <div class="ml-auto flex flex-col items-end">
+        <div class="">
+          {{ poolStatus?.token2AmountAvailable || '-' }}
+        </div>
+
+        <div class="flex items-center gap-2 text-zinc-500" v-if="hasPending">
+          {{ '+ ' + poolStatus.token2AmountPending || '-' }}
+          <Loader2Icon class="size-3 animate-spin" />
+        </div>
       </div>
     </div>
   </div>

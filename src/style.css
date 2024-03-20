@@ -29,11 +29,11 @@
 }
 
 .quiet-input {
-  @apply !border-transparent !border-0;
+  @apply !border-0 !border-transparent;
 }
 
 .quiet-input:focus {
-  @apply !ring-0 !outline-0 !outline-transparent !ring-transparent !border-transparent;
+  @apply !border-transparent !outline-0 !outline-transparent !ring-0 !ring-transparent;
 }
 
 /* hide numeric input's ugly control */
@@ -53,15 +53,15 @@ input:focus {
 }
 
 .primary-panel {
-  @apply bg-zinc-900 rounded-md;
+  @apply rounded-md bg-zinc-900;
 }
 
 .swap-sub-control-panel {
-  @apply px-4 py-5 bg-zinc-800 rounded-2xl border border-transparent hover:border-zinc-700;
+  @apply rounded-2xl border border-transparent bg-zinc-800 px-4 py-5 hover:border-zinc-700;
 }
 
 .swap-sub-static-panel {
-  @apply bg-zinc-800 rounded-2xl border border-zinc-700 px-4 py-5;
+  @apply rounded-2xl border border-zinc-700 bg-zinc-800 px-4 py-5;
 }
 
 .cute-button {
@@ -69,7 +69,7 @@ input:focus {
 }
 
 .swap-main-btn {
-  @apply bg-primary/20 text-primary font-medium block w-full py-3 rounded-2xl text-xl hover:bg-primary/30;
+  @apply block w-full rounded-2xl bg-primary/20 py-3 text-xl font-medium text-primary hover:bg-primary/30;
 }
 
 .swap-main-btn.disabled {
