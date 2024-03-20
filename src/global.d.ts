@@ -109,12 +109,12 @@ interface Window {
     verifySignature: (params: any) => Promise<any>
     on: (
       eventName: string,
-      handler: ({ mvcAddress: string, btcAddress: string }) => void
-    ) => void
+      handler: { mvcAddress: string; btcAddress: string } | any
+    ) => any
     removeListener: (
       eventName: string,
-      handler: ({ mvcAddress: string, btcAddress: string }) => void
-    ) => void
+      handler: { mvcAddress: string; btcAddress: string } | any
+    ) => any
     btc: {
       getAddress: () => Promise<string>
       getPublicKey: () => Promise<string>

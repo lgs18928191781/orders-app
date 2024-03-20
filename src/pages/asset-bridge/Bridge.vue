@@ -575,8 +575,6 @@ async function getAssetInfo() {
           }),
         ])
           .then((res) => {
-            console.log('res1231231231231', res)
-            // debugger
             const fromBalance = res[0]
             fromAsset.val.balance = new Decimal(fromBalance)
               .div(10 ** decimals)
