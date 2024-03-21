@@ -39,30 +39,35 @@
         </button>
       </div> -->
       <button
-        class="group relative flex h-16 flex-col items-center justify-center gap-0.5 rounded-md border p-2 hover:border-primary/60"
+        class="group relative flex h-16 flex-col items-center justify-center gap-0.5 rounded-md border p-2 "
         :class="[
           isSelected(transferable)
             ? 'border-primary/60 bg-black text-primary'
             : 'border-zinc-700 bg-zinc-800 text-zinc-300',
+            +transferable.inscriptionNumber <= 0 ?'': 'hover:border-primary/60'
         ]"
         v-for="transferable in myOneBrc20?.transferBalanceList"
         :key="transferable.inscriptionId"
         @click="toggleSelect(transferable)"
       >
-        <div class="self-center text-sm">
+        <div class="self-center text-sm" :class="+transferable.inscriptionNumber <= 0 ? 'text-zinc-400' : ''">
           {{ transferable.amount }}
         </div>
         <div class="rounded-sm bg-zinc-700 px-1 text-xs text-zinc-400">
           {{ prettyInscriptionId(transferable.inscriptionId) }}
         </div>
+        <div v-if="+transferable.inscriptionNumber <= 0" class="rounded-sm bg-zinc-700 px-1 text-xs text-zinc-400
+        ">pending</div>
 
         <CheckCircleIcon
+        
           class="absolute right-0 top-0 size-5 translate-x-[33%] translate-y-[-33%] rotate-12 rounded-full bg-black/80 p-0.5 text-primary/80"
           v-if="isSelected(transferable)"
         ></CheckCircleIcon>
 
         <CircleIcon
-          class="absolute right-0 top-0 size-5 translate-x-[33%] translate-y-[-33%] rotate-12 rounded-full bg-zinc-800 p-0.5 text-zinc-700 group-hover:text-primary/60"
+        :class="+transferable.inscriptionNumber <= 0 ? '' : 'group-hover:text-primary/60' " 
+          class="absolute right-0 top-0 size-5 translate-x-[33%] translate-y-[-33%] rotate-12 rounded-full bg-zinc-800 p-0.5 text-zinc-700 "
           v-else
         ></CircleIcon>
       </button>
@@ -184,6 +189,10 @@ const { data: myOneBrc20, isLoading } = useQuery(
   )
 )
 
+
+
+
+
 function selectMore() {
   isOpen.value = true
 }
@@ -197,10 +206,8 @@ function isSelected(transferable: Brc20Transferable) {
 }
 
 const toggleSelect = (transferable: Brc20Transferable) => {
-  if (+transferable.inscriptionNumber < 0) {
-    return ElMessage.error(
-      'selected BRC20 is unconfirmed,Not available for trading'
-    )
+  if (+transferable.inscriptionNumber <= 0) {
+    return ElMessage.error('The inscription is not confirmed and cannot be traded.')
   }
 
   if (isSelected(transferable)) {

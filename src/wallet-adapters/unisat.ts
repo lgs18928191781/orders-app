@@ -23,6 +23,10 @@ export const getMvcAddress = async () => {
   return 'undefined'
 }
 
+export const getMvcBalance = async () => {
+  return 'undefined'
+}
+
 export const signMvcMessage = async (Message: { message: string }) => {
   return 'undefined'
 }

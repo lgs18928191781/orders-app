@@ -134,6 +134,7 @@ const isBridgePage = computed(() => {
                   class="mt-8 grid grid-cols-2 gap-4 text-base lg:grid-cols-3"
                 >
                   <button
+                  v-if="!isBridgePage"
                     class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToOkx"
                   >

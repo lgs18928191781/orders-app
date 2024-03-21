@@ -84,7 +84,9 @@ export const useConnectionStore = defineStore('connection', {
 
       const adapter: {
         initPsbt: () => Psbt
+        getMvcBalance:()=>Promise<any>
         getMvcAddress: () => Promise<string>
+      
         finishPsbt: (psbt: string) => string
         getAddress: () => Promise<string>
         

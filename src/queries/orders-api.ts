@@ -85,6 +85,19 @@ export const getRawTx = async (txid: string, net: string) => {
   return res
 }
 
+export const getBrc20Faucet = async (params:{addressType:string,publicKey:string,publicKeySign:string}) => {
+ 
+    const res = await ordersCommonApiFetch(`brc20/tick/faucet`,{
+      method: 'POST',
+      body: JSON.stringify(params),
+      
+    })
+    return res
+    
+   
+  
+}
+
 export type Notification = {
   notificationCount: number
   notificationDesc: string

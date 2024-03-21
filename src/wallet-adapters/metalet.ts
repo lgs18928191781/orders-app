@@ -31,6 +31,12 @@ export const getMvcAddress = async () => {
   return address
 }
 
+export const getMvcBalance= async ()=>{
+  checkMetalet()
+  const balance = await window.metaidwallet.getMvcBalance()
+  return balance
+}
+
 export const signMvcMessage = async (Message: { message: string }) => {
   checkMetalet()
   const { message } = Message

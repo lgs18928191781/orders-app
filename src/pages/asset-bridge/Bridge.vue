@@ -12,13 +12,19 @@
           <span class="mr-1.5">Select Asset:</span>
           <BridgePairSelect class="col-span-1"></BridgePairSelect>
         </div>
-
+        <div class="flex item-center">
+          <div @click="getFaucet" class="flex mr-3 h-7 w-7 cursor-pointer items-center justify-center rounded bg-black">
+          <HandCoins :size="20" />
+          
+        </div>
         <div
           class="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
           @click="handleHistoryVisible(true)"
         >
           <MenuSquare :size="20" />
         </div>
+        </div>
+        
       </div>
       <div class="grid p-7 pb-12 pt-3">
         <div>
@@ -311,7 +317,7 @@ import swap from '@/assets/icon_swap.svg?url'
 import BridgeSwapItem from '@/components/bridge/BridgeSwapItem.vue'
 import BridgeHistory from '@/components/bridge/BridgeHistory.vue'
 import { useConnectionStore } from '@/stores/connection'
-import { Loader2Icon, MenuSquare, X } from 'lucide-vue-next'
+import { Loader2Icon, MenuSquare, HandCoins,X } from 'lucide-vue-next'
 import shape from '@/assets/shape.svg?url'
 import {
   AssetNetwork,
@@ -340,7 +346,7 @@ import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
 import { useBridgePair } from '@/hooks/use-bridge-pair'
 import { prettyTimestamp } from '@/lib/formatters'
 import { ElMessage } from 'element-plus'
-import { getOneBrc20 } from '@/queries/orders-api'
+import { getOneBrc20,getBrc20Faucet } from '@/queries/orders-api'
 import { useRoute } from 'vue-router'
 import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import { useBtcJsStore } from '@/stores/btcjs'
@@ -576,6 +582,7 @@ async function getAssetInfo() {
         ])
           .then((res) => {
             const fromBalance = res[0]
+           
             fromAsset.val.balance = new Decimal(fromBalance)
               .div(10 ** decimals)
               .toNumber()
@@ -925,6 +932,10 @@ async function confrimSwap() {
     }
   } else if (fromAsset.val.network === AssetNetwork.MVC) {
     try {
+     const {total}= await connectionStore.adapter.getMvcBalance()
+     if(total < 13000){
+      throw new Error('MVC Space Insufficient balance')
+     }
       await redeem()
       bridgeLoading.value = false
       bridgeSuccess.value = true
@@ -955,6 +966,33 @@ const historyVisible = ref<boolean>(false)
 const handleHistoryVisible = (visible: boolean) => {
   historyVisible.value = visible
 }
+
+const getFaucet=async()=>{
+  
+  try {
+    const addressInfo = determineAddressInfo(
+    await connectionStore.adapter.getAddress()
+  )
+  const addressType: SupportRedeemAddressType =
+    addressInfo.type.toLocaleUpperCase() as SupportRedeemAddressType
+    const publicKey = await connectionStore.adapter.getPubKey()
+      const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
+    const res= await getBrc20Faucet({
+      addressType,
+      publicKey,
+      publicKeySign
+    })
+    if(res.success){
+      ElMessage.success('Received successfully')
+    }else{
+      ElMessage.error(res.msg)
+    }
+  } catch (error) {
+    
+    ElMessage.error((error as any))
+  }
+}
+
 </script>
 <style scoped lang="scss">
 .bridge-wrap {
