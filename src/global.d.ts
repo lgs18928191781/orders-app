@@ -100,6 +100,10 @@ interface Window {
     }
   }
   metaidwallet: {
+    verifySignature(verifyObj: { message: unknown; signature: any; encoding: string }): any
+    getPublicKey(): any
+    signMessage(arg0: { message: strin,encoding?:string }): { signature: any } | PromiseLike<{ signature: any }>
+    getAddress(): any
     on: (
       eventName: string,
       handler: { mvcAddress: string; btcAddress: string } | any
