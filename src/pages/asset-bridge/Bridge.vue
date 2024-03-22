@@ -182,7 +182,7 @@
                       <div class="text-[#C1C0C0]">{{ item.title }}</div>
                       <div class="flex text-[#fff]">
                         <span class="mr-2">{{ item.value }}</span>
-                        <span>{{ item.symbol }}</span>
+                        <span>{{ item.unit }}</span>
                       </div>
                     </div>
                   </div>
@@ -407,8 +407,11 @@ const bridgeSuccess = ref(false)
 const bridgeLoading = ref(false)
 const feeInfo = reactive({
   val: {
-    feeRate: '--',
-    comfirmation: 0,
+    confirmNumber:0,
+          bridgeFee:0,
+          fixedFee:0,
+          networkFee:0
+
   },
 })
 const swapSuccess = ref(true)
@@ -416,22 +419,22 @@ const bridgeInfo = reactive({
   feeRate: {
     title: 'Fee Rate',
     value: 0,
-    symbol: 'BTC',
+    unit:''
   },
   bridgeFee: {
     title: "You're pay in bridge fees",
     value: 0,
-    symbol: 'BTC',
+    unit:''
   },
   newtworkFee: {
     title: 'Network fee',
     value: 0,
-    symbol: 'BTC',
+    unit:''
   },
   estimatedTime: {
     title: 'Estimated Time of Arrival',
     value: 0,
-    symbol: 'minutes',
+    unit:'minutes'
   },
 })
 const assetInfo = reactive<{ val: bridgeAssetPairReturnType }>({
@@ -661,6 +664,13 @@ const fromNetworkIsBrc20 = computed(() => {
 })
 
 const btnStatus = computed(() => {
+    if(swapToAmount.value && swapToAmount.value! < 0){
+      return {
+      value: 'Less than Bridge MinmumLimit',
+      color: BtnColor.error,
+      disable: true,
+    } 
+    }
   if (fromAsset.val.network == AssetNetwork.BTC) {
     if (networkStore.network !== 'testnet') {
       return {
@@ -691,8 +701,10 @@ const btnStatus = computed(() => {
     swapFromAmount.value &&
     fromNetworkIsBrc20.value &&
     new Decimal(swapFromAmount.value).toNumber() <=
-      myBrc20s.value.transferBalance
+      myBrc20s.value.transferBalance && (!lastThanMaxLimited.value && !lessThanMinLimited.value)
   ) {
+   
+    
     return {
       value: `Bridge`,
       color: BtnColor.default,
@@ -712,6 +724,7 @@ const btnStatus = computed(() => {
       disable: true,
     }
   } else if (lastThanMaxLimited.value) {
+    
     return {
       value: 'Over than Bridge MaxmumLimit',
       color: BtnColor.error,
@@ -748,14 +761,20 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBtc
             : BridgeOp.MVCToBtcByBtc
-        const { confirmNumber, receiveAmount } = BridgeTools.calcReceiveInfo(
+        const { confirmNumber, receiveAmount, bridgeFee,fixedFee,networkFee} = BridgeTools.calcReceiveInfo(
           formatUnitToSats(swapFromAmount.value, currentAssetInfo.val.decimal),
           assetInfo.val,
           currentAssetInfo.val,
           op
         )
-        feeInfo.val.comfirmation = confirmNumber
-        return formatUnitToBtc(receiveAmount, currentAssetInfo.val.decimal)
+        feeInfo.val ={
+          confirmNumber,
+          bridgeFee,
+          fixedFee,
+          networkFee
+        }
+        
+        return receiveAmount
       } catch (error) {
         if ((error as any).message) {
           if (
@@ -785,26 +804,42 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBrc20
             : BridgeOp.MvcToBtcByBrc20
-        const { confirmNumber, receiveAmount } = BridgeTools.calcReceiveInfo(
+        const { confirmNumber, receiveAmount,bridgeFee,fixedFee,networkFee } = BridgeTools.calcReceiveInfo(
+          
           swapFromAmount.value,
           assetInfo.val,
           currentAssetInfo.val,
           op
         )
-        feeInfo.val.comfirmation = confirmNumber
+        
+
+        feeInfo.val ={
+          confirmNumber,
+          bridgeFee,
+          fixedFee,
+          networkFee
+        }
         return receiveAmount
       } catch (error) {
+        
         if ((error as any).message) {
+          const converBtcValue=BridgeTools.tokenConvertBtcRate({
+            inputAmount:swapFromAmount.value,
+            brc20Price:currentAssetInfo.val.price,
+            btcPrice:assetInfo.val.btcPrice
+          })
+       
           if (
-            +swapFromAmount.value <
-            JSON.parse((error as any).message).amountLimitMinimum
+            converBtcValue <
+            +JSON.parse((error as any).message).amountLimitMinimum
           ) {
             lessThanMinLimited.value = true
           } else if (
-            +swapFromAmount.value >
-            JSON.parse((error as any).message).amountLimitMaximum
+            converBtcValue >
+            +JSON.parse((error as any).message).amountLimitMaximum
           ) {
             lastThanMaxLimited.value = true
+            
           }
         }
       }
@@ -823,13 +858,14 @@ function BtnOperate() {
   if (btnStatus.value.color == BtnColor.unLogin) {
     connetMetalet()
   } else if (btnStatus.value.color == BtnColor.default) {
-    bridgeInfo.bridgeFee.value =
-      fromAsset.val.symbol == 'BTC' || fromAsset.val.symbol == 'TBTC'
-        ? 0
-        : new Decimal(1000).div(10 ** 8).toNumber()
-
-    bridgeInfo.estimatedTime.value = feeInfo.val.comfirmation * 10
-
+    bridgeInfo.bridgeFee.value =feeInfo.val.bridgeFee
+    bridgeInfo.feeRate.value=feeInfo.val.fixedFee
+    bridgeInfo.newtworkFee.value=feeInfo.val.networkFee
+    bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
+    console.log('currentAssetInfo',currentAssetInfo.val)
+    bridgeInfo.bridgeFee.unit=currentAssetInfo.val.originSymbol
+    bridgeInfo.feeRate.unit=currentAssetInfo.val.originSymbol
+    bridgeInfo.newtworkFee.unit=currentAssetInfo.val.originSymbol
     showConfrimDialog.value = true
   }
 }
