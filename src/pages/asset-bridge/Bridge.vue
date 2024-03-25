@@ -27,7 +27,7 @@
           </div>
         </div>
       </div>
-      <div class="grid p-7 pb-12 pt-3">
+      <div class="grid p-7 pb-4 pt-3">
         <div>
           <BridgeSwapItem
             ref="bridgeSwapItem"
@@ -66,6 +66,34 @@
           >
         </div> -->
       </div>
+
+      <div class="grid grid-rows-4 gap-y-5 px-7 pb-5 text-sm">
+        <div class="flex items-center justify-between text-sm text-red-500">
+          <div class="mr-2">
+            <span class="text-[#C1C0C0]">LimitMinimum:</span>
+            <span class="mr-1">{{ limitInfo.min }}</span>
+            <span>{{ fromAsset.val.symbol }}</span>
+          </div>
+          <div>
+            <span class="text-[#C1C0C0]">LimitMaximum:</span
+            ><span class="mr-1">{{ limitInfo.max }}</span>
+            <span>{{ fromAsset.val.symbol }}</span>
+          </div>
+        </div>
+
+        <div
+          class="item-center flex justify-between"
+          v-for="(item, index) in bridgeInfo"
+          :key="index"
+        >
+          <div class="text-[#C1C0C0]">{{ item.title }}</div>
+          <div class="flex text-[#fff]">
+            <span class="mr-2">{{ item.value }}</span>
+            <span>{{ item.unit }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="op-btn w-full px-7">
         <button
           :disabled="btnStatus.disable"
@@ -83,6 +111,10 @@
             btnStatus.color,
           ]"
         >
+          <Loader2Icon
+            v-if="bridgeLoading"
+            class="mr-1.5 h-5 animate-spin text-[#181614]"
+          />
           <!-- <Loader2Icon  class="mr-1.5 h-5 animate-spin" /> -->
           <span
             :class="[
@@ -90,7 +122,6 @@
               btnStatus.color == BtnColor.disable
                 ? 'textBlack'
                 : '',
-              'w-10/12',
             ]"
             >{{ btnStatus.value }}</span
           >
@@ -98,7 +129,7 @@
       </div>
     </div>
 
-    <TransitionRoot :show="showConfrimDialog" as="template">
+    <TransitionRoot :show="showSuccessDialog" as="template">
       <Dialog class="relative z-30" as="div" @close="() => {}">
         <!-- Modal背景 -->
         <TransitionChild
@@ -118,7 +149,7 @@
         </TransitionChild>
         <!-- Modal內容 -->
         <div class="fixed inset-0 overflow-y-auto text-zinc-300">
-          <div class="mt-32 flex justify-center p-4 text-center">
+          <div class="mt-64 flex justify-center p-4 text-center">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -129,92 +160,8 @@
               leave-to="opacity-0"
             >
               <DialogPanel
-                v-if="!bridgeSuccess"
-                class="relative w-[515px] transform overflow-hidden rounded-xl bg-zinc-800 px-4 pb-4 pt-5 text-left shadow-[0_0px_10px_rgba(255,255,255,0.3)] transition-all sm:p-7"
-              >
-                <DialogTitle
-                  as="h3"
-                  class="flex items-center justify-between text-2xl leading-6 text-gray-300 text-zinc-100"
-                >
-                  Summary
-                  <div
-                    class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-neutral-500"
-                    @click="
-                      ;(showConfrimDialog = false), (bridgeLoading = false)
-                    "
-                  >
-                    <X :size="20" class="text-zinc-800"></X>
-                  </div>
-                </DialogTitle>
-                <div class="mt-14 flex flex-col">
-                  <div
-                    class="confrim-top flex flex-col items-center justify-center border-b border-b-[#313131] pb-12 text-lg"
-                  >
-                    <div
-                      class="flex w-full flex-row items-center justify-between"
-                    >
-                      <div class="text-[#6F6F6F]">From</div>
-                      <div class="flex text-xl text-[#FFFFFF]">
-                        <span class="mr-3"> {{ swapFromAmount }}</span
-                        ><span>{{ fromAsset.val.symbol }}</span>
-                      </div>
-                    </div>
-                    <div class="my-7 flex flex-row">
-                      <img :src="Arrow" alt="" />
-                    </div>
-                    <div
-                      class="flex w-full flex-row items-center justify-between"
-                    >
-                      <div class="flex text-[#6F6F6F]">To</div>
-                      <div class="text-xl text-[#FFFFFF]">
-                        <span class="mr-3"> {{ swapToAmount }}</span
-                        ><span>{{ toAsset.val.symbol }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="confrim-body mt-7 grid grid-rows-4 gap-y-5 text-sm"
-                  >
-                    <div
-                      class="item-center flex justify-between"
-                      v-for="(item, index) in bridgeInfo"
-                      :key="index"
-                    >
-                      <div class="text-[#C1C0C0]">{{ item.title }}</div>
-                      <div class="flex text-[#fff]">
-                        <span class="mr-2">{{ item.value }}</span>
-                        <span>{{ item.unit }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="confrim-foot mt-14 w-full">
-                    <button
-                      @click="confrimSwap"
-                      :class="[
-                        'w-full',
-                        'text-base',
-
-                        'rounded-xl',
-                        'py-3',
-                        'flex',
-                        'item-center',
-                        'justify-center',
-                        'font-bold',
-                        BtnColor.default,
-                      ]"
-                    >
-                      <Loader2Icon
-                        v-if="bridgeLoading"
-                        class="mr-1.5 h-5 animate-spin text-[#181614]"
-                      />
-                      <span class="text-[#181614]">Confirm Bridge</span>
-                    </button>
-                  </div>
-                </div>
-              </DialogPanel>
-              <DialogPanel
+                v-if="true"
                 class="relative w-[515px] transform overflow-hidden rounded-xl bg-zinc-800 text-left shadow-[0_0px_10px_rgba(255,255,255,0.3)] transition-all sm:p-7"
-                v-else
               >
                 <div class="flex flex-col items-center justify-center">
                   <div
@@ -403,31 +350,25 @@ const BridgeRedeem = useBridgeRedeem()
 const bridgeSwapItem = ref()
 const swapFromAmount = ref(0)
 const myBrc20s = ref()
-const showConfrimDialog = ref(false)
+const showSuccessDialog = ref(false)
 const bridgeSuccess = ref(false)
 const bridgeLoading = ref(false)
 const feeInfo = reactive({
   val: {
     confirmNumber: 0,
     bridgeFee: '0',
-    fixedFee: '0',
-    networkFee: '0',
+    minerFee: '0',
   },
 })
 const swapSuccess = ref(true)
 const bridgeInfo = reactive({
-  feeRate: {
-    title: 'Fee Rate',
-    value: '0',
-    unit: '',
-  },
   bridgeFee: {
     title: "You're pay in bridge fees",
     value: '0',
     unit: '',
   },
-  newtworkFee: {
-    title: 'Network fee',
+  minerFee: {
+    title: 'Miner fee',
     value: '0',
     unit: '',
   },
@@ -437,6 +378,12 @@ const bridgeInfo = reactive({
     unit: 'minutes',
   },
 })
+
+const limitInfo = reactive({
+  min: '0',
+  max: '0',
+})
+
 const assetInfo = reactive<{ val: bridgeAssetPairReturnType }>({
   val: {},
 })
@@ -503,14 +450,14 @@ async function publickeyToAddress() {
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const { address } = btcJsStore.btcjs!.payments.p2pkh({
     pubkey: publicKeyBuffer,
-    network: btcJsStore.btcjs!.networks.testnet,
+    network: networkStore.typedNetwork,
   })
   return address
 }
 
 function closeSuccessDialog() {
-  bridgeSuccess.value = false
-  showConfrimDialog.value = false
+  // bridgeSuccess.value = false
+  showSuccessDialog.value = false
   window.location.reload()
 }
 
@@ -552,6 +499,15 @@ async function getAssetInfo() {
           }),
         ])
           .then((res) => {
+            const { limitMinAmount, limitMaxAmount } = calcBrc20Limited({
+              amountLimitMinimum: assetInfo.val.amountLimitMinimum,
+              amountLimitMaximum: assetInfo.val.amountLimitMaximum,
+              btcPrice: assetInfo.val.btcPrice,
+              brc20Pirce: currentAssetInfo.val.price,
+            })
+            limitInfo.min = limitMinAmount
+            limitInfo.max = limitMaxAmount
+
             myBrc20s.value = res[0]
             const fromBalance = res[0]
             fromAsset.val.balance = new Decimal(
@@ -589,6 +545,13 @@ async function getAssetInfo() {
             fromAsset.val.balance = new Decimal(fromBalance)
               .div(10 ** decimals)
               .toNumber()
+
+            limitInfo.min = new Decimal(assetInfo.val.amountLimitMinimum)
+              .div(10 ** 8)
+              .toString()
+            limitInfo.max = new Decimal(assetInfo.val.amountLimitMaximum)
+              .div(10 ** 8)
+              .toString()
 
             if (res[1].length) {
               const toAssetInfo = res[1][0]
@@ -664,7 +627,7 @@ const fromNetworkIsBrc20 = computed(() => {
 })
 
 const btnStatus = computed(() => {
-  if (swapToAmount.value && swapToAmount.value! < 0) {
+  if (swapToAmount.value && +swapToAmount.value! < 0) {
     return {
       value: 'Less than Bridge MinmumLimit',
       color: BtnColor.error,
@@ -760,27 +723,30 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBtc
             : BridgeOp.MVCToBtcByBtc
-        const {
-          confirmNumber,
-          receiveAmount,
-          bridgeFee,
-          fixedFee,
-          networkFee,
-        } = BridgeTools.calcReceiveInfo(
-          formatUnitToSats(swapFromAmount.value, currentAssetInfo.val.decimal),
-          assetInfo.val,
-          currentAssetInfo.val,
-          op,
-        )
-        console.log('bridgeFee', bridgeFee, fixedFee, networkFee)
+        const { confirmNumber, receiveAmount, bridgeFee, minerFee } =
+          BridgeTools.calcReceiveInfo(
+            formatUnitToSats(
+              swapFromAmount.value,
+              currentAssetInfo.val.decimal,
+            ),
+            assetInfo.val,
+            currentAssetInfo.val,
+            op,
+          )
+        console.log('bridgeFee', bridgeFee, minerFee)
 
         feeInfo.val = {
           confirmNumber,
           bridgeFee,
-          fixedFee,
-          networkFee,
+          minerFee,
         }
+        bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee
+        bridgeInfo.minerFee.value = feeInfo.val.minerFee
 
+        bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
+        console.log('currentAssetInfo', currentAssetInfo.val)
+        bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
+        bridgeInfo.minerFee.unit = currentAssetInfo.val.originSymbol
         return receiveAmount
       } catch (error) {
         if ((error as any).message) {
@@ -811,25 +777,27 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBrc20
             : BridgeOp.MvcToBtcByBrc20
-        const {
-          confirmNumber,
-          receiveAmount,
-          bridgeFee,
-          fixedFee,
-          networkFee,
-        } = BridgeTools.calcReceiveInfo(
-          swapFromAmount.value,
-          assetInfo.val,
-          currentAssetInfo.val,
-          op,
-        )
+        const { confirmNumber, receiveAmount, bridgeFee, minerFee } =
+          BridgeTools.calcReceiveInfo(
+            swapFromAmount.value,
+            assetInfo.val,
+            currentAssetInfo.val,
+            op,
+          )
 
         feeInfo.val = {
           confirmNumber,
           bridgeFee,
-          fixedFee,
-          networkFee,
+          minerFee,
         }
+
+        bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee
+        bridgeInfo.minerFee.value = feeInfo.val.minerFee
+
+        bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
+        console.log('currentAssetInfo', currentAssetInfo.val)
+        bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
+        bridgeInfo.minerFee.unit = currentAssetInfo.val.originSymbol
         return receiveAmount
       } catch (error) {
         if ((error as any).message) {
@@ -856,6 +824,35 @@ const swapToAmount = computed(() => {
   }
 })
 
+function calcBrc20Limited(params: {
+  amountLimitMinimum: string
+  amountLimitMaximum: string
+  btcPrice: number
+  brc20Pirce: number
+}) {
+  const { amountLimitMinimum, amountLimitMaximum, btcPrice, brc20Pirce } =
+    params
+  const limitMinAmount = new Decimal(amountLimitMinimum)
+    .div(10 ** 8)
+    .mul(btcPrice)
+    .div(brc20Pirce)
+    .toString()
+  const limitMaxAmount = new Decimal(amountLimitMaximum)
+    .div(10 ** 8)
+    .mul(btcPrice)
+    .div(brc20Pirce)
+    .toString()
+  return {
+    limitMinAmount,
+    limitMaxAmount,
+  }
+  // mintBrc20EqualBtcAmount = new Decimal(currentAssetInfo.price)
+  //   .mul(mintAmount)
+  //   .div(btcPrice)
+  //   .mul(10 ** 8)
+  //   .toNumber()
+}
+
 function converSwapItem() {
   const temp = toRaw(fromAsset.val)
   fromAsset.val = toAsset.val
@@ -867,15 +864,16 @@ function BtnOperate() {
   if (btnStatus.value.color == BtnColor.unLogin) {
     connetMetalet()
   } else if (btnStatus.value.color == BtnColor.default) {
-    bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee
-    bridgeInfo.feeRate.value = feeInfo.val.fixedFee
-    bridgeInfo.newtworkFee.value = feeInfo.val.networkFee
-    bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
-    console.log('currentAssetInfo', currentAssetInfo.val)
-    bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
-    bridgeInfo.feeRate.unit = currentAssetInfo.val.originSymbol
-    bridgeInfo.newtworkFee.unit = currentAssetInfo.val.originSymbol
-    showConfrimDialog.value = true
+    confrimSwap()
+    // bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee
+    // bridgeInfo.minerFee.value = feeInfo.val.minerFee
+
+    // bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
+    // console.log('currentAssetInfo', currentAssetInfo.val)
+    // bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
+    // bridgeInfo.minerFee.unit = currentAssetInfo.val.originSymbol
+
+    // showConfrimDialog.value = true
   }
 }
 async function redeem() {
@@ -919,6 +917,7 @@ async function confrimSwap() {
   if (swapFromAmount.value <= 0) {
     return
   }
+
   bridgeLoading.value = true
   if (fromAsset.val.network === AssetNetwork.BTC) {
     try {
@@ -972,7 +971,7 @@ async function confrimSwap() {
         })
       }
       bridgeLoading.value = false
-      bridgeSuccess.value = true
+      showSuccessDialog.value = true
     } catch (error) {
       bridgeLoading.value = false
       return ElMessage.error((error as any).message)
@@ -985,7 +984,7 @@ async function confrimSwap() {
       }
       await redeem()
       bridgeLoading.value = false
-      bridgeSuccess.value = true
+      showSuccessDialog.value = true
     } catch (error) {
       bridgeLoading.value = false
       return ElMessage.error((error as any).message)
