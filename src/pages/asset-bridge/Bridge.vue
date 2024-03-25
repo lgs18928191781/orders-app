@@ -503,7 +503,7 @@ async function publickeyToAddress() {
   const publicKeyBuffer = Buffer.from(publicKey, 'hex')
   const { address } = btcJsStore.btcjs!.payments.p2pkh({
     pubkey: publicKeyBuffer,
-    network: btcJsStore.btcjs!.networks.bitcoin,
+    network: btcJsStore.btcjs!.networks.testnet,
   })
   return address
 }
@@ -1034,7 +1034,7 @@ const getFaucet = async () => {
       ElMessage.error(res.msg)
     }
   } catch (error) {
-    ElMessage.error(error as any)
+    ElMessage.error('Cancel')
   }
 }
 </script>
