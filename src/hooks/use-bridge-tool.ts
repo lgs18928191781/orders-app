@@ -18,7 +18,13 @@ import { getRawTx } from '@/queries/orders-api'
 import { Payment, Transaction, Psbt, address as Address } from 'bitcoinjs-lib'
 import { determineAddressInfo, formatSat } from '@/lib/utils'
 import { exclusiveChange } from '@/lib/build-helpers'
-import { SIGHASH_ALL, USE_UTXO_COUNT_LIMIT,BRIDGE_CONST_FEE ,MVC_CONST_FEE,BTC_CONST_FEE} from '@/data/constants'
+import {
+  SIGHASH_ALL,
+  USE_UTXO_COUNT_LIMIT,
+  BRIDGE_CONST_FEE,
+  MVC_CONST_FEE,
+  BTC_CONST_FEE,
+} from '@/data/constants'
 const XEDR_PRICE = 400
 export enum AssetBridgeNetwork {
   BRC20 = 'BRC20',
@@ -95,7 +101,7 @@ export function useBridgeTools() {
   function confirmNumberBySeqAndAmount(
     amount: number,
     seq: number[][],
-    network: 'BTC' | 'BRC20' | 'MVC'
+    network: 'BTC' | 'BRC20' | 'MVC',
   ) {
     for (const item of seq) {
       const [start, end, confirmBtc, confirmMvc] = item
@@ -121,27 +127,27 @@ export function useBridgeTools() {
   }
 
   async function createPrepayOrderMintBtc(
-    data: prepayOrderParams
+    data: prepayOrderParams,
   ): Promise<prepayOrderReturnType> {
-   try {
-    const res = await createPrepayOrderMintBtcReq(data)
+    try {
+      const res = await createPrepayOrderMintBtcReq(data)
 
-    return res
-   } catch (error) {
-    throw new Error(error as any)
-   }
+      return res
+    } catch (error) {
+      throw new Error(error as any)
+    }
   }
 
   async function createPrepayOrderMintBRC20(
-    data: prepayOrderParams
+    data: prepayOrderParams,
   ): Promise<prepayOrderReturnType> {
-   try {
-    const res = await createPrepayOrderMintBrc20Req(data)
+    try {
+      const res = await createPrepayOrderMintBrc20Req(data)
 
-    return res
-   } catch (error) {
-    throw new Error(error as any)
-   }
+      return res
+    } catch (error) {
+      throw new Error(error as any)
+    }
   }
 
   async function submitPrepayOrderMintBtc(data: any) {
@@ -232,7 +238,7 @@ export function useBridgeTools() {
       })
 
       const signPsbt = await connectionStore.adapter.signPsbt(
-        psbt1xFinished!.toHex()
+        psbt1xFinished!.toHex(),
       )
 
       return Psbt.fromHex(signPsbt)
@@ -383,7 +389,7 @@ export function useBridgeTools() {
   function getTotalSatoshi(utxos: UTXO[]): Decimal {
     return utxos.reduce(
       (total, utxo) => total.add(utxo.satoshi),
-      new Decimal(0)
+      new Decimal(0),
     )
   }
 
@@ -395,25 +401,29 @@ export function useBridgeTools() {
     return size * feeRate
   }
 
-  function tokenConvertBtcRate(params:{
-    inputAmount:number,
-    brc20Price:number,
-    btcPrice:number,
-  }){
-    return new Decimal(params.inputAmount).mul(params.brc20Price).div(params.btcPrice).mul(10**8).toNumber()
+  function tokenConvertBtcRate(params: {
+    inputAmount: number
+    brc20Price: number
+    btcPrice: number
+  }) {
+    return new Decimal(params.inputAmount)
+      .mul(params.brc20Price)
+      .div(params.btcPrice)
+      .mul(10 ** 8)
+      .toNumber()
   }
 
   function calcReceiveInfo(
     mintAmount: number,
     assetInfo: bridgeAssetPairReturnType,
     currentAssetInfo: assetReqReturnType,
-    op: BridgeOp
-  ):{
-    bridgeFee:number,
-        fixedFee:number,
-        networkFee:number,
-        receiveAmount:number,
-        confirmNumber:number,
+    op: BridgeOp,
+  ): {
+    bridgeFee: string
+    fixedFee: string
+    networkFee: string
+    receiveAmount: number
+    confirmNumber: number
   } {
     const {
       btcPrice,
@@ -426,7 +436,7 @@ export function useBridgeTools() {
       transactionSize,
     } = assetInfo
     let mintBrc20EqualBtcAmount = 0
-    
+
     if (op == BridgeOp.BtcToMvcByBtc || op == BridgeOp.MVCToBtcByBtc) {
       if (mintAmount < amountLimitMinimum || mintAmount > amountLimitMaximum) {
         const error = JSON.stringify({
@@ -439,12 +449,12 @@ export function useBridgeTools() {
       if (op == BridgeOp.MvcToBtcByBrc20) {
         mintAmount = new Decimal(mintAmount)
           .mul(
-            10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals)
+            10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals),
           )
           .toNumber()
         const brcAmount = new Decimal(mintAmount)
           .div(
-            10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals)
+            10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals),
           )
           .toNumber()
 
@@ -466,13 +476,11 @@ export function useBridgeTools() {
           .mul(10 ** 8)
           .toNumber()
       }
-  
-      
+
       if (
         mintBrc20EqualBtcAmount < +amountLimitMinimum ||
         mintBrc20EqualBtcAmount > +amountLimitMaximum
       ) {
-        
         const error = JSON.stringify({
           amountLimitMinimum,
           amountLimitMaximum,
@@ -492,23 +500,31 @@ export function useBridgeTools() {
       op == BridgeOp.BtcToMvcByBtc
         ? AssetBridgeNetwork.BTC
         : op == BridgeOp.BtcToMvcByBrc20
-        ? AssetBridgeNetwork.BRC20
-        : AssetBridgeNetwork.MVC
+          ? AssetBridgeNetwork.BRC20
+          : AssetBridgeNetwork.MVC,
     )
 
-    let bridgeFee = 0
-    let networkFee = 0
-    let fixedFee=0
+    let bridgeFee = '0'
+    let networkFee = '0'
+    let fixedFee = '0'
     let totalFee = 0
     let receiveAmount = 0
     let receiveAmountFixed = 0
     if (op == BridgeOp.BtcToMvcByBtc) {
- 
       // bridgeFee = (mintAmount * currentAssetInfo.feeRateNumeratorMint) / 10000
       // minerFee = (transactionSize.BTC_MINT * feeMvc * mvcPrice) / btcPrice
-      bridgeFee =formatUnitToBtc(mintAmount)  * BRIDGE_CONST_FEE
-      fixedFee=BTC_CONST_FEE
-      networkFee = new Decimal(MVC_CONST_FEE).mul(mvcPrice).div(btcPrice).toNumber()
+      bridgeFee = new Decimal(formatUnitToBtc(mintAmount))
+        .mul(BRIDGE_CONST_FEE)
+        .toNumber()
+        .toFixed(8)
+
+      fixedFee = new Decimal(BTC_CONST_FEE).toString()
+      networkFee = new Decimal(MVC_CONST_FEE)
+        .mul(mvcPrice)
+        .div(btcPrice)
+        .toNumber()
+        .toFixed(8)
+
       totalFee = new Decimal(bridgeFee).add(fixedFee).add(networkFee).toNumber()
       receiveAmount = +(formatUnitToBtc(mintAmount) - totalFee).toFixed(8)
       return {
@@ -519,15 +535,19 @@ export function useBridgeTools() {
         confirmNumber,
       }
     } else if (op == BridgeOp.BtcToMvcByBrc20) {
-
-      
-      bridgeFee =mintAmount * BRIDGE_CONST_FEE
-      fixedFee=BTC_CONST_FEE * btcPrice / currentAssetInfo.price
-      networkFee =MVC_CONST_FEE * mvcPrice / currentAssetInfo.price
-      totalFee = bridgeFee + fixedFee + networkFee
+      bridgeFee = new Decimal(mintAmount).mul(BRIDGE_CONST_FEE).toString()
+      fixedFee = new Decimal(BTC_CONST_FEE)
+        .mul(btcPrice)
+        .div(currentAssetInfo.price)
+        .toString()
+      networkFee = new Decimal(MVC_CONST_FEE)
+        .mul(mvcPrice)
+        .div(currentAssetInfo.price)
+        .toString()
+      totalFee = new Decimal(bridgeFee).add(fixedFee).add(networkFee).toNumber()
       receiveAmount = mintAmount - totalFee
       receiveAmountFixed = +receiveAmount.toFixed(
-        currentAssetInfo.decimals - currentAssetInfo.trimDecimals
+        currentAssetInfo.decimals - currentAssetInfo.trimDecimals,
       )
       return {
         bridgeFee,
@@ -537,14 +557,14 @@ export function useBridgeTools() {
         confirmNumber,
       }
     } else if (op == BridgeOp.MVCToBtcByBtc) {
+      bridgeFee = new Decimal(formatUnitToBtc(mintAmount))
+        .mul(BRIDGE_CONST_FEE)
+        .toString()
+      fixedFee = new Decimal(BTC_CONST_FEE).toString()
+      networkFee = new Decimal(BRIDGE_CONST_FEE).toString()
+      totalFee = new Decimal(bridgeFee).add(fixedFee).add(networkFee).toNumber()
+      receiveAmount = +(formatUnitToBtc(mintAmount) - totalFee).toFixed(8)
 
-      
-      bridgeFee =formatUnitToBtc(mintAmount)  * BRIDGE_CONST_FEE
-      fixedFee=BTC_CONST_FEE
-      networkFee = BRIDGE_CONST_FEE
-      totalFee = bridgeFee + fixedFee + networkFee
-      receiveAmount =+(formatUnitToBtc(mintAmount)  - totalFee).toFixed(8)
-      
       return {
         bridgeFee,
         fixedFee,
@@ -567,31 +587,39 @@ export function useBridgeTools() {
       //   ((transactionSize.BRC20_REDEEM / 10 ** 8) * feeBtc * btcPrice) /
       //     currentAssetInfo.price
       // )
-    
-      const converMintAmount:number=new Decimal(mintAmount).div(10 ** (currentAssetInfo.decimals- currentAssetInfo.trimDecimals)).toNumber()
-      bridgeFee=converMintAmount*BRIDGE_CONST_FEE
-      fixedFee=(BTC_CONST_FEE * btcPrice )/ currentAssetInfo.price
-      networkFee=(BRIDGE_CONST_FEE * btcPrice )/ currentAssetInfo.price
-      totalFee = bridgeFee + fixedFee + networkFee
+
+      const converMintAmount: number = new Decimal(mintAmount)
+        .div(10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals))
+        .toNumber()
+      bridgeFee = new Decimal(converMintAmount).mul(BRIDGE_CONST_FEE).toString()
+      fixedFee = new Decimal(BTC_CONST_FEE)
+        .mul(btcPrice)
+        .div(currentAssetInfo.price)
+        .toString()
+      networkFee = new Decimal(BRIDGE_CONST_FEE)
+        .mul(btcPrice)
+        .div(currentAssetInfo.price)
+        .toString()
+      totalFee = new Decimal(bridgeFee).add(fixedFee).add(networkFee).toNumber()
       receiveAmount = new Decimal(converMintAmount - totalFee).toNumber()
       return {
         receiveAmount: Number(
           receiveAmount.toFixed(
-            currentAssetInfo.decimals - currentAssetInfo.trimDecimals
-          )
+            currentAssetInfo.decimals - currentAssetInfo.trimDecimals,
+          ),
         ),
         confirmNumber,
         bridgeFee,
         networkFee,
-        fixedFee
+        fixedFee,
       }
     } else {
       return {
         receiveAmount: 0,
         confirmNumber: 0,
-        bridgeFee:0,
-        networkFee:0,
-        fixedFee:0
+        bridgeFee: '0',
+        networkFee: '0',
+        fixedFee: '0',
       }
     }
   }
@@ -602,6 +630,6 @@ export function useBridgeTools() {
     sumitBridgeOrderForBrc20,
     getPublicKey,
     buildTx,
-    tokenConvertBtcRate
+    tokenConvertBtcRate,
   }
 }

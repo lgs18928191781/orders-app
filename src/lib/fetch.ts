@@ -13,7 +13,7 @@ async function fetchWrapper(url: string, options?: RequestInit): Promise<any> {
       throw new Error(jsoned.message)
     }
     throw new Error(
-      `Failed to fetch ${url}: ${response.status} ${response.statusText}`
+      `Failed to fetch ${url}: ${response.status} ${response.statusText}`,
     )
   }
   return await response.json()
@@ -188,7 +188,7 @@ export async function swapApiFetch(url: string, options?: ApiOptions) {
 export async function bridgeApiFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit,
-  returnRaw: boolean = false
+  returnRaw: boolean = false,
 ) {
   const ordersApiUrl = `https://www.orders.exchange/api-bridge-testnet${url}`
   if (!options)
@@ -236,9 +236,9 @@ export async function bridgeApiFetch(
 export async function metasvApiFetch(
   url: string,
   options?: { headers?: HeadersInit } & RequestInit,
-  returnRaw: boolean = false
+  returnRaw: boolean = false,
 ) {
-  const ordersApiUrl = `https://mainnet.mvcapi.com${url}`
+  const ordersApiUrl = `https://testnet.mvcapi.com${url}`
   if (!options)
     options = {
       headers: {
@@ -285,7 +285,7 @@ export async function originalFetch(url: string, options?: RequestInit) {
   const response = await fetch(url, options)
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch ${url}: ${response.status} ${response.statusText}`
+      `Failed to fetch ${url}: ${response.status} ${response.statusText}`,
     )
   }
   return response

@@ -6,8 +6,8 @@ const bridgePairs = [
     id: 1,
     fromSymbol: 'BTC',
     originName: 'BTC',
-    toSymbol: 'TBTC',
-    targetName: 'Test Bitcoin',
+    toSymbol: 'BTC',
+    targetName: 'Bitcoin test9',
     fromIcon: btcLogo,
     toIcon: btcLogo,
     network: 'BTC',
@@ -18,7 +18,18 @@ const bridgePairs = [
     fromSymbol: 'XEDR',
     originName: 'XEDR',
     toSymbol: 'XEDR',
-    targetName: 'Test XEDR',
+    targetName: 'XEDR test4',
+    fromIcon: btcLogo,
+    toIcon: btcLogo,
+    network: 'BRC20',
+    isNew: false,
+  },
+  {
+    id: 3,
+    fromSymbol: 'DEXR',
+    originName: 'DEXR',
+    toSymbol: 'DEXR',
+    targetName: 'DEXR test4',
     fromIcon: btcLogo,
     toIcon: btcLogo,
     network: 'BRC20',
@@ -47,7 +58,7 @@ export const selectPair = (pairRaw?: string) => {
   return (
     bridgePairs.find(
       (pair) =>
-        pair.fromSymbol === pairSymbols[0] && pair.toSymbol === pairSymbols[1]
+        pair.fromSymbol === pairSymbols[0] && pair.toSymbol === pairSymbols[1],
     ) || bridgePairs[0]
   )
 }

@@ -12,19 +12,20 @@
           <span class="mr-1.5">Select Asset:</span>
           <BridgePairSelect class="col-span-1"></BridgePairSelect>
         </div>
-        <div class="flex item-center">
-          <div @click="getFaucet" class="flex mr-3 h-7 w-7 cursor-pointer items-center justify-center rounded bg-black">
-          <HandCoins :size="20" />
-          
+        <div class="item-center flex">
+          <div
+            @click="getFaucet"
+            class="mr-3 flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
+          >
+            <HandCoins :size="20" />
+          </div>
+          <div
+            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
+            @click="handleHistoryVisible(true)"
+          >
+            <MenuSquare :size="20" />
+          </div>
         </div>
-        <div
-          class="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
-          @click="handleHistoryVisible(true)"
-        >
-          <MenuSquare :size="20" />
-        </div>
-        </div>
-        
       </div>
       <div class="grid p-7 pb-12 pt-3">
         <div>
@@ -317,7 +318,7 @@ import swap from '@/assets/icon_swap.svg?url'
 import BridgeSwapItem from '@/components/bridge/BridgeSwapItem.vue'
 import BridgeHistory from '@/components/bridge/BridgeHistory.vue'
 import { useConnectionStore } from '@/stores/connection'
-import { Loader2Icon, MenuSquare, HandCoins,X } from 'lucide-vue-next'
+import { Loader2Icon, MenuSquare, HandCoins, X } from 'lucide-vue-next'
 import shape from '@/assets/shape.svg?url'
 import {
   AssetNetwork,
@@ -346,7 +347,7 @@ import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
 import { useBridgePair } from '@/hooks/use-bridge-pair'
 import { prettyTimestamp } from '@/lib/formatters'
 import { ElMessage } from 'element-plus'
-import { getOneBrc20,getBrc20Faucet } from '@/queries/orders-api'
+import { getOneBrc20, getBrc20Faucet } from '@/queries/orders-api'
 import { useRoute } from 'vue-router'
 import { formatUnitToBtc, formatUnitToSats } from '@/lib/formatters'
 import { useBtcJsStore } from '@/stores/btcjs'
@@ -407,34 +408,33 @@ const bridgeSuccess = ref(false)
 const bridgeLoading = ref(false)
 const feeInfo = reactive({
   val: {
-    confirmNumber:0,
-          bridgeFee:0,
-          fixedFee:0,
-          networkFee:0
-
+    confirmNumber: 0,
+    bridgeFee: '0',
+    fixedFee: '0',
+    networkFee: '0',
   },
 })
 const swapSuccess = ref(true)
 const bridgeInfo = reactive({
   feeRate: {
     title: 'Fee Rate',
-    value: 0,
-    unit:''
+    value: '0',
+    unit: '',
   },
   bridgeFee: {
     title: "You're pay in bridge fees",
-    value: 0,
-    unit:''
+    value: '0',
+    unit: '',
   },
   newtworkFee: {
     title: 'Network fee',
-    value: 0,
-    unit:''
+    value: '0',
+    unit: '',
   },
   estimatedTime: {
     title: 'Estimated Time of Arrival',
     value: 0,
-    unit:'minutes'
+    unit: 'minutes',
   },
 })
 const assetInfo = reactive<{ val: bridgeAssetPairReturnType }>({
@@ -555,14 +555,14 @@ async function getAssetInfo() {
             myBrc20s.value = res[0]
             const fromBalance = res[0]
             fromAsset.val.balance = new Decimal(
-              fromBalance.transferBalance
+              fromBalance.transferBalance,
             ).toNumber()
             fromAsset.val.initAmount = new Decimal(
-              fromBalance.transferBalance
+              fromBalance.transferBalance,
             ).toNumber()
 
             fromAsset.val.availableBalance = new Decimal(
-              fromBalance.availableBalance
+              fromBalance.availableBalance,
             ).toNumber()
             if (res[1].length) {
               const toAssetInfo = res[1][0]
@@ -585,7 +585,7 @@ async function getAssetInfo() {
         ])
           .then((res) => {
             const fromBalance = res[0]
-           
+
             fromAsset.val.balance = new Decimal(fromBalance)
               .div(10 ** decimals)
               .toNumber()
@@ -653,7 +653,7 @@ watch(
     if (staus) {
       getAssetInfo()
     }
-  }
+  },
 )
 
 const fromNetworkIsBrc20 = computed(() => {
@@ -664,30 +664,30 @@ const fromNetworkIsBrc20 = computed(() => {
 })
 
 const btnStatus = computed(() => {
-    if(swapToAmount.value && swapToAmount.value! < 0){
-      return {
+  if (swapToAmount.value && swapToAmount.value! < 0) {
+    return {
       value: 'Less than Bridge MinmumLimit',
       color: BtnColor.error,
       disable: true,
-    } 
-    }
-  if (fromAsset.val.network == AssetNetwork.BTC) {
-    if (networkStore.network !== 'testnet') {
-      return {
-        value: 'BTC => MVC requires Metalet wallet to switch to Testnet',
-        color: BtnColor.error,
-        disable: true,
-      }
-    }
-  } else {
-    if (networkStore.network !== 'livenet') {
-      return {
-        value: 'MVC => BTC requires Metalet wallet to switch to Mainnet',
-        color: BtnColor.error,
-        disable: true,
-      }
     }
   }
+  // if (fromAsset.val.network == AssetNetwork.BTC) {
+  //   if (networkStore.network !== 'testnet') {
+  //     return {
+  //       value: 'BTC => MVC requires Metalet wallet to switch to Testnet',
+  //       color: BtnColor.error,
+  //       disable: true,
+  //     }
+  //   }
+  // } else {
+  //   if (networkStore.network !== 'livenet') {
+  //     return {
+  //       value: 'MVC => BTC requires Metalet wallet to switch to Mainnet',
+  //       color: BtnColor.error,
+  //       disable: true,
+  //     }
+  //   }
+  // }
 
   if (swapFromAmount.value == 0) {
     return {
@@ -701,10 +701,10 @@ const btnStatus = computed(() => {
     swapFromAmount.value &&
     fromNetworkIsBrc20.value &&
     new Decimal(swapFromAmount.value).toNumber() <=
-      myBrc20s.value.transferBalance && (!lastThanMaxLimited.value && !lessThanMinLimited.value)
+      myBrc20s.value.transferBalance &&
+    !lastThanMaxLimited.value &&
+    !lessThanMinLimited.value
   ) {
-   
-    
     return {
       value: `Bridge`,
       color: BtnColor.default,
@@ -724,7 +724,6 @@ const btnStatus = computed(() => {
       disable: true,
     }
   } else if (lastThanMaxLimited.value) {
-    
     return {
       value: 'Over than Bridge MaxmumLimit',
       color: BtnColor.error,
@@ -761,19 +760,27 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBtc
             : BridgeOp.MVCToBtcByBtc
-        const { confirmNumber, receiveAmount, bridgeFee,fixedFee,networkFee} = BridgeTools.calcReceiveInfo(
+        const {
+          confirmNumber,
+          receiveAmount,
+          bridgeFee,
+          fixedFee,
+          networkFee,
+        } = BridgeTools.calcReceiveInfo(
           formatUnitToSats(swapFromAmount.value, currentAssetInfo.val.decimal),
           assetInfo.val,
           currentAssetInfo.val,
-          op
+          op,
         )
-        feeInfo.val ={
+        console.log('bridgeFee', bridgeFee, fixedFee, networkFee)
+
+        feeInfo.val = {
           confirmNumber,
           bridgeFee,
           fixedFee,
-          networkFee
+          networkFee,
         }
-        
+
         return receiveAmount
       } catch (error) {
         if ((error as any).message) {
@@ -781,7 +788,7 @@ const swapToAmount = computed(() => {
             +swapFromAmount.value <
             formatUnitToBtc(
               JSON.parse((error as any).message).amountLimitMinimum,
-              currentAssetInfo.val.decimal
+              currentAssetInfo.val.decimal,
             )
           ) {
             lessThanMinLimited.value = true
@@ -789,7 +796,7 @@ const swapToAmount = computed(() => {
             +swapFromAmount.value >
             formatUnitToBtc(
               JSON.parse((error as any).message).amountLimitMaximum,
-              currentAssetInfo.val.decimal
+              currentAssetInfo.val.decimal,
             )
           ) {
             lastThanMaxLimited.value = true
@@ -804,31 +811,34 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBrc20
             : BridgeOp.MvcToBtcByBrc20
-        const { confirmNumber, receiveAmount,bridgeFee,fixedFee,networkFee } = BridgeTools.calcReceiveInfo(
-          
+        const {
+          confirmNumber,
+          receiveAmount,
+          bridgeFee,
+          fixedFee,
+          networkFee,
+        } = BridgeTools.calcReceiveInfo(
           swapFromAmount.value,
           assetInfo.val,
           currentAssetInfo.val,
-          op
+          op,
         )
-        
 
-        feeInfo.val ={
+        feeInfo.val = {
           confirmNumber,
           bridgeFee,
           fixedFee,
-          networkFee
+          networkFee,
         }
         return receiveAmount
       } catch (error) {
-        
         if ((error as any).message) {
-          const converBtcValue=BridgeTools.tokenConvertBtcRate({
-            inputAmount:swapFromAmount.value,
-            brc20Price:currentAssetInfo.val.price,
-            btcPrice:assetInfo.val.btcPrice
+          const converBtcValue = BridgeTools.tokenConvertBtcRate({
+            inputAmount: swapFromAmount.value,
+            brc20Price: currentAssetInfo.val.price,
+            btcPrice: assetInfo.val.btcPrice,
           })
-       
+
           if (
             converBtcValue <
             +JSON.parse((error as any).message).amountLimitMinimum
@@ -839,7 +849,6 @@ const swapToAmount = computed(() => {
             +JSON.parse((error as any).message).amountLimitMaximum
           ) {
             lastThanMaxLimited.value = true
-            
           }
         }
       }
@@ -858,20 +867,20 @@ function BtnOperate() {
   if (btnStatus.value.color == BtnColor.unLogin) {
     connetMetalet()
   } else if (btnStatus.value.color == BtnColor.default) {
-    bridgeInfo.bridgeFee.value =feeInfo.val.bridgeFee
-    bridgeInfo.feeRate.value=feeInfo.val.fixedFee
-    bridgeInfo.newtworkFee.value=feeInfo.val.networkFee
+    bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee
+    bridgeInfo.feeRate.value = feeInfo.val.fixedFee
+    bridgeInfo.newtworkFee.value = feeInfo.val.networkFee
     bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
-    console.log('currentAssetInfo',currentAssetInfo.val)
-    bridgeInfo.bridgeFee.unit=currentAssetInfo.val.originSymbol
-    bridgeInfo.feeRate.unit=currentAssetInfo.val.originSymbol
-    bridgeInfo.newtworkFee.unit=currentAssetInfo.val.originSymbol
+    console.log('currentAssetInfo', currentAssetInfo.val)
+    bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
+    bridgeInfo.feeRate.unit = currentAssetInfo.val.originSymbol
+    bridgeInfo.newtworkFee.unit = currentAssetInfo.val.originSymbol
     showConfrimDialog.value = true
   }
 }
 async function redeem() {
   const addressInfo = determineAddressInfo(
-    await connectionStore.adapter.getAddress()
+    await connectionStore.adapter.getAddress(),
   )
   const addressType: SupportRedeemAddressType =
     addressInfo.type.toLocaleUpperCase() as SupportRedeemAddressType
@@ -884,17 +893,17 @@ async function redeem() {
       await BridgeRedeem.redeemBtc(
         formatSat(swapFromAmount.value, currentAssetInfo.val.decimals),
         currentAssetInfo.val,
-        addressType
+        addressType,
       )
     }
     if (currentAssetInfo.val.network === AssetBridgeNetwork.BRC20) {
       await BridgeRedeem.redeemBrc20(
         formatSat(
           swapFromAmount.value,
-          currentAssetInfo.val.decimals - currentAssetInfo.val.trimDecimals
+          currentAssetInfo.val.decimals - currentAssetInfo.val.trimDecimals,
         ),
         currentAssetInfo.val,
-        addressType
+        addressType,
       )
     }
   } catch (err) {
@@ -919,18 +928,20 @@ async function confrimSwap() {
       const publicKeyReceiveSign = await connectionStore.adapter.signMvcMessage(
         {
           message: publicKeyReceive,
-        }
+        },
       )
-      console.log('publicKeyReceiveSign', publicKeyReceiveSign)
 
       const addressType = determineAddressInfo(
-        await connectionStore.adapter.getAddress()
+        await connectionStore.adapter.getAddress(),
       )
       console.log('addressType', bridgeSwapItem.value.InscriptionUtxos)
       if (fromAsset.val.symbol == 'BTC') {
         await BridgeTools.sumitBridgeOrderForBtc({
           amount: String(
-            formatUnitToSats(swapFromAmount.value, currentAssetInfo.val.decimal)
+            formatUnitToSats(
+              swapFromAmount.value,
+              currentAssetInfo.val.decimal,
+            ),
           ),
           originTokenId: currentAssetInfo.val.originTokenId,
           addressType: addressType.type.toUpperCase(),
@@ -968,10 +979,10 @@ async function confrimSwap() {
     }
   } else if (fromAsset.val.network === AssetNetwork.MVC) {
     try {
-     const {total}= await connectionStore.adapter.getMvcBalance()
-     if(total < 13000){
-      throw new Error('MVC Space Insufficient balance')
-     }
+      const { total } = await connectionStore.adapter.getMvcBalance()
+      if (total < 13000) {
+        throw new Error('MVC Space Insufficient balance')
+      }
       await redeem()
       bridgeLoading.value = false
       bridgeSuccess.value = true
@@ -1003,32 +1014,29 @@ const handleHistoryVisible = (visible: boolean) => {
   historyVisible.value = visible
 }
 
-const getFaucet=async()=>{
-  
+const getFaucet = async () => {
   try {
     const addressInfo = determineAddressInfo(
-    await connectionStore.adapter.getAddress()
-  )
-  const addressType: SupportRedeemAddressType =
-    addressInfo.type.toLocaleUpperCase() as SupportRedeemAddressType
+      await connectionStore.adapter.getAddress(),
+    )
+    const addressType: SupportRedeemAddressType =
+      addressInfo.type.toLocaleUpperCase() as SupportRedeemAddressType
     const publicKey = await connectionStore.adapter.getPubKey()
-      const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
-    const res= await getBrc20Faucet({
+    const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
+    const res = await getBrc20Faucet({
       addressType,
       publicKey,
-      publicKeySign
+      publicKeySign,
     })
-    if(res.success){
+    if (res.success) {
       ElMessage.success('Received successfully')
-    }else{
+    } else {
       ElMessage.error(res.msg)
     }
   } catch (error) {
-    
-    ElMessage.error((error as any))
+    ElMessage.error(error as any)
   }
 }
-
 </script>
 <style scoped lang="scss">
 .bridge-wrap {
