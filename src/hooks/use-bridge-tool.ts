@@ -430,6 +430,7 @@ export function useBridgeTools() {
     minerFee: string
     receiveAmount: string
     confirmNumber: number
+    totalFee:string
   } {
     const {
       btcPrice,
@@ -510,7 +511,7 @@ export function useBridgeTools() {
 
     let bridgeFee = '0'
     let minerFee = '0'
-    let totalFee = 0
+    let totalFee = "0"
     let receiveAmount = '0'
     let receiveAmountFixed = '0'
 
@@ -525,9 +526,9 @@ export function useBridgeTools() {
         .mul(mvcPrice)
         .div(btcPrice)
         .toString()
-      totalFee = new Decimal(bridgeFee).add(minerFee).toNumber()
+      totalFee = new Decimal(bridgeFee).add(minerFee).toString()
       receiveAmount = formatFloatZeros(
-        formatUnitToBtc(mintAmount - totalFee).toFixed(8),
+        formatUnitToBtc(new Decimal(mintAmount).minus(totalFee).toNumber()).toFixed(8),
       )
 
       return {
@@ -539,6 +540,9 @@ export function useBridgeTools() {
         ),
         receiveAmount,
         confirmNumber,
+        totalFee:formatFloatZeros(
+          new Decimal(totalFee).div(10 ** 8).toFixed(8),
+        )
       }
     } else if (op == BridgeOp.BtcToMvcByBrc20) {
       bridgeFee = new Decimal(mintAmount)
@@ -567,7 +571,7 @@ export function useBridgeTools() {
       //   .mul(mvcPrice)
       //   .div(currentAssetInfo.price)
       //   .toString()
-      totalFee = new Decimal(bridgeFee).add(minerFee).toNumber()
+      totalFee = new Decimal(bridgeFee).add(minerFee).toString()
       receiveAmount = new Decimal(mintAmount).minus(totalFee).toString()
       receiveAmountFixed = formatFloatZeros(
         new Decimal(receiveAmount).toFixed(
@@ -588,6 +592,11 @@ export function useBridgeTools() {
         ),
         receiveAmount: receiveAmountFixed,
         confirmNumber,
+        totalFee:formatFloatZeros(
+          new Decimal(totalFee).toFixed(
+            currentAssetInfo.decimals - currentAssetInfo.trimDecimals,
+          ),
+        )
       }
     } else if (op == BridgeOp.MVCToBtcByBtc) {
       bridgeFee = new Decimal(mintAmount)
@@ -596,7 +605,7 @@ export function useBridgeTools() {
         .add(new Decimal(currentAssetInfo.feeRateConstRedeem))
         .toString()
       minerFee = new Decimal(transactionSize.BTC_REDEEM).mul(feeBtc).toString()
-      totalFee = new Decimal(bridgeFee).add(minerFee).toNumber()
+      totalFee = new Decimal(bridgeFee).add(minerFee).toString()
       receiveAmount = new Decimal(mintAmount).minus(totalFee).toFixed(8)
       return {
         bridgeFee: formatFloatZeros(
@@ -607,6 +616,9 @@ export function useBridgeTools() {
         ),
         receiveAmount: new Decimal(receiveAmount).div(10 ** 8).toString(),
         confirmNumber,
+        totalFee:formatFloatZeros(
+          new Decimal(totalFee).div(10 ** 8).toFixed(8),
+        )
       }
     } else if (op == BridgeOp.MvcToBtcByBrc20) {
       const bridgeFeeConst = new Decimal(currentAssetInfo.feeRateConstRedeem)
@@ -629,7 +641,7 @@ export function useBridgeTools() {
         .mul(10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals))
         .toString()
 
-      totalFee = new Decimal(bridgeFee).add(minerFee).toNumber()
+      totalFee = new Decimal(bridgeFee).add(minerFee).toString()
       receiveAmount = formatFloatZeros(
         new Decimal(mintAmount)
           .minus(totalFee)
@@ -655,6 +667,13 @@ export function useBridgeTools() {
             )
             .toFixed(currentAssetInfo.decimals - currentAssetInfo.trimDecimals),
         ),
+        totalFee:formatFloatZeros(
+          new Decimal(totalFee)
+            .div(
+              10 ** (currentAssetInfo.decimals - currentAssetInfo.trimDecimals),
+            )
+            .toFixed(currentAssetInfo.decimals - currentAssetInfo.trimDecimals),
+        )
       }
     } else {
       return {
@@ -662,6 +681,7 @@ export function useBridgeTools() {
         confirmNumber: 0,
         bridgeFee: '0',
         minerFee: '0',
+        totalFee:"0"
       }
     }
   }

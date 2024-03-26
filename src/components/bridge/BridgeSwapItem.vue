@@ -54,9 +54,10 @@
 
           <input
             v-else
+           
             :value="props.modelValue"
             placeholder="0"
-            @input="emit('update:modelValue', ($event as any).target!.value)"
+            @input="validateInput"
             type="number"
             :readonly="disableInput"
             class="input-wrap quiet-input mr-2.5 w-full rounded-md py-1 pl-2 text-right placeholder-zinc-500"
@@ -101,16 +102,16 @@ interface AssetInfo {
 interface Props {
   opName: string
   assetInfo: AssetInfo
-  modelValue: number
+  modelValue: string | number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: 0,
+  modelValue: '0',
 })
 
 console.log('assetInfo12313212', props.assetInfo)
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue','validate'])
 
 const curretnNetwork = ref('BTC')
 const InscriptionUtxos = ref<InscriptionUtxo[]>([])
@@ -123,6 +124,13 @@ const showInscription = computed(() => {
     props.assetInfo.symbol !== 'BTC'
   )
 })
+
+function validateInput(e:Event){
+  
+  emit('update:modelValue', (e as any).target!.value)
+  emit('validate')
+}
+
 function onAmountChange() {
   const totalValue = InscriptionUtxos.value.reduce((pre: any, cur: any) => {
     return new Decimal(pre).add(cur.amount!).toNumber()
