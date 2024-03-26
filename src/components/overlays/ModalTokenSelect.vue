@@ -1,15 +1,17 @@
 <script lang="ts" setup>
 import { Dialog, DialogPanel } from '@headlessui/vue'
-import { ChevronRightIcon, XIcon } from 'lucide-vue-next'
+import { XIcon } from 'lucide-vue-next'
 import { ref } from 'vue'
+import { refDebounced } from '@vueuse/core'
 
 import { useModalTokenSelect } from '@/hooks/use-modal-token-select'
-import { refDebounced } from '@vueuse/core'
-import SwapTokenButton from '@/components/swap/SwapTokenButton.vue'
 import { useTradingPair } from '@/hooks/use-trading-pair'
+
+import { useRouter } from 'vue-router'
 
 const { isOpen, closeModal } = useModalTokenSelect()
 const { selectPair, selectedPair } = useTradingPair()
+const router = useRouter()
 
 const props = defineProps<{
   pinnedTokens: string[]
@@ -23,6 +25,12 @@ function selectToken(token: string) {
 
 const keyword = ref('')
 const keywordDebounced = refDebounced(keyword, 300)
+const inputKeyword = ref<HTMLInputElement | null>(null)
+
+function useCustomToken() {
+  router.push(`/swap-pools/btc-${keyword.value}/add`)
+  closeModal()
+}
 </script>
 
 <template>
@@ -44,7 +52,7 @@ const keywordDebounced = refDebounced(keyword, 300)
       />
     </button> -->
 
-    <Dialog :open="isOpen" @close="() => {}">
+    <Dialog :open="isOpen" @close="() => {}" :initial-focus="inputKeyword">
       <div
         class="fixed inset-0 z-50 bg-black/40 backdrop-blur"
         aria-hidden="true"
@@ -66,13 +74,20 @@ const keywordDebounced = refDebounced(keyword, 300)
 
           <!-- body -->
           <!-- searchbar -->
-          <div class="flex items-center">
+          <div class="flex items-stretch gap-4">
             <input
               type="text"
               class="flex-1 rounded-md border-zinc-700 bg-inherit p-2 text-zinc-300"
-              placeholder="Search BRC-20 token name"
+              placeholder="Enter BRC-20 token name"
+              ref="inputKeyword"
               v-model="keyword"
             />
+            <button
+              class="rounded-md bg-zinc-900 px-6 py-1 transition hover:text-primary"
+              @click="useCustomToken"
+            >
+              OK
+            </button>
           </div>
 
           <!-- pinned tokens -->
