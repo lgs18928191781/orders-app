@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 export const useModalTokenSelect = createGlobalState(() => {
   // state
-  const isOpen = ref(true)
+  const isOpen = ref(false)
 
   // actions
   function openModal() {
