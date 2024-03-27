@@ -172,7 +172,7 @@
                     <img :src="shape" alt="" />
                   </div>
                   <div class="mt-5 text-2xl text-[#ffa02a]">
-                    <span>Successful</span>
+                    <span>Success</span>
                   </div>
                 </div>
                 <div class="mb-7 mt-16">
@@ -388,7 +388,7 @@ const bridgeInfo = reactive({
     unit: '',
   },
   totalFee: {
-    title: 'Total',
+    title: 'Total fee',
     value: '0',
     unit: '',
   },
@@ -696,7 +696,7 @@ const btnStatus = computed(() => {
 
   if (+swapFromAmount.value == 0) {
     return {
-      value: `Convert to ${fromAsset.val.symbol} on ${toAsset.val.network} network`,
+      value: `Convert ${fromAsset.val.symbol} on ${toAsset.val.network} network`,
       color: BtnColor.disable,
       disable: true,
     }
@@ -1093,7 +1093,7 @@ const getFaucet = async () => {
       publicKeySign,
     })
     if (res.success) {
-      ElMessage.success('Received successfully')
+      ElMessage.success('Received success')
     } else {
       ElMessage.error(res.msg)
     }
