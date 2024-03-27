@@ -175,16 +175,16 @@
                     <span>Success</span>
                   </div>
                 </div>
-                <div class="mb-7 mt-16">
+                <div class="item-center mb-7 mt-16 flex justify-center">
                   <button
                     @click="closeSuccessDialog"
                     :class="[
-                      'w-full',
                       'text-base',
-
+                      'w-2/6',
                       'rounded-xl',
                       'py-3',
                       'flex',
+                      'mr-10',
                       'item-center',
                       'justify-center',
                       'font-bold',
@@ -193,6 +193,27 @@
                   >
                     <!-- <Loader2Icon  class="mr-1.5 h-5 animate-spin" /> -->
                     <span class="text-[#181614]">OK</span>
+                  </button>
+
+                  <button
+                    @click="goToTrade"
+                    :class="[
+                      'text-base',
+                      'w-2/6',
+                      'rounded-xl',
+                      'py-3',
+                      'flex',
+                      'item-center',
+                      'justify-center',
+
+                      'border',
+
+                      'border-[#ffa02a]',
+                      ' hover:shadow-[0_0px_8px_#ffa02a]',
+                    ]"
+                  >
+                    <!-- <Loader2Icon  class="mr-1.5 h-5 animate-spin" /> -->
+                    <span class="text-[#fff]">Go to Trade</span>
                   </button>
                 </div>
               </DialogPanel>
@@ -325,6 +346,7 @@ import {
   TabPanel,
 } from '@headlessui/vue'
 import { Buffer } from 'buffer'
+import { useRouter } from 'vue-router'
 import { ElLoading } from 'element-plus'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
@@ -352,9 +374,9 @@ const BridgeRedeem = useBridgeRedeem()
 const bridgeSwapItem = ref()
 const swapFromAmount = ref('0')
 const myBrc20s = ref()
-const showSuccessDialog = ref(false)
+const showSuccessDialog = ref(true)
 const currentAddress = ref('')
-
+const router = useRouter()
 const feeInfo = reactive({
   val: {
     confirmNumber: 0,
@@ -363,7 +385,6 @@ const feeInfo = reactive({
     totalFee: '0',
   },
 })
-const swapSuccess = ref(true)
 
 function validateInput() {
   const regex = /^\d+(\.\d{0,8})?$/
@@ -373,6 +394,18 @@ function validateInput() {
       .replace(/[^\d^\.]+/g, '')
       .replace(/[0-9]{8}$/g, '')
       .replace(/\$\s?|(,*)/g, '')
+  }
+}
+
+function goToTrade() {
+  showSuccessDialog.value = false
+  if (fromAsset.val.network == 'BTC') {
+    router.push('/swap')
+  } else {
+    ElMessage.warning(`Order Swap on MVC network is coming soon`)
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   }
 }
 
@@ -972,6 +1005,9 @@ async function connetMetalet() {
 }
 
 async function confrimSwap() {
+  showSuccessDialog.value = true
+
+  return
   if (+swapFromAmount.value <= 0) {
     return
   }
