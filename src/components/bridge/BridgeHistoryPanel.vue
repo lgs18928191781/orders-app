@@ -42,7 +42,7 @@
         </div>
         <div class="mt-3 flex flex-col text-sm">
           <div class="flex flex-row items-center">
-            <span class="mr-1">OriginTxid</span>
+            <span class="mr-1">Origin Tx</span>
             <span class="mr-1">({{ tx.originNetwork }}):</span>
             <a
               class="mr-1 hover:text-primary"
@@ -58,7 +58,7 @@
             ></Copy>
           </div>
           <div class="mt-3 flex flex-row items-center">
-            <span class="mr-1">TargetTxid</span>
+            <span class="mr-1">Target Tx</span>
             <span class="mr-1">({{ tx.targetNetwork }}):</span>
             <a
               class="mr-1 hover:text-primary"
