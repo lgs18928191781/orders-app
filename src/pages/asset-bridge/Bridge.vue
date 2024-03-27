@@ -400,12 +400,12 @@ function validateInput() {
 function goToTrade() {
   showSuccessDialog.value = false
   if (fromAsset.val.network == 'BTC') {
-    router.push('/swap')
-  } else {
     ElMessage.warning(`Order Swap on MVC network is coming soon`)
     setTimeout(() => {
       window.location.reload()
     }, 1000)
+  } else {
+    router.push('/swap')
   }
 }
 
@@ -1005,9 +1005,6 @@ async function connetMetalet() {
 }
 
 async function confrimSwap() {
-  showSuccessDialog.value = true
-
-  return
   if (+swapFromAmount.value <= 0) {
     return
   }
