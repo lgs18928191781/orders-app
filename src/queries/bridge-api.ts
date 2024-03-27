@@ -65,7 +65,7 @@ export const createPrepayOrderMintBrc20Req = async (data: any) => {
 }
 
 export const submitPrepayOrderMintBtcReq = async (
-  data: any
+  data: any,
 ): Promise<{
   msg: string
   success: boolean
@@ -77,7 +77,7 @@ export const submitPrepayOrderMintBtcReq = async (
 }
 
 export const submitPrepayOrderMintBrc20Req = async (
-  data: any
+  data: any,
 ): Promise<{
   msg: string
   success: boolean
@@ -96,7 +96,7 @@ export const createPrepayOrderRedeemBtc = async (data: any) => {
 }
 
 export const submitPrepayOrderRedeemBtc = async (
-  data: any
+  data: any,
 ): Promise<{ success: boolean; msg: string }> => {
   return await bridgeApiFetch(`/submitPrepayOrderRedeemBtc`, {
     method: 'POST',
@@ -112,7 +112,7 @@ export const createPrepayOrderRedeemBrc20 = async (data: any) => {
 }
 
 export const submitPrepayOrderRedeemBrc20 = async (
-  data: any
+  data: any,
 ): Promise<{ success: boolean; msg: string }> => {
   return await bridgeApiFetch(`/submitPrepayOrderRedeemBrc20`, {
     method: 'POST',
@@ -139,11 +139,12 @@ export type HsitoryDetail = {
   amount: string
   timestamp: string
   status: PrepayOrderStatus
-  symbol: string;
-  originTxid:string;
-  originNetwork:'BTC'|'MVC';
-  targetNetwork:'BTC'|'MVC';
-  decimals:number
+  symbol: string
+  originTxid: string
+  targetTxid: string
+  originNetwork: 'BTC' | 'MVC'
+  targetNetwork: 'BTC' | 'MVC'
+  decimals: number
 }
 export const getBridgeHistory = async ({
   type,
@@ -159,6 +160,6 @@ export const getBridgeHistory = async ({
     `/queryTransactionsByAddress?type=${type}&cursor=${cursor}&size=${size}&order=${order}&address=${address}`,
     {
       method: 'GET',
-    }
+    },
   )
 }

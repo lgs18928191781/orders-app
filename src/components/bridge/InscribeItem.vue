@@ -164,12 +164,12 @@ watch(
   selecteds,
   (newSelecteds) => {
     // update amount and inscriptionUtxos when selecteds changed
-    const minusValue = newSelecteds
-      .reduce((prev, curr) => {
-        return prev.add(new Decimal(curr.amount))
-      }, new Decimal(0))
-      .toFixed(0)
+    const minusValue = newSelecteds.reduce((prev, curr) => {
+      return prev.add(new Decimal(curr.amount))
+    }, new Decimal(0))
+
     amount.value = new Decimal(initAmount.value!).minus(minusValue).toString()
+
     inscriptionUtxos.value = newSelecteds.map((t) => {
       return {
         id: t.inscriptionId,
@@ -212,11 +212,11 @@ function isSelected(transferable: Brc20Transferable) {
 }
 
 const toggleSelect = (transferable: Brc20Transferable) => {
-  if (+transferable.inscriptionNumber <= 0) {
-    return ElMessage.error(
-      'The inscription is not confirmed and cannot be traded.',
-    )
-  }
+  // if (+transferable.inscriptionNumber <= 0) {
+  //   return ElMessage.error(
+  //     'The inscription is not confirmed and cannot be traded.',
+  //   )
+  // }
 
   if (isSelected(transferable)) {
     selecteds.value = selecteds.value.filter((t) => t !== transferable)

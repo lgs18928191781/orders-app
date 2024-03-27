@@ -40,19 +40,39 @@
             {{ tx.status }}
           </div>
         </div>
-        <div class="mt-3 flex items-center text-sm">
-          <span>Txid:</span>
-          <a
-            class="mr-1 hover:text-primary"
-            :href="queryTx(tx)"
-            target="_blank"
-            >{{ prettyTxid(tx.originTxid, 8) }}</a
-          >
-          <Copy
-            @click="copyTx(tx.originTxid)"
-            class="cursor-pointer hover:scale-110"
-            :size="14"
-          ></Copy>
+        <div class="mt-3 flex flex-col text-sm">
+          <div class="flex flex-row items-center">
+            <span class="mr-1">OriginTxid</span>
+            <span class="mr-1">({{ tx.originNetwork }}):</span>
+            <a
+              class="mr-1 hover:text-primary"
+              :href="queryOriginTx(tx)"
+              target="_blank"
+              >{{ prettyTxid(tx.originTxid, 8) }}</a
+            >
+
+            <Copy
+              @click="copyTx(tx.originTxid)"
+              class="cursor-pointer hover:scale-110"
+              :size="14"
+            ></Copy>
+          </div>
+          <div class="mt-3 flex flex-row items-center">
+            <span class="mr-1">TargetTxid</span>
+            <span class="mr-1">({{ tx.targetNetwork }}):</span>
+            <a
+              class="mr-1 hover:text-primary"
+              :href="queryTargetTx(tx)"
+              target="_blank"
+              >{{ prettyTxid(tx.targetTxid, 8) }}</a
+            >
+
+            <Copy
+              @click="copyTx(tx.targetTxid)"
+              class="cursor-pointer hover:scale-110"
+              :size="14"
+            ></Copy>
+          </div>
         </div>
         <div class="my-4 h-px bg-gray-800"></div>
         <div
@@ -120,7 +140,7 @@ function copyTx(txid: string) {
   ElMessage.success('Txid copied to clipboard')
 }
 
-function queryTx(tx: HsitoryDetail) {
+function queryOriginTx(tx: HsitoryDetail) {
   if (!tx.originTxid) {
     return ''
   } else {
@@ -128,6 +148,18 @@ function queryTx(tx: HsitoryDetail) {
       return `https://mempool.space/zh/testnet/tx/${tx.originTxid}`
     } else {
       return `https://test.mvcscan.com/tx/${tx.originTxid}`
+    }
+  }
+}
+
+function queryTargetTx(tx: HsitoryDetail) {
+  if (!tx.targetTxid) {
+    return ''
+  } else {
+    if (tx.targetNetwork == 'BTC') {
+      return `https://mempool.space/zh/testnet/tx/${tx.targetTxid}`
+    } else {
+      return `https://test.mvcscan.com/tx/${tx.targetTxid}`
     }
   }
 }

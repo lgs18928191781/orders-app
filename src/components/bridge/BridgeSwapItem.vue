@@ -133,6 +133,7 @@ function onAmountChange() {
   const totalValue = InscriptionUtxos.value.reduce((pre: any, cur: any) => {
     return new Decimal(pre).add(cur.amount!).toNumber()
   }, new Decimal(0))
+
   emit('update:modelValue', totalValue)
 }
 
@@ -163,6 +164,7 @@ const selectNetwork = computed(() => {
 
 function onAmountCleared() {
   InscriptionUtxos.value = []
+  emit('update:modelValue', 0)
   emit('clearAmount')
 }
 

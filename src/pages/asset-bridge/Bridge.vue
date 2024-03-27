@@ -172,7 +172,7 @@
                     <img :src="shape" alt="" />
                   </div>
                   <div class="mt-5 text-2xl text-[#ffa02a]">
-                    <span>Successfully</span>
+                    <span>Successful</span>
                   </div>
                 </div>
                 <div class="mb-7 mt-16">
@@ -503,7 +503,7 @@ async function getAssetInfo() {
     currentAddress.value = await connectionStore.adapter.getAddress()
     if (determineAddressInfo(currentAddress.value).type == 'p2sh') {
       return ElMessage.error(
-        `Please use the address type that Nested Segwit expects`,
+        `Please use a Legacy / Native Segwit / Taproot format address.`,
       )
     }
 
@@ -540,6 +540,7 @@ async function getAssetInfo() {
             fromAsset.val.balance = new Decimal(
               fromBalance.transferBalance,
             ).toNumber()
+
             fromAsset.val.initAmount = new Decimal(
               fromBalance.transferBalance,
             ).toNumber()
@@ -671,7 +672,7 @@ const btnStatus = computed(() => {
   }
   if (determineAddressInfo(currentAddress.value).type == 'p2sh') {
     return {
-      value: 'Please use the address type that Nested Segwit expects',
+      value: 'Please use a Legacy / Native Segwit / Taproot format address',
       color: BtnColor.error,
       disable: true,
     }
