@@ -664,8 +664,7 @@ const btnStatus = computed(() => {
   }
   if (!networkStore.isTestnet) {
     return {
-      value:
-        'To continue the operation, you need to switch to the wallet testnet',
+      value: 'Please switch to testnet',
       color: BtnColor.error,
       disable: true,
     }

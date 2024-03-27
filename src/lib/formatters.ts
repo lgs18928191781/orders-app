@@ -5,7 +5,7 @@ import Decimal from 'decimal.js'
 export function prettyTimestamp(
   timestamp: number,
   isInSeconds = false,
-  cutThisYear = false
+  cutThisYear = false,
 ) {
   if (isInSeconds) timestamp = timestamp * 1000
 
@@ -28,12 +28,13 @@ export const prettyOneSideAddress = (address: string, len = 6) => {
 }
 
 export const prettyTxid = (txid: string, len = 6) => {
+  if (!txid) return ''
   return `${txid.slice(0, len)}...${txid.slice(-len)}`
 }
 
 export const formatUnitToSats = (
   value: number | string,
-  decimal: number = 8
+  decimal: number = 8,
 ) => {
   if (!value) {
     return 0
@@ -43,7 +44,7 @@ export const formatUnitToSats = (
 
 export const formatUnitToBtc = (
   value: number | string,
-  decimal: number = 8
+  decimal: number = 8,
 ) => {
   if (!value) {
     return 0
@@ -53,7 +54,7 @@ export const formatUnitToBtc = (
 
 export const prettyBalance = (
   balance: number | string | Decimal | undefined,
-  useBtcUnit: boolean | RemovableRef<boolean> = true
+  useBtcUnit: boolean | RemovableRef<boolean> = true,
 ) => {
   if (balance === 0 || balance === '0') return new Decimal(0)
   if (!balance) return '-'
@@ -73,7 +74,7 @@ export const prettyBalance = (
 
 export const prettyBtcDisplay = (
   balance: number | string | Decimal,
-  cutDecimals = false
+  cutDecimals = false,
 ) => {
   if (cutDecimals) {
     const _ = new Decimal(balance).dividedBy(1e8)

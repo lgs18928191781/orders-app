@@ -36,9 +36,8 @@
                   class="text-base font-semibold leading-6 text-zinc-100"
                 >
                   <span class="text-primary"
-                    >If you want to use the Asset Bridge function, you need to
-                    log in using Metalet Wallet. Do you want to log out of the
-                    current login and switch to Metalet login?</span
+                    >To utilize the Asset Bridge function, please log in with
+                    Metalet Wallet.</span
                   >
                 </DialogTitle>
               </div>
@@ -59,7 +58,7 @@
                     v-if="confrimLogin"
                     class="mr-1.5 animate-spin"
                   />
-                  <span>Confrim</span>
+                  <span>Login</span>
                 </button>
               </div>
             </DialogPanel>
