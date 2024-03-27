@@ -1,29 +1,29 @@
 <template>
   <div
-    class="min-h-96 max-h-96 h-96 flex flex-col items-center overflow-y-auto"
+    class="flex h-96 max-h-96 min-h-96 flex-col items-center overflow-y-auto"
   >
     <div
-      class="w-full h-full flex flex-col justify-center items-center text-zinc-500"
+      class="flex h-full w-full flex-col items-center justify-center text-zinc-500"
       v-if="list.length === 0 && !loading"
     >
       No Transfers yet
     </div>
-    <div class="w-full flex flex-col items-center py-1">
+    <div class="flex w-full flex-col items-center py-1">
       <div
         v-for="tx in list"
         :key="tx.originTxid"
-        class="w-full p-5 rounded-lg opacity-100 bg-zinc-900 mt-4"
+        class="mt-4 w-full rounded-lg bg-zinc-900 p-5 opacity-100"
       >
         <div class="flex items-center justify-between">
           <div
-            class="flex items-center gap-2 font-geist-mono text-base font-semibold text-white"
+            class="font-geist-mono flex items-center gap-2 text-base font-semibold text-white"
           >
             <img
               :src="tx.originNetwork == 'BTC' ? BtcIcon : MVC"
               class="h-6 w-6 rounded-full"
             /><span>{{ tx.originNetwork }}</span>
             <div
-              class="w-6 h-6 flex items-center justify-center rounded bg-gray-800"
+              class="flex h-6 w-6 items-center justify-center rounded bg-gray-800"
             >
               <ArrowRight :size="20" class="text-gray-500" />
             </div>
@@ -40,14 +40,26 @@
             {{ tx.status }}
           </div>
         </div>
-        <div class="h-px my-4 bg-gray-800"></div>
+        <div class="mt-3 flex items-center text-sm">
+          <span>Txid:</span>
+          <a
+            class="mr-1 hover:text-primary"
+            :href="queryTx(tx)"
+            target="_blank"
+            >{{ prettyTxid(tx.originTxid, 8) }}</a
+          >
+          <Copy
+            @click="copyTx(tx.originTxid)"
+            class="cursor-pointer hover:scale-110"
+            :size="14"
+          ></Copy>
+        </div>
+        <div class="my-4 h-px bg-gray-800"></div>
         <div
-          class="flex items-center justify-between font-geist-mono text-xl font-semibold text-white"
+          class="font-geist-mono flex items-center justify-between text-xl font-semibold text-white"
         >
           <div>
-            {{
-              tx.amount
-            }}
+            {{ tx.amount }}
             {{ tx.symbol }}
           </div>
           <div class="text-xs">
@@ -56,11 +68,11 @@
         </div>
       </div>
       <Loader2Icon
-        class="mt-2 size-6 text-zinc-300 animate-spin-slow"
+        class="mt-2 size-6 animate-spin-slow text-zinc-300"
         v-if="loading"
       />
       <div
-        class="cursor-pointer mt-2"
+        class="mt-2 cursor-pointer"
         v-if="!loading && !isEnd"
         @click="loadMore"
       >
@@ -73,10 +85,11 @@
 <script setup lang="ts">
 import { HsitoryDetail, getBridgeHistory } from '@/queries/bridge-api'
 import { Ref, computed, ref, watch, useAttrs } from 'vue'
-import { Loader2Icon, ArrowRight } from 'lucide-vue-next'
+import { Loader2Icon, ArrowRight, Copy } from 'lucide-vue-next'
 import BtcIcon from '@/assets/btc.svg?url'
 import MVC from '@/assets/mvc_logo.png?url'
-import { formatUnitToBtc, prettyTimestamp } from '@/lib/formatters'
+import { formatUnitToBtc, prettyTimestamp, prettyTxid } from '@/lib/formatters'
+import { ElMessage } from 'element-plus'
 type TxType = 'btcToMvc' | 'brc20ToMvc' | 'mvcToBtc' | 'mvcToBrc20'
 const props = defineProps({
   txType: {
@@ -101,6 +114,24 @@ async function loadMore() {
   page.value += 1
   fetchBridgeHistory()
 }
+
+function copyTx(txid: string) {
+  navigator.clipboard.writeText(txid)
+  ElMessage.success('Txid copied to clipboard')
+}
+
+function queryTx(tx: HsitoryDetail) {
+  if (!tx.originTxid) {
+    return ''
+  } else {
+    if (tx.originNetwork == 'BTC') {
+      return `https://mempool.space/zh/testnet/tx/${tx.originTxid}`
+    } else {
+      return `https://test.mvcscan.com/tx/${tx.originTxid}`
+    }
+  }
+}
+
 async function fetchBridgeHistory() {
   loading.value = true
   try {
@@ -128,10 +159,15 @@ async function fetchBridgeHistory() {
           item.targetNetwork = 'BTC'
         }
         item.timestamp = prettyTimestamp(Number(item.timestamp), true)
-        item.amount=String(formatUnitToBtc(
-                Number(item.amount),
-                (item.originNetwork === 'BTC')||(item.originNetwork === 'MVC'&&item.decimals <= 8)?item.decimals:  item.decimals - 8 
-              ))
+        item.amount = String(
+          formatUnitToBtc(
+            Number(item.amount),
+            item.originNetwork === 'BTC' ||
+              (item.originNetwork === 'MVC' && item.decimals <= 8)
+              ? item.decimals
+              : item.decimals - 8,
+          ),
+        )
         return item
       }),
     ]

@@ -3,7 +3,7 @@ import Decimal from 'decimal.js'
 import { twMerge } from 'tailwind-merge'
 import { networks } from 'bitcoinjs-lib'
 
-type AddressType = 'p2pkh' | 'p2wpkh' | 'p2tr' | 'unknown'
+type AddressType = 'p2pkh' | 'p2wpkh' | 'p2tr' | 'p2sh' | 'unknown'
 
 type AddressInfo = {
   type: AddressType
@@ -21,14 +21,14 @@ export function formatSat(tokenValue: number, tokenDecimal: number) {
 export function formatTok(
   tokenValue: number,
   tokenDecimal: number,
-  fomat?: number
+  fomat?: number,
 ) {
   if (fomat) {
     return removeTrailingZeros(
       new Decimal(tokenValue)
         .div(10 ** tokenDecimal)
         .toNumber()
-        .toFixed(fomat)
+        .toFixed(fomat),
     )
   } else {
     return new Decimal(tokenValue).div(10 ** tokenDecimal).toNumber()
@@ -75,6 +75,12 @@ export function determineAddressInfo(address: string): AddressInfo {
   if (address.startsWith('1')) {
     return {
       type: 'p2pkh',
+      network: bitcoin,
+    }
+  }
+  if (address.startsWith('3')) {
+    return {
+      type: 'p2sh',
       network: bitcoin,
     }
   }

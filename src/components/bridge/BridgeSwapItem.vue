@@ -54,7 +54,6 @@
 
           <input
             v-else
-           
             :value="props.modelValue"
             placeholder="0"
             @input="validateInput"
@@ -111,7 +110,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 console.log('assetInfo12313212', props.assetInfo)
 
-const emit = defineEmits(['update:modelValue','validate'])
+const emit = defineEmits(['update:modelValue', 'validate', 'clearAmount'])
 
 const curretnNetwork = ref('BTC')
 const InscriptionUtxos = ref<InscriptionUtxo[]>([])
@@ -125,8 +124,7 @@ const showInscription = computed(() => {
   )
 })
 
-function validateInput(e:Event){
-  
+function validateInput(e: Event) {
   emit('update:modelValue', (e as any).target!.value)
   emit('validate')
 }
@@ -165,6 +163,7 @@ const selectNetwork = computed(() => {
 
 function onAmountCleared() {
   InscriptionUtxos.value = []
+  emit('clearAmount')
 }
 
 defineExpose({

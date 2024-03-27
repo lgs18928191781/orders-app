@@ -30,7 +30,8 @@
       <div class="grid p-7 pb-4 pt-3">
         <div>
           <BridgeSwapItem
-          @validate="validateInput"
+            @clearAmount="clearBridgeInfo"
+            @validate="validateInput"
             ref="bridgeSwapItem"
             v-model="swapFromAmount"
             opName="From"
@@ -71,12 +72,12 @@
       <div class="grid grid-rows-4 gap-y-5 px-7 pb-5 text-sm">
         <div class="flex items-center justify-between text-sm text-red-500">
           <div class="mr-2">
-            <span class="text-[#C1C0C0]">LimitMinimum:</span>
+            <span class="mr-1 text-[#C1C0C0]">Minimum:</span>
             <span class="mr-1">{{ limitInfo.min }}</span>
             <span>{{ fromAsset.val.symbol }}</span>
           </div>
           <div>
-            <span class="text-[#C1C0C0]">LimitMaximum:</span
+            <span class="mr-1 text-[#C1C0C0]">Maximum:</span
             ><span class="mr-1">{{ limitInfo.max }}</span>
             <span>{{ fromAsset.val.symbol }}</span>
           </div>
@@ -341,9 +342,6 @@ enum BridgeType {
   BTC_REDEEM = 'BTC_REDEEM',
 }
 
-
-
-
 const { openConnectionModal, closeConnectionModal } =
   useCheckMetaletLoginModal()
 const connectionStore = useConnectionStore()
@@ -355,40 +353,32 @@ const bridgeSwapItem = ref()
 const swapFromAmount = ref('0')
 const myBrc20s = ref()
 const showSuccessDialog = ref(false)
-const bridgeSuccess = ref(false)
-//const bridgeLoading = ref(false)
+const currentAddress = ref('')
+
 const feeInfo = reactive({
   val: {
     confirmNumber: 0,
     bridgeFee: '0',
     minerFee: '0',
-    totalFee:"0",
+    totalFee: '0',
   },
 })
 const swapSuccess = ref(true)
 
-function validateInput(){
-  
+function validateInput() {
   const regex = /^\d+(\.\d{0,8})?$/
- 
-    if (!regex.test(swapFromAmount.value)) {
-     
-      swapFromAmount.value= swapFromAmount.value.replace(/[^\d^\.]+/g,'').replace(/[0-9]{8}$/g,'').replace(/\$\s?|(,*)/g, '')
-    
-    }
-  
 
- 
- 
-    
-
+  if (!regex.test(swapFromAmount.value)) {
+    swapFromAmount.value = swapFromAmount.value
+      .replace(/[^\d^\.]+/g, '')
+      .replace(/[0-9]{8}$/g, '')
+      .replace(/\$\s?|(,*)/g, '')
+  }
 }
-
-
 
 const bridgeInfo = reactive({
   bridgeFee: {
-    title: "Service fee",
+    title: 'Service fee',
     value: '0',
     unit: '',
   },
@@ -397,7 +387,7 @@ const bridgeInfo = reactive({
     value: '0',
     unit: '',
   },
-  totalFee:{
+  totalFee: {
     title: 'Total',
     value: '0',
     unit: '',
@@ -441,8 +431,6 @@ const toAsset = reactive({
     initAmount: 0,
   },
 })
-
-
 
 const bridgeType = computed(() => {
   if (fromAsset.val.network == AssetNetwork.BTC) {
@@ -512,6 +500,13 @@ async function getAssetInfo() {
     console.log('assetInfo.val', currentAssetInfo.val)
     // debugger
     const mvcAddress = await publickeyToAddress()
+    currentAddress.value = await connectionStore.adapter.getAddress()
+    if (determineAddressInfo(currentAddress.value).type == 'p2sh') {
+      return ElMessage.error(
+        `Please use the address type that Nested Segwit expects`,
+      )
+    }
+
     if (connectionStore.connected) {
       if (fromAsset.val.network == AssetNetwork.BTC) {
         queryAddress = connectionStore.last.address
@@ -666,6 +661,21 @@ const btnStatus = computed(() => {
       disable: true,
     }
   }
+  if (!networkStore.isTestnet) {
+    return {
+      value:
+        'To continue the operation, you need to switch to the wallet testnet',
+      color: BtnColor.error,
+      disable: true,
+    }
+  }
+  if (determineAddressInfo(currentAddress.value).type == 'p2sh') {
+    return {
+      value: 'Please use the address type that Nested Segwit expects',
+      color: BtnColor.error,
+      disable: true,
+    }
+  }
   // if (fromAsset.val.network == AssetNetwork.BTC) {
   //   if (networkStore.network !== 'testnet') {
   //     return {
@@ -742,8 +752,20 @@ const btnStatus = computed(() => {
 const lessThanMinLimited = ref(false)
 const lastThanMaxLimited = ref(false)
 
+function clearBridgeInfo() {
+  bridgeInfo.bridgeFee.value = '0'
+  bridgeInfo.minerFee.value = '0'
+  bridgeInfo.totalFee.value = '0'
+  bridgeInfo.estimatedTime.value = 0
+
+  bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
+  bridgeInfo.minerFee.unit = currentAssetInfo.val.originSymbol
+  bridgeInfo.totalFee.unit = currentAssetInfo.val.originSymbol
+}
+
 const swapToAmount = computed(() => {
   if (+swapFromAmount.value == 0 || !swapFromAmount.value) {
+    clearBridgeInfo()
     return 0
   } else {
     lessThanMinLimited.value = false
@@ -755,7 +777,7 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBtc
             : BridgeOp.MVCToBtcByBtc
-        const { confirmNumber, receiveAmount, bridgeFee, minerFee ,totalFee} =
+        const { confirmNumber, receiveAmount, bridgeFee, minerFee, totalFee } =
           BridgeTools.calcReceiveInfo(
             formatUnitToSats(
               swapFromAmount.value,
@@ -771,16 +793,16 @@ const swapToAmount = computed(() => {
           confirmNumber,
           bridgeFee,
           minerFee,
-          totalFee
+          totalFee,
         }
         bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee
         bridgeInfo.minerFee.value = feeInfo.val.minerFee
-        bridgeInfo.totalFee.value=feeInfo.val.totalFee
+        bridgeInfo.totalFee.value = feeInfo.val.totalFee
         bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
         console.log('currentAssetInfo', currentAssetInfo.val)
         bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
         bridgeInfo.minerFee.unit = currentAssetInfo.val.originSymbol
-        bridgeInfo.totalFee.unit=currentAssetInfo.val.originSymbol
+        bridgeInfo.totalFee.unit = currentAssetInfo.val.originSymbol
         return receiveAmount
       } catch (error) {
         if ((error as any).message) {
@@ -811,7 +833,7 @@ const swapToAmount = computed(() => {
           fromAsset.val.network == AssetNetwork.BTC
             ? BridgeOp.BtcToMvcByBrc20
             : BridgeOp.MvcToBtcByBrc20
-        const { confirmNumber, receiveAmount, bridgeFee, minerFee,totalFee } =
+        const { confirmNumber, receiveAmount, bridgeFee, minerFee, totalFee } =
           BridgeTools.calcReceiveInfo(
             +swapFromAmount.value,
             assetInfo.val,
@@ -823,16 +845,17 @@ const swapToAmount = computed(() => {
           confirmNumber,
           bridgeFee,
           minerFee,
-          totalFee
+          totalFee,
         }
 
         bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee
         bridgeInfo.minerFee.value = feeInfo.val.minerFee
-
+        bridgeInfo.totalFee.value = feeInfo.val.totalFee
         bridgeInfo.estimatedTime.value = feeInfo.val.confirmNumber * 10
         console.log('currentAssetInfo', currentAssetInfo.val)
         bridgeInfo.bridgeFee.unit = currentAssetInfo.val.originSymbol
         bridgeInfo.minerFee.unit = currentAssetInfo.val.originSymbol
+        bridgeInfo.totalFee.unit = currentAssetInfo.val.originSymbol
         return receiveAmount
       } catch (error) {
         if ((error as any).message) {
@@ -954,8 +977,8 @@ async function confrimSwap() {
   }
 
   //bridgeLoading.value = true
-  const loadingInstance=ElLoading.service({
-    text:'Waiting'
+  const loadingInstance = ElLoading.service({
+    text: 'Waiting',
   })
   if (fromAsset.val.network === AssetNetwork.BTC) {
     try {
@@ -1080,9 +1103,8 @@ const getFaucet = async () => {
 }
 </script>
 <style scoped lang="scss">
-
-.spinnerColor{
-  color: red !important
+.spinnerColor {
+  color: red !important;
 }
 .bridge-wrap {
   .bridge-container {
