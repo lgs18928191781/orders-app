@@ -14,7 +14,7 @@ const links: {
   {
     name: 'Orderbook',
     path: '/',
-    version: 2,
+    // version: 2,
   },
   // {
   //   name: 'Pool',
@@ -24,12 +24,13 @@ const links: {
   {
     name: 'Swap',
     path: '/swap/',
-    version: 0,
+    // version: 0,
     // testing: true,
   },
   {
     name: 'Bridge',
     path: '/bridge',
+    new: true,
   },
   {
     name: 'Events',
