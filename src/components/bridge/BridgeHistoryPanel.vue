@@ -35,9 +35,19 @@
           </div>
           <div
             class="text-base"
-            :class="tx.status === 'success' ? 'text-green-500' : 'text-primary'"
+            :class="
+              tx.status === 'success' && tx.blockHeight > 0
+                ? 'text-green-500'
+                : 'text-primary'
+            "
           >
-            {{ tx.status }}
+            {{
+              tx.status === 'success' && tx.blockHeight < 0
+                ? 'unconfirmed'
+                : tx.status === 'doing'
+                  ? 'pending'
+                  : tx.status
+            }}
           </div>
         </div>
         <div class="mt-3 flex flex-col text-sm">
@@ -68,11 +78,15 @@
               class="mr-1 hover:text-primary"
               :href="queryTargetTx(tx)"
               target="_blank"
-              >{{tx.targetTxid ? prettyTxid(tx.targetTxid, 8) : 'Waiting for Generation' }}</a
+              >{{
+                tx.targetTxid
+                  ? prettyTxid(tx.targetTxid, 8)
+                  : 'Waiting for Generation'
+              }}</a
             >
 
             <Copy
-            v-if="tx.targetTxid"
+              v-if="tx.targetTxid"
               @click="copyTx(tx.targetTxid)"
               class="cursor-pointer hover:scale-110"
               :size="14"

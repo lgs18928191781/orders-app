@@ -1017,7 +1017,7 @@ async function confrimSwap() {
     try {
       const publicKey = await connectionStore.adapter.getPubKey()
       const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
-      const publicKeyReceive = '123' //await connectionStore.adapter.getMvcPublickey()
+      const publicKeyReceive = await connectionStore.adapter.getMvcPublickey()
       const publicKeyReceiveSign = await connectionStore.adapter.signMvcMessage(
         {
           message: publicKeyReceive,

@@ -130,7 +130,7 @@ export type HistoryParams = {
 }
 
 export enum PrepayOrderStatus {
-  doing = 'pending',
+  doing = 'doing',
   success = 'success',
   cancel = 'cancel',
   failed = 'failed',
@@ -145,6 +145,7 @@ export type HsitoryDetail = {
   originNetwork: 'BTC' | 'MVC'
   targetNetwork: 'BTC' | 'MVC'
   decimals: number
+  blockHeight: number
 }
 export const getBridgeHistory = async ({
   type,
