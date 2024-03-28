@@ -605,10 +605,14 @@ async function getAssetInfo() {
         ])
           .then((res) => {
             let fromBalance
-            if (Array.isArray(res[0]) && res[0].length) {
-              fromBalance = res[0].reduce((pre: any, cur: any) => {
-                return new Decimal(cur.satoshis).add(pre).toNumber()
-              }, new Decimal(0))
+            if (Array.isArray(res[0])) {
+              if (res[0].length) {
+                fromBalance = res[0].reduce((pre: any, cur: any) => {
+                  return new Decimal(cur.satoshis).add(pre).toNumber()
+                }, new Decimal(0))
+              } else {
+                fromBalance = 0
+              }
             } else {
               fromBalance = res[0]
             }
