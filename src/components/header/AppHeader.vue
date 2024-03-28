@@ -83,14 +83,13 @@ const metaletAccountsChangedHandler = () => {
 }
 
 const metaletNetworkChangedHandler = (network: Network | string) => {
-  
   if (useConnectionStore().last.wallet !== 'metalet') return
   let net = ''
   if (network == 'mainnet') {
     net = 'livenet'
   }
   networkStore.set(net as Network)
-   ElMessage.warning({
+  ElMessage.warning({
     message: 'Metalet network changed. Refreshing page...',
     type: 'warning',
     onClose: () => {
@@ -120,11 +119,11 @@ onBeforeUnmount(() => {
   window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
   window.metaidwallet?.removeListener(
     'accountsChanged',
-    metaletAccountsChangedHandler
+    metaletAccountsChangedHandler,
   )
   window.metaidwallet.removeListener(
     'networkChanged',
-    metaletNetworkChangedHandler
+    metaletNetworkChangedHandler,
   )
 })
 </script>
