@@ -35,19 +35,9 @@
           </div>
           <div
             class="text-base"
-            :class="
-              tx.status === 'success' && tx.blockHeight > 0
-                ? 'text-green-500'
-                : 'text-primary'
-            "
+            :class="tx.status === 'success' ? 'text-green-500' : 'text-primary'"
           >
-            {{
-              tx.status === 'success' && tx.blockHeight < 0
-                ? 'unconfirmed'
-                : tx.status === 'doing'
-                  ? 'pending'
-                  : tx.status
-            }}
+            {{ tx.status === 'doing' ? 'pending' : tx.status }}
           </div>
         </div>
         <div class="mt-3 flex flex-col text-sm">
@@ -58,16 +48,20 @@
             <span class="mr-1">({{ tx.originNetwork }}):</span>
             <a
               class="mr-1 hover:text-primary"
-              :href="queryOriginTx(tx)"
+              @click="queryOriginTx($event, tx)"
               target="_blank"
-              >{{ prettyTxid(tx.originTxid, 8) }}</a
+              >{{ prettyTxid(tx.originTxid, 6) }}</a
             >
 
             <Copy
               @click="copyTx(tx.originTxid)"
-              class="cursor-pointer hover:scale-110"
+              class="mr-2 cursor-pointer hover:scale-110"
               :size="14"
             ></Copy>
+
+            <span class="text-sm text-primary" v-if="tx.blockHeight < 0">
+              (unconfirmed)
+            </span>
           </div>
           <div class="mt-3 flex flex-row items-center">
             <span class="mr-1">{{
@@ -76,11 +70,10 @@
             <span class="mr-1">({{ tx.targetNetwork }}):</span>
             <a
               class="mr-1 hover:text-primary"
-              :href="queryTargetTx(tx)"
-              target="_blank"
+              @click="queryTargetTx($event, tx)"
               >{{
                 tx.targetTxid
-                  ? prettyTxid(tx.targetTxid, 8)
+                  ? prettyTxid(tx.targetTxid, 6)
                   : 'Waiting for Generation'
               }}</a
             >
@@ -159,26 +152,34 @@ function copyTx(txid: string) {
   ElMessage.success('Txid copied to clipboard')
 }
 
-function queryOriginTx(tx: HsitoryDetail) {
+function queryOriginTx(e: Event, tx: HsitoryDetail) {
   if (!tx.originTxid) {
-    return ''
+    e.preventDefault()
+    return
   } else {
     if (tx.originNetwork == 'BTC') {
-      return `https://mempool.space/zh/testnet/tx/${tx.originTxid}`
+      window.open(
+        `https://mempool.space/zh/testnet/tx/${tx.originTxid}`,
+        '_blank',
+      )
     } else {
-      return `https://test.mvcscan.com/tx/${tx.originTxid}`
+      window.open(`https://test.mvcscan.com/tx/${tx.originTxid}`, '_blank')
     }
   }
 }
 
-function queryTargetTx(tx: HsitoryDetail) {
-  if (!tx.targetTxid) {
-    return ''
+function queryTargetTx(e: Event, tx: HsitoryDetail) {
+  if (!tx.targetTxid || tx.targetTxid == 'Waiting for Generation') {
+    e.preventDefault()
+    return
   } else {
     if (tx.targetNetwork == 'BTC') {
-      return `https://mempool.space/zh/testnet/tx/${tx.targetTxid}`
+      window.open(
+        `https://mempool.space/zh/testnet/tx/${tx.targetTxid}`,
+        '_blank',
+      )
     } else {
-      return `https://test.mvcscan.com/tx/${tx.targetTxid}`
+      window.open(`https://test.mvcscan.com/tx/${tx.targetTxid}`, '_blank')
     }
   }
 }
