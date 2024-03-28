@@ -411,22 +411,22 @@ function goToTrade() {
 
 const bridgeInfo = reactive({
   bridgeFee: {
-    title: 'Service fee',
+    title: 'Service Fee',
     value: '0',
     unit: '',
   },
   minerFee: {
-    title: 'Miner fee',
+    title: 'Network Fee',
     value: '0',
     unit: '',
   },
   totalFee: {
-    title: 'Total fee',
+    title: 'Total Fee',
     value: '0',
     unit: '',
   },
   estimatedTime: {
-    title: 'Estimated Time of Arrival',
+    title: 'Estimated Receipt Time',
     value: 0,
     unit: 'minutes',
   },
@@ -1011,13 +1011,13 @@ async function confrimSwap() {
 
   //bridgeLoading.value = true
   const loadingInstance = ElLoading.service({
-    text: 'Waiting',
+    text: 'Awaiting Your Signature',
   })
   if (fromAsset.val.network === AssetNetwork.BTC) {
     try {
       const publicKey = await connectionStore.adapter.getPubKey()
       const publicKeySign = await connectionStore.adapter.signMessage(publicKey)
-      const publicKeyReceive = await connectionStore.adapter.getMvcPublickey()
+      const publicKeyReceive = '123' //await connectionStore.adapter.getMvcPublickey()
       const publicKeyReceiveSign = await connectionStore.adapter.signMvcMessage(
         {
           message: publicKeyReceive,
@@ -1128,7 +1128,13 @@ const getFaucet = async () => {
     if (res.success) {
       ElMessage.success('Received success')
     } else {
-      ElMessage.error(res.msg)
+      if (res.msg == 'public key already in faucet') {
+        ElMessage.error(
+          `The address has already used the faucet, please wait patiently for it to refresh.`,
+        )
+      } else {
+        ElMessage.error(res.msg)
+      }
     }
   } catch (error) {
     ElMessage.error('Cancel')

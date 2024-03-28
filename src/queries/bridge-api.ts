@@ -130,7 +130,7 @@ export type HistoryParams = {
 }
 
 export enum PrepayOrderStatus {
-  doing = 'processing',
+  doing = 'pending',
   success = 'success',
   cancel = 'cancel',
   failed = 'failed',

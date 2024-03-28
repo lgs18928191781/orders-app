@@ -7,11 +7,12 @@ export type ApiOptions = { headers?: HeadersInit } & RequestInit & {
 async function fetchWrapper(url: string, options?: RequestInit): Promise<any> {
   const response = await fetch(url, options)
   if (!response.ok) {
-    if (response.status === 422) {
+    if (response.status === 422 || response.status === 403) {
       const jsoned = await response.json()
 
       throw new Error(jsoned.message)
     }
+
     throw new Error(
       `Failed to fetch ${url}: ${response.status} ${response.statusText}`,
     )
@@ -190,7 +191,7 @@ export async function bridgeApiFetch(
   options?: { headers?: HeadersInit } & RequestInit,
   returnRaw: boolean = false,
 ) {
-  const ordersApiUrl = `https://www.orders.exchange/api-bridge-testnet${url}`
+  const ordersApiUrl = `https://api.orders.exchange/api-bridge-testnet${url}`
   if (!options)
     options = {
       headers: {
