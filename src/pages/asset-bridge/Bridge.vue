@@ -348,6 +348,7 @@ import {
 import { Buffer } from 'buffer'
 import { useRouter } from 'vue-router'
 import { ElLoading } from 'element-plus'
+import { getUtxos } from '@/queries/proxy'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -594,16 +595,25 @@ async function getAssetInfo() {
           })
       } else if (network == AssetBridgeNetwork.BTC) {
         Promise.all([
-          connectionStore.adapter.getBalance(),
+          fromAsset.val.network == AssetNetwork.BTC
+            ? getUtxos(queryAddress)
+            : connectionStore.adapter.getBalance(),
           GetMvcTokenDetail(mvcAddress!, {
             codeHash: currentAssetInfo.val.targetTokenCodeHash,
             genesis: currentAssetInfo.val.targetTokenGenesis,
           }),
         ])
           .then((res) => {
-            const fromBalance = res[0]
+            let fromBalance
+            if (Array.isArray(res[0]) && res[0].length) {
+              fromBalance = res[0].reduce((pre: any, cur: any) => {
+                return new Decimal(cur.satoshis).add(pre).toNumber()
+              }, new Decimal(0))
+            } else {
+              fromBalance = res[0]
+            }
 
-            fromAsset.val.balance = new Decimal(fromBalance)
+            fromAsset.val.balance = new Decimal(fromBalance as number)
               .div(10 ** decimals)
               .toNumber()
 
