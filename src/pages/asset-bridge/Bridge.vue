@@ -613,9 +613,11 @@ async function getAssetInfo() {
               fromBalance = res[0]
             }
 
-            fromAsset.val.balance = new Decimal(fromBalance as number)
-              .div(10 ** decimals)
-              .toNumber()
+            fromAsset.val.balance = fromBalance
+              ? new Decimal(fromBalance as number)
+                  .div(10 ** decimals)
+                  .toNumber()
+              : 0
 
             limitInfo.min = new Decimal(assetInfo.val.amountLimitMinimum)
               .div(10 ** 8)
