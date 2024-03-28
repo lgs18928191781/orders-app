@@ -36,8 +36,8 @@
                   class="text-base font-semibold leading-6 text-zinc-100"
                 >
                   <span class="text-primary"
-                    >To utilize the Asset Bridge function, please log in with
-                    Metalet Wallet.</span
+                    >To utilize the Orders Bridge function, please connect with
+                    Metalet Wallet</span
                   >
                 </DialogTitle>
               </div>

@@ -97,7 +97,7 @@ interface connectRes {
 
 export const switchNetwork = async (network: 'livenet' | 'testnet') => {
   checkMetalet()
-  return await window.metaidwallet.switchNetwork().then((res) => res)
+  return await window.metaidwallet.switchNetwork(network)
 }
 
 export const disconnect = async () => {}

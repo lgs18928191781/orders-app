@@ -117,7 +117,7 @@ interface Window {
       total: number
       unconfirmed: number
     }>
-    switchNetwork: () => Promise<{
+    switchNetwork: (network: 'livenet' | 'testnet') => Promise<{
       address: string
       network: 'mainnet' | 'testnet'
       status: string
