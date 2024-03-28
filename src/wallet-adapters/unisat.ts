@@ -105,7 +105,9 @@ export const connect: () => Promise<{
 export const disconnect = async () => {}
 
 export const switchNetwork = async (network: 'mainnet' | 'testnet') => {
-  return 'mainnet'
+  checkUnisat()
+
+  return await window.unisat.switchNetwork()
 }
 
 export const getBalance = async () => {

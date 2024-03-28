@@ -85,16 +85,16 @@ function onDisconnect() {
 }
 
 async function switchNetwork() {
-  if (connectionStore.last.wallet !== 'unisat') {
+  if (connectionStore.last.wallet === 'okx') {
     ElMessage({
-      message: 'Only Unisat wallet supports switching network.',
+      message: 'OKX wallet does not support switching network.',
       type: 'error',
     })
     return
   }
 
   const toNetwork = networkStore.network === 'testnet' ? 'livenet' : 'testnet'
-  await window.unisat.switchNetwork(toNetwork)
+  await connectionStore.adapter.switchNetwork(toNetwork)
 }
 
 async function onGetGasFromFaucet() {

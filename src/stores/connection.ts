@@ -104,10 +104,10 @@ export const useConnectionStore = defineStore('connection', {
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
         signMessage: (message: string) => Promise<string>
-        switchNetwork: (network: 'mainnet' | 'testnet') => Promise<
+        switchNetwork: (network: 'livenet' | 'testnet') => Promise<
           | {
               address: string
-              network: 'mainnet' | 'testnet'
+              network: 'livenet' | 'testnet'
               status: string
             }
           | string
