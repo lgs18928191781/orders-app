@@ -95,6 +95,9 @@ async function switchNetwork() {
 
   const toNetwork = networkStore.network === 'testnet' ? 'livenet' : 'testnet'
   await connectionStore.adapter.switchNetwork(toNetwork)
+
+  // reload
+  window.location.reload()
 }
 
 async function onGetGasFromFaucet() {
