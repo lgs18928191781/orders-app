@@ -35,7 +35,6 @@ export const getMvcAddress = async () => {
   return 'undefined'
 }
 
-
 export const getMvcBalance = async () => {
   return 'undefined'
 }
@@ -167,6 +166,10 @@ export const connect: () => Promise<{
 
 export const disconnect = async () => {
   await window.okxwallet.bitcoin.disconnect()
+}
+
+export const switchNetwork = async (network: 'mainnet' | 'testnet') => {
+  return 'mainnet'
 }
 
 export const getBalance = async () => {

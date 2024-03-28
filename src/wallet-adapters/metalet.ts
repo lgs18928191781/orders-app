@@ -31,7 +31,7 @@ export const getMvcAddress = async () => {
   return address
 }
 
-export const getMvcBalance= async ()=>{
+export const getMvcBalance = async () => {
   checkMetalet()
   const balance = await window.metaidwallet.getMvcBalance()
   return balance
@@ -95,6 +95,11 @@ interface connectRes {
   pubKey: string
 }
 
+export const switchNetwork = async (network: 'mainnet' | 'testnet') => {
+  checkMetalet()
+  return await window.metaidwallet.switchNetwork(network).then((res) => res)
+}
+
 export const disconnect = async () => {}
 
 export const getBalance = async () => {
@@ -113,7 +118,7 @@ export const inscribe = async (tick: string): Promise<string> => {
 
 export const signPsbt = async (
   psbtHex: string,
-  options?: any
+  options?: any,
 ): Promise<string> => {
   checkMetalet()
 
@@ -122,7 +127,7 @@ export const signPsbt = async (
 
 export const signPsbts = async (
   psbtHexs: string[],
-  options?: any[]
+  options?: any[],
 ): Promise<string[]> => {
   checkMetalet()
 

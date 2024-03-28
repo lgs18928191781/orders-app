@@ -709,7 +709,7 @@ const btnStatus = computed(() => {
     return {
       value: 'Please switch to testnet',
       color: BtnColor.error,
-      disable: true,
+      disable: false,
     }
   }
   if (determineAddressInfo(currentAddress.value).type == 'p2sh') {
@@ -964,6 +964,10 @@ function converSwapItem() {
 function BtnOperate() {
   if (btnStatus.value.color == BtnColor.unLogin) {
     connetMetalet()
+  } else if (!networkStore.isTestnet) {
+    connectionStore.adapter
+      .switchNetwork('testnet')
+      .then((res) => window.location.reload())
   } else if (btnStatus.value.color == BtnColor.default) {
     confrimSwap()
     // bridgeInfo.bridgeFee.value = feeInfo.val.bridgeFee

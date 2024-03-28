@@ -49,7 +49,7 @@ interface Window {
       getPublicKey: () => Promise<string>
       signMessage: (
         message: string,
-        { from }: { from: string }
+        { from }: { from: string },
       ) => Promise<string>
       send: ({
         from,
@@ -73,7 +73,7 @@ interface Window {
           type?: any
           autoFinalized?: boolean
           toSignInputs?: any[]
-        }
+        },
       ) => Promise<string>
       inscribe: ({
         type,
@@ -90,7 +90,7 @@ interface Window {
           signedTx: string
           type: 52 | 22 | 59 // 22: NFT, 52: BRC20, 59: BRC20-s
         }[],
-        from: string
+        from: string,
       ) => Promise<
         Record<
           string, // unique id
@@ -100,23 +100,35 @@ interface Window {
     }
   }
   metaidwallet: {
-    verifySignature(verifyObj: { message: unknown; signature: any; encoding: string }): any
+    verifySignature(verifyObj: {
+      message: unknown
+      signature: any
+      encoding: string
+    }): any
     getPublicKey(): any
-    signMessage(arg0: { message: strin,encoding?:string }): { signature: any } | PromiseLike<{ signature: any }>
+    signMessage(arg0: {
+      message: strin
+      encoding?: string
+    }): { signature: any } | PromiseLike<{ signature: any }>
     getAddress(): any
-    getMvcBalance:()=>Promise<{
-      address:string,
-      confirmed:number,
-      total:number,
-      unconfirmed:number
+    getMvcBalance: () => Promise<{
+      address: string
+      confirmed: number
+      total: number
+      unconfirmed: number
+    }>
+    switchNetwork: (network: 'mainnet' | 'testnet') => Promise<{
+      address: string
+      network: 'mainnet' | 'testnet'
+      status: string
     }>
     on: (
       eventName: string,
-      handler: { mvcAddress: string; btcAddress: string } | any
+      handler: { mvcAddress: string; btcAddress: string } | any,
     ) => void
     removeListener: (
       eventName: string,
-      handler: { mvcAddress: string; btcAddress: string } | any
+      handler: { mvcAddress: string; btcAddress: string } | any,
     ) => void
     getNetwork: () => Promise<{ network: 'mainnet' | 'testnet' }>
     btc: {

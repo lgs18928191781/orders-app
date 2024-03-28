@@ -48,10 +48,10 @@ export const getAddress = async () => {
       addresses[0].startsWith('n')
     ) {
       ElMessage.error(
-        'Please use a native SegWit or Taproot address (Starts with bc1)'
+        'Please use a native SegWit or Taproot address (Starts with bc1)',
       )
       throw new Error(
-        'Please use a native SegWit or Taproot address (Starts with bc1)'
+        'Please use a native SegWit or Taproot address (Starts with bc1)',
       )
     }
 
@@ -83,7 +83,7 @@ export const connect: () => Promise<{
       connectRes[0].startsWith('n')
     ) {
       throw new Error(
-        'Please use a native SegWit or Taproot address (Starts with bc1)'
+        'Please use a native SegWit or Taproot address (Starts with bc1)',
       )
     }
 
@@ -104,6 +104,10 @@ export const connect: () => Promise<{
 
 export const disconnect = async () => {}
 
+export const switchNetwork = async (network: 'mainnet' | 'testnet') => {
+  return 'mainnet'
+}
+
 export const getBalance = async () => {
   checkUnisat()
 
@@ -111,7 +115,7 @@ export const getBalance = async () => {
     .getBalance()
     .then(
       (info: { confirmed: number; unconfirmed: number; total: number }) =>
-        info.total
+        info.total,
     )
   return balance
 }
@@ -124,7 +128,7 @@ export const inscribe = async (tick: string): Promise<string> => {
 
 export const signPsbt = async (
   psbt: string,
-  options?: any
+  options?: any,
 ): Promise<string> => {
   checkUnisat()
 
@@ -135,7 +139,7 @@ export const signPsbt = async (
 
 export const signPsbts = async (
   psbts: string[],
-  options?: any[]
+  options?: any[],
 ): Promise<string[]> => {
   checkUnisat()
 
