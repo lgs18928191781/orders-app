@@ -31,6 +31,22 @@ export function initPsbt() {
   return new bitcoinJs.Psbt()
 }
 
+export const getMvcAddress = async () => {
+  return 'undefined'
+}
+
+export const getMvcBalance = async () => {
+  return 'undefined'
+}
+
+export const signMvcMessage = async (Message: { message: string }) => {
+  return 'undefined'
+}
+
+export const getMvcPublickey = async () => {
+  return 'undefined'
+}
+
 export function finishPsbt(psbtStr: string): string {
   return psbtStr
   const btcjs = useBtcJsStore().get ?? raise('btcjs not initialized')
@@ -150,6 +166,10 @@ export const connect: () => Promise<{
 
 export const disconnect = async () => {
   await window.okxwallet.bitcoin.disconnect()
+}
+
+export const switchNetwork = async (network: 'mainnet' | 'testnet') => {
+  return 'mainnet'
 }
 
 export const getBalance = async () => {

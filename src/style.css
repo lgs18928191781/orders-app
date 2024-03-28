@@ -7,6 +7,9 @@
   src: url('@/assets/fonts/geistMono.ttf') format('truetype');
 }
 
+
+
+
 .nicer-scrollbar::-webkit-scrollbar {
   @apply h-2 w-2;
 }
@@ -79,3 +82,12 @@ input:focus {
 .swap-main-border {
   @apply border border-primary/30;
 }
+
+
+.el-loading-spinner .path{
+  stroke: #FFA02A !important;
+}
+
+.el-loading-spinner .el-loading-text{
+  color: #FFA02A !important;;
+} 

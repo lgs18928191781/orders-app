@@ -70,8 +70,17 @@ export const OKX_TEMPLATE_PSBT =
 export const BUY_PRICE_OUTPUT_INDEX = 2
 export const BUY_PAY_INPUT_INDEX = 4
 
+export enum AssetNetwork {
+  BTC = 'BTC',
+  MVC = 'MVC',
+}
 export const SIGNING_MESSAGE = 'orders.exchange'
 
 export const SWAP_THRESHOLD_AMOUNT = 20_000
 export const REMOVE_THRESHOLD_AMOUNT = 50_000
 export const ADD_THRESHOLD_AMOUNT = 100_000
+export const BRIDGE_CONST_FEE = 0.0005
+export const BTC_CONST_FEE = 0.000001
+export const MVC_CONST_FEE = 0.0002
+export const BTC_CONST_REDEEM_FEE = 0.0005
+export const MVC_PRICE = 20

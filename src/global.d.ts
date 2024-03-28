@@ -1,6 +1,27 @@
 /// <reference types="chrome" />
 type BitcoinJs = typeof import('bitcoinjs-lib')
 type ECPairFactory = typeof import('ecpair')
+type TransferOutput = {
+  genesis?: string
+  codehash?: string
+  type: 'token' | 'space' | string
+  receivers: {
+    address: string
+    amount: string
+  }[]
+}
+type TaskResponse = {
+  id: number
+  txid: string
+  txHex: string
+  routeCheckTxid?: string
+  routeCheckTxHex?: string
+}
+type TransferResponse = {
+  res: TaskResponse[]
+  txids: string[]
+  broadcasted: boolean
+}
 
 interface Window {
   bitcoinjs: BitcoinJs
@@ -79,13 +100,35 @@ interface Window {
     }
   }
   metaidwallet: {
+    verifySignature(verifyObj: {
+      message: unknown
+      signature: any
+      encoding: string
+    }): any
+    getPublicKey(): any
+    signMessage(arg0: {
+      message: strin
+      encoding?: string
+    }): { signature: any } | PromiseLike<{ signature: any }>
+    getAddress(): any
+    getMvcBalance: () => Promise<{
+      address: string
+      confirmed: number
+      total: number
+      unconfirmed: number
+    }>
+    switchNetwork: (network: 'mainnet' | 'testnet') => Promise<{
+      address: string
+      network: 'mainnet' | 'testnet'
+      status: string
+    }>
     on: (
       eventName: string,
-      handler: ({ mvcAddress: string, btcAddress: string }) => void,
+      handler: { mvcAddress: string; btcAddress: string } | any,
     ) => void
     removeListener: (
       eventName: string,
-      handler: ({ mvcAddress: string, btcAddress: string }) => void,
+      handler: { mvcAddress: string; btcAddress: string } | any,
     ) => void
     getNetwork: () => Promise<{ network: 'mainnet' | 'testnet' }>
     btc: {
@@ -109,5 +152,9 @@ interface Window {
       pushPsbt: (psbt: string) => Promise<string>
       signPsbts: (psbtHexs: string[], options?: any[]) => Promise<string[]>
     }
+    transfer: (params: {
+      tasks: TransferOutput[]
+      broadcast: boolean
+    }) => Promise<TransferResponse>
   }
 }

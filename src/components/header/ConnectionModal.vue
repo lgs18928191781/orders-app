@@ -6,7 +6,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { useConnectionStore } from '@/stores/connection'
@@ -18,7 +18,7 @@ import { isMobile, isOKApp, getOkxLink } from '@/lib/helpers'
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
-
+import { useRoute } from 'vue-router'
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
 
@@ -74,6 +74,14 @@ async function connectToMetalet() {
     closeConnectionModal()
   }
 }
+
+const route = useRoute()
+const isSwapPage = computed(() => {
+  return route.fullPath.includes('swap')
+})
+const isBridgePage = computed(() => {
+  return route.fullPath.includes('bridge')
+})
 </script>
 
 <template>
@@ -126,6 +134,7 @@ async function connectToMetalet() {
                   class="mt-8 grid grid-cols-2 gap-4 text-base lg:grid-cols-3"
                 >
                   <button
+                  v-if="!isBridgePage"
                     class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
                     @click="connectToOkx"
                   >
@@ -134,10 +143,10 @@ async function connectToMetalet() {
                   </button>
 
                   <button
-                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
+                    v-if="!isBridgePage && !isMobile()"
+                    class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
                     @click="connectToUnisat"
                     ref="firstButtonRef"
-                    v-if="!isMobile()"
                   >
                     <img
                       class="h-12 rounded"
@@ -163,6 +172,14 @@ async function connectToMetalet() {
 
                 <!-- footer -->
                 <div class="mt-16 space-y-1 text-xs text-zinc-500">
+                  <p v-if="isSwapPage" class="text-primary">
+                    Swap module is currently only supported on Unisat wallet and
+                    Testnet environment.
+                  </p>
+                  <p v-if="isBridgePage" class="text-primary">
+                    Bridge module is currently only supported on Metalet wallet
+                    and Testnet environment.
+                  </p>
                   <p>By connecting wallet,</p>
                   <p class="">
                     <span>you agree to Orders.Exchange's</span>

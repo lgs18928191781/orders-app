@@ -89,8 +89,8 @@ const { data: myOneBrc20, isLoading } = useQuery(
       network: networkStore.network,
       tick: token2,
     },
-    computed(() => connectionStore.connected),
-  ),
+    computed(() => connectionStore.connected)
+  )
 )
 
 // amount
@@ -139,7 +139,7 @@ watch(
       emit('amountCleared')
     }
   },
-  { deep: true },
+  { deep: true }
 )
 
 const tweenedAmount = reactive({

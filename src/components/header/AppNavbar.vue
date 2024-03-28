@@ -28,6 +28,10 @@ const links: {
     // testing: true,
   },
   {
+    name: 'Bridge',
+    path: '/bridge',
+  },
+  {
     name: 'Events',
     path: '/events',
   },
@@ -39,6 +43,7 @@ const links: {
 ]
 
 function isLinkActive(path: string) {
+  console.log('path', path)
   switch (path) {
     case '/':
       return route.path === '/' || route.path.startsWith('/orders')
@@ -53,7 +58,8 @@ function isLinkActive(path: string) {
       )
     case '/swap/':
       return route.path.startsWith('/swap') || route.path.startsWith('/add')
-
+    case '/bridge':
+      return route.path.startsWith('/bridge')
     default:
       return false
   }

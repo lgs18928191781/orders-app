@@ -183,7 +183,7 @@ export function fillInternalKey<T extends PsbtInput | PsbtInputExtended>(
     const { output } = useBtcJsStore().get!.payments.p2tr({
       internalPubkey: tapInternalKey,
     })
-    if (input.witnessUtxo?.script.toString('hex') == output.toString('hex')) {
+    if (input.witnessUtxo?.script.toString('hex') == output!.toString('hex')) {
       input.tapInternalKey = tapInternalKey
     }
   }

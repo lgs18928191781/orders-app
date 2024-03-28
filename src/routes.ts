@@ -1,12 +1,14 @@
 import { fetchGeo } from '@/queries/geo'
 import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
+import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
 import { useGeoStore } from '@/stores/geo'
 import { isRestrictedRegion } from '@/lib/helpers'
-
+import { useRouter } from 'vue-router'
 const Home = () => import('./pages/Home.vue')
 const Recover = () => import('./pages/Recover.vue')
 const Swap = () => import('./pages/Swap.vue')
+const Bridge = () => import('./pages/asset-bridge/Bridge.vue')
 const SwapPools = () => import('./pages/swap-pools/Index.vue')
 const Whitelist = () => import('./pages/Whitelist.vue')
 const Events = () => import('./pages/Events.vue')
@@ -35,6 +37,21 @@ const routes = [
         component: () => import('./pages/swap-pools/Remove.vue'),
       },
     ],
+  },
+  // { path: '/swap', component: Swap },
+  {
+    path: '/bridge/:pair?',
+    component: Bridge,
+    beforeEnter: () => {
+      const connectionStore = useConnectionStore()
+      const { openConnectionModal } = useCheckMetaletLoginModal()
+      if (
+        connectionStore.connected &&
+        connectionStore.last.wallet !== 'metalet'
+      ) {
+        openConnectionModal()
+      }
+    },
   },
   { path: '/swap/:pair?', component: Swap, name: 'swap' },
   { path: '/whitelist', component: Whitelist },
@@ -82,7 +99,9 @@ export const geoGuard = async (to: any, from: any, next: any) => {
         if (!isRestrictedRegion(geo)) {
           geoStore.pass = true
         }
-
+        // geoStore.pass = true
+        // next()
+        // return
         if (isRestrictedRegion(geo) && to.path !== '/not-available')
           next('/not-available')
         else {

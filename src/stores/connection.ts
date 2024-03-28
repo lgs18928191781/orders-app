@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage, type RemovableRef } from '@vueuse/core'
-import type { Psbt } from 'bitcoinjs-lib'
+import type { Psbt, networks } from 'bitcoinjs-lib'
 
 import * as unisatAdapter from '@/wallet-adapters/unisat'
 import * as okxAdapter from '@/wallet-adapters/okx'
@@ -84,9 +84,14 @@ export const useConnectionStore = defineStore('connection', {
 
       const adapter: {
         initPsbt: () => Psbt
-        getMvcAddress?: () => Promise<string>
+        getMvcBalance: () => Promise<any>
+        getMvcAddress: () => Promise<string>
+
         finishPsbt: (psbt: string) => string
         getAddress: () => Promise<string>
+
+        signMvcMessage: (message: any) => Promise<any>
+        getMvcPublickey: () => Promise<string>
         getPubKey: () => Promise<string>
         connect: () => Promise<{
           address: string
@@ -99,6 +104,14 @@ export const useConnectionStore = defineStore('connection', {
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
         signMessage: (message: string) => Promise<string>
+        switchNetwork: (network: 'mainnet' | 'testnet') => Promise<
+          | {
+              address: string
+              network: 'mainnet' | 'testnet'
+              status: string
+            }
+          | string
+        >
       } = getWalletAdapter(state.last.wallet)
 
       return adapter

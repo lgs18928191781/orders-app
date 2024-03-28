@@ -82,6 +82,23 @@ const metaletAccountsChangedHandler = () => {
   })
 }
 
+const metaletNetworkChangedHandler = (network: Network | string) => {
+  
+  if (useConnectionStore().last.wallet !== 'metalet') return
+  let net = ''
+  if (network == 'mainnet') {
+    net = 'livenet'
+  }
+  networkStore.set(net as Network)
+   ElMessage.warning({
+    message: 'Metalet network changed. Refreshing page...',
+    type: 'warning',
+    onClose: () => {
+      window.location.reload()
+    },
+  })
+}
+
 onMounted(async () => {
   if (window.unisat) {
     const unisat = window.unisat
@@ -94,6 +111,7 @@ onMounted(async () => {
 
   if (window.metaidwallet) {
     window.metaidwallet.on('accountsChanged', metaletAccountsChangedHandler)
+    window.metaidwallet.on('networkChanged', metaletNetworkChangedHandler)
   }
 })
 onBeforeUnmount(() => {
@@ -102,7 +120,11 @@ onBeforeUnmount(() => {
   window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
   window.metaidwallet?.removeListener(
     'accountsChanged',
-    metaletAccountsChangedHandler,
+    metaletAccountsChangedHandler
+  )
+  window.metaidwallet.removeListener(
+    'networkChanged',
+    metaletNetworkChangedHandler
   )
 })
 </script>
