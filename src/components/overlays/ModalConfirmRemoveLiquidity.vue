@@ -6,7 +6,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { CircleHelpIcon } from 'lucide-vue-next'
+import { HelpCircleIcon } from 'lucide-vue-next'
 
 import { useModalConfirmRemoveLiquidity } from '@/hooks/use-modal-confirm-remove-liquidity'
 
@@ -51,7 +51,7 @@ const onConfirm = () => {
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel class="rounded-lg bg-zinc-800 p-8">
-              <CircleHelpIcon class="mx-auto h-16 w-16 text-primary" />
+              <HelpCircleIcon class="mx-auto h-16 w-16 text-primary" />
               <DialogDescription class="mt-4 text-lg text-zinc-300">
                 Are you sure to remove liquidity?
               </DialogDescription>

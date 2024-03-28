@@ -14,7 +14,12 @@ import { useBuildingOverlay } from '@/hooks/use-building-overlay'
 import { useOngoingTask } from '@/hooks/use-ongoing-task'
 
 import { buildAdd, buildInit, postTask, previewAdd } from '@/queries/swap'
-import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import {
+  IS_DEV,
+  SIGHASH_ALL,
+  SIGHASH_ALL_ANYONECANPAY,
+  USE_UTXO_COUNT_LIMIT,
+} from '@/data/constants'
 import { exclusiveChange } from '@/lib/build-helpers'
 import { type InscriptionUtxo } from '@/queries/swap/types'
 import SwapSideWithInput from '@/components/swap/SwapSideWithInput.vue'
@@ -303,8 +308,34 @@ const afterBuildAdd = async ({
   })
   if (!psbtAddFinished) throw new Error('Failed to add change')
 
+  const token2Count = token2InscriptionUtxos.value.length
+  const allInputsCount = psbtAddFinished.data.inputs.length
+  const address = connectionStore.getAddress
+  const toSignInputs = []
+  for (let i = 0; i < token2Count; i++) {
+    toSignInputs.push({
+      index: i,
+      sighashTypes: [SIGHASH_ALL_ANYONECANPAY],
+      address,
+    })
+  }
+  for (let i = token2Count; i < allInputsCount; i++) {
+    toSignInputs.push({
+      index: i,
+      sighashTypes: [SIGHASH_ALL],
+      address,
+    })
+  }
+  let options: any = {
+    autoFinalized: true,
+  }
+  const isOkWallet = connectionStore.last.wallet === 'okx'
+  if (isOkWallet) {
+    options['toSignInputs'] = toSignInputs
+  }
   const signedAdd = await connectionStore.adapter.signPsbt(
     psbtAddFinished.toHex(),
+    options,
   )
   if (!signedAdd) return
 

@@ -24,7 +24,12 @@ import {
 } from '@/queries/swap'
 import { exclusiveChange } from '@/lib/build-helpers'
 import { ERRORS } from '@/data/errors'
-import { IS_DEV, SIGHASH_ALL, USE_UTXO_COUNT_LIMIT } from '@/data/constants'
+import {
+  IS_DEV,
+  SIGHASH_ALL,
+  SIGHASH_ALL_ANYONECANPAY,
+  USE_UTXO_COUNT_LIMIT,
+} from '@/data/constants'
 import { sleep } from '@/lib/helpers'
 import { type InscriptionUtxo } from '@/queries/swap/types'
 import { useFeebStore } from '@/stores/feeb'
@@ -545,9 +550,24 @@ const afterBuildSwap = async ({
       break
 
     case '2x':
-      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt, {
+      const token2Count = token2InscriptionUtxos.value.length
+      const address = connectionStore.getAddress
+      const toSignInputs = []
+      for (let i = 0; i < token2Count; i++) {
+        toSignInputs.push({
+          index: i,
+          sighashTypes: [SIGHASH_ALL_ANYONECANPAY],
+          address,
+        })
+      }
+      let options: any = {
         autoFinalized: false,
-      })
+      }
+      const isOkWallet = connectionStore.last.wallet === 'okx'
+      if (isOkWallet) {
+        options['toSignInputs'] = toSignInputs
+      }
+      const signed2x = await connectionStore.adapter.signPsbt(rawPsbt, options)
       if (!signed2x) return
       if (!sourceAmount.value) return
 

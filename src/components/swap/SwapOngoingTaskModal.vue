@@ -180,7 +180,7 @@ function copyFailedReason() {
             >
               <h5 class="text-zinc-500">Error Message:</h5>
               <p
-                class="-m-1 mt-1 text-wrap rounded p-1 group-hover:bg-primary/10 group-hover:text-white"
+                class="-m-1 mt-1 text-wrap break-all rounded p-1 group-hover:bg-primary/10 group-hover:text-white"
               >
                 {{ task.failedReason }}
               </p>

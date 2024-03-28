@@ -46,6 +46,10 @@ const debouncedPercentage = refDebounced(removePercentage, 300)
 const removeEquity = computed(() => {
   if (!poolStatus.value) return '0'
 
+  if (debouncedPercentage.value[0] === 0) return '0'
+  if (debouncedPercentage.value[0] === 100)
+    return poolStatus.value.addressEquityAvailable
+
   return new Decimal(debouncedPercentage.value[0])
     .div(100)
     .mul(poolStatus.value.addressEquityAvailable || 0)
