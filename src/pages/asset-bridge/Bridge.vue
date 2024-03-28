@@ -963,7 +963,7 @@ function converSwapItem() {
 
 function BtnOperate() {
   if (btnStatus.value.color == BtnColor.unLogin) {
-    connetMetalet()
+    connectMetalet()
   } else if (!networkStore.isTestnet) {
     connectionStore.adapter
       .switchNetwork('testnet')
@@ -1014,7 +1014,7 @@ async function redeem() {
   }
 }
 
-async function connetMetalet() {
+async function connectMetalet() {
   await connectionStore.connect('metalet')
 }
 

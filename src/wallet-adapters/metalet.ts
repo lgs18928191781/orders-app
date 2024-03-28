@@ -20,8 +20,8 @@ function checkMetaletStatus(res: any, actionName: string) {
 
 export const connect: () => Promise<connectRes> = async () => {
   checkMetalet()
-  const connetRes = await window.metaidwallet.btc.connect()
-  return checkMetaletStatus(connetRes, 'connect')
+  const connectRes = await window.metaidwallet.btc.connect()
+  return checkMetaletStatus(connectRes, 'connect')
 }
 
 export const getMvcAddress = async () => {
@@ -95,9 +95,9 @@ interface connectRes {
   pubKey: string
 }
 
-export const switchNetwork = async (network: 'mainnet' | 'testnet') => {
+export const switchNetwork = async (network: 'livenet' | 'testnet') => {
   checkMetalet()
-  return await window.metaidwallet.switchNetwork(network).then((res) => res)
+  return await window.metaidwallet.switchNetwork().then((res) => res)
 }
 
 export const disconnect = async () => {}

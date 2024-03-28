@@ -107,7 +107,7 @@ interface Window {
     }): any
     getPublicKey(): any
     signMessage(arg0: {
-      message: strin
+      message: string
       encoding?: string
     }): { signature: any } | PromiseLike<{ signature: any }>
     getAddress(): any
@@ -117,7 +117,7 @@ interface Window {
       total: number
       unconfirmed: number
     }>
-    switchNetwork: (network: 'mainnet' | 'testnet') => Promise<{
+    switchNetwork: () => Promise<{
       address: string
       network: 'mainnet' | 'testnet'
       status: string
