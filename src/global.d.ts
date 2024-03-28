@@ -33,6 +33,9 @@ interface Window {
     signPsbt: (psbt: string) => Promise<string>
     pushPsbt: (psbt: string) => Promise<string>
     signPsbts: (psbts: string[], options: any[]) => Promise<string[]>
+    switchNetwork: (
+      network: 'livenet' | 'testnet',
+    ) => Promise<'livenet' | 'testnet'>
   }
   okxwallet: {
     on: (event: string, callback: (data: any) => void) => void

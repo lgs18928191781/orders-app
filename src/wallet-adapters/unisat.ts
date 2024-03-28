@@ -107,7 +107,7 @@ export const disconnect = async () => {}
 export const switchNetwork = async (network: 'livenet' | 'testnet') => {
   checkUnisat()
 
-  return await window.unisat.switchNetwork(network)
+  return (await window.unisat.switchNetwork(network)) as 'livenet' | 'testnet'
 }
 
 export const getBalance = async () => {

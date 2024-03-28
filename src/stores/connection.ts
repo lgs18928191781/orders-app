@@ -104,14 +104,9 @@ export const useConnectionStore = defineStore('connection', {
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
         signMessage: (message: string) => Promise<string>
-        switchNetwork: (network: 'livenet' | 'testnet') => Promise<
-          | {
-              address: string
-              network: 'livenet' | 'testnet'
-              status: string
-            }
-          | string
-        >
+        switchNetwork: (
+          network: 'livenet' | 'testnet',
+        ) => Promise<'livenet' | 'testnet'>
       } = getWalletAdapter(state.last.wallet)
 
       return adapter
