@@ -191,7 +191,7 @@ async function fetchBridgeHistory() {
     if (!address) throw new Error('not connect')
     const { txList } = await getBridgeHistory({
       type: txType as TxType,
-      cursor: page.value,
+      cursor: page.value * size,
       size: size,
       order: 'desc',
       address: address,

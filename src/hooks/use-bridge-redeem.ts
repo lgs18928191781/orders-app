@@ -52,7 +52,7 @@ export const supportRedeemAddressType: SupportRedeemAddressType[] = [
 const confirmNumberBySeqAndAmount = function (
   amount: number,
   seq: number[][],
-  network: 'BTC' | 'BRC20' | 'MVC'
+  network: 'BTC' | 'BRC20' | 'MVC',
 ) {
   for (const item of seq) {
     const [start, end, confirmBtc, confirmMvc] = item
@@ -81,7 +81,7 @@ export function useBridgeRedeem() {
     amount: string,
     address: string,
     targetTokenCodeHash: string,
-    targetTokenGenesis: string
+    targetTokenGenesis: string,
   ): Promise<string> {
     const res = await window.metaidwallet
       .transfer({
@@ -113,9 +113,8 @@ export function useBridgeRedeem() {
   }> {
     const publicKey = await window.metaidwallet.getPublicKey()
     const publicKeyReceive = await window.metaidwallet.btc.getPublicKey()
-    const publicKeyReceiveSign = await window.metaidwallet.btc.signMessage(
-      publicKeyReceive
-    )
+    const publicKeyReceiveSign =
+      await window.metaidwallet.btc.signMessage(publicKeyReceive)
     const {
       signature: { signature: publicKeySign },
     } = await window.metaidwallet.signMessage({
@@ -142,7 +141,7 @@ export function useBridgeRedeem() {
   async function redeemBtc(
     redeemAmount: number,
     btcAsset: Asset,
-    addressType: SupportRedeemAddressType
+    addressType: SupportRedeemAddressType,
   ): Promise<{ orderId: string; txid: string }> {
     try {
       const {
@@ -168,7 +167,7 @@ export function useBridgeRedeem() {
         String(redeemAmount),
         bridgeAddress,
         targetTokenCodeHash,
-        targetTokenGenesis
+        targetTokenGenesis,
       )
 
       const submitPrepayOrderRedeemDto = {
@@ -191,7 +190,7 @@ export function useBridgeRedeem() {
 
   async function calcRedeemBtcInfo(
     redeemAmount: number,
-    assetInfo: BridgeAssetPairReturnType
+    assetInfo: BridgeAssetPairReturnType,
   ) {
     const {
       feeBtc,
@@ -212,7 +211,7 @@ export function useBridgeRedeem() {
       redeemAmount,
       confirmSequence,
       // mint btc -> mvc, get mvc confirm number
-      'MVC'
+      'MVC',
     )
     const btcAsset = assetList.find((item) => item.network === 'BTC')
     if (!btcAsset) throw new Error('no assrt')
@@ -233,7 +232,7 @@ export function useBridgeRedeem() {
   async function calcRedeemBrc20Info(
     redeemAmount: number,
     assetInfo: BridgeAssetPairReturnType,
-    asset: Asset
+    asset: Asset,
   ) {
     const {
       btcPrice,
@@ -258,13 +257,13 @@ export function useBridgeRedeem() {
       redeemBrc20EqualBtcAmount,
       confirmSequence,
       // mint btc -> mvc, get mvc confirm number
-      'MVC'
+      'MVC',
     )
     const bridgeFeeConst = BigInt(
       Math.floor(
         (((asset.feeRateConstRedeem / 10 ** 8) * btcPrice) / asset.price) *
-          10 ** (asset.decimals - asset.trimDecimals)
-      )
+          10 ** (asset.decimals - asset.trimDecimals),
+      ),
     )
     const bridgeFeePercent =
       (BigInt(redeemAmount) * BigInt(asset.feeRateNumeratorRedeem)) / 10000n
@@ -273,8 +272,8 @@ export function useBridgeRedeem() {
       Math.floor(
         (((transactionSize.BRC20_REDEEM / 10 ** 8) * feeBtc * btcPrice) /
           asset.price) *
-          10 ** (asset.decimals - asset.trimDecimals)
-      )
+          10 ** (asset.decimals - asset.trimDecimals),
+      ),
     )
     const totalFee = bridgeFee + minerFee
     const receiveAmount = BigInt(redeemAmount) - totalFee
@@ -289,7 +288,7 @@ export function useBridgeRedeem() {
   async function redeemBrc20(
     redeemAmount: number,
     asset: Asset,
-    addressType: SupportRedeemAddressType
+    addressType: SupportRedeemAddressType,
   ): Promise<{ orderId: string; txid: string }> {
     try {
       const {
@@ -307,16 +306,15 @@ export function useBridgeRedeem() {
         publicKeyReceive,
         publicKeyReceiveSign,
       }
-      const createResp = await createPrepayOrderRedeemBrc20(
-        createPrepayOrderDto
-      )
+      const createResp =
+        await createPrepayOrderRedeemBrc20(createPrepayOrderDto)
       const { orderId, bridgeAddress } = createResp
       const { targetTokenCodeHash, targetTokenGenesis } = asset
       const txid = await sendToken(
         String(redeemAmount),
         bridgeAddress,
         targetTokenCodeHash,
-        targetTokenGenesis
+        targetTokenGenesis,
       )
       const submitPrepayOrderRedeemDto = {
         orderId,

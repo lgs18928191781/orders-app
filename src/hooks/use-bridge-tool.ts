@@ -278,7 +278,9 @@ export function useBridgeTools() {
     return payInput
   }
   //
-  async function sumitBridgeOrderForBrc20(orderParams: prepayOrderParams) {
+  async function sumitBridgeOrderForBrc20(
+    orderParams: prepayOrderParams,
+  ): Promise<any> {
     const {
       amount,
       originTokenId,
@@ -319,14 +321,19 @@ export function useBridgeTools() {
         orderId,
         txHex: psbt!.extractTransaction().toHex(),
       }
-      await submitPrepayOrderMintBrc20(submitPrepayOrderMintDto)
+      const submitRes = await submitPrepayOrderMintBrc20(
+        submitPrepayOrderMintDto,
+      )
+      return submitRes
       //成功
     } catch (error) {
       throw new Error((error as any).message)
     }
   }
 
-  async function sumitBridgeOrderForBtc(orderParams: prepayOrderParams) {
+  async function sumitBridgeOrderForBtc(
+    orderParams: prepayOrderParams,
+  ): Promise<any> {
     const {
       amount,
       originTokenId,
@@ -362,7 +369,8 @@ export function useBridgeTools() {
         orderId,
         txHex: txHex,
       }
-      await submitPrepayOrderMintBtc(submitPrepayOrderMintDto)
+      const submitRes = await submitPrepayOrderMintBtc(submitPrepayOrderMintDto)
+      return submitRes
       //成功
     } catch (error) {
       throw new Error((error as any).message)

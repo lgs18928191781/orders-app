@@ -1049,7 +1049,7 @@ async function confrimSwap() {
       )
       console.log('addressType', bridgeSwapItem.value.InscriptionUtxos)
       if (fromAsset.val.symbol == 'BTC') {
-        await BridgeTools.sumitBridgeOrderForBtc({
+        const submitRes = await BridgeTools.sumitBridgeOrderForBtc({
           amount: String(
             formatUnitToSats(
               swapFromAmount.value,
@@ -1064,6 +1064,14 @@ async function confrimSwap() {
           publicKeyReceiveSign: publicKeyReceiveSign,
           feeBtc: assetInfo.val.feeBtc,
         })
+
+        if (submitRes.msg == 'success' && submitRes.success) {
+          loadingInstance.close()
+          showSuccessDialog.value = true
+        } else {
+          loadingInstance.close()
+          ElMessage.error(submitRes.msg)
+        }
       } else {
         let inscriptions: inscriptionInfo =
           myBrc20s.value.transferBalanceList.find((item: inscriptionInfo) => {
@@ -1072,7 +1080,7 @@ async function confrimSwap() {
             )
           })
 
-        await BridgeTools.sumitBridgeOrderForBrc20({
+        const submitRes = await BridgeTools.sumitBridgeOrderForBrc20({
           amount: String(swapFromAmount.value),
           originTokenId: currentAssetInfo.val.originTokenId,
           addressType: addressType.type.toUpperCase(),
@@ -1083,10 +1091,14 @@ async function confrimSwap() {
           feeBtc: assetInfo.val.feeBtc,
           inscription: inscriptions,
         })
+        if (submitRes.msg == 'success' && submitRes.success) {
+          loadingInstance.close()
+          showSuccessDialog.value = true
+        } else {
+          loadingInstance.close()
+          ElMessage.error(submitRes.msg)
+        }
       }
-      //bridgeLoading.value = false
-      loadingInstance.close()
-      showSuccessDialog.value = true
     } catch (error) {
       //bridgeLoading.value = false
       loadingInstance.close()
@@ -1109,18 +1121,18 @@ async function confrimSwap() {
     }
   }
 
-  successInfo.send.amount = swapFromAmount.value
-  successInfo.send.desc =
-    (fromAsset.val.network as AssetNetwork) == AssetNetwork.BTC
-      ? 'BTC Wallet'
-      : 'MVC Wallet'
-  successInfo.send.symbol = fromAsset.val.symbol
-  successInfo.receive.amount = +swapToAmount.value!
-  successInfo.receive.desc =
-    toAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
-  successInfo.receive.symbol = toAsset.val.symbol
-  successInfo.networkFee.symbol = fromAsset.val.symbol
-  successInfo.time.amount = prettyTimestamp(Date.now())
+  // successInfo.send.amount = swapFromAmount.value
+  // successInfo.send.desc =
+  //   (fromAsset.val.network as AssetNetwork) == AssetNetwork.BTC
+  //     ? 'BTC Wallet'
+  //     : 'MVC Wallet'
+  // successInfo.send.symbol = fromAsset.val.symbol
+  // successInfo.receive.amount = +swapToAmount.value!
+  // successInfo.receive.desc =
+  //   toAsset.val.network == AssetNetwork.BTC ? 'BTC Wallet' : 'MVC Wallet'
+  // successInfo.receive.symbol = toAsset.val.symbol
+  // successInfo.networkFee.symbol = fromAsset.val.symbol
+  // successInfo.time.amount = prettyTimestamp(Date.now())
 }
 
 getAssetInfo()
