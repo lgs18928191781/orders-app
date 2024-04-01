@@ -33,7 +33,7 @@ const links: {
     new: true,
   },
   {
-    name: 'Events',
+    name: 'Rewards',
     path: '/events',
   },
   // {
