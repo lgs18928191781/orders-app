@@ -53,7 +53,7 @@ export async function buildAskLimit({
   // Step 1: Get the ordinal utxo as input
   // if testnet, we use a cardinal utxo as a fake one
   let ordinalUtxo: SimpleUtxo
-  if (networkStore.network === 'testnet') {
+  if (networkStore.isTestnet) {
     const cardinalUtxo = await getUtxos(address).then((result) => {
       // choose the smallest utxo, but bigger than 600
       const smallOne = result.reduce((prev, curr) => {

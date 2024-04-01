@@ -10,7 +10,12 @@ export const useFeebStore = defineStore('feeb', {
   },
 
   getters: {
-    get: (state) => state.feeb,
+    get: (state) => {
+      const networkStore = useNetworkStore()
+      if (networkStore.isTestnet) return 2
+
+      return state.feeb
+    },
 
     inscriptionFee: (state) => {
       if (!state.feeb) return 0
