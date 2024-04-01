@@ -151,7 +151,7 @@ const { data: myBrc20s } = useQuery({
               >
                 <div class="text-primary">BTC</div>
                 <div class="mt-2 flex items-center justify-between">
-                  <div class="text-xs text-zinc-500">Available Balance</div>
+                  <div class="text-xs text-zinc-500">Confirmed Balance</div>
                   <div class="text-xs">
                     {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
                   </div>
@@ -166,7 +166,7 @@ const { data: myBrc20s } = useQuery({
 
                 <!-- usable % -->
                 <div class="mt-1 flex items-center justify-between">
-                  <div class="text-xs text-zinc-500">Available BTC %</div>
+                  <div class="text-xs text-zinc-500">Confirmed BTC %</div>
                   <div
                     class="text-xs"
                     :class="availableBalanceRatioColor"
@@ -196,14 +196,17 @@ const { data: myBrc20s } = useQuery({
                       class="-mx-2 rounded-md bg-black p-2 text-xs text-zinc-300"
                     >
                       <p class="">
-                        There are 2 parts of your overall BTC balance that you
+                        There are 3 parts of your overall BTC balance that you
                         don't want to spend.
                       </p>
-                      <p class="mt-1">
-                        1. Those that actually contain BRC-20 / Ordinals.
+                      <p class="mt-1 font-bold text-green-500">
+                        1. Those that are unconfirmed yet.
                       </p>
                       <p class="mt-1">
-                        2. Those that are placed in orders (bid / liquidity).
+                        2. Those that actually contain BRC-20 / Ordinals.
+                      </p>
+                      <p class="mt-1">
+                        3. Those that are placed in orders (bid orders).
                       </p>
                       <p class="mt-1 text-primary">
                         Plus, currently we only select part of your BTC UTXOs to

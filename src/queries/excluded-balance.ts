@@ -6,7 +6,7 @@ import { ComputedRef } from 'vue'
 
 export const useExcludedBalanceQuery = (
   address: ComputedRef<string | undefined>,
-  enabled: ComputedRef<boolean>
+  enabled: ComputedRef<boolean>,
 ) => {
   const queryFn = async () => {
     return Promise.all([getUtxos(address.value!), getListingUtxos()]).then(
@@ -25,18 +25,19 @@ export const useExcludedBalanceQuery = (
             (utxo) =>
               !listingUtxos.some(
                 (l) =>
-                  l.txid === utxo.txId && l.outputIndex === utxo.outputIndex
-              )
+                  l.txid === utxo.txId && l.outputIndex === utxo.outputIndex,
+              ),
           )
           .sort((a, b) => {
             return b.satoshis - a.satoshis
           })
-        const biggestUtxos = allNotListingUtxos.slice(0, USE_UTXO_COUNT_LIMIT)
+        // const biggestUtxos = allNotListingUtxos.slice(0, USE_UTXO_COUNT_LIMIT)
+        const biggestUtxos = allNotListingUtxos // we don't limit the number of utxos anymore
 
         return biggestUtxos.reduce((acc, utxo) => {
           return acc + utxo.satoshis
         }, 0)
-      }
+      },
     )
   }
   return useQuery({
