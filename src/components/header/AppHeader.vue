@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
               <NetworkStateButton />
             </div>
 
-            <AppNotifications />
+            <AppNotifications class="hidden xl:block" />
           </div>
 
           <div class="flex grow items-center lg:hidden">

@@ -117,14 +117,14 @@ const { data: myBrc20s } = useQuery({
             {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
           </span>
           <span
-            class="hidden text-xs lg:inline"
+            class="hidden text-xs xl:inline"
             :class="availableBalanceRatioColor"
             v-if="balance"
           >
             ({{ ((excludedBalance / balance) * 100).toFixed(0) }}%)
           </span>
 
-          <div class="hidden h-4 w-4 items-center justify-center lg:flex">
+          <div class="hidden h-4 w-4 items-center justify-center xl:flex">
             <ChevronsUpDownIcon
               class="h-3 w-3 transition-all duration-200 ease-in-out group-hover:h-4 group-hover:w-4"
             />
@@ -200,7 +200,7 @@ const { data: myBrc20s } = useQuery({
                         don't want to spend.
                       </p>
                       <p class="mt-1 font-bold text-green-500">
-                        1. Those that are unconfirmed yet.
+                        1. Those that are not confirmed yet.
                       </p>
                       <p class="mt-1">
                         2. Those that actually contain BRC-20 / Ordinals.

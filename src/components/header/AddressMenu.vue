@@ -116,7 +116,8 @@ async function onGetGasFromFaucet() {
         class="text-xs font-bold text-red-500"
         v-if="networkStore.network === 'testnet'"
       >
-        (Testnet)
+        <span class="hidden xl:inline">(Testnet)</span>
+        <span class="inline xl:hidden">(T)</span>
       </span>
 
       <ChevronsDownUpIcon
