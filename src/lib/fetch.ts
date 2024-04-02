@@ -232,7 +232,7 @@ export async function bridgeApiFetch(
   if (jsoned.status === 'error') {
     throw new Error(jsoned.message)
   }
-  debugger
+
   if (!jsoned.success) {
     throw new Error(jsoned.data ?? jsoned)
   }
