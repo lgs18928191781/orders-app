@@ -28,6 +28,12 @@ const links: {
     // testing: true,
   },
   {
+    name: 'MVCSwap',
+    path: '/mvcswap',
+    // version: 0,
+    // testing: true,
+  },
+  {
     name: 'Bridge',
     path: '/bridge',
     new: true,

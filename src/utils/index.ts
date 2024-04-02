@@ -1,6 +1,6 @@
 import { ElMessage } from 'element-plus'
 import { Buffer } from 'buffer'
-
+import BigNumber from 'bignumber.js'
 import { useDummiesStore, type DummyUtxo } from '@/stores/dummies'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useNetworkStore } from '@/stores/network'
@@ -64,7 +64,7 @@ const utils = {
 
       if (!paymentUtxo) {
         return ElMessage.error(
-          `Insufficient account balance, unable to initiate subsequent transactions`
+          `Insufficient account balance, unable to initiate subsequent transactions`,
         )
       }
 
@@ -86,7 +86,7 @@ const utils = {
             script: paymentScriptPk,
             value: paymentUtxo.satoshis,
           },
-        })
+        }),
       )
 
       dummiesPsbt.addOutput({ address: address, value: DUMMY_UTXO_VALUE })
@@ -133,6 +133,28 @@ const utils = {
       dummiesStore.set(dummies)
     }
   },
+}
+
+export const formatSat = (value: string | number, dec = 8) => {
+  if (!value) return '0'
+
+  const v = BigNumber(value).div(Math.pow(10, dec))
+  const arr = v.toString().split('.')
+  if (v.toString().indexOf('e') > -1 || (arr[1] && arr[1].length > dec)) {
+    return BigNumber(v).toFixed(dec)
+  }
+  return v.toString()
+}
+
+export const formatAmount = (value: any, n = 4) => {
+  if (!value) return 0
+
+  const arr = value.toString().split('.')
+  if (value.toString().indexOf('e') > -1 || (arr[1] && arr[1].length > n)) {
+    return BigNumber(value).toFixed(n)
+  }
+  if (typeof value === 'object') return value.toFixed(n)
+  return value
 }
 
 export default utils
