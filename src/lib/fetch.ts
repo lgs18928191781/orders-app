@@ -233,10 +233,6 @@ export async function bridgeApiFetch(
     throw new Error(jsoned.message)
   }
 
-  if (!jsoned.success) {
-    throw new Error(jsoned.data ?? jsoned)
-  }
-
   return jsoned.data ?? jsoned
 }
 
