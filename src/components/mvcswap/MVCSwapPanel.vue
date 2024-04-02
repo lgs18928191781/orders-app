@@ -166,7 +166,7 @@ watch(
             tokenIn.value = newVlue.token1
             tokenOut.value = newVlue.token2;
             if (oldValue && newVlue.swapID !== oldValue.swapID) {
-                tokenInAmount.value = 0
+                tokenInAmount.value = ''
             }
 
         }
@@ -326,7 +326,7 @@ const handleSubmit = async () => {
             fetchBalance(),
             fetchPairInfo()
         ])
-        tokenInAmount.value = 0;
+        tokenInAmount.value = '';
         handleSuccessVisible(true)
     } catch (err) {
         console.log(err)
