@@ -200,7 +200,7 @@ watch(tokenInAmount,
         fee.value = `${_fee} ${tokenIn.value.symbol.toUpperCase()}`
     },)
 const switchToken = () => {
-    tokenInAmount.value = 0;
+    tokenInAmount.value = '';
     const tmp = tokenIn.value;
     tokenIn.value = tokenOut.value
     tokenOut.value = tmp
