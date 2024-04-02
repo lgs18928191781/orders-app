@@ -371,7 +371,6 @@ export function useBridgeTools() {
       }
       const submitRes = await submitPrepayOrderMintBtc(submitPrepayOrderMintDto)
 
-      debugger
       return submitRes
       //成功
     } catch (error) {
