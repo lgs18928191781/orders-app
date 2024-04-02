@@ -1,8 +1,8 @@
-import { USE_UTXO_COUNT_LIMIT } from '@/data/constants'
-import { getListingUtxos } from '@/queries/orders-api'
-import { getUtxos } from '@/queries/proxy'
 import { useQuery } from '@tanstack/vue-query'
 import { ComputedRef } from 'vue'
+
+import { getListingUtxos } from '@/queries/orders-api'
+import { getUtxos } from '@/queries/proxy'
 
 export const useExcludedBalanceQuery = (
   address: ComputedRef<string | undefined>,
@@ -40,6 +40,7 @@ export const useExcludedBalanceQuery = (
       },
     )
   }
+
   return useQuery({
     queryKey: ['excludedBalance', { address: address.value }],
     queryFn,

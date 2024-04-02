@@ -370,6 +370,7 @@ export function useBridgeTools() {
         txHex: txHex,
       }
       const submitRes = await submitPrepayOrderMintBtc(submitPrepayOrderMintDto)
+
       return submitRes
       //成功
     } catch (error) {

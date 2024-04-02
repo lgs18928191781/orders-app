@@ -44,7 +44,6 @@ const links: {
 ]
 
 function isLinkActive(path: string) {
-  console.log('path', path)
   switch (path) {
     case '/':
       return route.path === '/' || route.path.startsWith('/orders')

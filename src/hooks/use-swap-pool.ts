@@ -10,7 +10,7 @@ export function useSwapPool() {
   if (!pairStr.value) {
     // use default
     const networkStore = useNetworkStore()
-    if (networkStore.network === 'testnet') {
+    if (networkStore.isTestnet) {
       pairStr.value = 'btc-xedr'
     } else {
       pairStr.value = 'btc-rdex'

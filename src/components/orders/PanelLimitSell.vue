@@ -118,7 +118,7 @@ const { data: marketPrice } = useQuery({
 
 const exchangeOrdiAmount = ref(0)
 const limitBrcAmount = computed(() => {
-  if (networkStore.network === 'testnet') {
+  if (networkStore.isTestnet) {
     return exchangeOrdiAmount.value
   }
 
@@ -249,10 +249,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
             <span class="ml-2 text-zinc-500">Amount</span>
           </div>
 
-          <div
-            class="relative max-w-[67%] grow"
-            v-if="networkStore.network === 'testnet'"
-          >
+          <div class="relative max-w-[67%] grow" v-if="networkStore.isTestnet">
             <input
               type="text"
               class="w-full rounded bg-zinc-700 py-2 pl-2 pr-16 text-right placeholder-zinc-500 outline-none"
@@ -342,7 +339,7 @@ const selectedAskCandidate: Ref<Brc20Transferable | undefined> = ref()
 
         <div
           class="cursor-pointer pt-2 text-right text-xs text-zinc-500"
-          v-if="networkStore.network === 'testnet'"
+          v-if="networkStore.isTestnet"
           @click="exchangeOrdiAmount = ordiBalance || 0"
           :title="`Sell all $${selectedPair.fromSymbol.toUpperCase()}`"
         >

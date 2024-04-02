@@ -14,7 +14,7 @@
         </div>
         <div class="item-center flex">
           <div
-            @click="getFaucet"
+            @click="commomVisible = true"
             class="mr-3 flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
           >
             <HandCoins :size="20" />
@@ -278,6 +278,63 @@
       :isOpen="historyVisible"
       @handleHistoryVisible="handleHistoryVisible"
     />
+    <CommonDialog
+      :isOpen="commomVisible"
+      @handleCommonVisible="handleCommonVisible"
+    >
+      <template v-slot:title>
+        <div class="text-2xl">Faucet</div>
+      </template>
+
+      <template v-slot:content>
+        <div class="mt-10 text-xl">
+          If no test BRC20 tokens are received after clicking,please manually
+          exchange via Swap.
+        </div>
+      </template>
+      <template v-slot:btns>
+        <div class="mt-16 flex items-center justify-center text-[#17171a]">
+          <button
+            @click="toSwap"
+            :class="[
+              'text-base',
+              'w-2/6',
+
+              'rounded-xl',
+              'py-3',
+              'flex',
+              'mr-10',
+              'item-center',
+              'justify-center',
+              'font-bold',
+              BtnColor.default,
+            ]"
+          >
+            Switch to Swap</button
+          ><button
+            @click="getFaucet"
+            :class="[
+              'text-base',
+              'w-2/6',
+              'rounded-xl',
+              'py-3',
+              'flex',
+              'mr-10',
+              'item-center',
+              'justify-center',
+              'font-bold',
+              BtnColor.default,
+            ]"
+          >
+            <Loader2Icon
+              v-if="getFaucetLoading"
+              class="mr-1.5 h-5 animate-spin"
+            />
+            <span>Remain Here</span>
+          </button>
+        </div>
+      </template>
+    </CommonDialog>
   </div>
 </template>
 
@@ -349,6 +406,7 @@ import { Buffer } from 'buffer'
 import { useRouter } from 'vue-router'
 import { ElLoading } from 'element-plus'
 import { getUtxos } from '@/queries/proxy'
+import CommonDialog from '@/components/bridge/CommonDialog.vue'
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -1139,11 +1197,17 @@ getAssetInfo()
 
 // history
 const historyVisible = ref<boolean>(false)
+const commomVisible = ref<boolean>(false)
+const getFaucetLoading = ref<boolean>(false)
 const handleHistoryVisible = (visible: boolean) => {
   historyVisible.value = visible
 }
+const handleCommonVisible = (visible: boolean) => {
+  commomVisible.value = visible
+}
 
 const getFaucet = async () => {
+  getFaucetLoading.value = true
   try {
     const addressInfo = determineAddressInfo(
       await connectionStore.adapter.getAddress(),
@@ -1159,18 +1223,28 @@ const getFaucet = async () => {
     })
     if (res.success) {
       ElMessage.success('Received success')
+      commomVisible.value = false
+      getFaucetLoading.value = false
     } else {
       if (res.msg == 'public key already in faucet') {
+        getFaucetLoading.value = false
         ElMessage.error(
           `The address has already used the faucet, please wait patiently for it to refresh.`,
         )
       } else {
+        getFaucetLoading.value = false
         ElMessage.error(res.msg)
       }
     }
   } catch (error) {
+    getFaucetLoading.value = false
     ElMessage.error('Cancel')
   }
+}
+
+function toSwap() {
+  commomVisible.value = false
+  router.push('/swap')
 }
 </script>
 <style scoped lang="scss">

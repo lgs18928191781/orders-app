@@ -23,6 +23,7 @@ declare module '@vue/runtime-core' {
     Building: typeof import('./src/components/overlays/Building.vue')['default']
     CheckMetaletProvider: typeof import('./src/components/bridge/CheckMetaletProvider.vue')['default']
     ClaimRecordItem: typeof import('./src/components/events/ClaimRecordItem.vue')['default']
+    CommonDialog: typeof import('./src/components/bridge/CommonDialog.vue')['default']
     ConfirmationModal: typeof import('./src/components/overlays/ConfirmationModal.vue')['default']
     ConnectionModal: typeof import('./src/components/header/ConnectionModal.vue')['default']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']

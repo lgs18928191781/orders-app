@@ -73,6 +73,9 @@ const okxAccountsChangedHandler = (accounts: string[] | null) => {
 const metaletAccountsChangedHandler = () => {
   if (useConnectionStore().last.wallet !== 'metalet') return
 
+  // sync here to prevent chronological error
+  connectionStore.sync()
+
   ElMessage.warning({
     message: 'Metalet account changed. Refreshing page...',
     type: 'warning',
