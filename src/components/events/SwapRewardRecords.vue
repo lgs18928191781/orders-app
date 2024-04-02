@@ -3,7 +3,11 @@ import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
 
-import { getClaimHistory, getRewardHistory } from '@/queries/events'
+import {
+  getClaimHistory,
+  getRewardHistory,
+  getSwapRewardHistory,
+} from '@/queries/events'
 import { useConnectionStore } from '@/stores/connection'
 
 const connectionStore = useConnectionStore()
@@ -20,9 +24,8 @@ const { data: rewardHistory } = useQuery({
     'rewardHistory',
     { event: computed(() => props.event), address: connectionStore.getAddress },
   ],
-  queryFn: () => getRewardHistory({ event: props.event }),
+  queryFn: () => getSwapRewardHistory({ event: props.event }),
   select: (data) => {
-    console.log({ data })
     return data
   },
   enabled: computed(() => connectionStore.connected),
@@ -65,7 +68,7 @@ const { data: claimHistory } = useQuery({
     <TabPanels class="mt-8">
       <TabPanel class="space-y-2">
         <template v-if="rewardHistory">
-          <RewardRecordItem
+          <SwapRewardRecordItem
             v-for="record in rewardHistory"
             :record="record"
             v-if="rewardHistory.length"

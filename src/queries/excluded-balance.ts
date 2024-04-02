@@ -19,7 +19,6 @@ export const useExcludedBalanceQuery = (
           }
         })
 
-        // choose 3 biggest utxos that are not in the listing
         const allNotListingUtxos = allUtxos
           .filter(
             (utxo) =>

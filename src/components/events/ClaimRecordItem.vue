@@ -11,7 +11,7 @@ const { record } = defineProps<{
 </script>
 
 <template>
-  <div class="mx-4 rounded-lg bg-zinc-950 px-4 py-4">
+  <div class="mx-4 rounded-lg border border-primary/15 bg-zinc-950 px-4 py-4">
     <!-- order id -->
     <span class="text-xs text-zinc-500"># {{ record.orderId }}</span>
 

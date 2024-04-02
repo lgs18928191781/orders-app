@@ -94,8 +94,9 @@ export const getEventRemains = async ({
   rewardTick: string
   remainingInfo: string
 }> => {
+  const network = useNetworkStore().network
   const params = new URLSearchParams({
-    net: 'livenet',
+    net: network,
     rewardType: event,
   })
 
@@ -119,9 +120,10 @@ export const getEventStats = async ({
   total: number
 }> => {
   const address = useConnectionStore().getAddress
+  const network = useNetworkStore().network
   const params = new URLSearchParams({
     address,
-    net: 'livenet',
+    net: network,
     rewardType: event,
   })
 
@@ -147,10 +149,12 @@ export const getClaimFees = async (): Promise<{
   rewardInscriptionFee: number
 }> => {
   const feeb = useFeebStore().get ?? raise('Choose a fee rate first.')
+  const network = useNetworkStore().network
 
   const params = new URLSearchParams({
     networkFeeRate: String(feeb),
     version: '2',
+    net: network,
   })
 
   return await rewardFetch(`cal/fee?${params}`, { auth: true })
@@ -197,9 +201,10 @@ export const postClaimReward = async ({
 
 export const getRewardHistory = async ({ event }: { event: string }) => {
   const address = useConnectionStore().getAddress
+  const network = useNetworkStore().network
   const params = new URLSearchParams({
     address,
-    net: 'livenet',
+    net: network,
     rewardType: event,
   })
 
@@ -215,9 +220,10 @@ export const getRewardHistory = async ({ event }: { event: string }) => {
 
 export const getClaimHistory = async ({ event }: { event: string }) => {
   const address = useConnectionStore().getAddress
+  const network = useNetworkStore().network
   const params = new URLSearchParams({
     address,
-    net: 'livenet',
+    net: network,
     rewardType: event,
   })
 
@@ -239,6 +245,41 @@ export const getClaimHistory = async ({ event }: { event: string }) => {
         return item
       })
     })
+
+  return history
+}
+
+export type SwapRewardHistory = {
+  dailyCount: number
+  endBlock: number
+  lpBlock: number
+  net: 'testnet' | 'livenet'
+  realReward: number
+  recordId: string
+  startBlock: number
+  tick: string
+  timestamp: number
+  userAddress: string
+}
+export const getSwapRewardHistory = async ({
+  event,
+}: {
+  event: string
+}): Promise<SwapRewardHistory[]> => {
+  const address = useConnectionStore().getAddress
+  const network = useNetworkStore().network
+  const params = new URLSearchParams({
+    address,
+    net: network,
+    rewardType: event,
+  })
+
+  const history = await rewardFetch(`user/records?${params}`).then((res) => {
+    // if is empty object, return empty array
+    if (Object.keys(res).length === 0) return []
+
+    return res.list
+  })
 
   return history
 }

@@ -160,6 +160,7 @@ async function onClaimReward() {
       </div>
     </section>
 
-    <EventRecords :event="event" />
+    <SwapRewardRecords :event="event" v-if="event === '51'" />
+    <EventRecords :event="event" v-else />
   </div>
 </template>

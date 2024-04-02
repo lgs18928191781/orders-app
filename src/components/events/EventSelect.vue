@@ -19,7 +19,7 @@ const sortByLatest = (a: any, b: any) => {
   }
   return 0
 }
-const eventsSorted = events.sort(sortByLatest)
+const eventsSorted = [...events].sort(sortByLatest)
 
 const eventSymbol = defineModel('eventSymbol', {
   required: true,
