@@ -18,6 +18,7 @@ const geoStore = useGeoStore()
 const isMobile = ref(false)
 
 onMounted(async () => {
+  console.log('updated', 123)
   if (window.innerWidth < 768) {
     isMobile.value = true
   }
