@@ -91,7 +91,7 @@ const selectedEvent = computed(() => {
             <div class="text-base font-bold">
               {{ event.title }}
               <span
-                v-if="index === 0"
+                v-if="event.latest === true"
                 class="mr-4 rounded bg-red-500/20 px-2 py-1 text-xs text-red-500"
               >
                 LIVE

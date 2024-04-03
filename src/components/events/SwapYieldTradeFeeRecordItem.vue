@@ -2,12 +2,15 @@
 import { CopyIcon } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
 
-import { prettyAddress, prettyBalance, prettyTimestamp } from '@/lib/formatters'
-import { EVENT_REWARDS_TICK } from '@/data/constants'
-import type { SwapRewardHistory } from '@/queries/events'
+import {
+  prettyAddress,
+  prettyCoinDisplay,
+  prettyTimestamp,
+} from '@/lib/formatters'
+import { type SwapYieldTradeFeeHistory } from '@/queries/swap-yield-reward-history.query'
 
 const props = defineProps<{
-  record: SwapRewardHistory
+  record: SwapYieldTradeFeeHistory
 }>()
 
 const onCopyOrderId = () => {
@@ -21,15 +24,15 @@ const onCopyOrderId = () => {
   <div class="rounded-lg border border-primary/15 bg-zinc-950 px-4 py-4">
     <h3 class="flex items-center justify-between">
       <div class="flex items-center text-lg">
-        <span class="font-bold text-primary" v-if="record.realReward">
-          {{ record.realReward }} {{ EVENT_REWARDS_TICK.toUpperCase() }}
+        <span class="font-bold text-primary" v-if="record.proportionFee">
+          {{ prettyCoinDisplay(record.proportionFee, 'btc') }}
         </span>
         <span v-else class="text-zinc-500">Calculating...</span>
       </div>
 
-      <!-- <span class="text-zinc-500 text-sm">
-        {{ `${prettyTimestamp(record.fromOrderDealTime)}` }}
-      </span> -->
+      <span class="text-sm text-zinc-500">
+        {{ `${prettyTimestamp(record.timestamp)}` }}
+      </span>
     </h3>
 
     <div class="mt-4 flex items-center justify-between">
@@ -50,25 +53,25 @@ const onCopyOrderId = () => {
           </div>
         </div>
 
-        <!-- <div class="flex items-center">
-          <span class="w-40 shrink-0 inline-block text-zinc-500"
-            >Deal Block</span
-          >
-          <span>
-            {{ record.fromOrderDealBlock || '-' }}
+        <div class="flex items-center">
+          <span class="inline-block w-40 shrink-0 text-zinc-500">
+            Blocks per round
           </span>
-        </div> -->
+          <span>
+            {{ record.dailyBlock || '-' }}
+          </span>
+        </div>
 
-        <!-- <div class="flex items-center">
-          <span class="w-40 shrink-0 inline-block text-zinc-500"
+        <div class="flex items-center">
+          <span class="inline-block w-40 shrink-0 text-zinc-500"
             >Reward Block Range</span
           >
-          <span v-if="record.calStartBlock">
-            {{ record.calStartBlock + ' - ' + record.calEndBlock }}
+          <span v-if="record.startBlock">
+            {{ record.startBlock + ' - ' + record.endBlock }}
           </span>
 
           <span v-else>-</span>
-        </div> -->
+        </div>
 
         <!-- <div class="flex items-center">
           <span class="w-40 shrink-0 inline-block text-zinc-500">Reward</span>

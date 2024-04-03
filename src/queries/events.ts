@@ -1,12 +1,11 @@
 import fetchWrapper, { type ApiOptions } from '@/lib/fetch'
 import { raise } from '@/lib/helpers'
-import sign from '@/lib/sign'
 import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
 import { useFeebStore } from '@/stores/feeb'
 import { useNetworkStore } from '@/stores/network'
 
-async function eventFetch(url: string, options?: ApiOptions) {
+export async function eventFetch(url: string, options?: ApiOptions) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/event/${url}`
   if (!options)
     options = {
@@ -46,7 +45,7 @@ async function eventFetch(url: string, options?: ApiOptions) {
   return jsoned.data
 }
 
-async function rewardFetch(url: string, options?: ApiOptions) {
+export async function rewardFetch(url: string, options?: ApiOptions) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/reward/${url}`
   if (!options)
     options = {
@@ -103,44 +102,6 @@ export const getEventRemains = async ({
   const remains = await eventFetch(`reward/pool/info?${params}`)
 
   return remains
-}
-
-export const getEventStats = async ({
-  event,
-}: {
-  event: string
-}): Promise<{
-  hadClaimRewardAmount: number
-  hasReleasePoolOrderCount: number
-  net: string
-  rewardTick: string
-  tick: string
-  totalRewardAmount: number
-  totalRewardExtraAmount: number
-  total: number
-}> => {
-  const address = useConnectionStore().getAddress
-  const network = useNetworkStore().network
-  const params = new URLSearchParams({
-    address,
-    net: network,
-    rewardType: event,
-  })
-
-  const stats = await rewardFetch(`user/info?${params}`).then((res) => {
-    let total =
-      res.totalRewardAmount +
-      res.totalRewardExtraAmount -
-      res.hadClaimRewardAmount
-    if (total < 0) total = 0
-
-    return {
-      ...res,
-      total,
-    }
-  })
-
-  return stats
 }
 
 export const getClaimFees = async (): Promise<{
@@ -274,12 +235,17 @@ export const getSwapRewardHistory = async ({
     rewardType: event,
   })
 
-  const history = await rewardFetch(`user/records?${params}`).then((res) => {
-    // if is empty object, return empty array
-    if (Object.keys(res).length === 0) return []
+  const history = await rewardFetch(`user/records?${params}`)
+    .then((res) => {
+      // if is empty object, return empty array
+      if (Object.keys(res).length === 0) return []
 
-    return res.list
-  })
+      return res.list
+    })
+    .then((res) => {
+      // filter records that is 0
+      return res.filter((item: any) => item.realReward > 0)
+    })
 
   return history
 }

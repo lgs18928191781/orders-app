@@ -4,27 +4,31 @@ import { Loader2Icon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import { DEBUG } from '@/data/constants'
 import { useConnectionStore } from '@/stores/connection'
-import events from '@/data/events'
-import {
-  getEventRemains,
-  getEventStats,
-  postClaimReward,
-} from '@/queries/events'
-import { sleep } from '@/lib/helpers'
-import { buildClaim } from '@/lib/builders/orders-v2'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useBuildingOverlay } from '@/hooks/use-building-overlay'
+
+import { getEventStatsQuery } from '@/queries/event-stats.query'
+import { getEventRemains, postClaimReward } from '@/queries/events'
+
+import { prettyBalance, prettyBtcDisplay } from '@/lib/formatters'
+import { sleep } from '@/lib/helpers'
+import { buildClaim } from '@/lib/builders/orders-v2'
+import events from '@/data/events'
+import { DEBUG, SWAP_YIELD_TRADE_FEE_CLAIM_THRESHOLD } from '@/data/constants'
 
 const connectionStore = useConnectionStore()
 
 const event = ref(events[events.length - 1].symbol)
-const { data: eventStats, isFetching: isFetchingEventStats } = useQuery({
-  queryKey: ['events', { event, address: connectionStore.getAddress }],
-  queryFn: () => getEventStats({ event: event.value }),
-  enabled: computed(() => !!event.value),
-})
+const { data: eventStats, isFetching: isFetchingEventStats } = useQuery(
+  getEventStatsQuery(
+    {
+      event: computed(() => event.value),
+      address: connectionStore.getAddress,
+    },
+    computed(() => !!event.value),
+  ),
+)
 
 const { data: eventRemains, isFetching: isFetchingEventRemains } = useQuery({
   queryKey: ['eventsRemains', { event }],
@@ -88,6 +92,10 @@ async function onClaimReward() {
     closeBuilding()
   }
 }
+
+async function onClaimTradeFee() {
+  console.log('todo')
+}
 </script>
 
 <template>
@@ -138,21 +146,58 @@ async function onClaimReward() {
         <h3 class="text-sm font-medium leading-6 text-zinc-300">My Rewards</h3>
         <div class="mt-2 flex items-center gap-4 text-lg" v-if="eventStats">
           <div class="gap- flex items-baseline text-primary">
-            <span class="text-3xl font-bold">
+            <span
+              class="text-3xl font-bold"
+              v-if="eventStats.rewardTick === 'btc'"
+            >
+              {{ isFetchingEventStats ? '-' : prettyBalance(eventStats.total) }}
+            </span>
+
+            <span class="text-3xl font-bold" v-else>
               {{ isFetchingEventStats ? '-' : eventStats.total }}
             </span>
 
-            <span class="ml-1 uppercase">
+            <span class="ml-1 uppercase" v-if="eventStats.rewardTick === 'btc'">
+              BTC
+            </span>
+            <span class="ml-1 uppercase" v-else>
               ${{ eventStats.rewardTick.toUpperCase() }}
             </span>
           </div>
 
           <!-- claim button -->
+          <div
+            v-if="
+              event === 'swapYieldTradeFee' &&
+              eventStats &&
+              eventStats.total > 0
+            "
+            class="flex items-center gap-4"
+          >
+            <button
+              class="rounded bg-primary px-4 py-1 text-sm text-orange-950 shadow-md shadow-primary/20 hover:shadow-primary/50 disabled:opacity-30 disabled:shadow-none disabled:saturate-50"
+              @click="onClaimTradeFee"
+              :disabled="
+                !eventStats ||
+                eventStats.total < SWAP_YIELD_TRADE_FEE_CLAIM_THRESHOLD
+              "
+            >
+              Claim
+            </button>
+            <div class="mt-2 text-xs text-zinc-500">
+              You need to accumulate at least 0.001 BTC to claim.
+            </div>
+          </div>
+
           <button
             class="rounded bg-primary px-4 py-1 text-sm text-orange-950 shadow-md shadow-primary/20 hover:shadow-primary/50 disabled:opacity-30 disabled:shadow-none disabled:saturate-50"
             @click="onClaimReward"
             :disabled="!eventStats || eventStats.total === 0"
-            v-if="eventStats && eventStats.total > 0"
+            v-else-if="
+              event !== 'swapYieldTradeFee' &&
+              eventStats &&
+              eventStats.total > 0
+            "
           >
             Claim
           </button>
@@ -160,7 +205,11 @@ async function onClaimReward() {
       </div>
     </section>
 
-    <SwapRewardRecords :event="event" v-if="event === '51'" />
+    <SwapYieldBrc20Records :event="event" v-if="event === '51'" />
+    <SwapYieldTradeFeeRecords
+      :event="event"
+      v-else-if="event === 'swapYieldTradeFee'"
+    />
     <EventRecords :event="event" v-else />
   </div>
 </template>

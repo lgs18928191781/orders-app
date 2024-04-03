@@ -285,7 +285,6 @@ export async function buildSellTake({
     sighashType: SIGHASH_ALL,
     feeb,
   })
-  console.log({ fee })
 
   return {
     order: sell,
