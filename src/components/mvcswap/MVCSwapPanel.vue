@@ -254,7 +254,7 @@ const handleSubmit = async () => {
                     note: 'mvcswap.com(swap)',
                     noBroadcast: true,
                 }
-                const res = await window.metaidwallet.transfer({
+                const res:any = await window.metaidwallet.transfer({
                     broadcast: false,
                     tasks: [
                         {
@@ -263,7 +263,7 @@ const handleSubmit = async () => {
                         },
                     ],
                 });
-                console.log(res)
+                
                 if (res.status === 'canceled') throw new Error(res.status)
                 if (res.msg) throw new Error(res.msg)
                 payload = {
@@ -278,7 +278,7 @@ const handleSubmit = async () => {
                 throw new Error('not support yet')
             }
         } else {
-            const tx_res = await window.metaidwallet.transfer({
+            const tx_res:any = await window.metaidwallet.transfer({
                 broadcast: false,
                 tasks: [
                     {
@@ -315,7 +315,7 @@ const handleSubmit = async () => {
 
         }
 
-        let swap_data = JSON.stringify(payload);
+        let swap_data:any = JSON.stringify(payload);
 
         swap_data = await gzip(swap_data);
         let res = dirForward ? await token1totoken2({ data: swap_data }) : await token2toToken1({ data: swap_data });
@@ -328,7 +328,7 @@ const handleSubmit = async () => {
         ])
         tokenInAmount.value = '';
         handleSuccessVisible(true)
-    } catch (err) {
+    } catch (err:any) {
         console.log(err)
         ElMessage.error(err.message)
     }

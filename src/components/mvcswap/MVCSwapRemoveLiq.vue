@@ -188,7 +188,7 @@ const handleSubmit = async () => {
             throw new Error(isLackBalance.msg);
         }
         const _removeLP = formatTok(removeLP, lptoken.decimal);
-        const tx_res = await window.metaidwallet.transfer({
+        const tx_res:any = await window.metaidwallet.transfer({
             broadcast: false,
             tasks: [
                 {
@@ -237,7 +237,7 @@ const handleSubmit = async () => {
         token2Amount.value = 0;
         removeLPAmount.value = 0
         handleSuccessVisible(true)
-    } catch (err) {
+    } catch (err:any) {
         console.log(err)
         ElMessage.error(err.message)
     }

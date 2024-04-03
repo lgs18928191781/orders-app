@@ -3,7 +3,7 @@ import { formatSat } from '@/utils'
 import { defineStore } from 'pinia'
 const getMvcBalance = async () => {
   try {
-    const res = await window.metaidwallet.getBalance()
+    const res = await window.metaidwallet.getMvcBalance()
     return formatSat(res.total)
     //return formatSat(0);
   } catch (err) {
@@ -14,7 +14,7 @@ const getMvcBalance = async () => {
 const getTokenBalance = async () => {
   const res = await window.metaidwallet.token.getBalance()
   const userBalance: Record<string, string> = {}
-  res.forEach((item) => {
+  res.forEach((item:any) => {
     const balance =
       BigInt(item.confirmedString) + BigInt(item.unconfirmedString)
     userBalance[item.genesis] = formatSat(balance.toString(), item.decimal)

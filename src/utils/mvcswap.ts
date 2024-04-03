@@ -12,7 +12,7 @@ export const formatAmount = (value: any, n = 4) => {
   if (typeof value === 'object') return value.toFixed(n)
   return value
 }
-export const formatTok = (value, dec = 8, str = true) => {
+export const formatTok = (value:any, dec = 8, str = true) => {
   if (!value) return 0
   const v = BigNumber(value).multipliedBy(Math.pow(10, dec))
   return str ? v.toFixed(0) : v
@@ -32,8 +32,8 @@ export const calcAmount = ({
   pairData,
 }: Params) => {
   const { swapToken1Amount, swapToken2Amount, swapFeeRate } = pairData
-  let amount1 = dirForward ? swapToken1Amount : swapToken2Amount
-  let amount2 = dirForward ? swapToken2Amount : swapToken1Amount
+  let amount1:any = dirForward ? swapToken1Amount : swapToken2Amount
+  let amount2:any = dirForward ? swapToken2Amount : swapToken1Amount
   let decimal1 = dirForward ? pairData.token1.decimal : pairData.token2.decimal
   let decimal2 = dirForward ? pairData.token2.decimal : pairData.token1.decimal
 
@@ -47,7 +47,7 @@ export const calcAmount = ({
     const addAmountWithFee =
       _originAddAmount * BigInt(FEE_FACTOR - (swapFeeRate || 0))
     newAmount1 = BigInt(amount1) + _originAddAmount
-    let removeAmount =
+    let removeAmount:any =
       (addAmountWithFee * BigInt(amount2)) /
       ((BigInt(amount1) + _originAddAmount) * BigInt(FEE_FACTOR))
     removeAmount = BigNumber(removeAmount)

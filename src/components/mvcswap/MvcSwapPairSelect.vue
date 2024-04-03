@@ -1,4 +1,5 @@
 <template>
+  
   <Listbox as="div" class="relative inline-block text-left" v-model="curPair">
     <ListboxButton>
       <button
@@ -34,7 +35,7 @@
           <button
             :class="[
               'flex w-max min-w-full items-center gap-2 rounded p-4 text-sm hover:bg-primary/70',
-              curPair.swapID === pair.swapID ? 'bg-primary/70' : 'bg-black',
+              curPair&&curPair.swapID === pair.swapID ? 'bg-primary/70' : 'bg-black',
 
             ]"
             @click="setCurPair(pair)"
@@ -49,7 +50,7 @@
             </div>
 
             <CheckIcon
-              v-if="curPair.swapID === pair.swapID"
+              v-if="curPair&&curPair.swapID === pair.swapID"
               class="ml-auto h-5 w-5 text-primary"
               aria-hidden="true"
             />

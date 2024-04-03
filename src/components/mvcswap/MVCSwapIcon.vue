@@ -14,7 +14,7 @@ const { icons } = storeToRefs(store);
 const props = withDefaults(defineProps<{ token: MS.Token }>(), {
     token: undefined
 })
-const init = (props) => {
+const init = (props:{ token: MS.Token }) => {
     if (!props.token) {
         icon.value = '';
         return

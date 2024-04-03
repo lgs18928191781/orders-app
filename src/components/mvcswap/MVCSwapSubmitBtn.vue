@@ -9,14 +9,14 @@ const { connected, last } = storeToRefs(connectionStore);
 const { isTestnet } = storeToRefs(networkStore);
 type Condition = { condition: boolean, text: string, danger: boolean, disabled: boolean }
 type Props = {
-    conditions: Condition[] | never[],
+    conditions: Condition[] | undefined,
     loading?: boolean,
-    className?: stringz
+    className?: string
     submiting?: boolean
 }
 import { computed, ref, watch } from "vue";
 const props = withDefaults(defineProps<Props>(), {
-    conditions: [],
+    conditions: undefined,
     loading: false,
     className: '',
     submiting: false
@@ -63,7 +63,7 @@ const combineConditions = computed(() => {
             danger: false,
             disabled: true
         },
-        ...props.conditions
+        ...props.conditions||[]
     ]
 })
 watch([connected, last, isTestnet], () => {

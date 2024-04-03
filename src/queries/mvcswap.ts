@@ -62,7 +62,7 @@ export async function token1totoken2(data: { data: string }) {
     },
   })
 }
-export async function token2toToken1(data: { data: string }) {
+export async function token2toToken1(data: { data: any }) {
   return fetchWrapper<
     MS.Ret<{
       token1Amount: string
@@ -77,7 +77,7 @@ export async function token2toToken1(data: { data: string }) {
   })
 }
 
-export async function addLiq(data: { data: string }) {
+export async function addLiq(data: { data: any }) {
   return fetchWrapper<
     MS.Ret<{
       lpAddAmount: string
@@ -92,7 +92,7 @@ export async function addLiq(data: { data: string }) {
   })
 }
 
-export async function removeLiq(data: { data: string }) {
+export async function removeLiq(data: { data: any }) {
   return fetchWrapper<
     MS.Ret<{
       token1Amount: string

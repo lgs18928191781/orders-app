@@ -159,7 +159,7 @@ watch(
     },
     { deep: true }
 )
-const handelToken1Change = (e) => {
+const handelToken1Change = (e:any) => {
     console.log(e.target.value)
     const { value } = e.target;
     if (!curPair.value) return
@@ -183,7 +183,7 @@ const handelToken1Change = (e) => {
     lastMod.value = 'token1'
 }
 
-const handelToken2Change = (e) => {
+const handelToken2Change = (e:any) => {
     console.log(e.target.value)
     const { value } = e.target;
     if (!curPair.value) return
@@ -279,7 +279,7 @@ const handleSubmit = async () => {
         }
         let liq_data;
         if (isMvc) {
-            const tx_res = await window.metaidwallet.transfer({
+            const tx_res:any = await window.metaidwallet.transfer({
                 broadcast: false,
                 tasks: [
                     {
@@ -316,7 +316,7 @@ const handleSubmit = async () => {
                 amountCheckRawTx: retData[1].routeCheckTxHex,
             };
         } else {
-            const tx_res = await window.metaidwallet.transfer({
+            const tx_res:any = await window.metaidwallet.transfer({
                 broadcast: false,
                 tasks: [
                     {
@@ -375,7 +375,7 @@ const handleSubmit = async () => {
         token1Amount.value = '';
         token2Amount.value = '';
         handleSuccessVisible(true)
-    } catch (err) {
+    } catch (err:any) {
         console.log(err)
         ElMessage.error(err.message)
     }
