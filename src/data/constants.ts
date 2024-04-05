@@ -5,6 +5,7 @@ export const VERSION = changelog[0].version
 export const DEBUG = false
 export const IS_DEV = import.meta.env.VITE_ENVIRONMENT === 'development'
 export const SHOWING_TRADE_STATS = false
+export const NETWORK = import.meta.env.VITE_NETWORK || 'livenet'
 
 // all kinds of satoshis value
 export const DUMMY_UTXO_VALUE = 600

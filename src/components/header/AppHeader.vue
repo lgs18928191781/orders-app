@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { MenuIcon } from 'lucide-vue-next'
+import { MenuIcon, TriangleAlertIcon } from 'lucide-vue-next'
 
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
@@ -139,6 +139,13 @@ onBeforeUnmount(() => {
   <header
     class="select-none border-b border-zinc-800 bg-zinc-900 py-3 lg:mb-3 lg:border-none lg:py-4"
   >
+    <div
+      class="mx-auto -mt-3 mb-3 flex items-center justify-center gap-2 bg-red-900/50 p-2 text-center text-red-300 lg:-mt-4 lg:mb-4"
+    >
+      <TriangleAlertIcon class="inline-block h-5 w-5" />
+      This is a testnet version of Orders.Exchange. Funds and assets are not
+      real.
+    </div>
     <div class="mx-auto flex max-w-9xl items-center justify-between gap-4 px-3">
       <AppNavbar />
 
