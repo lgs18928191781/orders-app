@@ -4,7 +4,7 @@ import { useCredentialsStore } from '@/stores/credentials'
 import { useCheckMetaletLoginModal } from '@/hooks/use-check-metalet-modal'
 import { useGeoStore } from '@/stores/geo'
 import { isRestrictedRegion } from '@/lib/helpers'
-import { useRouter } from 'vue-router'
+
 const Home = () => import('./pages/Home.vue')
 const Recover = () => import('./pages/Recover.vue')
 const Swap = () => import('./pages/Swap.vue')
@@ -39,20 +39,20 @@ const routes = [
     ],
   },
   // { path: '/swap', component: Swap },
-  {
-    path: '/bridge/:pair?',
-    component: Bridge,
-    beforeEnter: () => {
-      const connectionStore = useConnectionStore()
-      const { openConnectionModal } = useCheckMetaletLoginModal()
-      if (
-        connectionStore.connected &&
-        connectionStore.last.wallet !== 'metalet'
-      ) {
-        openConnectionModal()
-      }
-    },
-  },
+  // {
+  //   path: '/bridge/:pair?',
+  //   component: Bridge,
+  //   beforeEnter: () => {
+  //     const connectionStore = useConnectionStore()
+  //     const { openConnectionModal } = useCheckMetaletLoginModal()
+  //     if (
+  //       connectionStore.connected &&
+  //       connectionStore.last.wallet !== 'metalet'
+  //     ) {
+  //       openConnectionModal()
+  //     }
+  //   },
+  // },
   { path: '/swap/:pair?', component: Swap, name: 'swap' },
   { path: '/whitelist', component: Whitelist },
   { path: '/events', component: Events },
