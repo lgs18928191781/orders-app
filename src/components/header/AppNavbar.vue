@@ -27,11 +27,11 @@ const links: {
     // version: 0,
     // testing: true,
   },
-  {
-    name: 'Bridge',
-    path: '/bridge',
-    new: true,
-  },
+  // {
+  //   name: 'Bridge',
+  //   path: '/bridge',
+  //   new: true,
+  // },
   {
     name: 'Rewards',
     path: '/events',

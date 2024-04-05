@@ -43,9 +43,13 @@ const { mutate: mutateClaimReward } = useMutation({
   mutationFn: postClaimReward,
   onSuccess: () => {
     ElMessage.success('Reward claimed')
-    queryClient.invalidateQueries({
-      queryKey: ['events', { event, address: connectionStore.getAddress }],
-    })
+    queryClient.invalidateQueries({ queryKey: ['events'] })
+    queryClient.invalidateQueries({ queryKey: ['eventStats'] })
+    queryClient.invalidateQueries({ queryKey: ['eventsRemains'] })
+    queryClient.invalidateQueries({ queryKey: ['swapYieldBrc20History'] })
+    queryClient.invalidateQueries({ queryKey: ['swapYieldTradeFeeHistory'] })
+    queryClient.invalidateQueries({ queryKey: ['rewardHistory'] })
+    queryClient.invalidateQueries({ queryKey: ['claimHistory'] })
   },
   onError: (err: any) => {
     ElMessage.error(err.message)
