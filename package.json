@@ -65,6 +65,5 @@
     "vite-plugin-vue-devtools": "^7.0.25",
     "vite-plugin-wasm": "^3.2.2",
     "vue-tsc": "^1.6.5"
-  },
-  "packageManager": "yarn@4.1.1"
+  }
 }
