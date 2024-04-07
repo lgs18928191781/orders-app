@@ -32,6 +32,7 @@ const initData = async () => {
 onMounted(() => {
   initData();
   intervalId = window.setInterval(() => {
+    fetchPairs(),
     fetchPairInfo()
   }, 10000)
 })

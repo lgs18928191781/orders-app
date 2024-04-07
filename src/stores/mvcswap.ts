@@ -65,12 +65,16 @@ export const useMVCSwapStore = defineStore('mvcswap', {
     async fetchPairInfo() {
       if (!this.curPair) return
 
-      const ret = await queryPairInfo(this.curPair.lptoken.tokenID);
-      
+      const ret = await queryPairInfo(this.curPair.lptoken.tokenID)
+
       if (ret.code === 0) {
-        if(this.curPair.lptoken.tokenID!==ret.data.lptoken.tokenID) return
+        if (this.curPair.lptoken.tokenID !== ret.data.lptoken.tokenID) return
+        const find = this.pairs.find(
+          (item) => item.swapID === this.curPair?.swapID,
+        )
+        const _old = find ? find : this.curPair;
         this.curPair = {
-          ...this.curPair,
+          ..._old,
           ...ret.data,
           token1: {
             ...ret.data.token1,
