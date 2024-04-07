@@ -233,8 +233,8 @@ watch(tokenInAmount,
         });
         tokenOutAmount.value = obj.newAimAddAmount;
         fee.value = `${_fee} ${tokenIn.value.symbol.toUpperCase()}`
-        slip.value = obj.slip;
-        slip1.value = obj.slip1;
+        slip.value = obj.slip.indexOf('NaN')>-1?'0%':obj.slip;
+        slip1.value = obj.slip1.indexOf('NaN')>-1?'0%':obj.slip1;;
     },)
 const switchToken = () => {
     tokenInAmount.value = '';
