@@ -56,17 +56,18 @@
             </div>
             <div class="item-center flex justify-between ">
                 <span class="text-[#C1C0C0]">Price Impact</span>
-                <span :class="beyond?'text-red-500':'text-[#fff]'">{{tokenIn.symbol}} {{slip || '0%'}}, {{tokenOut.symbol}} {{slip1 || '0%'}}</span>
+                <span :class="beyond ? 'text-red-500' : 'text-[#fff]'">{{ tokenIn.symbol }} {{ slip || '0%' }},
+                    {{ tokenOut.symbol }} {{ slip1 || '0%' }}</span>
             </div>
             <div class="item-center flex justify-between ">
                 <span class="text-[#C1C0C0]">Fee</span>
                 <span class="text-[#fff]">{{ fee }}</span>
             </div>
-            
+
         </div>
         <div class="my-2">
             <MVCSwapSubmitBtn :conditions="conditions" @submit="handleSubmit" :submiting="submiting">
-                {{beyond?'Swap Anyway':'Swap'}}
+                {{ beyond ? 'Swap Anyway' : 'Swap' }}
             </MVCSwapSubmitBtn>
         </div>
 
@@ -166,17 +167,42 @@ const conditions = computed(() => {
 
     }]
 })
-const beyond = computed(()=>{
+const beyond = computed(() => {
     return Math.abs(parseFloat(slip.value)) > defaultSlipValue;
 })
 watch(
     curPair,
     (newVlue, oldValue) => {
         if (newVlue) {
-            tokenIn.value = newVlue.token1
-            tokenOut.value = newVlue.token2;
-            if (oldValue && newVlue.swapID !== oldValue.swapID) {
-                tokenInAmount.value = ''
+
+
+            if (oldValue) {
+
+                if (newVlue.swapID !== oldValue.swapID) {
+                    tokenInAmount.value = '';
+                    tokenIn.value = newVlue.token1
+                    tokenOut.value = newVlue.token2;
+                } else if (tokenIn.value && tokenOut.value) {
+                    let _newTokenIn: any
+                    let _newTokenOut: any
+                    if (tokenIn.value.tokenID === newVlue.token1.tokenID) {
+                        _newTokenIn = newVlue.token1
+                    }
+                    if (tokenIn.value.tokenID === newVlue.token2.tokenID) {
+                        _newTokenIn = newVlue.token2
+                    }
+                    if (tokenOut.value.tokenID === newVlue.token1.tokenID) {
+                        _newTokenOut = newVlue.token1
+                    }
+                    if (tokenOut.value.tokenID === newVlue.token2.tokenID) {
+                        _newTokenOut = newVlue.token2
+                    }
+                    tokenIn.value = _newTokenIn;
+                    tokenOut.value = _newTokenOut;
+                }
+            } else {
+                tokenIn.value = newVlue.token1
+                tokenOut.value = newVlue.token2;
             }
 
         }
