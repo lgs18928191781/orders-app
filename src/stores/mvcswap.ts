@@ -15,7 +15,7 @@ const getMvcBalance = async () => {
 const getTokenBalance = async () => {
   const res = await window.metaidwallet.token.getBalance()
   const userBalance: Record<string, string> = {}
-  res.forEach((item:any) => {
+  res.forEach((item: any) => {
     const balance =
       BigInt(item.confirmedString) + BigInt(item.unconfirmedString)
     userBalance[item.genesis] = formatSat(balance.toString(), item.decimal)
@@ -30,7 +30,7 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       userBalance: {} as Record<string, string>,
       loading: true as boolean,
       icons: [] as MS.Icon[],
-      bridgeAssets:[] as string[]
+      bridgeAssets: [] as string[],
     }
   },
   actions: {
@@ -39,12 +39,12 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       if (ret.code === 0) {
         let _pairs = []
         for (let pairName in ret.data) {
-          if(this.bridgeAssets.includes(ret.data[pairName].token2.tokenID) ){
+          if (this.bridgeAssets.includes(ret.data[pairName].token2.tokenID)) {
             _pairs.push({ pairName, ...ret.data[pairName] })
           }
         }
         this.pairs = _pairs // Object.values(ret.data)
-        if (!this.curPair) {
+        if (!this.curPair && this.pairs.length > 0) {
           this.curPair = this.pairs[0]
           await this.fetchPairInfo()
         }
@@ -56,13 +56,15 @@ export const useMVCSwapStore = defineStore('mvcswap', {
         this.icons = ret.data
       }
     },
-    async fetchBridgeAssets(){
-      const ret = await getAssetPairList();
-      this.bridgeAssets = ret.assetList.map((item:any)=>item.targetTokenGenesis)
+    async fetchBridgeAssets() {
+      const ret = await getAssetPairList()
+      this.bridgeAssets = ret.assetList.map(
+        (item: any) => item.targetTokenGenesis,
+      )
     },
     async fetchPairInfo() {
       if (!this.curPair) return
-    
+
       const ret = await queryPairInfo(this.curPair.lptoken.tokenID)
       if (ret.code === 0) {
         this.curPair = {
