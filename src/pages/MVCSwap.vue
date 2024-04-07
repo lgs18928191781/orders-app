@@ -18,9 +18,10 @@ const changeTab = (index: number) => {
   currentTab.value = index;
 };
 const store = useMVCSwapStore()
-const { fetchPairs, fetchBalance, fetchIcons } = store;
+const { fetchPairs, fetchBalance, fetchIcons,fetchBridgeAssets } = store;
 const { loading } = storeToRefs(store);
 const initData = async () => {
+  await fetchBridgeAssets()
   await Promise.all([
     fetchIcons(),
     fetchPairs(),
@@ -38,6 +39,7 @@ watch(
     }
   },
 )
+
 </script>
 
 <template>

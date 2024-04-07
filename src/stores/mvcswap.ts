@@ -1,3 +1,4 @@
+import { getAssetPairList } from '@/queries/bridge-api'
 import { queryAllPairs, queryIcons, queryPairInfo } from '@/queries/mvcswap'
 import { formatSat } from '@/utils'
 import { defineStore } from 'pinia'
@@ -29,6 +30,7 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       userBalance: {} as Record<string, string>,
       loading: true as boolean,
       icons: [] as MS.Icon[],
+      bridgeAssets:[] as string[]
     }
   },
   actions: {
@@ -37,7 +39,9 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       if (ret.code === 0) {
         let _pairs = []
         for (let pairName in ret.data) {
-          _pairs.push({ pairName, ...ret.data[pairName] })
+          if(this.bridgeAssets.includes(ret.data[pairName].token2.tokenID) ){
+            _pairs.push({ pairName, ...ret.data[pairName] })
+          }
         }
         this.pairs = _pairs // Object.values(ret.data)
         if (!this.curPair) {
@@ -51,6 +55,10 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       if (ret.data) {
         this.icons = ret.data
       }
+    },
+    async fetchBridgeAssets(){
+      const ret = await getAssetPairList();
+      this.bridgeAssets = ret.assetList.map((item:any)=>item.targetTokenGenesis)
     },
     async fetchPairInfo() {
       if (!this.curPair) return

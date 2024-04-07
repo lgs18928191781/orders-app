@@ -87,7 +87,6 @@ const init = (props: Props) => {
 init(props)
 
 watch(props, (_props) => {
-    console.log(props, 'token')
     init(_props)
 }, { deep: true })
 </script>

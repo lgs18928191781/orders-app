@@ -55,13 +55,18 @@
                 <span class="text-[#fff]">{{ priceLabel }}</span>
             </div>
             <div class="item-center flex justify-between ">
+                <span class="text-[#C1C0C0]">Price Impact</span>
+                <span :class="beyond?'text-red-500':'text-[#fff]'">{{tokenIn.symbol}} {{slip || '0%'}}, {{tokenOut.symbol}} {{slip1 || '0%'}}</span>
+            </div>
+            <div class="item-center flex justify-between ">
                 <span class="text-[#C1C0C0]">Fee</span>
                 <span class="text-[#fff]">{{ fee }}</span>
             </div>
+            
         </div>
         <div class="my-2">
             <MVCSwapSubmitBtn :conditions="conditions" @submit="handleSubmit" :submiting="submiting">
-                Swap
+                {{beyond?'Swap Anyway':'Swap'}}
             </MVCSwapSubmitBtn>
         </div>
 
@@ -96,6 +101,9 @@ const successVisible = ref(false);
 const handleSuccessVisible = (visible: boolean) => {
     successVisible.value = visible
 }
+const defaultSlipValue = 1;
+const slip = ref('0%');
+const slip1 = ref('0%')
 const tokenOutAmount = ref();
 const submiting = ref(false);
 const fee = ref('--');
@@ -158,7 +166,9 @@ const conditions = computed(() => {
 
     }]
 })
-
+const beyond = computed(()=>{
+    return Math.abs(parseFloat(slip.value)) > defaultSlipValue;
+})
 watch(
     curPair,
     (newVlue, oldValue) => {
@@ -182,7 +192,6 @@ watch(tokenInAmount,
 
         if (!curPair.value || !tokenIn.value || !tokenOut.value) return
         const dirForward = tokenIn.value.symbol === curPair.value.token1.symbol
-        console.log(newVlue)
         const value = formatAmount(newVlue, curPair.value.token1.decimal);
 
         const _fee = formatAmount(
@@ -198,6 +207,8 @@ watch(tokenInAmount,
         });
         tokenOutAmount.value = obj.newAimAddAmount;
         fee.value = `${_fee} ${tokenIn.value.symbol.toUpperCase()}`
+        slip.value = obj.slip;
+        slip1.value = obj.slip1;
     },)
 const switchToken = () => {
     tokenInAmount.value = '';
@@ -205,12 +216,9 @@ const switchToken = () => {
     tokenIn.value = tokenOut.value
     tokenOut.value = tmp
 }
-const mvcAddress = ref<string>('')
+
 const connectionStore = useConnectionStore()
-async function getAddress() {
-    mvcAddress.value = await connectionStore.adapter.getMvcAddress()
-}
-getAddress()
+
 const handleSubmit = async () => {
     if (!curPair.value || !tokenIn.value || !tokenOut.value) return;
     try {
