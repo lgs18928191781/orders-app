@@ -26,7 +26,6 @@ const { data: fiatRate } = useFiatRateQuery()
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const router = useRouter()
-const address = connectionStore.getAddress
 const network = networkStore.network
 
 const { data: poolStats, isLoading: isLoadingPoolStats } = useQuery(
@@ -35,8 +34,8 @@ const { data: poolStats, isLoading: isLoadingPoolStats } = useQuery(
 
 const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
   getPoolStatusQuery(
-    { token1, token2, address, network },
-    computed(() => !!address),
+    { token1, token2, address: connectionStore.getAddress, network },
+    computed(() => !!connectionStore.getAddress),
   ),
 )
 const hasPending = computed(() => {
