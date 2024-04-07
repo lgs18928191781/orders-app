@@ -1,10 +1,26 @@
-// const baseUrl = 'https://api.mvcswap.com/swap'
-const baseUrl='https://api.mvcswap.com/swap/test'
+import { useNetworkStore } from '@/stores/network'
+const mainBaseUrl = 'https://api.mvcswap.com/swap'
+const testBaseUrl = 'https://api.mvcswap.com/swap/test'
+
 interface IRequest {
   <T = any>(url: string, opts: RequestInit): Promise<T>
   <T = any>(url: string): Promise<T>
 }
+
+const getBaseUrl = (isTestNet: boolean) => {
+  if (isTestNet) {
+    return testBaseUrl
+  } else {
+    return mainBaseUrl
+  }
+}
 const fetchWrapper: IRequest = async (url: string, options?: RequestInit) => {
+  const networkStore = useNetworkStore()
+  const isTestNet = networkStore.isTestnet
+  if (url.indexOf('http') < 0) {
+    url = `${getBaseUrl(isTestNet)}${url}`
+  }
+
   const response = await fetch(url, options)
   if (!response.ok) {
     if (response.status === 422 || response.status === 403) {
@@ -20,7 +36,7 @@ const fetchWrapper: IRequest = async (url: string, options?: RequestInit) => {
   return await response.json()
 }
 export async function queryAllPairs() {
-  return fetchWrapper<MS.Ret<Record<string, MS.Pair>>>(`${baseUrl}/allpairs`)
+  return fetchWrapper<MS.Ret<Record<string, MS.Pair>>>(`/allpairs`)
 }
 
 export async function queryIcons() {
@@ -30,9 +46,7 @@ export async function queryIcons() {
 }
 
 export async function queryPairInfo(symbol: string) {
-  return fetchWrapper<MS.Ret<MS.PairInfo>>(
-    `${baseUrl}/swapinfo?symbol=${symbol}`,
-  )
+  return fetchWrapper<MS.Ret<MS.PairInfo>>(`/swapinfo?symbol=${symbol}`)
 }
 export async function reqSwap(data: {
   symbol: string
@@ -40,7 +54,7 @@ export async function reqSwap(data: {
   op: number
   source: string
 }) {
-  return fetchWrapper<MS.Ret<MS.SwapArgs>>(`${baseUrl}/reqswapargs`, {
+  return fetchWrapper<MS.Ret<MS.SwapArgs>>(`/reqswapargs`, {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
@@ -54,7 +68,7 @@ export async function token1totoken2(data: { data: string }) {
       token2Amount: string
       txid: string
     }>
-  >(`${baseUrl}/token1totoken2`, {
+  >(`/token1totoken2`, {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
@@ -68,7 +82,7 @@ export async function token2toToken1(data: { data: any }) {
       token1Amount: string
       txid: string
     }>
-  >(`${baseUrl}/token2toToken1`, {
+  >(`/token2toToken1`, {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
@@ -83,7 +97,7 @@ export async function addLiq(data: { data: any }) {
       lpAddAmount: string
       txid: string
     }>
-  >(`${baseUrl}/addLiq`, {
+  >(`/addLiq`, {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
@@ -99,7 +113,7 @@ export async function removeLiq(data: { data: any }) {
       token2Amount: string
       txid: string
     }>
-  >(`${baseUrl}/removeLiq`, {
+  >(`/removeLiq`, {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {

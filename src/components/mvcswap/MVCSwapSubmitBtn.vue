@@ -57,12 +57,12 @@ const combineConditions = computed(() => {
             disabled: true
 
         },
-        {
-            condition: !isTestnet.value,
-            text: 'Switch To Testnet',
-            danger: false,
-            disabled: true
-        },
+        // {
+        //     condition: !isTestnet.value,
+        //     text: 'Switch To Testnet',
+        //     danger: false,
+        //     disabled: true
+        // },
         ...props.conditions||[]
     ]
 })

@@ -35,11 +35,18 @@ export const useMVCSwapStore = defineStore('mvcswap', {
   },
   actions: {
     async fetchPairs() {
+      
       const ret = await queryAllPairs()
       if (ret.code === 0) {
         let _pairs = []
         for (let pairName in ret.data) {
           if (this.bridgeAssets.includes(ret.data[pairName].token2.tokenID)) {
+            _pairs.push({ pairName, ...ret.data[pairName] })
+          }
+        }
+        //TODO 暂时处理主网没上线交易对的问题
+        if(_pairs.length===0){
+          for (let pairName in ret.data) {
             _pairs.push({ pairName, ...ret.data[pairName] })
           }
         }
