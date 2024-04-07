@@ -11,43 +11,43 @@ const links: {
   testing?: boolean
   disabled?: boolean
 }[] = [
-  {
-    name: 'Orderbook',
-    path: '/',
-    // version: 2,
-  },
-  // {
-  //   name: 'Pool',
-  //   path: '/pool',
-  //   // new: true,
-  // },
-  {
-    name: 'Swap',
-    path: '/swap/',
-    // version: 0,
-    // testing: true,
-  },
-  {
-    name: 'MVCSwap',
-    path: '/mvcswap',
-    // version: 0,
-    // testing: true,
-  },
-  {
-    name: 'Bridge',
-    path: '/bridge',
-    new: true,
-  },
-  {
-    name: 'Events',
-    path: '/events',
-  },
-  // {
-  //   name: 'Whitelist',
-  //   path: '/whitelist',
-  //   disabled: true,
-  // },
-]
+    {
+      name: 'Orderbook',
+      path: '/',
+      // version: 2,
+    },
+    // {
+    //   name: 'Pool',
+    //   path: '/pool',
+    //   // new: true,
+    // },
+    {
+      name: 'Swap',
+      path: '/swap/',
+      // version: 0,
+      // testing: true,
+    },
+    {
+      name: 'MVCSwap',
+      path: '/mvcswap',
+      // version: 0,
+      // testing: true,
+    },
+    {
+      name: 'Bridge',
+      path: '/bridge',
+      new: true,
+    },
+    {
+      name: 'Events',
+      path: '/events',
+    },
+    // {
+    //   name: 'Whitelist',
+    //   path: '/whitelist',
+    //   disabled: true,
+    // },
+  ]
 
 function isLinkActive(path: string) {
   console.log('path', path)
@@ -67,6 +67,8 @@ function isLinkActive(path: string) {
       return route.path.startsWith('/swap') || route.path.startsWith('/add')
     case '/bridge':
       return route.path.startsWith('/bridge')
+    case '/mvcswap':
+      return route.path.startsWith('/mvcswap')
     default:
       return false
   }
@@ -78,8 +80,7 @@ function isLinkActive(path: string) {
     <LogoMenu />
 
     <nav class="ml-6 hidden items-center gap-x-2 lg:flex">
-      <component
-        :class="[
+      <component :class="[
           'rounded-md px-4 py-2 text-sm font-medium transition-all',
           isLinkActive(link.path)
             ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
@@ -87,30 +88,22 @@ function isLinkActive(path: string) {
           link.disabled
             ? 'cursor-default text-zinc-500'
             : 'hover:bg-black hover:text-primary',
-        ]"
-        v-for="link in links"
-        :key="link.name"
-        :is="link.disabled ? 'span' : 'router-link'"
-        :to="link.path"
-        :title="link.disabled ? 'Coming soon' : ''"
-      >
+        ]" v-for="link in links" :key="link.name" :is="link.disabled ? 'span' : 'router-link'" :to="link.path"
+        :title="link.disabled ? 'Coming soon' : ''">
         {{ link.name }}
         <span
           class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400"
-          v-if="link.new"
-        >
+          v-if="link.new">
           New
         </span>
         <span
           class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400"
-          v-if="link.testing"
-        >
+          v-if="link.testing">
           Test
         </span>
         <span
           class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400"
-          v-else-if="typeof link.version !== 'undefined'"
-        >
+          v-else-if="typeof link.version !== 'undefined'">
           {{ 'V' + link.version }}
         </span>
       </component>

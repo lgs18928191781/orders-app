@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, type Ref, computed, onMounted, reactive, watchEffect, provide } from 'vue'
+import { ref, watch, type Ref, computed, onMounted, reactive, watchEffect, provide, onBeforeUnmount, onUnmounted } from 'vue'
 import { useMVCSwapStore } from '@/stores/mvcswap'
 import { useConnectionStore } from '@/stores/connection'
 import {
@@ -18,8 +18,9 @@ const changeTab = (index: number) => {
   currentTab.value = index;
 };
 const store = useMVCSwapStore()
-const { fetchPairs, fetchBalance, fetchIcons,fetchBridgeAssets } = store;
+const { fetchPairs, fetchBalance, fetchIcons, fetchBridgeAssets, fetchPairInfo } = store;
 const { loading } = storeToRefs(store);
+let intervalId = 0;
 const initData = async () => {
   await fetchBridgeAssets()
   await Promise.all([
@@ -29,7 +30,10 @@ const initData = async () => {
   ])
 }
 onMounted(() => {
-  initData()
+  initData();
+  intervalId = window.setInterval(() => {
+    fetchPairInfo()
+  }, 10000)
 })
 watch(
   () => connectionStore.connected,
@@ -39,6 +43,9 @@ watch(
     }
   },
 )
+onUnmounted(() => {
+  clearInterval(intervalId);
+})
 
 </script>
 
