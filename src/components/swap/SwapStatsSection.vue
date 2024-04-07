@@ -16,11 +16,11 @@ import { prettyBalance, prettyBtcDisplay, prettySymbol } from '@/lib/formatters'
 import { Loader2Icon } from 'lucide-vue-next'
 import { getPoolStatsQuery } from '@/queries/swap/pool-stats.query'
 
-const { token1, token2, token1Icon, token2Icon, pairStr } = useSwapPool()
+const { token1, token2, pairStr } = useSwapPool()
 
 const { isEmpty } = useEmptyPoolSignal()
 
-const { useFiatRateQuery, getFiatPrice, getFiatPriceDisplay } = useFiat()
+const { useFiatRateQuery, getFiatPrice } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
 
 const connectionStore = useConnectionStore()

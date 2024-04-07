@@ -168,6 +168,11 @@ export const disconnect = async () => {
   await window.okxwallet.bitcoin.disconnect()
 }
 
+export const getNetwork = async () => {
+  checkOkx()
+  return 'livenet' as const
+}
+
 export const switchNetwork = async (
   network: 'livenet' | 'testnet',
 ): Promise<'livenet'> => {

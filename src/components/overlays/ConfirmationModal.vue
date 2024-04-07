@@ -8,12 +8,15 @@ import {
 } from '@headlessui/vue'
 import { ArrowDownIcon } from 'lucide-vue-next'
 import { ElMessage } from 'element-plus'
+import { useQuery } from '@tanstack/vue-query'
 
-import { prettyBtcDisplay, prettyCoinDisplay } from '@/lib/formatters'
-import { pushAskOrder } from '@/queries/orders-api'
 import { useBtcJsStore } from '@/stores/btcjs'
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
+import { pushAskOrder } from '@/queries/orders-api'
+import { getExcludedBalanceQuery } from '@/queries/excluded-balance.query'
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
+
 import {
   DEBUG,
   SIGHASH_ALL,
@@ -21,10 +24,9 @@ import {
   BUY_PAY_INPUT_INDEX,
 } from '@/data/constants'
 import assets from '@/data/assets'
-import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
+import { prettyBtcDisplay, prettyCoinDisplay } from '@/lib/formatters'
 import { fillInternalKey } from '@/lib/build-helpers'
 import { postBidOrder, postBuyTake, postSellTake } from '@/queries/orders-v2'
-import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
@@ -34,9 +36,11 @@ const confirmButtonRef = ref<HTMLElement | null>(null)
 const cancelButtonRef = ref<HTMLElement | null>(null)
 
 const adapter = connectionStore.adapter
-const { data: balance } = useExcludedBalanceQuery(
-  computed(() => connectionStore.getAddress),
-  computed(() => !!connectionStore.connected),
+const { data: balance, isLoading: isLoadingExcludedBalance } = useQuery(
+  getExcludedBalanceQuery(
+    { address: connectionStore.getAddress },
+    computed(() => !!connectionStore.connected),
+  ),
 )
 
 function getIconFromSymbol(symbol: string) {

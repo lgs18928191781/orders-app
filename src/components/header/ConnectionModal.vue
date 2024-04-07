@@ -8,9 +8,11 @@ import {
 } from '@headlessui/vue'
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRoute } from 'vue-router'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useCredentialsStore } from '@/stores/credentials'
+import { useNetworkStore } from '@/stores/network'
 import { useConnectionModal } from '@/hooks/use-connection-modal'
 
 import { isMobile, isOKApp, getOkxLink } from '@/lib/helpers'
@@ -18,13 +20,14 @@ import { isMobile, isOKApp, getOkxLink } from '@/lib/helpers'
 import UnisatIcon from '@/assets/unisat-icon.png?url'
 import OkxIcon from '@/assets/okx-icon.png?url'
 import MetaletIcon from '@/assets/metalet-icon.png?url'
-import { useRoute } from 'vue-router'
+
 const { isConnectionModalOpen, closeConnectionModal, setMissingWallet } =
   useConnectionModal()
 
 const firstButtonRef = ref<HTMLElement | null>(null)
 
 const connectionStore = useConnectionStore()
+const networkStore = useNetworkStore()
 const credentialsStore = useCredentialsStore()
 async function connectToUnisat() {
   if (!window.unisat) {
@@ -134,8 +137,8 @@ const isBridgePage = computed(() => {
                   class="mt-8 grid grid-cols-2 gap-4 text-base lg:grid-cols-3"
                 >
                   <button
-                  v-if="!isBridgePage"
-                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:w-36"
+                    v-if="!isBridgePage && !networkStore.isTestnet"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:min-w-36"
                     @click="connectToOkx"
                   >
                     <img class="h-12 rounded" :src="OkxIcon" alt="Metamask" />
@@ -144,7 +147,7 @@ const isBridgePage = computed(() => {
 
                   <button
                     v-if="!isBridgePage && !isMobile()"
-                    class="flex w-36 flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition hover:border-primary/30 hover:bg-primary hover:text-orange-950 hover:shadow-md hover:shadow-primary/30 lg:min-w-36"
                     @click="connectToUnisat"
                     ref="firstButtonRef"
                   >
@@ -157,7 +160,7 @@ const isBridgePage = computed(() => {
                   </button>
 
                   <button
-                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30 lg:w-36"
+                    class="flex flex-col items-center justify-center gap-2 rounded-lg border border-zinc-500/50 bg-zinc-800 py-4 font-medium text-zinc-100 transition enabled:hover:border-primary/30 enabled:hover:bg-primary enabled:hover:text-orange-950 enabled:hover:shadow-md enabled:hover:shadow-primary/30 disabled:opacity-30 lg:min-w-36"
                     @click="connectToMetalet"
                     v-if="!isMobile()"
                   >
@@ -172,10 +175,6 @@ const isBridgePage = computed(() => {
 
                 <!-- footer -->
                 <div class="mt-16 space-y-1 text-xs text-zinc-500">
-                  <p v-if="isSwapPage" class="text-primary">
-                    Swap module is currently only supported on Unisat wallet and
-                    Testnet environment.
-                  </p>
                   <p v-if="isBridgePage" class="text-primary">
                     Bridge module is currently only supported on Metalet wallet
                     and Testnet environment.
