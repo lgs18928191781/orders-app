@@ -1,6 +1,6 @@
 import { getAssetPairList } from '@/queries/bridge-api'
 import { queryAllPairs, queryIcons, queryPairInfo } from '@/queries/mvcswap'
-import { formatSat } from '@/utils'
+import { formatSat } from '@/lib/formatters'
 import { defineStore } from 'pinia'
 const getMvcBalance = async () => {
   try {
@@ -35,7 +35,6 @@ export const useMVCSwapStore = defineStore('mvcswap', {
   },
   actions: {
     async fetchPairs() {
-      
       const ret = await queryAllPairs()
       if (ret.code === 0) {
         let _pairs = []
@@ -45,7 +44,7 @@ export const useMVCSwapStore = defineStore('mvcswap', {
           }
         }
         //TODO 暂时处理主网没上线交易对的问题
-        if(_pairs.length===0){
+        if (_pairs.length === 0) {
           for (let pairName in ret.data) {
             _pairs.push({ pairName, ...ret.data[pairName] })
           }
@@ -79,7 +78,7 @@ export const useMVCSwapStore = defineStore('mvcswap', {
         const find = this.pairs.find(
           (item) => item.swapID === this.curPair?.swapID,
         )
-        const _old = find ? find : this.curPair;
+        const _old = find ? find : this.curPair
         this.curPair = {
           ..._old,
           ...ret.data,
