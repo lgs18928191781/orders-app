@@ -6,9 +6,8 @@ import { Loader2Icon, EraserIcon, AlertCircleIcon } from 'lucide-vue-next'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useSwapPool } from '@/hooks/use-swap-pool'
-import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
+import { getExcludedBalanceQuery } from '@/queries/excluded-balance.query'
 import { getBrcFiatRate, getFiatRate, getBrc20s } from '@/queries/orders-api'
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
@@ -127,9 +126,11 @@ const fiatPrice = computed(() => {
 })
 
 // balance
-const { data: btcBalance } = useExcludedBalanceQuery(
-  computed(() => connectionStore.getAddress),
-  computed(() => !!connectionStore.connected),
+const { data: btcBalance } = useQuery(
+  getExcludedBalanceQuery(
+    { address: connectionStore.getAddress },
+    computed(() => !!connectionStore.connected),
+  ),
 )
 const { data: myBrc20s } = useQuery({
   queryKey: [

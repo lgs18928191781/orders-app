@@ -20,28 +20,26 @@ import {
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrc20s } from '@/queries/orders-api'
+import { getExcludedBalanceQuery } from '@/queries/excluded-balance.query'
 import { unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettyCoinDisplay } from '@/lib/formatters'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const address = computed(() => connectionStore.getAddress)
+const address = connectionStore.getAddress
 const enabled = computed(() => connectionStore.connected)
 
 const { data: balance } = useQuery({
-  queryKey: [
-    'balance',
-    { network: networkStore.network, address: address.value! },
-  ],
+  queryKey: ['balance', { network: networkStore.network, address }],
   queryFn: () => connectionStore.adapter!.getBalance(),
   enabled,
 })
 
-const { data: excludedBalance, isLoading: isLoadingExcludedBalance } =
-  useExcludedBalanceQuery(address, enabled)
+const { data: excludedBalance, isLoading: isLoadingExcludedBalance } = useQuery(
+  getExcludedBalanceQuery({ address }, enabled),
+)
 
 const availableBalanceRatioColor = computed(() => {
   if (excludedBalance.value === undefined || balance.value === undefined) {
@@ -265,7 +263,7 @@ const { data: myBrc20s } = useQuery({
     </div>
 
     <Loader2Icon
-      class="ml-3 h-5 animate-spin"
+      class="mx-2 h-5 animate-spin"
       v-else-if="isLoadingExcludedBalance"
     />
   </div>
