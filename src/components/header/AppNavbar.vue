@@ -60,6 +60,8 @@ function isLinkActive(path: string) {
       return route.path.startsWith('/swap') || route.path.startsWith('/add')
     case '/bridge':
       return route.path.startsWith('/bridge')
+    case '/mvcswap':
+      return route.path.startsWith('/mvcswap')
     default:
       return false
   }

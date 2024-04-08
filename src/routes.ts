@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 const Home = () => import('./pages/Home.vue')
 const Recover = () => import('./pages/Recover.vue')
 const Swap = () => import('./pages/Swap.vue')
+const MVCSwap = () => import('./pages/MVCSwap.vue')
 const Bridge = () => import('./pages/asset-bridge/Bridge.vue')
 const SwapPools = () => import('./pages/swap-pools/Index.vue')
 const Whitelist = () => import('./pages/Whitelist.vue')
@@ -54,6 +55,7 @@ const routes = [
     },
   },
   { path: '/swap/:pair?', component: Swap, name: 'swap' },
+  { path: '/mvcswap', component: MVCSwap, name: 'mvcswap' },
   { path: '/whitelist', component: Whitelist },
   { path: '/events', component: Events },
   { path: '/leaderboard', component: Leaderboard },
