@@ -99,7 +99,7 @@ onUnmounted(() => {
       <SwapChainSelector :chain="'mvc'" />
 
       <div
-        class="h-full space-y-3 rounded-xl border border-sky-500/30 bg-zinc-900 p-2 lg:rounded-3xl lg:!pt-3"
+        class="border-mvc/30 h-full space-y-3 rounded-xl border-2 bg-zinc-900 p-2 lg:rounded-3xl lg:!pt-3"
       >
         <div class="flex gap-4 border-b border-zinc-800 px-3 pb-2">
           <span

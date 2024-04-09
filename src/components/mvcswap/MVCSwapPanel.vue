@@ -32,10 +32,10 @@
           />
 
           <button
-            class="box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm shadow-primary/80 transition-all duration-500 group-hover:inline lg:duration-200"
+            class="shadow-mvc/80 box-content hidden rounded-lg bg-zinc-800 p-2 shadow-sm transition-all duration-500 group-hover:inline lg:duration-200"
             @click="switchToken"
           >
-            <ArrowUpDownIcon class="h-4 w-4 text-primary" />
+            <ArrowUpDownIcon class="text-mvc h-4 w-4" />
           </button>
         </div>
       </div>

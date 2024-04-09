@@ -7,7 +7,7 @@
           LP Balance:
           <span
             @click="removePercentage[0] = 100"
-            class="cursor-pointer text-primary hover:underline"
+            class="text-mvc cursor-pointer hover:underline"
             >{{ lpTokenBal }}</span
           >
         </div>

@@ -28,7 +28,9 @@ function switchChain() {
       <span
         class="absolute inset-[-1000%] opacity-30 group-hover:opacity-100"
         :class="[
-          props.chain === 'btc' ? 'gorgeous-bg-for-btc' : 'gorgeous-bg-for-mvc',
+          props.chain === 'btc'
+            ? 'gorgeous-btn-bg-for-btc'
+            : 'gorgeous-btn-bg-for-mvc',
         ]"
       ></span>
       <span
@@ -50,25 +52,3 @@ function switchChain() {
     </button>
   </div>
 </template>
-
-<style scoped>
-.gorgeous-bg-for-btc {
-  background: conic-gradient(
-    from 90deg at 50% 50%,
-    #ffa02a 0%,
-    #dff7cc 30%,
-    #ff9f2a 100%
-  );
-  animation: spin 2s linear infinite;
-}
-
-.gorgeous-bg-for-mvc {
-  background: conic-gradient(
-    from 90deg at 50% 50%,
-    #38bdf8 0%,
-    #4f46e5 30%,
-    #38bdf8 100%
-  );
-  animation: spin 2s linear infinite;
-}
-</style>
