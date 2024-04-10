@@ -3,7 +3,7 @@ import { useConnectionStore } from '@/stores/connection'
 
 async function eventFetch(
   url: string,
-  options?: { headers?: HeadersInit } & RequestInit
+  options?: { headers?: HeadersInit } & RequestInit,
 ) {
   const ordersApiUrl = `https://www.orders.exchange/api-book/event/${url}`
   if (!options)
@@ -43,7 +43,7 @@ export const getActivityAssetTicks = async (): Promise<
   })
 
   const ticks = await eventFetch(`ranking/tick?${params}`).then(
-    (res) => res?.results ?? []
+    (res) => res?.results ?? [],
   )
 
   return ticks

@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 
+import { useNetworkStore } from '@/stores/network'
+
 const route = useRoute()
+const networkStore = useNetworkStore()
 
 const links: {
   name: string
@@ -14,6 +17,7 @@ const links: {
   {
     name: 'Orderbook',
     path: '/',
+    disabled: networkStore.isTestnet,
     // version: 2,
   },
   // {
@@ -31,6 +35,7 @@ const links: {
     name: 'Bridge',
     path: '/bridge',
     new: true,
+    disabled: !networkStore.isTestnet,
   },
   {
     name: 'Rewards',
@@ -60,6 +65,8 @@ function isLinkActive(path: string) {
       return route.path.startsWith('/swap') || route.path.startsWith('/add')
     case '/bridge':
       return route.path.startsWith('/bridge')
+    case '/mvcswap':
+      return route.path.startsWith('/mvcswap')
     default:
       return false
   }

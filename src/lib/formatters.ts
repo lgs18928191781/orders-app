@@ -1,6 +1,7 @@
 import { RemovableRef } from '@vueuse/core'
 import dayjs from 'dayjs/esm/index.js'
 import Decimal from 'decimal.js'
+import BigNumber from 'bignumber.js'
 
 export function prettyTimestamp(
   timestamp: number,
@@ -125,4 +126,26 @@ export function formatNum(num: any) {
 
 export const prettyInscriptionId = (id: string, len: number = 8) => {
   return `#${id.slice(0, len)}`
+}
+
+export const formatSat = (value: string | number, dec = 8) => {
+  if (!value) return '0'
+
+  const v = BigNumber(value).div(Math.pow(10, dec))
+  const arr = v.toString().split('.')
+  if (v.toString().indexOf('e') > -1 || (arr[1] && arr[1].length > dec)) {
+    return BigNumber(v).toFixed(dec)
+  }
+  return v.toString()
+}
+
+export const formatAmount = (value: any, n = 4) => {
+  if (!value) return 0
+
+  const arr = value.toString().split('.')
+  if (value.toString().indexOf('e') > -1 || (arr[1] && arr[1].length > n)) {
+    return BigNumber(value).toFixed(n)
+  }
+  if (typeof value === 'object') return value.toFixed(n)
+  return value
 }

@@ -26,6 +26,7 @@ export default {
       },
       colors: {
         primary: '#FFA02A',
+        mvc: '#0ea5e9',
       },
       maxWidth: {
         '8xl': '90rem',

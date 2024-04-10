@@ -154,7 +154,7 @@ async function onGetGasFromFaucet() {
             </button>
           </MenuItem>
 
-          <MenuItem v-slot="{ active }" as="div">
+          <!-- <MenuItem v-slot="{ active }" as="div">
             <div class="-mb-2 px-4 pt-4 text-sm text-zinc-500">
               Network: {{ networkStore.network }}
             </div>
@@ -167,7 +167,7 @@ async function onGetGasFromFaucet() {
               />
               <span>Switch Network</span>
             </button>
-          </MenuItem>
+          </MenuItem> -->
 
           <MenuItem v-slot="{ active }" as="div" v-if="networkStore.isTestnet">
             <button
