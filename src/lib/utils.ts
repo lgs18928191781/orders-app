@@ -78,7 +78,7 @@ export function determineAddressInfo(address: string): AddressInfo {
       network: bitcoin,
     }
   }
-  if (address.startsWith('3')) {
+  if (address.startsWith('3') || address.startsWith('2')) {
     return {
       type: 'p2sh',
       network: bitcoin,

@@ -239,7 +239,7 @@ export async function metasvApiFetch(
   options?: { headers?: HeadersInit } & RequestInit,
   returnRaw: boolean = false,
 ) {
-  const ordersApiUrl = `https://testnet.mvcapi.com${url}`
+  const ordersApiUrl = `https://mainnet.mvcapi.com${url}`
   if (!options)
     options = {
       headers: {

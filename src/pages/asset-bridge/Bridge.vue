@@ -13,12 +13,12 @@
           <BridgePairSelect class="col-span-1"></BridgePairSelect>
         </div>
         <div class="item-center flex">
-          <div
+          <!-- <div
             @click="commomVisible = true"
             class="mr-3 flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
           >
             <HandCoins :size="20" />
-          </div>
+          </div> -->
           <div
             class="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
             @click="handleHistoryVisible(true)"
@@ -69,7 +69,7 @@
         </div> -->
       </div>
 
-      <div class="grid grid-rows-4 gap-y-5 px-7 pb-5 text-sm">
+      <div class="grid grid-rows-2 gap-y-5 px-7 pb-5 text-sm">
         <div class="flex items-center justify-between text-sm text-red-500">
           <div class="mr-2">
             <span class="mr-1 text-[#C1C0C0]">Minimum:</span>
@@ -84,16 +84,27 @@
         </div>
 
         <div
-          class="item-center flex justify-between"
-          v-for="(item, index) in bridgeInfo"
-          :key="index"
+          class="flex cursor-pointer items-center justify-center hover:text-[#ffa02a]"
+          @click="showFeeDetail = !showFeeDetail"
         >
-          <div class="text-[#C1C0C0]">{{ item.title }}</div>
-          <div class="flex text-[#fff]">
-            <span class="mr-2">{{ item.value }}</span>
-            <span>{{ item.unit }}</span>
-          </div>
+          <span class="mr-1">Show more</span>
+          <ChevronUp :size="18" v-if="showFeeDetail" />
+          <ChevronDown :size="18" v-else />
         </div>
+
+        <template v-if="showFeeDetail">
+          <div
+            class="item-center flex justify-between gap-y-5"
+            v-for="(item, index) in bridgeInfo"
+            :key="index"
+          >
+            <div class="text-[#C1C0C0]">{{ item.title }}</div>
+            <div class="flex text-[#fff]">
+              <span class="mr-2">{{ item.value }}</span>
+              <span>{{ item.unit }}</span>
+            </div>
+          </div>
+        </template>
       </div>
 
       <div class="op-btn w-full px-7">
@@ -278,7 +289,8 @@
       :isOpen="historyVisible"
       @handleHistoryVisible="handleHistoryVisible"
     />
-    <CommonDialog
+    <!--mainnet no necessary-->
+    <!-- <CommonDialog
       :isOpen="commomVisible"
       @handleCommonVisible="handleCommonVisible"
     >
@@ -334,7 +346,7 @@
           </button>
         </div>
       </template>
-    </CommonDialog>
+    </CommonDialog> -->
   </div>
 </template>
 
@@ -345,7 +357,14 @@ import swap from '@/assets/icon_swap.svg?url'
 import BridgeSwapItem from '@/components/bridge/BridgeSwapItem.vue'
 import BridgeHistory from '@/components/bridge/BridgeHistory.vue'
 import { useConnectionStore } from '@/stores/connection'
-import { Loader2Icon, MenuSquare, HandCoins, X } from 'lucide-vue-next'
+import {
+  Loader2Icon,
+  MenuSquare,
+  HandCoins,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-vue-next'
 import shape from '@/assets/shape.svg?url'
 import {
   AssetNetwork,
@@ -444,6 +463,7 @@ const feeInfo = reactive({
     totalFee: '0',
   },
 })
+const showFeeDetail = ref(false)
 
 function validateInput() {
   const regex = /^\d+(\.\d{0,8})?$/
@@ -769,9 +789,9 @@ const btnStatus = computed(() => {
       disable: true,
     }
   }
-  if (!networkStore.isTestnet) {
+  if (networkStore.isTestnet) {
     return {
-      value: 'Please switch to testnet',
+      value: 'Please switch to livenet',
       color: BtnColor.error,
       disable: false,
     }
@@ -1028,9 +1048,9 @@ function converSwapItem() {
 function BtnOperate() {
   if (btnStatus.value.color == BtnColor.unLogin) {
     connectMetalet()
-  } else if (!networkStore.isTestnet) {
+  } else if (networkStore.isTestnet) {
     connectionStore.adapter
-      .switchNetwork('testnet')
+      .switchNetwork('livenet')
       .then((res) => window.location.reload())
   } else if (btnStatus.value.color == BtnColor.default) {
     confrimSwap()

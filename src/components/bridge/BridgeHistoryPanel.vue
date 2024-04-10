@@ -158,12 +158,9 @@ function queryOriginTx(e: Event, tx: HsitoryDetail) {
     return
   } else {
     if (tx.originNetwork == 'BTC') {
-      window.open(
-        `https://mempool.space/zh/testnet/tx/${tx.originTxid}`,
-        '_blank',
-      )
+      window.open(`https://mempool.space/tx/${tx.originTxid}`, '_blank')
     } else {
-      window.open(`https://test.mvcscan.com/tx/${tx.originTxid}`, '_blank')
+      window.open(`https://mvcscan.com/tx/${tx.originTxid}`, '_blank')
     }
   }
 }
@@ -174,12 +171,9 @@ function queryTargetTx(e: Event, tx: HsitoryDetail) {
     return
   } else {
     if (tx.targetNetwork == 'BTC') {
-      window.open(
-        `https://mempool.space/zh/testnet/tx/${tx.targetTxid}`,
-        '_blank',
-      )
+      window.open(`https://mempool.space/tx/${tx.targetTxid}`, '_blank')
     } else {
-      window.open(`https://test.mvcscan.com/tx/${tx.targetTxid}`, '_blank')
+      window.open(`https://mvcscan.com/tx/${tx.targetTxid}`, '_blank')
     }
   }
 }
