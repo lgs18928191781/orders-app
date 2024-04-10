@@ -50,6 +50,9 @@ import { InjectionKey } from 'vue'
 import { useNetworkStore } from '@/stores/network'
 import { ref, Ref } from 'vue'
 import { type assetReqReturnType } from '@/queries/bridge-api'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
 const networkStore = useNetworkStore()
 
 const bridgePairs: Ref<assetReqReturnType[]> = networkStore.isTestnet

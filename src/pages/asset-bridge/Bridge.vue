@@ -73,14 +73,14 @@
       <div class="px-7 pb-5 text-sm">
         <div class="flex flex-col justify-between text-red-500">
           <div class="flex flex-row items-center justify-between">
-            <span class="mr-1 text-[#C1C0C0]">Minimum</span>
+            <span class="mr-1 text-[#C1C0C0]">Minimum Bridging Quantity</span>
             <div>
               <span class="mr-2">{{ limitInfo.min }}</span>
               <span class="text-[#C1C0C0]">{{ fromAsset.val.symbol }}</span>
             </div>
           </div>
           <div class="mt-3 flex flex-row items-center justify-between">
-            <span class="mr-1 text-[#C1C0C0]">Maximum</span>
+            <span class="mr-1 text-[#C1C0C0]">Maximum Bridging Quantity</span>
             <div>
               <span class="mr-2">{{ limitInfo.max }}</span>
               <span class="text-[#C1C0C0]">{{ fromAsset.val.symbol }}</span>
