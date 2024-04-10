@@ -24,6 +24,13 @@ export const connect: () => Promise<connectRes> = async () => {
   return checkMetaletStatus(connectRes, 'connect')
 }
 
+export const metaletConnect: () => Promise<connectRes> = async () => {
+  checkMetalet()
+
+  const connectRes = await window.metaidwallet.connect()
+  return checkMetaletStatus(connectRes, 'connect')
+}
+
 export const getMvcAddress = async () => {
   checkMetalet()
   const addressRes = await window.metaidwallet.getAddress()
@@ -95,17 +102,30 @@ interface connectRes {
   pubKey: string
 }
 
+export const getNetwork = async () => {
+  checkMetalet()
+  return await window.metaidwallet.getNetwork().then(({ network }) => {
+    if (network === 'mainnet') {
+      return 'livenet'
+    }
+
+    return 'testnet'
+  })
+}
+
 export const switchNetwork = async (network: 'livenet' | 'testnet') => {
   checkMetalet()
-  return await window.metaidwallet
-    .switchNetwork(network)
-    .then(({ network }) => {
-      if (network === 'mainnet') {
-        return 'livenet'
-      }
+  return await window.metaidwallet.switchNetwork(network).then((res) => {
+    if (res.status === 'canceled') {
+      throw new Error('Switch network canceled')
+    }
 
-      return 'testnet'
-    })
+    if (res.network === 'mainnet') {
+      return 'livenet'
+    }
+
+    return 'testnet'
+  })
 }
 
 export const disconnect = async () => {}

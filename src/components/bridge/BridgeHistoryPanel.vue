@@ -122,6 +122,7 @@ import BtcIcon from '@/assets/btc.svg?url'
 import MVC from '@/assets/mvc_logo.png?url'
 import { formatUnitToBtc, prettyTimestamp, prettyTxid } from '@/lib/formatters'
 import { ElMessage } from 'element-plus'
+import bridgePairs from '@/data/bridge-pairs'
 type TxType = 'btcToMvc' | 'brc20ToMvc' | 'mvcToBtc' | 'mvcToBrc20'
 const props = defineProps({
   txType: {
@@ -158,12 +159,9 @@ function queryOriginTx(e: Event, tx: HsitoryDetail) {
     return
   } else {
     if (tx.originNetwork == 'BTC') {
-      window.open(
-        `https://mempool.space/zh/testnet/tx/${tx.originTxid}`,
-        '_blank',
-      )
+      window.open(`https://mempool.space/tx/${tx.originTxid}`, '_blank')
     } else {
-      window.open(`https://test.mvcscan.com/tx/${tx.originTxid}`, '_blank')
+      window.open(`https://mvcscan.com/tx/${tx.originTxid}`, '_blank')
     }
   }
 }
@@ -174,12 +172,9 @@ function queryTargetTx(e: Event, tx: HsitoryDetail) {
     return
   } else {
     if (tx.targetNetwork == 'BTC') {
-      window.open(
-        `https://mempool.space/zh/testnet/tx/${tx.targetTxid}`,
-        '_blank',
-      )
+      window.open(`https://mempool.space/tx/${tx.targetTxid}`, '_blank')
     } else {
-      window.open(`https://test.mvcscan.com/tx/${tx.targetTxid}`, '_blank')
+      window.open(`https://mvcscan.com/tx/${tx.targetTxid}`, '_blank')
     }
   }
 }
@@ -213,13 +208,18 @@ async function fetchBridgeHistory() {
           item.targetNetwork = 'BTC'
         }
         item.timestamp = prettyTimestamp(Number(item.timestamp), true)
+
+        const currentToken = bridgePairs.value.find((token) => {
+          return token.originSymbol == item.symbol
+        })
+
         item.amount = String(
           formatUnitToBtc(
             Number(item.amount),
             item.originNetwork === 'BTC' ||
               (item.originNetwork === 'MVC' && item.decimals <= 8)
               ? item.decimals
-              : item.decimals - 8,
+              : item.decimals - currentToken.trimDecimals,
           ),
         )
         return item

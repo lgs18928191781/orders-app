@@ -7,10 +7,11 @@ import gsap from 'gsap'
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
+import { getExcludedBalanceQuery } from '@/queries/excluded-balance.query'
 import { getBrcFiatRate, getFiatRate } from '@/queries/orders-api'
 import { getBrc20s } from '@/queries/orders-api'
+
 import { calcFiatPrice, unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettySymbol } from '@/lib/formatters'
 import { ADD_THRESHOLD_AMOUNT, SWAP_THRESHOLD_AMOUNT } from '@/data/constants'
@@ -123,9 +124,11 @@ const fiatPrice = computed(() => {
 })
 
 // balance
-const { data: btcBalance } = useExcludedBalanceQuery(
-  computed(() => connectionStore.getAddress),
-  computed(() => !!connectionStore.connected),
+const { data: btcBalance } = useQuery(
+  getExcludedBalanceQuery(
+    { address: connectionStore.getAddress },
+    computed(() => !!connectionStore.connected),
+  ),
 )
 const { data: myBrc20s } = useQuery({
   queryKey: [

@@ -8,9 +8,9 @@ import { isRestrictedRegion } from '@/lib/helpers'
 const Home = () => import('./pages/Home.vue')
 const Recover = () => import('./pages/Recover.vue')
 const Swap = () => import('./pages/Swap.vue')
+const MVCSwap = () => import('./pages/MVCSwap.vue')
 const Bridge = () => import('./pages/asset-bridge/Bridge.vue')
 const SwapPools = () => import('./pages/swap-pools/Index.vue')
-const Whitelist = () => import('./pages/Whitelist.vue')
 const Events = () => import('./pages/Events.vue')
 const Leaderboard = () => import('./pages/Leaderboard.vue')
 const Changelog = () => import('./pages/Changelog.vue')
@@ -20,7 +20,6 @@ const Maintaining = () => import('./pages/Maintaining.vue')
 
 const routes = [
   { path: '/orders/:pair?', component: Home, alias: '/' },
-  // { path: '/swap-pools/add', component: SwapPoolsAdd }
   {
     path: '/swap-pools/:pair?',
     component: SwapPools,
@@ -38,27 +37,26 @@ const routes = [
       },
     ],
   },
-  // { path: '/swap', component: Swap },
-  // {
-  //   path: '/bridge/:pair?',
-  //   component: Bridge,
-  //   beforeEnter: () => {
-  //     const connectionStore = useConnectionStore()
-  //     const { openConnectionModal } = useCheckMetaletLoginModal()
-  //     if (
-  //       connectionStore.connected &&
-  //       connectionStore.last.wallet !== 'metalet'
-  //     ) {
-  //       openConnectionModal()
-  //     }
-  //   },
-  // },
+  { path: '/swap', component: Swap },
+  {
+    path: '/bridge/:pair?',
+    component: Bridge,
+    beforeEnter: () => {
+      const connectionStore = useConnectionStore()
+      const { openConnectionModal } = useCheckMetaletLoginModal()
+      if (
+        connectionStore.connected &&
+        connectionStore.last.wallet !== 'metalet'
+      ) {
+        openConnectionModal()
+      }
+    },
+  },
   { path: '/swap/:pair?', component: Swap, name: 'swap' },
-  { path: '/whitelist', component: Whitelist },
+  { path: '/mvcswap', component: MVCSwap, name: 'mvcswap' },
   { path: '/events', component: Events },
   { path: '/leaderboard', component: Leaderboard },
   { path: '/changelog', component: Changelog },
-  // { path: '/pool/:pair?', component: Pool },
   { path: '/recover', component: Recover },
   { path: '/dev', component: Dev },
   { path: '/not-available', component: NoService },

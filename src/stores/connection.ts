@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage, type RemovableRef } from '@vueuse/core'
-import type { Psbt, networks } from 'bitcoinjs-lib'
+import type { Psbt } from 'bitcoinjs-lib'
+import { ElMessage } from 'element-plus'
 
 import * as unisatAdapter from '@/wallet-adapters/unisat'
 import * as okxAdapter from '@/wallet-adapters/okx'
 import * as metaletAdapter from '@/wallet-adapters/metalet'
-import { login } from '@/queries/orders-api'
-import { ElMessage } from 'element-plus'
+
 import { IS_DEV } from '@/data/constants'
 import { Network, useNetworkStore } from './network'
 
@@ -97,6 +97,10 @@ export const useConnectionStore = defineStore('connection', {
           address: string
           pubKey: string
         }>
+        metaletConnect?: () => Promise<{
+          address: string
+          pubKey: string
+        }>
         disconnect: () => Promise<void>
         getBalance: () => Promise<number>
         inscribe: (tick: string) => Promise<string | undefined>
@@ -104,6 +108,7 @@ export const useConnectionStore = defineStore('connection', {
         signPsbts: (psbts: string[], options?: any) => Promise<string[]>
         pushPsbt: (psbt: string) => Promise<string>
         signMessage: (message: string) => Promise<string>
+        getNetwork: () => Promise<Network>
         switchNetwork: (
           network: 'livenet' | 'testnet',
         ) => Promise<'livenet' | 'testnet'>
@@ -124,10 +129,42 @@ export const useConnectionStore = defineStore('connection', {
             pubKey: '',
           }
 
-      const connectRes = await getWalletAdapter(wallet).connect()
+      let connectRes = await getWalletAdapter(wallet).connect()
 
       try {
         if (connectRes) {
+          // check if network suits app's current environment;
+          // if not, call switchNetwork
+          const networkStore = useNetworkStore()
+          const appNetwork = networkStore.network
+          switch (wallet) {
+            case 'okx':
+              // okx only supports livenet
+              if (networkStore.isTestnet) {
+                throw new Error('OKX wallet only supports livenet')
+              }
+              break
+
+            case 'unisat':
+              const network = await getWalletAdapter('unisat').getNetwork()
+              if (network !== appNetwork) {
+                await getWalletAdapter('unisat').switchNetwork(appNetwork)
+
+                // re-connect to get new address
+                connectRes = await getWalletAdapter('unisat').connect()
+              }
+              break
+            case 'metalet':
+              const metaNetwork = await getWalletAdapter('metalet').getNetwork()
+              if (metaNetwork !== appNetwork) {
+                await getWalletAdapter('metalet').switchNetwork(appNetwork)
+
+                // re-connect to get new address
+                connectRes = await getWalletAdapter('metalet').connect()
+              }
+              break
+          }
+
           connection.address = connectRes.address
           connection.pubKey = connectRes.pubKey
 
@@ -156,25 +193,33 @@ export const useConnectionStore = defineStore('connection', {
       this.last.address = await this.adapter.getAddress()
       this.last.pubKey = await this.adapter.getPubKey()
 
-      // sync network
+      // check network synced;
+      // if not, disconnect
       const networkStore = useNetworkStore()
-      if (this.last.wallet === 'okx') {
-        networkStore.set('livenet')
-      } else if (this.last.wallet === 'unisat') {
-        const network: Network = await window.unisat.getNetwork()
-        networkStore.set(network)
-      } else if (this.last.wallet === 'metalet') {
-        const network: Network = await window.metaidwallet
-          .getNetwork()
-          .then(({ network }: { network: 'mainnet' | 'testnet' }) => {
-            if (network === 'mainnet') return 'livenet'
+      const appNetwork = networkStore.network
+      let networkSynced = true
+      switch (this.last.wallet) {
+        case 'okx':
+          // okx only supports livenet
+          if (networkStore.isTestnet) {
+            networkSynced = false
+            throw new Error('OKX wallet only supports livenet')
+          }
+          break
 
-            return 'testnet'
-          })
-        networkStore.set(network)
+        case 'unisat':
+        case 'metalet':
+          const network = await this.adapter.getNetwork()
+          if (network !== appNetwork) {
+            networkSynced = false
+            this.disconnect()
+          }
+          break
       }
 
-      return this.last
+      if (networkSynced) {
+        return this.last
+      }
     },
 
     async disconnect() {
@@ -187,10 +232,6 @@ export const useConnectionStore = defineStore('connection', {
       this.last.status = 'disconnected'
       this.last.address = ''
       this.last.pubKey = ''
-
-      // reset network
-      const networkStore = useNetworkStore()
-      networkStore.set('livenet')
     },
   },
 })

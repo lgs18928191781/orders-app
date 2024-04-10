@@ -5,9 +5,16 @@ import { computed, ref, toRef } from 'vue'
 
 import { useTokenIcon } from '@/hooks/use-token-icon'
 
-const props = defineProps(['class', 'token'])
+const props = withDefaults(
+  defineProps<{
+    token: string
+    class?: string
+    wrapt?: boolean
+  }>(),
+  { wrapt: false },
+)
 
-const { iconUrl } = useTokenIcon(toRef(props.token))
+const { iconUrl } = useTokenIcon(toRef(props.token), toRef(props.wrapt))
 
 const firstChar = computed(() => {
   if (!props.token) {

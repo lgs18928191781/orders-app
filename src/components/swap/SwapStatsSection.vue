@@ -16,17 +16,16 @@ import { prettyBalance, prettyBtcDisplay, prettySymbol } from '@/lib/formatters'
 import { Loader2Icon } from 'lucide-vue-next'
 import { getPoolStatsQuery } from '@/queries/swap/pool-stats.query'
 
-const { token1, token2, token1Icon, token2Icon, pairStr } = useSwapPool()
+const { token1, token2, pairStr } = useSwapPool()
 
 const { isEmpty } = useEmptyPoolSignal()
 
-const { useFiatRateQuery, getFiatPrice, getFiatPriceDisplay } = useFiat()
+const { useFiatRateQuery, getFiatPrice } = useFiat()
 const { data: fiatRate } = useFiatRateQuery()
 
 const connectionStore = useConnectionStore()
 const networkStore = useNetworkStore()
 const router = useRouter()
-const address = connectionStore.getAddress
 const network = networkStore.network
 
 const { data: poolStats, isLoading: isLoadingPoolStats } = useQuery(
@@ -35,8 +34,8 @@ const { data: poolStats, isLoading: isLoadingPoolStats } = useQuery(
 
 const { data: poolStatus, isLoading: isLoadingPoolStatus } = useQuery(
   getPoolStatusQuery(
-    { token1, token2, address, network },
-    computed(() => !!address),
+    { token1, token2, address: connectionStore.getAddress, network },
+    computed(() => !!connectionStore.getAddress),
   ),
 )
 const hasPending = computed(() => {

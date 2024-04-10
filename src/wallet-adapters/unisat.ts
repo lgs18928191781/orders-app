@@ -104,6 +104,12 @@ export const connect: () => Promise<{
 
 export const disconnect = async () => {}
 
+export const getNetwork = async () => {
+  checkUnisat()
+
+  return (await window.unisat.getNetwork()) as 'livenet' | 'testnet'
+}
+
 export const switchNetwork = async (network: 'livenet' | 'testnet') => {
   checkUnisat()
 
