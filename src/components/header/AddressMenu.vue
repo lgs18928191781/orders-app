@@ -93,7 +93,7 @@ async function switchNetwork() {
     return
   }
 
-  const toNetwork = networkStore.network === 'testnet' ? 'livenet' : 'testnet'
+  const toNetwork = networkStore.isTestnet ? 'livenet' : 'testnet'
   await connectionStore.adapter.switchNetwork(toNetwork)
 
   // reload
@@ -114,9 +114,10 @@ async function onGetGasFromFaucet() {
       </span>
       <span
         class="text-xs font-bold text-red-500"
-        v-if="networkStore.network === 'testnet'"
+        v-if="networkStore.isTestnet"
       >
-        (Testnet)
+        <span class="hidden xl:inline">(Testnet)</span>
+        <span class="inline xl:hidden">(T)</span>
       </span>
 
       <ChevronsDownUpIcon
@@ -153,7 +154,7 @@ async function onGetGasFromFaucet() {
             </button>
           </MenuItem>
 
-          <MenuItem v-slot="{ active }" as="div">
+          <!-- <MenuItem v-slot="{ active }" as="div">
             <div class="-mb-2 px-4 pt-4 text-sm text-zinc-500">
               Network: {{ networkStore.network }}
             </div>
@@ -166,13 +167,9 @@ async function onGetGasFromFaucet() {
               />
               <span>Switch Network</span>
             </button>
-          </MenuItem>
+          </MenuItem> -->
 
-          <MenuItem
-            v-slot="{ active }"
-            as="div"
-            v-if="networkStore.network === 'testnet'"
-          >
+          <MenuItem v-slot="{ active }" as="div" v-if="networkStore.isTestnet">
             <button
               class="group flex w-full items-center gap-2 p-4 text-left hover:text-primary"
               @click="onGetGasFromFaucet"

@@ -152,12 +152,20 @@ export function useBridgeTools() {
 
   async function submitPrepayOrderMintBtc(data: any) {
     const res = await submitPrepayOrderMintBtcReq(data)
-    return res
+    if (res.success) {
+      return res
+    } else {
+      throw new Error(res.msg)
+    }
   }
 
   async function submitPrepayOrderMintBrc20(data: any) {
     const res = await submitPrepayOrderMintBrc20Req(data)
-    return res
+    if (res.success) {
+      return res
+    } else {
+      throw new Error(res.msg)
+    }
   }
 
   async function createPayment() {
@@ -327,7 +335,7 @@ export function useBridgeTools() {
       return submitRes
       //成功
     } catch (error) {
-      throw new Error((error as any).message)
+      throw new Error((error as any).message || (error as any).msg)
     }
   }
 
@@ -371,11 +379,10 @@ export function useBridgeTools() {
       }
       const submitRes = await submitPrepayOrderMintBtc(submitPrepayOrderMintDto)
 
-      debugger
       return submitRes
       //成功
     } catch (error) {
-      throw new Error((error as any).message)
+      throw new Error((error as any).message || (error as any).msg)
     }
   }
 

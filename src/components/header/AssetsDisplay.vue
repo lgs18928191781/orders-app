@@ -20,28 +20,26 @@ import {
 
 import { useConnectionStore } from '@/stores/connection'
 import { useNetworkStore } from '@/stores/network'
-import { useExcludedBalanceQuery } from '@/queries/excluded-balance'
 
 import { getBrc20s } from '@/queries/orders-api'
+import { getExcludedBalanceQuery } from '@/queries/excluded-balance.query'
 import { unit, useBtcUnit } from '@/lib/helpers'
 import { prettyBalance, prettyCoinDisplay } from '@/lib/formatters'
 
 const networkStore = useNetworkStore()
 const connectionStore = useConnectionStore()
-const address = computed(() => connectionStore.getAddress)
+const address = connectionStore.getAddress
 const enabled = computed(() => connectionStore.connected)
 
 const { data: balance } = useQuery({
-  queryKey: [
-    'balance',
-    { network: networkStore.network, address: address.value! },
-  ],
+  queryKey: ['balance', { network: networkStore.network, address }],
   queryFn: () => connectionStore.adapter!.getBalance(),
   enabled,
 })
 
-const { data: excludedBalance, isLoading: isLoadingExcludedBalance } =
-  useExcludedBalanceQuery(address, enabled)
+const { data: excludedBalance, isLoading: isLoadingExcludedBalance } = useQuery(
+  getExcludedBalanceQuery({ address }, enabled),
+)
 
 const availableBalanceRatioColor = computed(() => {
   if (excludedBalance.value === undefined || balance.value === undefined) {
@@ -117,14 +115,14 @@ const { data: myBrc20s } = useQuery({
             {{ prettyBalance(excludedBalance, useBtcUnit) }} {{ unit }}
           </span>
           <span
-            class="hidden text-xs lg:inline"
+            class="hidden text-xs xl:inline"
             :class="availableBalanceRatioColor"
             v-if="balance"
           >
             ({{ ((excludedBalance / balance) * 100).toFixed(0) }}%)
           </span>
 
-          <div class="hidden h-4 w-4 items-center justify-center lg:flex">
+          <div class="hidden h-4 w-4 items-center justify-center xl:flex">
             <ChevronsUpDownIcon
               class="h-3 w-3 transition-all duration-200 ease-in-out group-hover:h-4 group-hover:w-4"
             />
@@ -200,7 +198,7 @@ const { data: myBrc20s } = useQuery({
                         don't want to spend.
                       </p>
                       <p class="mt-1 font-bold text-green-500">
-                        1. Those that are unconfirmed yet.
+                        1. Those that are not confirmed yet.
                       </p>
                       <p class="mt-1">
                         2. Those that actually contain BRC-20 / Ordinals.
@@ -265,7 +263,7 @@ const { data: myBrc20s } = useQuery({
     </div>
 
     <Loader2Icon
-      class="ml-3 h-5 animate-spin"
+      class="mx-2 h-5 animate-spin"
       v-else-if="isLoadingExcludedBalance"
     />
   </div>

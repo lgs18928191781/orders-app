@@ -2,7 +2,7 @@ import { computedEager, useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
 import terminal from 'virtual:terminal'
 
-import { IS_DEV } from '@/data/constants'
+import { IS_DEV, NETWORK } from '@/data/constants'
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -21,12 +21,16 @@ export const raiseUnless = (cond: boolean, err: string): void => {
 }
 
 export const isUnsupportedAddress = (address: string) => {
-  return (
+  const isLegacyOrScript =
     address.startsWith('1') ||
     address.startsWith('3') ||
     address.startsWith('m') ||
     address.startsWith('n')
-  )
+
+  const isIncompatibleNetwork =
+    NETWORK === 'testnet' ? address.startsWith('bc') : address.startsWith('tb')
+
+  return isLegacyOrScript || isIncompatibleNetwork
 }
 
 export const generateRandomString = (length: number = 32) => {

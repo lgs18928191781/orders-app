@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 
+import { useNetworkStore } from '@/stores/network'
+
 const route = useRoute()
+const networkStore = useNetworkStore()
 
 const links: {
   name: string
@@ -14,6 +17,7 @@ const links: {
   {
     name: 'Orderbook',
     path: '/',
+    disabled: networkStore.isTestnet,
     // version: 2,
   },
   // {
@@ -31,9 +35,10 @@ const links: {
     name: 'Bridge',
     path: '/bridge',
     new: true,
+    disabled: !networkStore.isTestnet,
   },
   {
-    name: 'Events',
+    name: 'Rewards',
     path: '/events',
   },
   // {
@@ -44,7 +49,6 @@ const links: {
 ]
 
 function isLinkActive(path: string) {
-  console.log('path', path)
   switch (path) {
     case '/':
       return route.path === '/' || route.path.startsWith('/orders')
@@ -61,6 +65,8 @@ function isLinkActive(path: string) {
       return route.path.startsWith('/swap') || route.path.startsWith('/add')
     case '/bridge':
       return route.path.startsWith('/bridge')
+    case '/mvcswap':
+      return route.path.startsWith('/mvcswap')
     default:
       return false
   }
@@ -74,7 +80,7 @@ function isLinkActive(path: string) {
     <nav class="ml-6 hidden items-center gap-x-2 lg:flex">
       <component
         :class="[
-          'rounded-md px-4 py-2 text-sm font-medium transition-all',
+          'rounded-md px-2 py-2 text-sm font-medium transition-all xl:px-4',
           isLinkActive(link.path)
             ? 'text-primary underline underline-offset-4 hover:underline-offset-2'
             : 'text-zinc-300',
@@ -90,7 +96,7 @@ function isLinkActive(path: string) {
       >
         {{ link.name }}
         <span
-          class="absolute inline-flex -translate-x-1 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400"
+          class="absolute inline-flex -translate-x-4 -translate-y-2 items-center rounded-md bg-red-400/30 px-1.5 py-0.5 text-xs font-medium text-red-400 xl:-translate-x-1"
           v-if="link.new"
         >
           New

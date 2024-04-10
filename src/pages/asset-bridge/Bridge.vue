@@ -426,6 +426,13 @@ import { useRouter } from 'vue-router'
 import { ElLoading } from 'element-plus'
 import { getUtxos } from '@/queries/proxy'
 import CommonDialog from '@/components/bridge/CommonDialog.vue'
+
+const router = useRouter()
+// is is not correct environment, redirect
+if (!useNetworkStore().isTestnet) {
+  router.push('/')
+}
+
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
   default = 'default',
@@ -454,7 +461,6 @@ const swapFromAmount = ref('0')
 const myBrc20s = ref()
 const showSuccessDialog = ref(false)
 const currentAddress = ref('')
-const router = useRouter()
 const feeInfo = reactive({
   val: {
     confirmNumber: 0,
@@ -479,7 +485,7 @@ function validateInput() {
 function goToTrade() {
   showSuccessDialog.value = false
   if (fromAsset.val.network == 'BTC') {
-    ElMessage.warning(`Order Swap on MVC network is coming soon`)
+    ElMessage.warning(`Swap on MVC coming soon`)
     setTimeout(() => {
       window.location.reload()
     }, 1000)

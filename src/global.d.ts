@@ -155,6 +155,9 @@ interface Window {
       pushPsbt: (psbt: string) => Promise<string>
       signPsbts: (psbtHexs: string[], options?: any[]) => Promise<string[]>
     }
+    token:{
+      getBalance:() => Promise<any>
+    }
     transfer: (params: {
       tasks: TransferOutput[]
       broadcast: boolean

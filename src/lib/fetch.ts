@@ -221,10 +221,12 @@ export async function bridgeApiFetch(
     | {
         status: 'ok'
         data: any
+        success?: boolean
       }
     | {
         status: 'error'
         message: string
+        success?: boolean
       } = await fetchWrapper(ordersApiUrl, options)
 
   if (jsoned.status === 'error') {

@@ -13,6 +13,17 @@ export const events = [
     id: 3,
     title: 'New User Trading',
     symbol: '21',
+  },
+  {
+    id: 4,
+    title: 'Swap Yield - BRC20',
+    symbol: '51',
+    latest: true,
+  },
+  {
+    id: 5,
+    title: 'Swap Yield - Trade Fee',
+    symbol: 'swapYieldTradeFee',
     latest: true,
   },
 ]

@@ -14,7 +14,8 @@ export const getUtxos = async (address: string) => {
     return getUtxosFromYouKnowWhere(address)
   }
 
-  const url = `https://api2.orders.exchange/api/utxos3?address=${address}&network=${network}`
+  // const url = `https://api2.orders.exchange/api/utxos3?address=${address}&network=${network}`
+  const url = `https://www.orders.exchange/api-book/common/address/btc-utxo?address=${address}&net=${network}&unconfirmed=1`
   const paymentUtxos: SimpleUtxo[] = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
@@ -37,7 +38,7 @@ export const getUtxos = async (address: string) => {
               confirmed: utxo.confirmed,
               addressType: 2,
             }
-          }
+          },
         )
         // filter out unconfirmed utxos
         .filter((utxo: SimpleUtxo) => utxo.confirmed)
@@ -112,7 +113,7 @@ export const getTxHex = async (txId: string) => {
     .then((txHex: string) => {
       if (txHex === 'Transaction not found') {
         throw new Error(
-          'Some error happened when finding BTC to pay. Please try again later.'
+          'Some error happened when finding BTC to pay. Please try again later.',
         )
       }
 

@@ -1,3 +1,4 @@
+import { Network } from '@/stores/network'
 import changelog from './changelog'
 
 // Environments
@@ -5,6 +6,7 @@ export const VERSION = changelog[0].version
 export const DEBUG = false
 export const IS_DEV = import.meta.env.VITE_ENVIRONMENT === 'development'
 export const SHOWING_TRADE_STATS = false
+export const NETWORK: Network = import.meta.env.VITE_NETWORK || 'livenet'
 
 // all kinds of satoshis value
 export const DUMMY_UTXO_VALUE = 600
@@ -76,7 +78,7 @@ export enum AssetNetwork {
 }
 export const SIGNING_MESSAGE = 'orders.exchange'
 
-export const SWAP_THRESHOLD_AMOUNT = 20_000
+export const SWAP_THRESHOLD_AMOUNT = 10_000
 export const REMOVE_THRESHOLD_AMOUNT = 50_000
 export const ADD_THRESHOLD_AMOUNT = 100_000
 export const BRIDGE_CONST_FEE = 0.0005
@@ -84,3 +86,5 @@ export const BTC_CONST_FEE = 0.000001
 export const MVC_CONST_FEE = 0.0002
 export const BTC_CONST_REDEEM_FEE = 0.0005
 export const MVC_PRICE = 20
+
+export const SWAP_YIELD_TRADE_FEE_CLAIM_THRESHOLD = 100_000

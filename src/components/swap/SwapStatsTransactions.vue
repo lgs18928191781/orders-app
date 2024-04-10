@@ -57,10 +57,9 @@ const { data: transactions, isLoading: isLoadingTransactions } = useQuery(
 )
 
 function viewAddress(address: string) {
-  const browserHost =
-    networkStore.network === 'testnet'
-      ? 'https://mempool.space/testnet'
-      : 'https://mempool.space'
+  const browserHost = networkStore.isTestnet
+    ? 'https://mempool.space/testnet'
+    : 'https://mempool.space'
   window.open(`${browserHost}/address/${address}`, '_blank')
 }
 

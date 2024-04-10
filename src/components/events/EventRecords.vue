@@ -22,6 +22,7 @@ const { data: rewardHistory } = useQuery({
   ],
   queryFn: () => getRewardHistory({ event: props.event }),
   select: (data) => {
+    console.log({ data })
     return data
   },
   enabled: computed(() => connectionStore.connected),

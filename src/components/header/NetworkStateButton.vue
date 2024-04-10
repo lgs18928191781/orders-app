@@ -88,8 +88,8 @@ const trafficColorClass = computed(() => {
     @click="openModal"
     v-if="true"
   >
-    <span class="hidden lg:inline">Network</span>
-    <span class="relative hidden h-2 w-2 lg:flex">
+    <span class="hidden xl:inline">Network</span>
+    <span class="relative hidden h-2 w-2 xl:flex">
       <span
         class="absolute inline-flex h-full w-full animate-ping-slow rounded-full opacity-75"
         :class="trafficColorClass.secondaryBg"

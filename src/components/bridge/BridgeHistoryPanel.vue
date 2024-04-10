@@ -190,9 +190,11 @@ async function fetchBridgeHistory() {
       order: 'desc',
       address: address,
     })
+
     if (txList.length < size) {
       isEnd.value = true
     }
+
     list.value = [
       ...list.value,
       ...txList.map((item) => {

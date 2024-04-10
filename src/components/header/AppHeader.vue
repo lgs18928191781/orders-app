@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { MenuIcon } from 'lucide-vue-next'
+import { MenuIcon, TriangleAlertIcon } from 'lucide-vue-next'
 
 import { useNetworkStore, type Network } from '@/stores/network'
 import { useConnectionStore } from '@/stores/connection'
@@ -30,8 +30,11 @@ useQuery({
   enabled: computed(() => connectionStore.connected),
 })
 
+const isNetworkChanging = ref(false)
 const unisatAccountsChangedHandler = (accounts: string[]) => {
   if (connectionStore.last.wallet !== 'unisat') return
+  if (isNetworkChanging.value) return
+
   if (!accounts[0]) {
     // disconnect
     connectionStore.disconnect()
@@ -49,6 +52,21 @@ const unisatAccountsChangedHandler = (accounts: string[]) => {
     },
   })
 }
+function handleNetworkChanged(network: Network) {
+  isNetworkChanging.value = true
+
+  const appNetwork = networkStore.network
+  if (network !== appNetwork) {
+    connectionStore.disconnect()
+  }
+
+  isNetworkChanging.value = false
+}
+const unisatNetworkChangedHandler = (network: Network) => {
+  if (connectionStore.last.wallet !== 'unisat') return
+  handleNetworkChanged(network)
+}
+
 const okxAccountsChangedHandler = (accounts: string[] | null) => {
   if (connectionStore.last.wallet !== 'okx') return
   if (!accounts) {
@@ -56,8 +74,6 @@ const okxAccountsChangedHandler = (accounts: string[] | null) => {
     connectionStore.disconnect()
     return
   }
-
-  console.log({ accounts })
 
   if (isUnsupportedAddress(accounts[0])) return
 
@@ -73,6 +89,9 @@ const okxAccountsChangedHandler = (accounts: string[] | null) => {
 const metaletAccountsChangedHandler = () => {
   if (useConnectionStore().last.wallet !== 'metalet') return
 
+  // sync here to prevent chronological error
+  connectionStore.sync()
+
   ElMessage.warning({
     message: 'Metalet account changed. Refreshing page...',
     type: 'warning',
@@ -81,27 +100,16 @@ const metaletAccountsChangedHandler = () => {
     },
   })
 }
-
-const metaletNetworkChangedHandler = (network: Network | string) => {
+const metaletNetworkChangedHandler = (network: Network) => {
   if (useConnectionStore().last.wallet !== 'metalet') return
-  let net = ''
-  if (network == 'mainnet') {
-    net = 'livenet'
-  }
-  networkStore.set(net as Network)
-  ElMessage.warning({
-    message: 'Metalet network changed. Refreshing page...',
-    type: 'warning',
-    onClose: () => {
-      window.location.reload()
-    },
-  })
+  handleNetworkChanged(network)
 }
 
 onMounted(async () => {
   if (window.unisat) {
     const unisat = window.unisat
     unisat.on('accountsChanged', unisatAccountsChangedHandler)
+    unisat.on('networkChanged', unisatNetworkChangedHandler)
   }
 
   if (window.okxwallet) {
@@ -116,6 +124,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   // remove event listener
   window.unisat?.removeListener('accountsChanged', unisatAccountsChangedHandler)
+  window.unisat?.removeListener('networkChanged', unisatNetworkChangedHandler)
   window.okxwallet?.removeListener('accountsChanged', okxAccountsChangedHandler)
   window.metaidwallet?.removeListener(
     'accountsChanged',
@@ -136,6 +145,14 @@ onBeforeUnmount(() => {
   <header
     class="select-none border-b border-zinc-800 bg-zinc-900 py-3 lg:mb-3 lg:border-none lg:py-4"
   >
+    <div
+      class="mx-auto -mt-3 mb-3 flex items-center justify-center gap-2 bg-red-900/50 p-2 text-center text-amber-200 lg:-mt-4 lg:mb-4"
+      v-if="networkStore.isTestnet"
+    >
+      <TriangleAlertIcon class="inline-block h-5 w-5" />
+      This is a testnet version of Orders.Exchange. Funds and assets are not
+      real.
+    </div>
     <div class="mx-auto flex max-w-9xl items-center justify-between gap-4 px-3">
       <AppNavbar />
 
@@ -166,7 +183,7 @@ onBeforeUnmount(() => {
               <NetworkStateButton />
             </div>
 
-            <AppNotifications />
+            <AppNotifications class="hidden xl:block" />
           </div>
 
           <div class="flex grow items-center lg:hidden">

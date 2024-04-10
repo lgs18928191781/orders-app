@@ -8,6 +8,7 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
 import terminal from 'vite-plugin-terminal'
+import VueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,6 +18,7 @@ export default defineConfig({
   plugins: [
     vue(),
     terminal(),
+    VueDevTools(),
     nodePolyfills({
       // To exclude specific polyfills, add them to this list.
       exclude: [

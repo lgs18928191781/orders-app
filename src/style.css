@@ -7,9 +7,6 @@
   src: url('@/assets/fonts/geistMono.ttf') format('truetype');
 }
 
-
-
-
 .nicer-scrollbar::-webkit-scrollbar {
   @apply h-2 w-2;
 }
@@ -83,11 +80,30 @@ input:focus {
   @apply border border-primary/30;
 }
 
-
-.el-loading-spinner .path{
-  stroke: #FFA02A !important;
+.el-loading-spinner .path {
+  stroke: #ffa02a !important;
 }
 
-.el-loading-spinner .el-loading-text{
-  color: #FFA02A !important;;
-} 
+.el-loading-spinner .el-loading-text {
+  color: #ffa02a !important;
+}
+
+.gorgeous-btn-bg-for-btc {
+  background: conic-gradient(
+    from 90deg at 50% 50%,
+    #ffa02a 0%,
+    #dff7cc 30%,
+    #ff9f2a 100%
+  );
+  animation: spin 2s linear infinite;
+}
+
+.gorgeous-btn-bg-for-mvc {
+  background: conic-gradient(
+    from 90deg at 50% 50%,
+    #38bdf8 0%,
+    #4f46e5 30%,
+    #38bdf8 100%
+  );
+  animation: spin 2s linear infinite;
+}
