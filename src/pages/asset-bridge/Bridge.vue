@@ -465,7 +465,7 @@ function validateInput() {
 function goToTrade() {
   showSuccessDialog.value = false
   if (fromAsset.val.network == 'BTC') {
-    ElMessage.warning(`Order Swap on MVC network is coming soon`)
+    ElMessage.warning(`Swap on MVC coming soon`)
     setTimeout(() => {
       window.location.reload()
     }, 1000)

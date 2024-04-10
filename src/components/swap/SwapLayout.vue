@@ -55,7 +55,7 @@ watchEffect(() => {
     <SwapStatsSection v-show="isExpanded" class="flex-1 lg:mb-8" />
 
     <div class="w-112 max-w-md lg:mb-8">
-      <SwapChainSelector :chain="'btc'" />
+      <!-- <SwapChainSelector :chain="'btc'" /> -->
 
       <div :class="['relative z-10 rounded-3xl']">
         <!-- new pool warning -->
