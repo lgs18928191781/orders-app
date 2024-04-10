@@ -60,6 +60,7 @@ const bridgePairs: Ref<assetReqReturnType[]> = networkStore.isTestnet
         originSymbol: 'BTC',
         id: 1,
       },
+      //
       // {
       //   id: 1,
       //   fromSymbol: 'BTC',
