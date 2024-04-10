@@ -72,6 +72,16 @@ async function connectToMetalet() {
       type: 'warning',
     })
   })
+  if (connectionStore?.adapter?.metaletConnect) {
+    console.log('1321321', '进来连接')
+    await connectionStore?.adapter.metaletConnect()!.catch((err) => {
+      ElMessage.warning({
+        message: err.message,
+        type: 'warning',
+      })
+    })
+  }
+
   if (connection?.status === 'connected') {
     await credentialsStore.login()
     closeConnectionModal()

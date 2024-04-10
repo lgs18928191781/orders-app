@@ -134,6 +134,11 @@ interface Window {
       handler: { mvcAddress: string; btcAddress: string } | any,
     ) => void
     getNetwork: () => Promise<{ network: 'mainnet' | 'testnet' }>
+    connect: () => Promise<{
+      address?: string
+      pubKey?: string
+      status?: string
+    }>
     btc: {
       getAddress: () => Promise<string>
       getPublicKey: () => Promise<string>
@@ -155,8 +160,8 @@ interface Window {
       pushPsbt: (psbt: string) => Promise<string>
       signPsbts: (psbtHexs: string[], options?: any[]) => Promise<string[]>
     }
-    token:{
-      getBalance:() => Promise<any>
+    token: {
+      getBalance: () => Promise<any>
     }
     transfer: (params: {
       tasks: TransferOutput[]

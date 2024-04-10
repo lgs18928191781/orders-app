@@ -24,6 +24,13 @@ export const connect: () => Promise<connectRes> = async () => {
   return checkMetaletStatus(connectRes, 'connect')
 }
 
+export const metaletConnect: () => Promise<connectRes> = async () => {
+  checkMetalet()
+
+  const connectRes = await window.metaidwallet.connect()
+  return checkMetaletStatus(connectRes, 'connect')
+}
+
 export const getMvcAddress = async () => {
   checkMetalet()
   const addressRes = await window.metaidwallet.getAddress()

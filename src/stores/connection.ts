@@ -97,6 +97,10 @@ export const useConnectionStore = defineStore('connection', {
           address: string
           pubKey: string
         }>
+        metaletConnect?: () => Promise<{
+          address: string
+          pubKey: string
+        }>
         disconnect: () => Promise<void>
         getBalance: () => Promise<number>
         inscribe: (tick: string) => Promise<string | undefined>
