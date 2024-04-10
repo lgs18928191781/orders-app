@@ -13,12 +13,13 @@
           <BridgePairSelect class="col-span-1"></BridgePairSelect>
         </div>
         <div class="item-center flex">
-          <!-- <div
+          <div
+            v-if="networkStore.isTestnet"
             @click="commomVisible = true"
             class="mr-3 flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
           >
             <HandCoins :size="20" />
-          </div> -->
+          </div>
           <div
             class="flex h-7 w-7 cursor-pointer items-center justify-center rounded bg-black"
             @click="handleHistoryVisible(true)"
@@ -63,45 +64,51 @@
         <!-- <div class="fee-wrap mt-2.5 flex">
           <span class="mr-4">Fee rate:{{ feeInfo.val.feeRate }}%</span>
           <span
-            >{{ feeInfo.val.comfirmation }} confirmation on
+            >{{ feeInfo.val.confirmNumber }} confirmation on
             {{ toAsset.val.network }} TXs</span
           >
         </div> -->
       </div>
 
-      <div class="grid grid-rows-2 gap-y-5 px-7 pb-5 text-sm">
-        <div class="flex items-center justify-between text-sm text-red-500">
-          <div class="mr-2">
-            <span class="mr-1 text-[#C1C0C0]">Minimum:</span>
-            <span class="mr-1">{{ limitInfo.min }}</span>
-            <span>{{ fromAsset.val.symbol }}</span>
+      <div class="px-7 pb-5 text-sm">
+        <div class="flex flex-col justify-between text-red-500">
+          <div class="flex flex-row items-center justify-between">
+            <span class="mr-1 text-[#C1C0C0]">Minimum</span>
+            <div>
+              <span class="mr-2">{{ limitInfo.min }}</span>
+              <span class="text-[#C1C0C0]">{{ fromAsset.val.symbol }}</span>
+            </div>
           </div>
-          <div>
-            <span class="mr-1 text-[#C1C0C0]">Maximum:</span
-            ><span class="mr-1">{{ limitInfo.max }}</span>
-            <span>{{ fromAsset.val.symbol }}</span>
+          <div class="mt-3 flex flex-row items-center justify-between">
+            <span class="mr-1 text-[#C1C0C0]">Maximum</span>
+            <div>
+              <span class="mr-2">{{ limitInfo.max }}</span>
+              <span class="text-[#C1C0C0]">{{ fromAsset.val.symbol }}</span>
+            </div>
           </div>
         </div>
 
         <div
-          class="flex cursor-pointer items-center justify-center hover:text-[#ffa02a]"
+          class="flex cursor-pointer items-center justify-center py-5 text-[#C1C0C0] hover:text-[#ffa02a]"
           @click="showFeeDetail = !showFeeDetail"
         >
-          <span class="mr-1">Show more</span>
+          <span class="mr-1">Show Fee List</span>
           <ChevronUp :size="18" v-if="showFeeDetail" />
           <ChevronDown :size="18" v-else />
         </div>
 
         <template v-if="showFeeDetail">
-          <div
-            class="item-center flex justify-between gap-y-5"
-            v-for="(item, index) in bridgeInfo"
-            :key="index"
-          >
-            <div class="text-[#C1C0C0]">{{ item.title }}</div>
-            <div class="flex text-[#fff]">
-              <span class="mr-2">{{ item.value }}</span>
-              <span>{{ item.unit }}</span>
+          <div class="grid grid-rows-4 gap-y-5">
+            <div
+              class="item-center flex justify-between"
+              v-for="(item, index) in bridgeInfo"
+              :key="index"
+            >
+              <div class="text-[#C1C0C0]">{{ item.title }}</div>
+              <div class="flex text-[#fff]">
+                <span class="mr-2">{{ item.value }}</span>
+                <span>{{ item.unit }}</span>
+              </div>
             </div>
           </div>
         </template>
@@ -290,7 +297,8 @@
       @handleHistoryVisible="handleHistoryVisible"
     />
     <!--mainnet no necessary-->
-    <!-- <CommonDialog
+    <CommonDialog
+      v-if="networkStore.isTestnet"
       :isOpen="commomVisible"
       @handleCommonVisible="handleCommonVisible"
     >
@@ -346,7 +354,7 @@
           </button>
         </div>
       </template>
-    </CommonDialog> -->
+    </CommonDialog>
   </div>
 </template>
 
@@ -426,12 +434,13 @@ import { useRouter } from 'vue-router'
 import { ElLoading } from 'element-plus'
 import { getUtxos } from '@/queries/proxy'
 import CommonDialog from '@/components/bridge/CommonDialog.vue'
+import bridgePairs, { getPairs } from '@/data/bridge-pairs'
 
 const router = useRouter()
 // is is not correct environment, redirect
-if (!useNetworkStore().isTestnet) {
-  router.push('/')
-}
+// if (!useNetworkStore().isTestnet) {
+//   router.push('/')
+// }
 
 const { selectBridgePair, selectedPair } = useBridgePair()
 enum BtnColor {
@@ -604,11 +613,12 @@ async function getAssetInfo() {
   try {
     let queryAddress = ''
     assetInfo.val = await getAssetPairList()
+    getPairs(assetInfo.val.assetList)
 
     const currentPairs = assetInfo.val!.assetList!.filter((item: any) => {
       return (
-        item.originSymbol == selectedPair.value.fromSymbol &&
-        item.targetSymbol == selectedPair.value.toSymbol
+        item.originSymbol == selectedPair.value.originSymbol &&
+        item.targetSymbol == selectedPair.value.targetSymbol
       )
     })
 
@@ -616,7 +626,7 @@ async function getAssetInfo() {
 
     currentAssetInfo.val = currentPairs[0]
     console.log('assetInfo.val', currentAssetInfo.val)
-    // debugger
+
     const mvcAddress = await publickeyToAddress()
     currentAddress.value = await connectionStore.adapter.getAddress()
     if (determineAddressInfo(currentAddress.value).type == 'p2sh') {
@@ -633,6 +643,7 @@ async function getAssetInfo() {
       }
       if (network == AssetBridgeNetwork.BRC20) {
         // debugger
+
         Promise.all([
           getOneBrc20({
             tick: originSymbol,
@@ -655,6 +666,12 @@ async function getAssetInfo() {
 
             myBrc20s.value = res[0]
             const fromBalance = res[0]
+            if (!res[0].availableBalance) {
+              fromBalance.availableBalance = '0'
+            }
+            if (!res[0].transferBalance) {
+              fromBalance.transferBalance = '0'
+            }
             fromAsset.val.balance = new Decimal(
               fromBalance.transferBalance,
             ).toNumber()

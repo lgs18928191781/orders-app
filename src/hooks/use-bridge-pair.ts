@@ -5,11 +5,11 @@ import bridgePairs from '@/data/bridge-pairs'
 
 export function useBridgePair() {
   const router = useRouter()
-
-  const selectedPairId = ref(bridgePairs[0].id)
+  console.log('bridgePairs', bridgePairs.value)
+  const selectedPairId = ref(bridgePairs.value[0].id)
 
   const selectedPair = computed(() => {
-    const pair = bridgePairs.find((a) => a.id === selectedPairId.value)
+    const pair = bridgePairs.value.find((a) => a.id === selectedPairId.value)
     if (pair) {
       return pair
     }
@@ -17,15 +17,15 @@ export function useBridgePair() {
     throw new Error('Pair not found')
   })
 
-  const defaultPairStr = `${bridgePairs[0].fromSymbol}-${bridgePairs[0].toSymbol}`
+  const defaultPairStr = `${bridgePairs.value[0].originSymbol}-${bridgePairs.value[0].targetSymbol}`
   const pairStr = useRouteParams('pair', defaultPairStr) as Ref<string>
   const fromSymbol = computed(() => pairStr.value.split('-')[0])
   const toSymbol = computed(() => pairStr.value.split('-')[1])
 
-  const selected = bridgePairs.find(
+  const selected = bridgePairs.value.find(
     (a) =>
-      a.fromSymbol.toUpperCase() === fromSymbol.value.toUpperCase() &&
-      a.toSymbol.toUpperCase() === toSymbol.value.toUpperCase()
+      a.originSymbol.toUpperCase() === fromSymbol.value.toUpperCase() &&
+      a.targetSymbol.toUpperCase() === toSymbol.value.toUpperCase(),
   )
   if (selected) {
     selectedPairId.value = selected.id
@@ -35,9 +35,9 @@ export function useBridgePair() {
     selectedPairId.value = id
 
     // redirect
-    const pair = bridgePairs.find((pair) => pair.id === id)
+    const pair = bridgePairs.value.find((pair) => pair.id === id)
     if (pair) {
-      const pairSymbol = `${pair.fromSymbol}-${pair.toSymbol}`
+      const pairSymbol = `${pair.originSymbol}-${pair.targetSymbol}`
       router.push({
         path: `/bridge/${pairSymbol}`,
       })

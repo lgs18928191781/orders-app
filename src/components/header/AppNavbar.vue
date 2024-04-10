@@ -35,7 +35,7 @@ const links: {
     name: 'Bridge',
     path: '/bridge',
     new: true,
-    disabled: !networkStore.isTestnet,
+    // disabled: !networkStore.isTestnet,
   },
   {
     name: 'Rewards',

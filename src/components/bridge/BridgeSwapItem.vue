@@ -108,8 +108,6 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: '0',
 })
 
-console.log('assetInfo12313212', props.assetInfo)
-
 const emit = defineEmits(['update:modelValue', 'validate', 'clearAmount'])
 
 const curretnNetwork = ref('BTC')

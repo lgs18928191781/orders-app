@@ -9,10 +9,12 @@ import { ChevronRightIcon, CheckIcon } from 'lucide-vue-next'
 
 import bridgePairs from '@/data/bridge-pairs'
 import { useBridgePair } from '@/hooks/use-bridge-pair'
-const sortedBridgePairs = bridgePairs.sort((a, b) => {
-  // sorted by id
-  return a.id > b.id ? 1 : -1
-})
+console.log('bridgePairs', bridgePairs)
+// debugger
+// const sortedBridgePairs = bridgePairs.value.sort((a, b) => {
+//   // sorted by id
+//   return a.id > b.id ? 1 : -1
+// })
 
 const { selectBridgePair, selectedPair } = useBridgePair()
 </script>
@@ -30,12 +32,27 @@ const { selectBridgePair, selectedPair } = useBridgePair()
         v-slot="{ open }"
       >
         <div class="flex">
-          <img :src="selectedPair.fromIcon" class="h-5 rounded-full" />
-          <img :src="selectedPair.toIcon" class="-ml-2 h-5 rounded-full" />
+          <TokenIcon
+            :token="selectedPair.originSymbol"
+            :wrapt="false"
+            class="size-5 rounded-full"
+            v-if="selectedPair.originSymbol"
+          />
+
+          <TokenIcon
+            :token="selectedPair.targetSymbol"
+            :wrapt="true"
+            class="-ml-2 size-5 rounded-full"
+            v-if="selectedPair.targetSymbol"
+          />
+          <!-- <img :src="selectedPair.fromSymbol" class="h-5 rounded-full" />
+          <img :src="selectedPair.toIcon" class="-ml-2 h-5 rounded-full" /> -->
         </div>
 
         <span class="font-bold uppercase"
-          >${{ selectedPair.fromSymbol }}-{{ selectedPair.toSymbol }}</span
+          >${{ selectedPair.originSymbol }}-{{
+            selectedPair.targetSymbol
+          }}</span
         >
         <ChevronRightIcon
           :class="[
@@ -60,7 +77,7 @@ const { selectBridgePair, selectedPair } = useBridgePair()
       >
         <ListboxOption
           v-slot="{ active, selected }"
-          v-for="pair in sortedBridgePairs"
+          v-for="pair in bridgePairs"
           :key="pair.id"
           :value="pair.id"
         >
@@ -71,8 +88,22 @@ const { selectBridgePair, selectedPair } = useBridgePair()
             ]"
           >
             <div class="flex">
-              <img :src="pair.fromIcon" class="h-5 rounded-full" />
-              <img :src="pair.toIcon" class="-ml-2 h-5 rounded-full" />
+              <TokenIcon
+                :token="pair.originSymbol"
+                :wrapt="false"
+                class="size-5 rounded-full"
+                v-if="pair.originSymbol"
+              />
+
+              <TokenIcon
+                :token="pair.targetSymbol"
+                :wrapt="true"
+                class="-ml-2 size-5 rounded-full"
+                v-if="pair.targetSymbol"
+              />
+
+              <!-- <img :src="pair.fromIcon" class="h-5 rounded-full" />
+              <img :src="pair.toIcon" class="-ml-2 h-5 rounded-full" /> -->
             </div>
 
             <div class="relative">
@@ -82,14 +113,14 @@ const { selectBridgePair, selectedPair } = useBridgePair()
                   selected && 'text-primary',
                 ]"
               >
-                ${{ pair.fromSymbol }}-{{ pair.toSymbol }}
+                ${{ pair.originSymbol }}-{{ pair.targetSymbol }}
               </span>
-              <span
+              <!-- <span
                 class="absolute inline-flex -translate-x-1 -translate-y-2 rotate-3 items-center rounded-md px-1.5 py-0.5 text-xs font-medium text-red-500"
                 v-if="pair.isNew"
               >
                 New!
-              </span>
+              </span> -->
             </div>
 
             <CheckIcon

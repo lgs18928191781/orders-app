@@ -191,7 +191,8 @@ export async function bridgeApiFetch(
   options?: { headers?: HeadersInit } & RequestInit,
   returnRaw: boolean = false,
 ) {
-  const ordersApiUrl = `https://api.orders.exchange/api-bridge-testnet${url}`
+  const baseUrl = `https://api.orders.exchange/api-bridge` //https://api.orders.exchange/api-bridge-testnet
+  const ordersApiUrl = `${baseUrl}${url}`
   if (!options)
     options = {
       headers: {
