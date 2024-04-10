@@ -89,8 +89,8 @@ const { data: myOneBrc20, isLoading } = useQuery(
       network: networkStore.network,
       tick: token2,
     },
-    computed(() => connectionStore.connected)
-  )
+    computed(() => connectionStore.connected),
+  ),
 )
 
 // amount
@@ -139,7 +139,7 @@ watch(
       emit('amountCleared')
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 const tweenedAmount = reactive({
@@ -170,7 +170,12 @@ async function goInscribe() {
           'flex items-center gap-1 rounded-full bg-zinc-900 p-1 px-4 text-base',
         ]"
       >
-        <TokenIcon :token="token2" class="size-5 rounded-full" v-if="token2" />
+        <TokenIcon
+          :token="token2"
+          :wrapt="false"
+          class="size-5 rounded-full"
+          v-if="token2"
+        />
         <div class="mr-1">
           {{ prettySymbol(symbol) }}
         </div>
