@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import * as VueRouter from 'vue-router'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import { VueQueryPlugin } from '@tanstack/vue-query'
+import * as secp256k1 from 'tiny-secp256k1'
 
 import './style.css'
 import routes, { geoGuard, maintenanceGuard } from '@/routes'
@@ -25,7 +26,10 @@ const pinia = createPinia()
 // wait until bitcoin is loaded then mount the app
 const launchInterval = setInterval(() => {
   if (window.bitcoinjs && window.ecpair) {
+    window.bitcoinjs.initEccLib(secp256k1)
+
     const app = createApp(App)
+
     // @ts-ignore
     app.use(router).use(pinia).use(VueQueryPlugin).mount('#app')
     clearInterval(launchInterval)
