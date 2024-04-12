@@ -33,12 +33,32 @@ import {
 import { sleep } from '@/lib/helpers'
 import { type InscriptionUtxo } from '@/queries/swap/types'
 import { useFeebStore } from '@/stores/feeb'
+import { useEmptyPoolSignal } from '@/hooks/use-empty-pool-signal'
+import { useRouter } from 'vue-router'
 
 const { openConnectionModal } = useConnectionModal()
 const connectionStore = useConnectionStore()
 const { openBuilding, closeBuilding } = useBuildingOverlay()
 const btcjsStore = useBtcJsStore()
 const networkStore = useNetworkStore()
+
+// if empty pool, redirect to pool page
+const { isEmpty } = useEmptyPoolSignal()
+const { pairStr } = useSwapPool()
+const router = useRouter()
+// watch(
+//   isEmpty,
+//   (empty) => {
+//     if (empty) {
+//       ElMessage.warning('This pool is empty. Redirecting to add liquidity...')
+//       // wait 3 seconds before redirecting
+//       setTimeout(() => {
+//         router.push(`/swap-pools/${pairStr.value}/add`)
+//       }, 3000)
+//     }
+//   },
+//   { immediate: true },
+// )
 
 // symbol & amount
 const { token1, token2 } = useSwapPool()

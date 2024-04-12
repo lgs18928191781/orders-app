@@ -98,14 +98,14 @@ const pinnedTokens = computed(() => {
           >
             <div class="flex">
               <TokenIcon
-                :token="token1"
+                :token="pair.token1"
                 class="size-6 rounded-full"
-                v-if="token1"
+                v-if="pair.token1"
               />
               <TokenIcon
-                :token="token2"
+                :token="pair.token2"
                 class="-ml-2 size-6 rounded-full"
-                v-if="token2"
+                v-if="pair.token2"
               />
             </div>
 
