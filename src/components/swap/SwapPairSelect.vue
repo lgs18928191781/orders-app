@@ -139,4 +139,3 @@ const pinnedTokens = computed(() => {
     </transition>
   </Listbox>
 </template>
-@/hooks/use-modal-token-select
