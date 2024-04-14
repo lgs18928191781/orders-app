@@ -54,6 +54,29 @@ export type FeebPlan = {
   fullTitle?: string
 }
 export const getFeebPlans = async (): Promise<FeebPlan[]> => {
+  const networkStore = useNetworkStore()
+  if (networkStore.isTestnet) {
+    return [
+      {
+        title: 'Eco',
+        fullTitle: 'Economy',
+        feeRate: 2,
+      },
+      {
+        title: 'Slow',
+        feeRate: 2,
+      },
+      {
+        title: 'Avg',
+        feeRate: 2,
+      },
+      {
+        title: 'Fast',
+        feeRate: 2,
+      },
+    ]
+  }
+
   const res = await ordersCommonApiFetch(`fee/recommended`)
 
   if (!res) return []

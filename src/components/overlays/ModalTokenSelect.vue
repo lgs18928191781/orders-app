@@ -1,17 +1,25 @@
 <script lang="ts" setup>
 import { Dialog, DialogPanel } from '@headlessui/vue'
-import { XIcon } from 'lucide-vue-next'
+import {
+  ChevronDownIcon,
+  FrownIcon,
+  LoaderCircleIcon,
+  SearchIcon,
+  XIcon,
+} from 'lucide-vue-next'
 import { ref } from 'vue'
 import { refDebounced } from '@vueuse/core'
+import { useQuery } from '@tanstack/vue-query'
 
 import { useModalTokenSelect } from '@/hooks/use-modal-token-select'
-import { useTradingPair } from '@/hooks/use-trading-pair'
+import { getSwapTokensQuery } from '@/queries/swap/swap-tokens.query'
 
-import { useRouter } from 'vue-router'
+import { prettySymbol } from '@/lib/formatters'
+import { useSwapPool } from '@/hooks/use-swap-pool'
 
-const { isOpen, closeModal } = useModalTokenSelect()
-const { selectPair, selectedPair } = useTradingPair()
-const router = useRouter()
+const { isOpen, closeModal, openModal } = useModalTokenSelect()
+const { pairStr, selectPair, token1, token2, token1Icon, token2Icon } =
+  useSwapPool()
 
 const props = defineProps<{
   pinnedTokens: string[]
@@ -27,31 +35,33 @@ const keyword = ref('')
 const keywordDebounced = refDebounced(keyword, 300)
 const inputKeyword = ref<HTMLInputElement | null>(null)
 
-function useCustomToken() {
-  router.push(`/swap-pools/btc-${keyword.value}/add`)
-  closeModal()
-}
+const { data: tokens, isLoading: isLoadingTokens } = useQuery(
+  getSwapTokensQuery({ keyword: keywordDebounced }),
+)
 </script>
 
 <template>
-  <div>
-    <!-- <button
-      class="inline-flex w-full items-center justify-center gap-x-1.5 rounded-md bg-black px-3 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-opacity-80"
-    >
-      <div class="flex">
-        <img :src="selectedPair.fromIcon" class="h-6 rounded-full" />
-        <img :src="selectedPair.toIcon" class="-ml-2 h-6 rounded-full" />
-      </div>
-
-      <span class="font-bold uppercase"
-        >${{ selectedPair.fromSymbol }}-{{ selectedPair.toSymbol }}</span
-      >
-      <ChevronRightIcon
-        :class="['-mr-1 h-5 w-5 transform text-zinc-400 duration-200']"
-        aria-hidden="true"
+  <button
+    class="flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-900 p-1 px-2 text-base hover:border-black hover:bg-black"
+    @click="openModal"
+    v-bind="$attrs"
+  >
+    <div class="flex" v-if="pairStr">
+      <TokenIcon :token="token1" class="size-6 rounded-full" v-if="token1" />
+      <TokenIcon
+        :token="token2"
+        class="-ml-2 size-6 rounded-full"
+        v-if="token2"
       />
-    </button> -->
+    </div>
+    <div class="mr-1" v-if="pairStr">
+      {{ prettySymbol(token1) + '-' + prettySymbol(token2) }}
+    </div>
+    <div v-else class="pl-2 text-base text-primary">Select token</div>
+    <ChevronDownIcon class="h-5 w-5" />
+  </button>
 
+  <div>
     <Dialog :open="isOpen" @close="() => {}" :initial-focus="inputKeyword">
       <div
         class="fixed inset-0 z-50 bg-black/40 backdrop-blur"
@@ -62,41 +72,69 @@ function useCustomToken() {
         class="fixed inset-0 z-[60] flex w-screen items-center justify-center p-4"
       >
         <DialogPanel
-          class="z-[70] max-w-lg rounded-xl bg-zinc-800 p-4 text-zinc-300 shadow-highlight lg:min-h-48 lg:min-w-96"
+          class="z-[70] min-w-full rounded-xl bg-zinc-800 p-4 text-zinc-300 shadow-highlight lg:min-h-48 lg:min-w-[24rem]"
         >
           <div class="flex items-center justify-between pb-4">
             <span>Select a token</span>
 
             <button @click="closeModal">
-              <XIcon class="h-6 w-6" @click="closeModal" />
+              <XIcon
+                class="h-6 w-6 duration-300 hover:rotate-90 hover:text-primary"
+                @click="closeModal"
+              />
             </button>
           </div>
 
           <!-- body -->
           <!-- searchbar -->
-          <div class="flex items-stretch gap-4">
+          <div class="relative flex items-center gap-4">
             <input
               type="text"
-              class="flex-1 rounded-md border-zinc-700 bg-inherit p-2 text-zinc-300"
+              class="flex-1 rounded-xl border-0 bg-zinc-950 p-2 text-zinc-300"
               placeholder="Enter BRC-20 token name"
               ref="inputKeyword"
               v-model="keyword"
             />
-            <button
-              class="rounded-md bg-zinc-900 px-6 py-1 transition hover:text-primary"
-              @click="useCustomToken"
-            >
-              OK
-            </button>
+            <SearchIcon class="absolute right-0 size-6 pr-2 text-zinc-500" />
           </div>
 
           <!-- pinned tokens -->
-          <div class="mt-4 flex flex-wrap gap-2">
-            <SwapTokenButton
-              v-for="token in props.pinnedTokens"
-              :token="token"
-              @click="selectToken(token)"
-            ></SwapTokenButton>
+          <div class="mt-4">
+            <h6 class="text-sm text-zinc-500">Popular BRC-20s</h6>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <SwapTokenButton
+                v-for="token in props.pinnedTokens"
+                :token="token"
+                @click="selectToken(token)"
+              ></SwapTokenButton>
+            </div>
+          </div>
+
+          <!-- divider -->
+          <div class="-mx-4 mt-4 border-b border-zinc-700 px-4"></div>
+
+          <!-- token list -->
+          <div class="mt-4">
+            <div class="py-8" v-if="isLoadingTokens">
+              <LoaderCircleIcon class="mx-auto size-6 animate-spin" />
+            </div>
+
+            <div class="py-8" v-else-if="tokens && !tokens.length">
+              <FrownIcon class="mx-auto size-10 text-zinc-500" />
+              <div class="mt-2 text-center text-zinc-500">No results.</div>
+            </div>
+
+            <div
+              v-for="token in tokens"
+              :key="token.ticker"
+              class="group -mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 hover:bg-zinc-900"
+              @click="selectToken(token.ticker)"
+            >
+              <TokenIcon :token="token.ticker" class="size-8" />
+              <h4 class="text-sm group-hover:text-primary">
+                {{ prettySymbol(token.ticker) }}
+              </h4>
+            </div>
           </div>
         </DialogPanel>
       </div>

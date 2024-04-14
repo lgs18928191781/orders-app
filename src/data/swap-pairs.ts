@@ -1,10 +1,9 @@
 import btcLogo from '@/assets/btc.svg?url'
 import rdexLogo from '@/assets/rdex.png?url'
 import ordiLogo from '@/assets/ordi.svg?url'
-import satsLogo from '@/assets/sats.jpg?url'
-import { IS_DEV } from '@/data/constants'
+import { NETWORK } from '@/data/constants'
 
-const swapPairs = [
+const livenetDefaultSwapPairs = [
   {
     id: 1,
     exactName: 'RDEX',
@@ -40,7 +39,7 @@ const swapPairs = [
   useDecimals?: number
 }[]
 
-export const testnetSwapPairs = [
+export const testnetDefaultSwapPairs = [
   {
     id: 1,
     exactName: 'xedr',
@@ -49,14 +48,17 @@ export const testnetSwapPairs = [
     token1Icon: btcLogo,
     token2Icon: rdexLogo,
   },
-  // {
-  //   id: 2,
-  //   exactName: 'dexr',
-  //   token1Symbol: 'btc',
-  //   token2Symbol: 'dexr',
-  //   token1Icon: btcLogo,
-  //   token2Icon: rdexLogo,
-  // },
+  {
+    id: 2,
+    exactName: 'dexr',
+    token1Symbol: 'btc',
+    token2Symbol: 'dexr',
+    token1Icon: btcLogo,
+    token2Icon: rdexLogo,
+  },
 ]
 
-export default swapPairs
+export const defaultSwapPairs =
+  NETWORK === 'testnet' ? testnetDefaultSwapPairs : livenetDefaultSwapPairs
+
+export default defaultSwapPairs
