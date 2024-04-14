@@ -7,7 +7,7 @@ import {
   SearchIcon,
   XIcon,
 } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { refDebounced } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
 
@@ -18,8 +18,7 @@ import { prettySymbol } from '@/lib/formatters'
 import { useSwapPool } from '@/hooks/use-swap-pool'
 
 const { isOpen, closeModal, openModal } = useModalTokenSelect()
-const { pairStr, selectPair, token1, token2, token1Icon, token2Icon } =
-  useSwapPool()
+const { pairStr, token1, token2 } = useSwapPool()
 
 const props = defineProps<{
   pinnedTokens: string[]
@@ -36,7 +35,10 @@ const keywordDebounced = refDebounced(keyword, 300)
 const inputKeyword = ref<HTMLInputElement | null>(null)
 
 const { data: tokens, isLoading: isLoadingTokens } = useQuery(
-  getSwapTokensQuery({ keyword: keywordDebounced }),
+  getSwapTokensQuery(
+    { keyword: keywordDebounced },
+    computed(() => isOpen.value),
+  ),
 )
 </script>
 

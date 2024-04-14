@@ -85,7 +85,7 @@ function toSwap() {
 </script>
 
 <template>
-  <div class="hidden lg:block">
+  <div class="hidden lg:block" v-if="connectionStore.connected">
     <div
       class="mt-8 flex items-center justify-center gap-4 text-zinc-500"
       v-if="isLoadingPoolStatus"

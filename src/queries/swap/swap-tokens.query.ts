@@ -3,7 +3,6 @@ import { ComputedRef, Ref, computed } from 'vue'
 
 import { NETWORK } from '@/data/constants'
 import { ordersCommonApiFetch } from '@/lib/fetch'
-import { sleep } from '@/lib/helpers'
 
 export type SwapToken = {
   creator: string
@@ -28,9 +27,16 @@ export const getSwapTokens = async ({
 }: {
   keyword: string
 }): Promise<SwapToken[]> => {
-  const res = await ordersCommonApiFetch(
-    `brc20/tick/list?net=${NETWORK}&size=5&tick=${keyword}`,
-  ).then(({ list }) => list)
+  const params = new URLSearchParams({
+    net: NETWORK,
+    size: '5',
+  })
+  if (keyword) {
+    params.set('tick', keyword)
+  }
+  const res = await ordersCommonApiFetch(`brc20/tick/list?${params}`).then(
+    ({ list }) => list,
+  )
   return res
 }
 
