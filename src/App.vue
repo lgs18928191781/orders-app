@@ -25,7 +25,6 @@ onMounted(async () => {
 
   // initialize btcjs
   const btcjs = window.bitcoinjs
-  btcjs.initEccLib(secp256k1)
   btcJsStore.set(btcjs)
 
   // initialize related btc modules

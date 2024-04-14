@@ -2,11 +2,8 @@ import { queryOptions } from '@tanstack/vue-query'
 import { ComputedRef, computed } from 'vue'
 
 import { swapApiFetch } from '@/lib/fetch'
-import { useCredentialsStore } from '@/stores/credentials'
 import { useNetworkStore, type Network } from '@/stores/network'
-import swapPairs, { testnetSwapPairs } from '@/data/swap-pairs'
-
-const credentialsStore = useCredentialsStore()
+import _defaultSwapPairs from '@/data/swap-pairs'
 
 export const getPools = async ({
   network,
@@ -31,9 +28,7 @@ export const getPoolsQuery = (
   enabled: ComputedRef<boolean> = computed(() => true),
 ) => {
   const network = useNetworkStore().network
-  const defaultSwapPairs = (
-    network === 'testnet' ? testnetSwapPairs : swapPairs
-  ).map((pair) => ({
+  const defaultSwapPairs = _defaultSwapPairs.map((pair) => ({
     token1: pair.token1Symbol,
     token2: pair.token2Symbol,
     network,
