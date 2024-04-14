@@ -4,7 +4,6 @@ import * as VueRouter from 'vue-router'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import * as secp256k1 from 'tiny-secp256k1'
 import { VueQueryPlugin } from '@tanstack/vue-query'
-import * as secp256k1 from 'tiny-secp256k1'
 
 import './style.css'
 import routes, { geoGuard, maintenanceGuard } from '@/routes'
@@ -35,4 +34,4 @@ const launchInterval = setInterval(() => {
     app.use(router).use(pinia).use(VueQueryPlugin).mount('#app')
     clearInterval(launchInterval)
   }
-}, 50)
+}, 200)
