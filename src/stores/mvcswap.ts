@@ -31,6 +31,7 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       loading: true as boolean,
       icons: [] as MS.Icon[],
       bridgeAssets: [] as string[],
+      wbtc: '' as string,
     }
   },
   actions: {
@@ -38,12 +39,20 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       const ret = await queryAllPairs()
       if (ret.code === 0) {
         let _pairs = []
-        for (let pairName in ret.data) {
-          if (this.bridgeAssets.includes(ret.data[pairName].token2.tokenID)) {
-            _pairs.push({ pairName, ...ret.data[pairName] })
-          }
-        }
-        //TODO 暂时处理主网没上线交易对的问题
+        //TODO fliter 
+        // for (let pairName in ret.data) {
+        //   const token1 = ret.data[pairName].token1.tokenID
+        //   const token2 = ret.data[pairName].token2.tokenID
+        //   if (
+        //     (this.bridgeAssets.includes(token1) &&
+        //       this.bridgeAssets.includes(token2)) ||
+        //     (token2 === this.wbtc &&
+        //       ret.data[pairName].token1.symbol === 'space')
+        //   ) {
+        //     _pairs.push({ pairName, ...ret.data[pairName] })
+        //   }
+        // }
+        
         if (_pairs.length === 0) {
           for (let pairName in ret.data) {
             _pairs.push({ pairName, ...ret.data[pairName] })
@@ -67,6 +76,10 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       this.bridgeAssets = ret.assetList.map(
         (item: any) => item.targetTokenGenesis,
       )
+      const find = ret.assetList.find((item: any) => item.network === 'BTC')
+      if (find) {
+        this.wbtc = find.targetTokenGenesis;
+      }
     },
     async fetchPairInfo() {
       if (!this.curPair) return

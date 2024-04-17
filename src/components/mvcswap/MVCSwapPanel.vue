@@ -325,7 +325,45 @@ const handleSubmit = async () => {
           token1AddAmount: amount.toString(),
         }
       } else {
-        throw new Error('not support yet')
+        const res: any = await window.metaidwallet.transfer({
+          broadcast: false,
+          tasks: [
+            {
+              type: 'space',
+              receivers: [{ address: mvcToAddress, amount: txFee.toString() }],
+            },
+            {
+              type: 'token',
+              codehash: tokenIn.value.codeHash,
+              genesis: tokenIn.value.tokenID,
+              receivers: [{ address: tokenToAddress, amount }],
+            },
+          ],
+        });
+        if (res.status === 'canceled') throw new Error(res.status)
+        if (!res) {
+          throw new Error('Transaction failed')
+        }
+        if (res.msg) {
+          throw new Error(res.msg)
+        }
+        const retData = res.res
+        if (
+          !retData[0] ||
+          !retData[0].txHex ||
+          !retData[1] ||
+          !retData[1].txHex
+        ) {
+          throw new Error('Transaction failed')
+        }
+        payload = {
+          ...payload,
+          mvcRawTx: retData[0].txHex,
+          mvcOutputIndex: 0,
+          token1RawTx: retData[1].txHex,
+          token1OutputIndex: 0,
+          amountCheckRawTx: retData[1].routeCheckTxHex,
+        }
       }
     } else {
       const tx_res: any = await window.metaidwallet.transfer({
