@@ -42,11 +42,11 @@
             >
               <div class="flex flex-col items-center justify-center">
                 <div
-                  class="mt-7 flex h-20 w-20 items-center justify-center rounded-full bg-[#ffa02a] p-7"
+                  class="mt-7 flex h-20 w-20 items-center justify-center rounded-full bg-mvc p-7"
                 >
                   <img :src="shape" alt="" />
                 </div>
-                <div class="mt-5 text-2xl text-[#ffa02a]">
+                <div class="mt-5 text-2xl text-mvc">
                   <span>Success</span>
                 </div>
               </div>
