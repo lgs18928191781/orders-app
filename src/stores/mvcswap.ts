@@ -39,20 +39,20 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       const ret = await queryAllPairs()
       if (ret.code === 0) {
         let _pairs = []
-        //TODO fliter 
-        // for (let pairName in ret.data) {
-        //   const token1 = ret.data[pairName].token1.tokenID
-        //   const token2 = ret.data[pairName].token2.tokenID
-        //   if (
-        //     (this.bridgeAssets.includes(token1) &&
-        //       this.bridgeAssets.includes(token2)) ||
-        //     (token2 === this.wbtc &&
-        //       ret.data[pairName].token1.symbol === 'space')
-        //   ) {
-        //     _pairs.push({ pairName, ...ret.data[pairName] })
-        //   }
-        // }
-        
+        //TODO fliter
+        for (let pairName in ret.data) {
+          const token1 = ret.data[pairName].token1.tokenID
+          const token2 = ret.data[pairName].token2.tokenID
+          if (
+            (this.bridgeAssets.includes(token1) &&
+              this.bridgeAssets.includes(token2)) ||
+            (token2 === this.wbtc &&
+              ret.data[pairName].token1.symbol === 'space')
+          ) {
+            _pairs.push({ pairName, ...ret.data[pairName] })
+          }
+        }
+
         if (_pairs.length === 0) {
           for (let pairName in ret.data) {
             _pairs.push({ pairName, ...ret.data[pairName] })
@@ -78,7 +78,7 @@ export const useMVCSwapStore = defineStore('mvcswap', {
       )
       const find = ret.assetList.find((item: any) => item.network === 'BTC')
       if (find) {
-        this.wbtc = find.targetTokenGenesis;
+        this.wbtc = find.targetTokenGenesis
       }
     },
     async fetchPairInfo() {
