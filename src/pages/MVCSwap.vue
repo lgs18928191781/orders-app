@@ -31,7 +31,8 @@ import { storeToRefs } from 'pinia'
 //@ts-ignore
 import { API_NET, API_TARGET, FtManager } from 'meta-contract'
 import Decimal from 'decimal.js'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
+
 const connectionStore = useConnectionStore()
 const tabs = ref(['Swap', 'Pools'])
 const currentTab = ref(0)
@@ -54,6 +55,10 @@ const initData = async () => {
 }
 
 async function getTestTokenFacuet() {
+  const loadingInstance = ElLoading.service({
+    text: 'Awaiting Transfer',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
   const ftManager = new FtManager({
     apiTarget: API_TARGET.MVC,
     network: API_NET.TEST,
@@ -76,11 +81,14 @@ async function getTestTokenFacuet() {
       senderWif: import.meta.env.VITE_FACUET_WIF,
     })
     if (txid) {
+      loadingInstance.close()
       ElMessage.success(`Receive 200 token1 success!,Txid: ${txid}`)
     } else {
+      loadingInstance.close()
       throw new Error(`Receive token1 fail`)
     }
   } catch (error) {
+    loadingInstance.close()
     ElMessage.error(error as any)
   }
 }
